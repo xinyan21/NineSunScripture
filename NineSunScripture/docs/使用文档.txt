@@ -1,0 +1,102 @@
+——————————————————————————————————————————同花顺证券交易协议————————————————————————————————————————————————————
+//功能：查询各种交易数据
+//ClientID,//客户端 ID
+//Category,//查询信息的种类 0资金	1股份 2当日委托	3当日成交 4可撤单 5股东账户 
+//Result, //内保存了返回的查询数据, 形式为表格数据，行数据之间通过\n 字符分割，列数据之间通过\t 分隔。一般要分配 1024 * 1024 字节的空间。出错时为空字符串。
+//ErrInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串。
+int WINAPI QueryData(int ClientID,int Category,char *Result,char *ErrInfo)
+
+
+//功能：委托下单
+//ClientID,//客户端ID
+//Category,//委托种类 0买入 1卖出
+//Gddm,//股东账号；交易上海股票填上海的股东账号，交易深圳的股票填入深圳的股东账号。 正常情况下留空（留空自动判断）
+//Zqdm,//证券代码
+//Price,//委托价格
+//Quantity,//委托数量
+//Result,//内保存了返回的查询数据, 含有委托编号数据 出错时为空字符串。
+//ErrInfo//如果出错，保存了错误信息说明。一般要分配 256 字节的空间
+int WINAPI SendOrder(int ClientID,int Category,const char *Gddm,const char *Zqdm,float Price,int Quantity,char *Result,char *ErrInfo)
+
+
+//功能：查行情 券商提供的行情虽然只有5档 但是速度快
+//ClientID,//客户端ID
+//Zqdm,//股票代码
+//Result,//内保存了返回的查询数据
+//ErrInfo//执行返回后，如果出错，保存了错误信息说明
+int WINAPI QueryHQ(int ClientID, const char *Zqdm, char *Result, char *ErrInfo)
+
+
+//功能：取消订单
+//ClientID,//客户端ID
+//Gddm,//股东账号 必写
+//OrderID,//表示要撤的目标委托的编号
+//Result,//内保存了返回的查询数据
+//ErrInfo//执行返回后，如果出错，保存了错误信息说明
+int WINAPI CancelOrder(int ClientID,const char *Gddm,const char *OrderID,char *Result,char *ErrInfo)
+
+
+//功能：登录 成功返回ClientID	失败返回0
+//Qsid,//券商id 					这个值可以在IP文件中查看
+//Host,//券商服务器IP
+//Port,//券商服务器端口
+//Version,//同花顺客户端版本号		目前通用版本号E065.20.92			目前发现，海通需要使用老版本号E065.18.77
+//AccountType,//账户类型 0x20自动判断(有些券商可能不支持) 0x30资金账户 0x31深圳账户 0x32上海账户 0x33基金账户 0x34深圳B股 0x35上海B股 0x6B客户号
+//Account,//券商账号“账号类型需要与上面的对应”
+//Password,//券商密码
+//comm_password,//通讯密码	可空
+//dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
+//ErrInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串
+int WINAPI  Logon(int Qsid,const char *Host,short Port,const char *Version,short AccountType,const char *Account,const char *Password,const char *comm_password,bool dommac,char *ErrInfo)
+
+
+//功能：退出登录	无返回值
+//ClientID,//客户端ID
+void WINAPI Logoff(int ClientID)
+
+
+//功能：查询是否授权 已授权返回1 未授权返回0
+//Account //券商账号
+int WINAPI QuerySQ(const char *Account)
+
+
+
+//功能：历史数据
+//ClientID - 客户端 ID
+//Category - 查询信息的种类 0 历史委托 1 历史成交 2 资金流水 3 交割单 12新股信息 13新股额度 14配号查询 15中签查询
+//BeginDate - 开始日期，格式为 yyyyMMdd,比如 2017 年 2 月 1 日为 20170201
+//EndDate - 结束日期，格式为 yyyyMMdd,比如 2017 年 2 月 1 日为 20170201
+//Result-此API执行返回后，Result内保存了返回的查询数据，形式为表格数据，行数据之间通过\n字符分割，列数据之间通过\t分隔。一般要分配 1024*1024 字节的空间。出错时为空字符串。
+//ErrInfo - 此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串。
+int WINAPI QueryHistoryData(int ClientID, int Category, const char *BeginDate, const char *EndDate, char *Result, char *ErrInfo) 
+
+——————————————————————————————————————————同花顺行情协议————————————————————————————————————————————————————
+
+功能：行情登录   登录成功返回ClientID 失败返回0
+//Account 登录同花顺的手机号
+//Password 密码
+//ErrInfo 登录失败时返回的提示
+int WINAPI  HQ_Logon(const char *Account, const char *Password, char *ErrInfo);
+
+
+
+功能：退出登录
+void WINAPI HQ_Logoff(int ClientID);
+
+
+
+功能：查询各类行情数据
+//ClientID	登录成功时返回值
+//Category 查询类型 
+//gpdm		股票代码	0十档行情价 1逐笔成交明细 2买列队数据 3卖列队数据
+//Name		股票名称 正常情况下可空		不可空的情况有：ST股 退市股     
+//Result	个别类型数据需要解析  可参考演示中的代码
+//ErrInfo
+int WINAPI  HQ_QueryData(int ClientID, int Category, const char * gpdm, const char * Name, char *Result, char *ErrInfo)
+
+
+
+各类语言调用DLL可以参考演示中的代码
+
+
+

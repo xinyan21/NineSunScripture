@@ -1,0 +1,745 @@
+
+广发 183.62.246.145 80 E065.20.92
+
+东莞证券 218.104.187.248 8002	E065.18.81
+
+平安证券 202.69.24.14 8003 E065.20.92
+
+国泰君安 103.250.193.34 8002 E065.20.92   这个券商貌似要指定的运营部IP     
+
+山西证券 59.49.103.212 8002	E065.20.92
+
+海通 120.234.143.126 8002 E065.18.77	海通对版本号要求不能高低
+
+模拟 120.199.9.103 8002
+实际使用中最好是选择本机网络对应的服务器ip，交易速度可以飞起
+
+qsmc=爱建证券 qsid=134 yybrid=1562”
+* “               name＝爱建证券主站二 area=北京市 ip＝120.132.4.142 port=8003 sp=联通”
+* “               name＝腾讯云站点 area=北京市 ip＝49.235.240.192 port=8002 sp=其他”
+* “               name＝爱建证券主站一 area=上海市 ip＝115.159.148.241 port=8002 sp=电信”
+* “
+qsmc=财富证券 qsid=11 yybrid=49”
+* “               name＝财富中心机房委托主站 area=湖南省 ip＝thswt.cfzq.com port=8002 sp=电信”
+* “               name＝财富中心机房电信主站 area=湖南省 ip＝218.76.45.132 port=8002 sp=电信”
+* “               name＝财富中心机房联通主站 area=重庆市 ip＝203.93.211.92 port=8002 sp=联通”
+* “               name＝财富中心机房电信主站2 area=湖南省 ip＝218.76.45.171 port=8002 sp=电信”
+* “               name＝财富中心机房移动主站 area=湖南省 ip＝111.8.51.115 port=8002 sp=移动”
+* “               name＝财富南方电信 area=湖南省 ip＝121.10.21.243 port=8002 sp=电信”
+* “               name＝财富南方移动 area=湖南省 ip＝120.197.179.39 port=8002 sp=联通”
+* “               name＝财富南方联通 area=湖南省 ip＝120.86.65.58 port=8002 sp=电信”
+* “
+qsmc=财达证券 qsid=124 yybrid=1”
+* “               name＝网通站点IP一 area=河北省 ip＝121.28.129.2 port=8002 sp=网通”
+* “               name＝财达证券电信委托服务器 area=河北省 ip＝jy2.s10000.com port=8002 sp=电信”
+* “               name＝移动站点IP area=河北省 ip＝183.196.0.115 port=8002 sp=移动”
+* “               name＝财达证券网通委托服务器 area=河北省 ip＝jy1.s10000.com port=8002 sp=网通”
+* “               name＝电信站点IP area=河北省 ip＝222.223.228.4 port=8002 sp=电信”
+* “               name＝网通站点IP二 area=河北省 ip＝221.192.130.214 port=8002 sp=网通”
+* “
+qsmc=长城国瑞证券 qsid=322 yybrid=64”
+* “               name＝长城国瑞证券委托主站1 area=福建省 ip＝59.61.80.229 port=8001 sp=电信”
+* “               name＝长城国瑞证券委托主站2 area=福建省 ip＝59.61.74.212 port=8001 sp=电信”
+* “               name＝长城国瑞证券委托主站3 area=福建省 ip＝59.61.74.213 port=8001 sp=电信”
+* “               name＝长城国瑞证券联通委托 area=福建省 ip＝218.104.135.220 port=8001 sp=联通”
+* “               name＝长城国瑞证券移动委托 area=福建省 ip＝218.207.140.94 port=8001 sp=移动”
+* “
+qsmc=川财证券 qsid=16 yybrid=103”
+* “               name＝川财证券成都电信ES主站 area=四川省 ip＝118.123.205.15 port=8002 sp=电信”
+* “               name＝川财证券成都电信XI主站 area=四川省 ip＝182.140.133.201 port=8002 sp=电信”
+* “               name＝川财证券成都联通ZB主站 area=四川省 ip＝221.10.37.206 port=8002 sp=联通”
+* “               name＝川财证券成都联通XI主站 area=四川省 ip＝119.6.200.40 port=8002 sp=联通”
+* “
+qsmc=长江证券 qsid=15 yybrid=67”
+* “               name＝长江证券武汉电信主站 area=湖北省 ip＝119.97.142.156 port=8002 sp=电信”
+* “               name＝长江证券上海电信主站 area=上海市 ip＝222.73.171.138 port=8002 sp=电信”
+* “               name＝长江证券武汉联通主站 area=湖北省 ip＝113.57.240.26 port=8002 sp=网通”
+* “               name＝长江证券天津联通主站 area=天津市 ip＝125.39.80.166 port=8002 sp=联通”
+* “
+qsmc=长城证券 qsid=13 yybrid=66”
+* “               name＝长城深圳电信主站1 area=广东省 ip＝219.133.95.102 port=8010 sp=电信”
+* “               name＝长城深圳联通主站1 area=广东省 ip＝210.21.198.233 port=8010 sp=联通”
+* “               name＝长城深圳电信主站2 area=广东省 ip＝121.13.222.157 port=8010 sp=电信”
+* “               name＝长城深圳联通主站2 area=广东省 ip＝218.104.185.71 port=8010 sp=联通”
+* “               name＝长城北京电信主站1 area=北京市 ip＝124.127.120.137 port=8010 sp=电信”
+* “               name＝长城北京联通主站1 area=北京市 ip＝123.127.225.42 port=8010 sp=联通”
+* “
+qsmc=财通证券 qsid=12 yybrid=56”
+* “               name＝财通电信总入口 area=浙江省 ip＝218.75.74.105 port=8001 sp=电信”
+* “               name＝财通电信备用入口 area=浙江省 ip＝61.164.43.147 port=8001 sp=电信”
+* “               name＝财通联通总入口 area=浙江省 ip＝60.12.5.202 port=8001 sp=联通”
+* “               name＝财通联通备用入口 area=浙江省 ip＝221.12.21.211 port=8001 sp=联通”
+* “               name＝财通杭州网通专用入口 area=浙江省 ip＝218.108.15.132 port=8001 sp=网通”
+* “               name＝财通移动总入口 area=浙江省 ip＝112.54.204.109 port=8001 sp=移动”
+* “               name＝财通移动备用入口 area=浙江省 ip＝221.131.242.198 port=8001 sp=移动”
+* “
+qsmc=东吴证券 qsid=23 yybrid=52”
+* “               name＝东吴证券总交易入口 area=江苏省 ip＝wt.dwstock.com port=8002 sp=未知”
+* “               name＝东吴证券电信入口一 area=江苏省 ip＝58.211.31.245 port=8002 sp=电信”
+* “               name＝东吴证券网通入口一 area=江苏省 ip＝221.6.67.124 port=8002 sp=网通”
+* “               name＝东吴证券电信入口二 area=江苏省 ip＝222.92.132.238 port=8002 sp=电信”
+* “               name＝东吴证券电信入口三 area=江苏省 ip＝58.211.94.45 port=8002 sp=电信”
+* “               name＝东吴证券电信入口四 area=江苏省 ip＝61.132.116.211 port=8002 sp=电信”
+* “               name＝东吴证券电信入口五 area=江苏省 ip＝222.92.150.138 port=8002 sp=电信”
+* “               name＝东吴证券网通入口二 area=江苏省 ip＝58.240.170.38 port=8002 sp=网通”
+* “               name＝东吴证券移动入口一 area=江苏省 ip＝223.112.64.117 port=8002 sp=移动”
+* “
+qsmc=东兴证券 qsid=55 yybrid=”
+* “               name＝北京电信 area=北京市 ip＝219.143.41.38 port=7701 sp=电信”
+* “               name＝北京联通 area=上海市 ip＝123.125.28.66 port=7701 sp=联通”
+* “               name＝上海电信3 area=上海市 ip＝114.80.178.210 port=8632 sp=电信”
+* “               name＝上海电信1 area=上海市 ip＝114.80.178.210 port=7703 sp=电信”
+* “               name＝上海电信2 area=上海市 ip＝114.80.178.210 port=7704 sp=电信”
+* “
+qsmc=东北证券 qsid=75 yybrid=2”
+* “               name＝东北证券江阴站点 area=江苏省 ip＝58.215.78.69 port=8002 sp=电信”
+* “               name＝东北证券北京站点 area=北京市 ip＝116.213.69.133 port=8002 sp=电信”
+* “               name＝东北证券长春站点（移动） area=吉林省 ip＝111.26.219.208 port=8002 sp=移动”
+* “               name＝东北证券成都站点 area=四川省 ip＝118.24.12.91 port=8002 sp=电信”
+* “               name＝东北证券广州站点 area=广东省 ip＝182.254.233.158 port=8002 sp=电信”
+* “               name＝东北证券杭州一站点 area=吉林省 ip＝121.43.74.176 port=8002 sp=电信”
+* “               name＝东北证券上海一站点 area=上海市 ip＝115.159.47.120 port=8002 sp=电信”
+* “               name＝东北证券长春站点（网通） area=吉林省 ip＝61.139.133.33 port=8002 sp=网通”
+* “               name＝东北证券长春站点（电信） area=吉林省 ip＝222.169.229.84 port=8002 sp=电信”
+* “               name＝东北证券上海华信北一站点 area=上海市 ip＝180.235.67.87 port=8002 sp=电信”
+* “               name＝东北证券深圳站点 area=广东省 ip＝113.105.77.165 port=8002 sp=电信”
+* “               name＝东北证券武汉站点 area=湖北省 ip＝61.183.15.133 port=8002 sp=电信”
+* “
+qsmc=东方财富证券 qsid=137 yybrid=101”
+* “               name＝山东东营东三路证券营业部 area=山东省 ip＝thsjh.xzsec.com port=7002 sp=联通”
+* “               name＝上海东方路证券营业部(网通) area=上海市 ip＝thsjh.xzsec.com port=7002 sp=联通”
+* “               name＝湖北分公司 area=湖北省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝北京陶然亭路证券营业部 area=北京市 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝西藏山南乃东县湖南路证券营业部 area=西藏自治区 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝河北石家庄槐安东路证券营业部 area=安徽省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝安徽合肥潜山路证券营业部 area=安徽省 ip＝60.191.118.66 port=7002 sp=电信”
+* “               name＝山东分公司 area=山东省 ip＝thsjh.xzsec.com port=7002 sp=联通”
+* “               name＝山东淄博东街证券营业部 area=山东省 ip＝thsjh.xzsec.com port=7002 sp=联通”
+* “               name＝河南分公司 area=河南省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝西藏林芝县八一大街证券营业部 area=西藏自治区 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝西藏拉萨察古大道证券营业部 area=西藏自治区 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝浙江衢州振兴东路证券营业部 area=浙江省 ip＝60.191.118.66 port=7002 sp=电信”
+* “               name＝山东潍坊东方路证券营业部 area=山东省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝上海分公司 area=上海市 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝福建分公司 area=福建省 ip＝60.191.118.66 port=7002 sp=电信”
+* “               name＝河北香河府前街证券营业部 area=河北省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝河北廊坊光明西道证券营业部 area=河北省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝山西太原平阳路证券营业部 area=山西省 ip＝thsjh.xzsec.com port=7002 sp=联通”
+* “               name＝山东青岛香港东路证券营业部 area=山东省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝浙江温州车站大道证券营业部 area=浙江省 ip＝60.191.118.66 port=7002 sp=电信”
+* “               name＝江苏盐城迎宾南路证券营业部 area=江苏省 ip＝60.191.118.66 port=7002 sp=电信”
+* “               name＝河北石家庄正定府西街证券营业部 area=福建省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝福建泉州宝洲路证券营业部 area=福建省 ip＝60.191.118.66 port=7002 sp=电信”
+* “               name＝吉林长春人民大街证券营业部 area=吉林省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝网上营业部南汇 area=上海市 ip＝nhtrade1.dfcfw.com port=7002 sp=电信”
+* “               name＝网上营业部 area=上海市 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝网上营业部电信 area=上海市 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝网上营业部联通 area=上海市 ip＝thsjh.xzsec.com port=7002 sp=联通”
+* “               name＝上海东方路证券营业部 area=上海市 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝上海东方路证券营业部(电信) area=上海市 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝西藏拉萨北京中路证券营业部 area=西藏自治区 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝广东深圳益田路证券营业部 area=广东省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝西藏昌都营业部 area=西藏自治区 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝四川达州鸿雁街证券营业部 area=四川省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “               name＝山东临沂双桥街证券营业部 area=山东省 ip＝thsjh.xzsec.com port=7002 sp=联通”
+* “               name＝浙江杭州城星路证券营业部 area=浙江省 ip＝60.191.118.66 port=7002 sp=电信”
+* “               name＝四川成都东大街证券营业部 area=四川省 ip＝thsjh.xzsec.com port=7002 sp=电信”
+* “
+qsmc=大同证券 qsid=349 yybrid=69”
+* “               name＝大同证券联通委托一 area=山西省 ip＝221.204.219.141 port=8002 sp=联通”
+* “               name＝大同证券联通委托二 area=山西省 ip＝221.204.219.142 port=8002 sp=联通”
+* “               name＝同花顺委托主站一 area=山西省 ip＝47.98.83.235 port=8002 sp=电信”
+* “               name＝同花顺委托主站二 area=山西省 ip＝47.96.202.97 port=8002 sp=电信”
+* “
+qsmc=德邦证券 qsid=125 yybrid=70”
+* “               name＝德邦上海电信1 area=上海市 ip＝180.153.93.167 port=9002 sp=电信”
+* “               name＝德邦上海电信2 area=上海市 ip＝180.153.93.164 port=9002 sp=电信”
+* “               name＝德邦上海电信3 area=上海市 ip＝180.153.93.169 port=9002 sp=电信”
+* “               name＝德邦上海联通 area=上海市 ip＝211.95.119.155 port=9002 sp=联通”
+* “               name＝德邦沈阳网通1 area=辽宁省 ip＝218.24.109.198 port=9002 sp=网通”
+* “               name＝德邦沈阳网通2 area=辽宁省 ip＝218.24.109.199 port=9002 sp=网通”
+* “               name＝德邦沈阳网通3 area=辽宁省 ip＝218.24.109.201 port=9002 sp=网通”
+* “
+qsmc=东海证券 qsid=22 yybrid=73”
+* “               name＝南方电信主站 area=江苏省 ip＝58.216.221.136 port=8022 sp=电信”
+* “               name＝北方网通主站 area=河南省 ip＝221.13.144.236 port=8022 sp=网通”
+* “               name＝南方网通主站 area=江苏省 ip＝122.195.77.166 port=8022 sp=网通”
+* “               name＝北方电信主站 area=河南省 ip＝222.88.72.136 port=8022 sp=电信”
+* “               name＝北方主站_域名 area=河南省 ip＝wt2.dhzq.com.cn port=8022 sp=电信”
+* “               name＝南方主站_域名 area=江苏省 ip＝wt.dhzq.com.cn port=8022 sp=电信”
+* “               name＝南方移动主站 area=江苏省 ip＝211.143.226.36 port=8022 sp=移动”
+* “               name＝北方移动主站 area=河南省 ip＝221.176.136.166 port=8022 sp=移动”
+* “
+qsmc=东莞证券 qsid=340 yybrid=104”
+* “               name＝东莞证券GT主站 area=广东省 ip＝113.78.134.106 port=8002 sp=电信”
+* “               name＝东莞证券LT主站 area=广东省 ip＝218.104.187.248 port=8002 sp=电信”
+* “               name＝东莞证券DC主站 area=广东省 ip＝218.16.124.5 port=8002 sp=电信”
+* “               name＝东莞证券DJ主站 area=广东省 ip＝121.14.137.5 port=8002 sp=电信”
+* “
+qsmc=方正证券 qsid=25 yybrid=92”
+* “               name＝方正证券委托主站 area=湖南省 ip＝wt.foundersc.com port=8008 sp=网通”
+* “               name＝长沙接入点备份1_电信 area=湖南省 ip＝222.240.130.6 port=8008 sp=电信”
+* “               name＝杭州接入点备份_电信 area=浙江省 ip＝218.75.120.10 port=8008 sp=电信”
+* “               name＝长沙接入点备份2_电信 area=湖南省 ip＝222.247.45.136 port=8008 sp=电信”
+* “               name＝杭州接入点备份_杭州网通 area=浙江省 ip＝218.108.44.140 port=8008 sp=网通”
+* “               name＝杭州接入点备份_北方网通  area=浙江省 ip＝221.12.19.69 port=8008 sp=网通”
+* “               name＝长沙接入点备份_长沙网通 area=湖南省 ip＝203.93.210.229 port=8008 sp=网通”
+* “               name＝长沙铁通委托接入点_铁通 area=湖南省 ip＝222.51.28.69 port=8008 sp=铁通”
+* “
+qsmc=国都证券 qsid=29 yybrid=” 数据太多需要手动取
+
+* “
+qsmc=广州证券 qsid=552 yybrid=”
+* “               name＝广州总部电信交易1 area=广东省 ip＝121.33.228.169 port=8002 sp=电信”
+* “               name＝广州总部电信交易2 area=广东省 ip＝121.33.228.171 port=8002 sp=电信”
+* “               name＝广州总部联通交易1 area=广东省 ip＝210.21.50.51 port=8002 sp=联通”
+* “               name＝广州电信交易1 area=广东省 ip＝121.33.38.5 port=8002 sp=电信”
+* “               name＝唐山联通交易1 area=广东省 ip＝60.2.165.34 port=8002 sp=联通”
+* “               name＝唐山电信交易1 area=广东省 ip＝222.223.8.42 port=8002 sp=电信”
+* “               name＝广州电信交易2 area=广东省 ip＝121.33.38.6 port=80 sp=电信”
+* “               name＝广州域名交易2 area=广东省 ip＝ydjy1.gzs.com.cn port=8002 sp=联通”
+* “               name＝广州域名交易3 area=广东省 ip＝ltjy1.gzs.com.cn port=8002 sp=联通”
+* “               name＝广州域名交易1 area=广东省 ip＝dxjy1.gzs.com.cn port=8002 sp=电信”
+* “
+qsmc=国融证券 qsid=61 yybrid=85”
+* “               name＝北京联通站点 area=北京市 ip＝111.207.227.86 port=8002 sp=联通”
+* “               name＝南方中心联通站点 area=浙江省 ip＝120.86.124.100 port=8002 sp=联通”
+* “               name＝南方中心移动站点 area=浙江省 ip＝120.234.56.165 port=8002 sp=移动”
+* “               name＝北京电信站点 area=北京市 ip＝124.127.49.196 port=8002 sp=电信”
+* “               name＝营业部内网 area=北京市 ip＝172.16.9.19 port=8002 sp=电信”
+* “               name＝北京移动站点 area=北京市 ip＝223.72.155.81 port=8002 sp=移动”
+* “               name＝内蒙联通站点 area=内蒙古自治区 ip＝116.112.66.9 port=8002 sp=联通”
+* “               name＝内蒙电信站点 area=内蒙古自治区 ip＝222.74.10.41 port=8002 sp=电信”
+* “               name＝绿色通道 area=北京市 ip＝106.37.195.23 port=443 sp=电信”
+* “
+qsmc=国联证券 qsid=30 yybrid=110”
+* “               name＝国联证券电信线路二 area=上海市 ip＝58.214.242.67 port=8002 sp=电信”
+* “               name＝国联证券电信线路二 area=上海市 ip＝58.215.43.130 port=8002 sp=电信”
+* “
+qsmc=国元证券 qsid=143 yybrid=117”
+* “               name＝国元证券上海站 area=上海市 ip＝116.236.238.90 port=8002 sp=电信”
+* “               name＝国元证券广州电信 area=广东省 ip＝183.6.138.218 port=8002 sp=电信”
+* “               name＝国元证券广州联通 area=广东省 ip＝211.97.4.58 port=8002 sp=联通”
+* “               name＝国元证券合肥电信 area=安徽省 ip＝60.173.222.50 port=8002 sp=电信”
+* “               name＝国元证券合肥联通 area=安徽省 ip＝220.248.233.5 port=8002 sp=联通”
+* “
+qsmc=国开证券 qsid=344 yybrid=” 数据太多需要手动取
+* “
+qsmc=国泰君安 qsid=31 yybrid=”	数据太多需要手动取
+* “
+qsmc=广发证券 qsid=27 yybrid=53”
+* “               name＝广州电信1 area=广东省 ip＝183.62.246.145 port=80 sp=电信”
+* “               name＝广州电信2 area=广东省 ip＝183.63.121.90 port=80 sp=电信”
+* “               name＝广州电信3 area=广东省 ip＝183.63.121.117 port=80 sp=电信”
+* “               name＝广州电信5 area=广东省 ip＝119.145.72.239 port=80 sp=电信”
+* “               name＝广州联通1 area=广东省 ip＝58.248.29.111 port=80 sp=联通”
+* “               name＝广州联通2 area=广东省 ip＝210.21.122.232 port=80 sp=联通”
+* “               name＝广州移动1 area=广东省 ip＝211.136.225.181 port=80 sp=移动”
+* “               name＝广州移动2 area=广东省 ip＝120.236.140.229 port=8008 sp=移动”
+* “               name＝沈阳联通 area=辽宁省 ip＝218.25.27.197 port=8008 sp=联通”
+* “               name＝北京联通 area=广东省 ip＝124.207.2.26 port=8008 sp=联通”
+* “               name＝上海电信 area=上海市 ip＝101.230.212.231 port=80 sp=电信”
+* “               name＝上海联通 area=上海市 ip＝210.13.72.135 port=80 sp=联通”
+* “
+qsmc=国金证券 qsid=331 yybrid=76”
+* “               name＝国金证券成都电信 area=四川省 ip＝221.236.15.20 port=8002 sp=电信”
+* “               name＝国金证券成都联通1 area=四川省 ip＝119.4.50.121 port=8002 sp=联通”
+* “               name＝国金证券成都联通2 area=四川省 ip＝101.207.248.168 port=8002 sp=联通”
+* “               name＝国金证券上海电信1 area=上海市 ip＝114.141.171.134 port=8002 sp=电信”
+* “               name＝国金证券上海电信2 area=上海市 ip＝103.253.207.8 port=8002 sp=电信”
+* “               name＝国金证券上海联通 area=上海市 ip＝140.207.225.80 port=8002 sp=联通”
+* “               name＝国金证券成都电信特别通道 area=四川省 ip＝221.236.15.20 port=995 sp=电信”
+* “               name＝国金证券成都联通特别通道 area=四川省 ip＝119.4.50.121 port=995 sp=联通”
+* “               name＝国金证券上海移动 area=上海市 ip＝117.135.142.75 port=8002 sp=移动”
+* “
+qsmc=国盛证券 qsid=313 yybrid=111”
+* “               name＝联通站点2 area=广东省 ip＝171.34.206.52 port=8002 sp=联通”
+* “               name＝电信站点1 area=广东省 ip＝59.63.158.231 port=8002 sp=电信”
+* “               name＝移动站点2 area=广东省 ip＝223.83.138.38 port=8002 sp=移动”
+* “               name＝移动站点1 area=广东省 ip＝120.203.73.229 port=8002 sp=移动”
+* “               name＝电信站点2 area=广东省 ip＝117.40.3.8 port=8002 sp=电信”
+* “               name＝联通站点1 area=广东省 ip＝171.34.139.47 port=8002 sp=联通”
+* “
+qsmc=光大证券 qsid=26 yybrid=”
+* “               name＝宁波电信 area=浙江省 ip＝60.190.62.172 port=443 sp=电信”
+* “               name＝宁波联通 area=浙江省 ip＝221.12.62.235 port=443 sp=联通”
+* “               name＝外高桥电信 area=上海市 ip＝222.66.65.72 port=443 sp=电信”
+* “               name＝静安电信 area=上海市 ip＝124.74.249.197 port=443 sp=电信”
+* “               name＝静安联通 area=上海市 ip＝58.247.17.248 port=443 sp=联通”
+* “
+qsmc=华福证券 qsid=91 yybrid=77”
+* “               name＝域名解析 area=福建省 ip＝wt.hfzq.com.cn port=8091 sp=电信”
+* “               name＝福州电信1 area=福建省 ip＝120.36.4.193 port=8091 sp=电信”
+* “               name＝福州电信2 area=福建省 ip＝27.151.115.35 port=8091 sp=电信”
+* “               name＝上海电信 area=上海市 ip＝180.168.121.133 port=8091 sp=电信”
+* “               name＝上海联通 area=上海市 ip＝112.65.146.197 port=8091 sp=联通”
+* “               name＝上海移动 area=上海市 ip＝117.184.125.165 port=8091 sp=移动”
+* “               name＝福州联通 area=福建省 ip＝58.22.121.165 port=8091 sp=联通”
+* “               name＝北京联通 area=北京市 ip＝123.125.108.158 port=8091 sp=联通”
+* “               name＝成都电信 area=四川省 ip＝222.211.87.252 port=8091 sp=电信”
+* “
+qsmc=宏信证券 qsid=35 yybrid=1616”
+* “               name＝宏信电信站点 area=四川省 ip＝222.211.87.144 port=8006 sp=电信”
+* “               name＝宏信网通站点 area=四川省 ip＝101.204.230.214 port=8006 sp=网通”
+* “
+qsmc=华融证券 qsid=347 yybrid=”	数据太多需要手动取
+* “
+qsmc=华金证券 qsid=191 yybrid=99”
+* “               name＝华金证券电信站点2 area=上海市 ip＝221.239.33.2 port=8002 sp=电信”
+* “               name＝华金证券联通站点1 area=上海市 ip＝140.207.224.236 port=8002 sp=联通”
+* “               name＝华金证券电信站点1 area=上海市 ip＝101.226.251.246 port=8002 sp=电信”
+* “               name＝华金证券联通站点2 area=上海市 ip＝125.39.42.35 port=8002 sp=联通”
+* “
+qsmc=华创证券 qsid=39 yybrid=114”
+* “               name＝北方区电信 area=北京市 ip＝218.6.146.240 port=8004 sp=移动”
+* “               name＝北方区网通 area=北京市 ip＝114.251.5.198 port=8004 sp=网通”
+* “               name＝观山湖电信 area=北京市 ip＝222.85.139.177 port=8004 sp=电信”
+* “               name＝观山湖网通 area=北京市 ip＝58.16.134.228 port=8004 sp=网通”
+* “
+qsmc=华鑫证券 qsid=181 yybrid=115”
+* “               name＝西北电信交易一 area=陕西省 ip＝113.141.71.3 port=8002 sp=电信”
+* “               name＝华东联通交易一 area=上海市 ip＝58.246.43.74 port=8002 sp=电信”
+* “               name＝西北移动主站一 area=陕西省 ip＝218.200.5.52 port=8002 sp=移动”
+* “               name＝西北域名主站一 area=广东省 ip＝thsjy4.cfsc.cn port=8002 sp=电信”
+* “               name＝华东域名主站三 area=上海市 ip＝thsjy3.cfsc.cn port=8002 sp=电信”
+* “               name＝华东域名主站二 area=上海市 ip＝thsjy2.cfsc.cn port=8002 sp=电信”
+* “               name＝华东域名主站一 area=上海市 ip＝thsjy1.cfsc.cn port=8002 sp=电信”
+* “               name＝西北联通交易二 area=陕西省 ip＝221.11.78.5 port=8002 sp=联通”
+* “               name＝西北联通交易一 area=陕西省 ip＝221.11.78.3 port=8002 sp=联通”
+* “               name＝华东联通交易二 area=上海市 ip＝140.207.81.9 port=8002 sp=联通”
+* “               name＝华东电信交易四 area=上海市 ip＝116.236.196.140 port=8002 sp=电信”
+* “               name＝华东电信交易三 area=上海市 ip＝180.167.75.183 port=8002 sp=电信”
+* “               name＝华东电信交易二 area=上海市 ip＝101.230.222.19 port=8002 sp=电信”
+* “               name＝华东电信交易一  area=上海市 ip＝114.80.155.93 port=8002 sp=电信”
+* “               name＝西北电信交易二 area=陕西省 ip＝113.141.71.99 port=8002 sp=电信”
+* “
+qsmc=华林证券 qsid=41 yybrid=”
+* “               name＝华林证券-电信 area=广东省 ip＝61.143.3.202 port=10482 sp=电信”
+* “               name＝华林证券-联通 area=广东省 ip＝58.252.166.234 port=10482 sp=电信”
+* “               name＝华林证券-移动 area=广东省 ip＝221.179.57.73 port=10482 sp=电信”
+* “               name＝华林证券-电信2 area=广东省 ip＝202.96.138.84 port=10482 sp=电信”
+* “               name＝华林证券-移动2 area=广东省 ip＝221.179.57.73 port=10482 sp=电信”
+* “
+qsmc=恒泰证券 qsid=36 yybrid=120”
+* “               name＝恒泰证券B1 area=浙江省 ip＝121.43.71.69 port=8009 sp=网通”
+* “               name＝恒泰证券北方联通一 area=内蒙古自治区 ip＝202.99.230.131 port=8009 sp=联通”
+* “               name＝恒泰证券北方移动一 area=内蒙古自治区 ip＝111.56.17.226 port=8009 sp=移动”
+* “               name＝恒泰证券B3 area=浙江省 ip＝101.37.73.114 port=8009 sp=其他”
+* “               name＝恒泰证券南方电信三 area=内蒙古自治区 ip＝116.228.223.186 port=8009 sp=电信”
+* “               name＝恒泰证券南方电信一 area=内蒙古自治区 ip＝116.228.223.186 port=8009 sp=电信”
+* “               name＝恒泰证券南方联通一 area=内蒙古自治区 ip＝211.95.98.138 port=8009 sp=联通”
+* “               name＝恒泰证券北方联通二 area=内蒙古自治区 ip＝202.99.230.131 port=8009 sp=联通”
+* “               name＝恒泰证券B2 area=浙江省 ip＝121.43.72.68 port=8009 sp=网通”
+* “               name＝恒泰证券北方电信一 area=内蒙古自治区 ip＝222.74.10.71 port=8009 sp=电信”
+* “
+qsmc=江海证券 qsid=195 yybrid=78”
+* “               name＝江海证券交易主站 area=黑龙江省 ip＝hxwt.jhscco.com.cn port=8002 sp=电信”
+* “               name＝江海证券电信主站1 area=黑龙江省 ip＝222.171.164.11 port=8002 sp=电信”
+* “               name＝江海证券移动站点1 area=黑龙江省 ip＝111.42.76.18 port=8002 sp=移动”
+* “               name＝江海证券上海电信站点 area=山东省 ip＝114.80.55.108 port=8002 sp=电信”
+* “               name＝江海证券上海联通站点 area=上海市 ip＝140.206.243.102 port=8002 sp=联通”
+* “               name＝江海证券电信站点2 area=上海市 ip＝222.171.83.131 port=8002 sp=电信”
+* “               name＝江海证券联通主站2 area=黑龙江省 ip＝113.6.242.11 port=8002 sp=联通”
+* “               name＝江海证券联通主站1 area=黑龙江省 ip＝61.158.42.11 port=8002 sp=联通”
+* “
+qsmc=金元证券 qsid=49 yybrid=79”
+* “               name＝深圳电信服务器 area=广东省 ip＝218.17.218.225 port=8002 sp=电信”
+* “               name＝海口网通服务器 area=海南省 ip＝210.13.224.1 port=8002 sp=电信”
+* “
+qsmc=开源证券 qsid=123 yybrid=116”
+* “               name＝开源西安联通委托一 area=陕西省 ip＝221.11.67.4 port=9001 sp=联通”
+* “               name＝开源西安电信委托二 area=陕西省 ip＝117.22.228.206 port=9001 sp=电信”
+* “               name＝开源深圳电信委托三 area=陕西省 ip＝125.93.187.251 port=9001 sp=电信”
+* “               name＝开源西安电信委托四 area=陕西省 ip＝1.85.40.228 port=9001 sp=电信”
+* “               name＝开源西安移动委托五 area=陕西省 ip＝111.20.162.154 port=9001 sp=移动”
+* “               name＝开源上海电信委托六 area=陕西省 ip＝116.239.22.139 port=9001 sp=电信”
+* “               name＝开源西安移动委托七 area=陕西省 ip＝thsidcwt.kysec.com.cn port=9001 sp=移动”
+* “               name＝开源北京联通委托八 area=北京市 ip＝220.194.41.115 port=9001 sp=联通”
+* “
+qsmc=联讯证券 qsid=51 yybrid=”
+* “               name＝联讯电信委托总站 area=广东省 ip＝125.93.31.126 port=8002 sp=电信”
+* “               name＝联讯联通委托总站 area=广东省 ip＝221.4.229.162 port=8002 sp=联通”
+* “               name＝联讯移动委托总站 area=辽宁省 ip＝221.179.64.114 port=8002 sp=移动”
+* “               name＝联讯下铺电信主站 area=广东省 ip＝61.146.46.50 port=8002 sp=电信”
+* “               name＝联讯下铺联通主站 area=广东省 ip＝163.179.245.180 port=8002 sp=联通”
+* “               name＝联讯下铺移动主站 area=广东省 ip＝183.239.209.181 port=8002 sp=移动”
+* “               name＝联讯上海电信主站 area=上海市 ip＝116.246.40.234 port=8002 sp=电信”
+* “               name＝联讯上海联通主站 area=上海市 ip＝58.246.252.42 port=8002 sp=联通”
+* “
+qsmc=联储证券 qsid=185 yybrid=1565”
+* “               name＝联储证券交易联通二 area=河南省 ip＝42.236.123.243 port=8002 sp=联通”
+* “               name＝联储证券交易电信三 area=上海市 ip＝222.73.7.211 port=8002 sp=电信”
+* “               name＝联储证券交易电信二 area=河南省 ip＝171.12.11.110 port=8002 sp=电信”
+* “               name＝联储证券交易移动二 area=广东省 ip＝117.159.7.226 port=8002 sp=移动”
+* “               name＝联储证券交易联通一 area=广东省 ip＝120.86.118.18 port=8002 sp=联通”
+* “               name＝联储证券交易联通三 area=上海市 ip＝58.247.138.215 port=8002 sp=联通”
+* “               name＝联储证券交易电信一 area=广东省 ip＝183.63.229.59 port=8002 sp=电信”
+* “               name＝联储证券交易移动一 area=广东省 ip＝120.197.177.99 port=8002 sp=移动”
+* “
+qsmc=模拟测试 qsid=352 yybrid=1591”
+* “               name＝东吴快速柜台电信 area=江苏省 ip＝222.92.132.238 port=8771 sp=电信”
+* “               name＝东吴快速柜台联通 area=江苏省 ip＝58.240.170.38 port=8771 sp=联通”
+* “               name＝东吴快速柜台移动 area=江苏省 ip＝223.112.64.117 port=8771 sp=移动”
+* “
+qsmc=民族证券 qsid=53 yybrid=”
+* “               name＝民族证券北京联通交易 area=北京市 ip＝111.200.21.18 port=8006 sp=联通”
+* “               name＝民族证券北京电信通交易 area=北京市 ip＝117.122.223.148 port=8006 sp=电信”
+* “               name＝民族证券北京电信交易 area=北京市 ip＝219.141.235.148 port=8006 sp=电信”
+* “
+qsmc=模拟炒股 qsid=356 yybrid=48”
+* “               name＝模拟炒股环境 area=河北省 ip＝trade.10jqka.com.cn port=8002 sp=电信”
+* “
+qsmc=民生证券 qsid=120 yybrid=”
+* “               name＝郑州交易主站133 area=河南省 ip＝221.176.114.76 port=8002 sp=电信”
+* “               name＝北京交易主站149 area=北京市 ip＝111.205.24.149 port=8002 sp=电信”
+* “               name＝北京交易主站146 area=北京市 ip＝124.205.133.146 port=8002 sp=电信”
+* “               name＝北京交易主站70 area=北京市 ip＝106.37.173.70 port=8002 sp=电信”
+* “               name＝郑州交易主站132 area=河南省 ip＝202.110.116.132 port=8002 sp=电信”
+* “               name＝郑州交易主站22 area=河南省 ip＝218.28.18.22 port=8002 sp=电信”
+* “
+qsmc=平安证券 qsid=59 yybrid=105”
+* “               name＝平安证券_宝信_电信 area=上海市 ip＝101.89.64.194 port=8003 sp=电信”
+* “               name＝平安证券_观澜 area=上海市 ip＝202.69.24.14 port=8003 sp=其他”
+* “               name＝平安证券_宝信_联通 area=上海市 ip＝43.254.105.92 port=8003 sp=其他”
+* “
+qsmc=申港证券 qsid=109 yybrid=1619”
+* “               name＝申港证券上海联通 area= ip＝140.206.243.33 port=8002 sp=联通”
+* “               name＝申港证券上海移动 area= ip＝117.131.59.190 port=8002 sp=移动”
+* “               name＝申港证券上海电信 area= ip＝114.80.55.1 port=8002 sp=电信”
+* “
+qsmc=首创证券 qsid=65 yybrid=”	数据太多需要手动取
+* “
+qsmc=世纪证券 qsid=63 yybrid=489”
+* “               name＝深圳入口（网通) area=江西省 ip＝210.21.198.169 port=8002 sp=网通”
+* “               name＝南昌新入口(电信1) area=江西省 ip＝111.75.219.137 port=8002 sp=电信”
+* “               name＝南昌新入口(网通1) area=江西省 ip＝220.248.205.214 port=8002 sp=网通”
+* “               name＝深圳入口（电信1) area=江西省 ip＝61.144.195.69 port=8002 sp=电信”
+* “               name＝深圳入口（电信2) area=江西省 ip＝119.145.36.229 port=8002 sp=电信”
+* “
+qsmc=上海证券 qsid=321 yybrid=88”
+* “               name＝上海证券上海联通1 area=上海市 ip＝211.95.59.139 port=8002 sp=网通”
+* “               name＝上海证券温州移动 area=上海市 ip＝117.149.195.146 port=8002 sp=移动”
+* “               name＝上海证券温州电信 area=上海市 ip＝61.164.100.202 port=8002 sp=电信”
+* “               name＝上海证券上海电信1 area=上海市 ip＝180.168.250.16 port=8002 sp=电信”
+* “
+qsmc=山西证券 qsid=327 yybrid=”
+* “               name＝山西证券太原联通2 area=山西省 ip＝221.204.232.50 port=8002 sp=联通”
+* “               name＝山西证券同城联通 area=山西省 ip＝59.49.78.164 port=8002 sp=联通”
+* “               name＝山西证券同城移动 area=山西省 ip＝180.163.112.254 port=8002 sp=移动”
+* “               name＝上证信息电信 area=上海市 ip＝218.26.15.44 port=8002 sp=电信”
+* “               name＝山西证券太原电信2 area=山西省 ip＝111.53.197.7 port=8002 sp=电信”
+* “               name＝山西证券太原电信1 area=山西省 ip＝59.49.103.212 port=8002 sp=电信”
+* “               name＝山西证券太原移动 area=山西省 ip＝218.26.224.151 port=8002 sp=移动”
+* “               name＝山西证券太原联通1 area=山西省 ip＝221.204.31.41 port=8002 sp=联通”
+* “
+qsmc=天风证券 qsid=343 yybrid=95”
+* “               name＝天风证券电信1 area=广东省 ip＝59.36.5.68 port=8002 sp=电信”
+* “               name＝天风证券联通1 area=广东省 ip＝221.4.140.227 port=8002 sp=联通”
+* “               name＝天风证券电信2 area=湖北省 ip＝58.48.176.131 port=8002 sp=电信”
+* “               name＝天风证券联通2 area=湖北省 ip＝113.57.203.231 port=8002 sp=联通”
+* “               name＝天风证券移动1 area=广东省 ip＝120.197.181.39 port=8002 sp=移动”
+* “               name＝天风证券移动2 area=广东省 ip＝111.47.25.23 port=8002 sp=移动”
+* “
+qsmc=太平洋证券 qsid=96 yybrid=106”
+* “               name＝太平洋证券电信站点 area=北京市 ip＝116.52.1.48 port=8002 sp=电信”
+* “               name＝太平洋证券网通站点 area=北京市 ip＝221.213.85.28 port=8002 sp=网通”
+* “               name＝太平洋证券上海电信 area=上海市 ip＝116.239.25.228 port=8002 sp=电信”
+* “               name＝太平洋证券上海电信二 area=上海市 ip＝116.239.25.235 port=8002 sp=电信”
+* “               name＝太平洋证券泰安联通一 area=山东省 ip＝123.135.125.180 port=8002 sp=联通”
+* “               name＝太平洋证券泰安联通二 area=山东省 ip＝123.135.125.187 port=8002 sp=联通”
+* “
+qsmc=网信证券 qsid=140 yybrid=68”
+* “               name＝网信证券锦州电信交易 area=辽宁省 ip＝59.44.203.203 port=9200 sp=电信”
+* “               name＝网信证券沈阳联通交易 area=辽宁省 ip＝202.97.181.10 port=9200 sp=联通”
+* “               name＝网信证券沈阳电信交易 area=辽宁省 ip＝59.44.49.18 port=9200 sp=电信”
+* “               name＝网信证券锦州联通交易 area=辽宁省 ip＝60.21.216.186 port=9200 sp=联通”
+* “
+qsmc=万联证券 qsid=99 yybrid=100”
+* “               name＝电信入口一 area=广东省 ip＝58.63.38.203 port=8002 sp=电信”
+* “               name＝电信入口二 area=广东省 ip＝58.63.239.138 port=8002 sp=电信”
+* “               name＝电信入口三 area=广东省 ip＝61.144.25.106 port=8002 sp=电信”
+* “               name＝联通入口 area=广东省 ip＝140.207.227.37 port=8002 sp=联通”
+* “               name＝移动入口 area=广东省 ip＝183.232.11.150 port=8002 sp=移动”
+* “
+qsmc=万和证券 qsid=186 yybrid=687”
+* “               name＝深圳电信1 area=广东省 ip＝61.144.217.235 port=8002 sp=电信”
+* “               name＝深圳电信2 area=广东省 ip＝202.105.116.6 port=8002 sp=电信”
+* “               name＝上海电信 area=上海市 ip＝101.226.254.91 port=8002 sp=电信”
+* “               name＝深圳移动 area=广东省 ip＝183.239.173.43 port=8002 sp=移动”
+* “               name＝上海联通 area=上海市 ip＝140.207.224.203 port=8002 sp=联通”
+* “               name＝深圳联通1 area=广东省 ip＝210.22.27.70 port=8002 sp=联通”
+* “               name＝深圳联通2 area=广东省 ip＝210.21.212.196 port=8002 sp=联通”
+* “               name＝成都广电 area=四川省 ip＝60.255.36.18 port=8002 sp=其他”
+* “
+qsmc=五矿证券 qsid=193 yybrid=688”
+* “               name＝东莞电信委托主站一 area=广东省 ip＝116.6.202.7 port=8002 sp=电信”
+* “               name＝电信站点二 area=广东省 ip＝59.40.79.52 port=8002 sp=电信”
+* “               name＝联通站点一 area=广东省 ip＝58.251.9.51 port=8002 sp=联通”
+* “
+qsmc=信达证券 qsid=33 yybrid=”	数据太多需要手动取
+* “
+qsmc=西南证券 qsid=73 yybrid=102”
+* “               name＝西南证券委托一 area=四川省 ip＝222.178.203.128 port=8002 sp=电信”
+* “               name＝西南证券委托二 area=四川省 ip＝222.178.203.129 port=8002 sp=电信”
+* “               name＝西南证券委托三 area=四川省 ip＝222.178.70.21 port=8002 sp=电信”
+* “               name＝西南证券委托四 area=四川省 ip＝ths1.swsc.com.cn port=8002 sp=电信”
+* “               name＝西南证券委托五 area=四川省 ip＝ths2.swsc.com.cn port=8002 sp=电信”
+* “
+qsmc=兴业证券 qsid=80 yybrid=63”
+* “               name＝自动选择服务器 area=上海市 ip＝hxwt.xyzq.com.cn port=8001 sp=电信”
+* “               name＝兴业证券电信一站 area=福建省 ip＝59.56.175.79 port=8001 sp=电信”
+* “               name＝兴业证券联通一站 area=福建省 ip＝27.115.74.118 port=8001 sp=联通”
+* “               name＝兴业证券联通二站 area=福建省 ip＝220.250.1.82 port=8001 sp=联通”
+* “               name＝兴业证券联通三站 area=福建省 ip＝123.125.108.157 port=8001 sp=联通”
+* “               name＝兴业证券电信二站 area=上海市 ip＝222.66.112.33 port=8001 sp=电信”
+* “               name＝兴业证券移动总站 area=福建省 ip＝183.252.22.69 port=8001 sp=移动”
+* “               name＝新业务电信体验站 area=上海市 ip＝116.236.173.2 port=8001 sp=电信”
+* “               name＝新业务联通体验站 area=福建省 ip＝58.22.3.102 port=8001 sp=联通”
+* “               name＝兴业证券电信三站 area=福建省 ip＝218.66.71.197 port=8001 sp=电信”
+* “               name＝兴业证券电信四站 area=福建省 ip＝202.100.166.94 port=8001 sp=电信”
+* “
+qsmc=湘财证券 qsid=196 yybrid=107”
+* “               name＝湘财证券长沙电信站 area=湖南省 ip＝124.232.155.79 port=8002 sp=电信”
+* “               name＝湘财证券上海联通站 area=上海市 ip＝140.206.243.220 port=8002 sp=联通”
+* “               name＝湘财证券上海电信站 area=上海市 ip＝101.226.250.236 port=8002 sp=电信”
+* “               name＝湘财证券长沙联通站 area=湖南省 ip＝58.20.55.60 port=8002 sp=联通”
+* “
+qsmc=银泰证券 qsid=320 yybrid=”	数据太多需要手动取
+* “
+qsmc=中泰证券 qsid=100 yybrid=”	数据太多需要手动取
+* “
+qsmc=中投证券 qsid=57 yybrid=59”
+* “               name＝中投证券电信入口 area=广东省 ip＝61.144.233.92 port=8803 sp=电信”
+* “               name＝中投证券联通入口 area=广东省 ip＝58.251.33.231 port=8803 sp=联通”
+* “               name＝中投证券东莞电信入口 area=广东省 ip＝183.63.228.198 port=8803 sp=电信”
+* “               name＝中投证券荣超电信入口 area=广东省 ip＝61.144.233.93 port=8803 sp=电信”
+* “               name＝中投证券东莞联通入口 area=广东省 ip＝58.255.39.38 port=8803 sp=联通”
+* “               name＝中投证券荣超联通入口 area=广东省 ip＝58.251.33.229 port=8803 sp=联通”
+* “
+qsmc=中天证券 qsid=86 yybrid=60”
+* “               name＝中天电信AB股交易站点一 area=辽宁省 ip＝59.44.49.219 port=9500 sp=电信”
+* “               name＝中天联通AB股备份站点 area=辽宁省 ip＝218.25.36.247 port=9500 sp=联通”
+* “               name＝中天移动AB股交易站点一 area= ip＝117.131.37.194 port=9560 sp=电信”
+* “               name＝中天联通AB股交易站点四 area= ip＝218.60.36.108 port=9560 sp=电信”
+* “               name＝中天联通AB股交易站点三 area= ip＝218.60.36.108 port=9500 sp=电信”
+* “               name＝中天电信AB股交易站点三 area=辽宁省 ip＝59.46.40.74 port=9560 sp=电信”
+* “               name＝中天联通AB股交易站点一 area=辽宁省 ip＝218.25.36.247 port=9560 sp=联通”
+* “               name＝中天电信AB股交易站点二 area=辽宁省 ip＝59.44.49.219 port=9560 sp=电信”
+* “               name＝中天联通AB股交易站点 area=辽宁省 ip＝202.97.181.2 port=9500 sp=联通”
+* “               name＝中天电信AB股交易站点 area=辽宁省 ip＝59.46.40.74 port=9500 sp=电信”
+* “               name＝中天电信AB股备份站点 area=上海市 ip＝222.66.83.90 port=9560 sp=电信”
+* “               name＝中天联通AB股交易站点二 area=辽宁省 ip＝218.25.36.247 port=9570 sp=联通”
+* “
+qsmc=中山证券 qsid=85 yybrid=61”
+* “               name＝中山证券公版电信站点1 area=广东省 ip＝218.17.197.20 port=8038 sp=电信”
+* “               name＝中山证券公版联通站点1 area=广东省 ip＝58.250.23.166 port=8038 sp=联通”
+* “               name＝中山证券公版电信站点2 area=广东省 ip＝121.15.129.247 port=8035 sp=电信”
+* “               name＝中山证券公版联通站点2 area=广东省 ip＝58.251.38.41 port=8035 sp=联通”
+* “
+qsmc=中银国际 qsid=87 yybrid=58”
+* “               name＝武汉电信 area=湖北省 ip＝61.183.15.195 port=8082 sp=电信”
+* “               name＝上海电信 area=上海市 ip＝114.80.128.66 port=8082 sp=电信”
+* “               name＝北京联通二 area=北京市 ip＝123.127.182.110 port=8082 sp=联通”
+* “               name＝沈阳联通 area=辽宁省 ip＝218.60.7.4 port=8082 sp=联通”
+* “               name＝上海联通 area=上海市 ip＝210.51.39.200 port=8082 sp=联通”
+* “               name＝广州电信 area=广东省 ip＝59.42.244.54 port=8082 sp=电信”
+* “
+qsmc=中信浙江 qsid=46 yybrid=90”
+* “               name＝济南联通主站w1 area=山东省 ip＝27.221.115.138 port=8002 sp=联通”
+* “               name＝北京联通主站Z443 area=北京市 ip＝202.108.253.168 port=443 sp=联通”
+* “               name＝广州云交易Z1 area=广东省 ip＝58.67.221.144 port=8002 sp=其他”
+* “               name＝杭州移动主站J1 area=浙江省 ip＝117.149.2.70 port=8002 sp=移动”
+* “               name＝杭州联通主站J2 area=浙江省 ip＝60.12.9.58 port=8002 sp=联通”
+* “               name＝杭州联通主站J1 area=浙江省 ip＝124.160.88.184 port=8002 sp=联通”
+* “               name＝北京联通主站Z1 area=北京市 ip＝202.108.253.169 port=8002 sp=联通”
+* “               name＝杭州华数主站J2 area=浙江省 ip＝218.108.78.201 port=8002 sp=华数”
+* “               name＝杭州华数主站J1 area=浙江省 ip＝218.108.98.249 port=8002 sp=华数”
+* “               name＝上海电信主站Z443 area=上海市 ip＝180.153.18.168 port=443 sp=电信”
+* “               name＝杭州电信主站J2 area=浙江省 ip＝115.238.90.118 port=8002 sp=电信”
+* “               name＝杭州电信主站J1 area=浙江省 ip＝115.238.56.182 port=8002 sp=电信”
+* “               name＝上海电信主站Z1 area=上海市 ip＝180.153.18.169 port=8002 sp=电信”
+* “
+qsmc=中信证券 qsid=158 yybrid=89”
+* “               name＝济南联通主站w1 area=山东省 ip＝27.221.115.138 port=8002 sp=联通”
+* “               name＝北京联通主站Z1 area=山东省 ip＝202.108.253.169 port=8002 sp=联通”
+* “               name＝南京电信Z1 area=江苏省 ip＝61.147.174.4 port=8002 sp=电信”
+* “               name＝南京联通Z1 area=江苏省 ip＝36.152.49.228 port=8002 sp=联通”
+* “               name＝南京联通Z1 area=江苏省 ip＝218.98.6.164 port=8002 sp=联通”
+* “               name＝深圳电信主站Z1 area=广东省 ip＝103.24.178.232 port=8002 sp=电信”
+* “               name＝成都电信主站Z1 area=四川省 ip＝222.211.87.251 port=8002 sp=电信”
+* “               name＝杭州华数主站J2 area=浙江省 ip＝218.108.78.201 port=8002 sp=华数”
+* “               name＝杭州华数主站J1 area=浙江省 ip＝218.108.98.249 port=8002 sp=华数”
+* “               name＝杭州移动主站J1 area=浙江省 ip＝117.149.2.70 port=8002 sp=电信”
+* “               name＝杭州电信主站J1 area=浙江省 ip＝115.238.56.182 port=8002 sp=电信”
+* “               name＝上海电信主站Z1 area=上海市 ip＝180.153.18.169 port=8002 sp=电信”
+* “               name＝上海电信主站Z443 area=上海市 ip＝180.153.18.168 port=443 sp=电信”
+* “               name＝北京联通主站Z443 area=北京市 ip＝202.108.253.168 port=443 sp=联通”
+* “               name＝杭州电信主站J2 area=浙江省 ip＝115.238.90.118 port=8002 sp=电信”
+* “               name＝广州云交易Z1 area=广东省 ip＝58.67.221.144 port=8002 sp=电信”
+* “               name＝杭州联通主站J1 area=山东省 ip＝124.160.88.184 port=8002 sp=联通”
+* “               name＝杭州联通主站J2 area=山东省 ip＝60.12.9.58 port=8002 sp=联通”
+* “
+qsmc=中金证券 qsid=131 yybrid=108”
+* “               name＝中金深圳 area=广东省 ip＝szhangqing.ciccs.com.cn port=8002 sp=电信”
+* “               name＝中金北京 area=北京市 ip＝bjhangqing.ciccs.com.cn port=8002 sp=电信”
+* “
+qsmc=中邮证券 qsid=40 yybrid=109”
+* “               name＝全国双线 area=陕西省 ip＝hxwt7.cnpsec.net port=8002 sp=电信”
+* “               name＝西安铁通 area=陕西省 ip＝hxwt6.cnpsec.net port=8002 sp=铁通”
+* “               name＝西安联通 area=陕西省 ip＝hxwt5.cnpsec.net port=8002 sp=联通”
+* “               name＝西安电信 area=陕西省 ip＝hxwt4.cnpsec.net port=8002 sp=电信”
+* “
+qsmc=中原证券 qsid=89 yybrid=57”
+* “               name＝中原证券河南网通站点二 area=河南省 ip＝218.29.103.98 port=8002 sp=联通”
+* “               name＝中原证券河南电信站点二 area=河南省 ip＝222.85.95.158 port=8002 sp=电信”
+* “               name＝中原证券上海联通站点 area=上海市 ip＝140.207.227.49 port=8002 sp=联通”
+* “               name＝中原证券河南网通站点一 area=河南省 ip＝218.29.101.58 port=8002 sp=网通”
+* “               name＝中原证券河南电信站点一 area=河南省 ip＝222.88.7.118 port=8002 sp=电信”
+* “               name＝中原证券上海电信站点 area=上海市 ip＝101.226.251.249 port=8002 sp=电信”
+* “               name＝中原证券深圳电信站点 area=广东省 ip＝113.105.70.98 port=8002 sp=电信”
+* “               name＝中原证券洛阳网通站点 area=河南省 ip＝222.141.17.158 port=8002 sp=联通”
+* “               name＝中原证券洛阳电信站点 area=河南省 ip＝222.88.67.118 port=8002 sp=电信”
+* “
+qsmc=浙商证券 qsid=339 yybrid=62”
+* “               name＝浙商阿里云多线 area=浙江省 ip＝114.55.68.67 port=8005 sp=其他”
+* “               name＝浙商滨江电信 area=浙江省 ip＝122.224.66.102 port=8005 sp=电信”
+* “               name＝浙商滨江联通 area=浙江省 ip＝124.160.61.202 port=8005 sp=联通”
+* “               name＝浙商下沙联通 area=浙江省 ip＝124.90.38.166 port=8005 sp=联通”
+* “               name＝浙商下沙电信 area=浙江省 ip＝60.191.99.99 port=8005 sp=电信”
+* “               name＝浙商下沙移动 area=浙江省 ip＝223.93.161.214 port=8005 sp=移动”
+
+
+
+qsmc=海通证券
+				name＝海通总站			ip＝Htjybeta.htsec.com	port=8002
+				name＝电信绍兴			ip＝122.224.27.196		port=8002
+				name＝联通福州			ip＝58.22.121.79		port=8002	
+				name＝联通西安			ip＝124.89.85.166		port=8002
+				name＝联通青岛			ip＝119.167.224.15		port=8002
+				name＝联通鞍山			ip＝59.44.141.136		port=8002
+				name＝联通南京			ip＝122.96.26.115		port=8002
+				name＝移动南方中心		ip＝120.234.143.126		port=8002
+				name＝联通南方中心		ip＝120.86.124.249		port=8002
+				name＝移动郑州			ip＝117.158.138.118		port=8002
+				name＝移动上海			ip＝221.226.47.99		port=8002
+				name＝移动南方中心		ip＝120.234.143.126		port=8002
+				name＝电信福州			ip＝110.87.168.111		port=8002
+				name＝电信西安			ip＝61.185.211.141		port=8002
+				name＝电信南方中心		ip＝183.63.228.122		port=8002
+				name＝电信成都			ip＝125.70.14.26		port=8002
+				name＝电信鞍山			ip＝218.24.10.54		port=8002
+				name＝电信南京			ip＝221.226.47.99		port=8002
+				name＝电信外高桥		ip＝124.74.236.71		port=8002
+				name＝联通外高桥		ip＝58.246.109.19		port=8002
+qsmc=银河证券	qsid=90 yybrid=93”
+ * “               name＝杭州电信 area=浙江省 ip＝218.75.75.25 port=6002 sp=电信”
+* “               name＝杭州华数网通 area=浙江省 ip＝218.108.13.242 port=6002 sp=网通”
+* “               name＝成都电信 area=四川省 ip＝118.112.180.148 port=6002 sp=电信”
+* “               name＝深圳电信 area=广东省 ip＝119.145.116.23 port=6002 sp=电信”
+* “               name＝新疆联通 area=新疆维吾尔自治区 ip＝60.13.152.188 port=6002 sp=联通”
+* “               name＝郑州电信 area=河南省 ip＝1.192.144.131 port=6002 sp=电信”
+* “               name＝昆明电信 area=云南省 ip＝116.52.158.146 port=6002 sp=电信”
+* “               name＝重庆联通 area=重庆市 ip＝113.204.18.115 port=6002 sp=联通”
+* “               name＝沈阳联通 area=辽宁省 ip＝61.161.176.198 port=6002 sp=联通”
+* “               name＝太原电信 area=山西省 ip＝59.49.17.20 port=6002 sp=电信”
+* “               name＝太原联通 area=山西省 ip＝218.26.227.52 port=6002 sp=电信”
+* “               name＝武汉电信1 area=湖北省 ip＝58.49.110.78 port=6002 sp=电信”
+* “               name＝广州联通1 area=广东省 ip＝210.21.85.11 port=6002 sp=联通”
+* “               name＝合肥联通 area=安徽省 ip＝218.104.72.43 port=6002 sp=联通”
+* “               name＝济南联通 area=山东省 ip＝60.217.192.188 port=6002 sp=联通”
+* “               name＝重庆电信 area=重庆市 ip＝222.178.110.219 port=6002 sp=电信”
+* “               name＝上海电信1 area=上海市 ip＝124.74.242.148 port=6002 sp=电信”
+* “               name＝福州电信 area=福建省 ip＝218.6.62.3 port=6002 sp=电信”
+* “               name＝郑州联通 area=河南省 ip＝218.28.238.198 port=6002 sp=联通”
+* “               name＝深圳电信 area=广东省 ip＝113.98.240.18 port=6002 sp=电信”
+* “               name＝新疆电信 area=新疆维吾尔自治区 ip＝124.117.244.245 port=6002 sp=电信”
+* “               name＝北京联通 area=北京市 ip＝114.251.2.72 port=6002 sp=联通”
+* “               name＝宁波信息港 area=浙江省 ip＝221.136.93.19 port=6002 sp=未知”
+* “               name＝宁波电信 area=浙江省 ip＝115.238.180.18 port=6002 sp=电信”
+* “               name＝宁波联通 area=浙江省 ip＝221.12.53.53 port=6002 sp=联通”
+* “               name＝合肥电信 area=安徽省 ip＝220.178.118.59 port=6002 sp=电信”
+* “               name＝北京移动 area=北京市 ip＝218.205.130.78 port=6002 sp=移动”
+* “               name＝武汉电信 area=湖北省 ip＝58.49.110.78 port=443 sp=电信”
+* “               name＝上海电信 area=上海市 ip＝124.74.242.148 port=443 sp=电信”
+* “               name＝北京联通1 area=北京市 ip＝114.251.2.72 port=443 sp=联通”
+* “               name＝北京电信 area=北京市 ip＝219.143.214.202 port=6002 sp=电信”
+ 
+ 
+
+qsmc=中信建投 	qsid=301	94
+* “               name＝中信建投_上海_电信 area=上海市 ip＝hexinjssh.csc108.com port=8002 sp=电信”
+* “               name＝中信建投_北京_移动 area=北京市 ip＝hexinjsyd2.csc108.com port=8002 sp=网通”
+* “               name＝中信建投_上海_电信2 area=上海市 ip＝hexinjssh2.csc108.com port=8002 sp=电信”
+* “               name＝中信建投_北京_网通 area=北京市 ip＝hexinjsbj.csc108.com port=8002 sp=网通”
+
+qsmc=华泰证券	qsid=114
+					name＝华泰证券（南京电信）		ip＝wt.htsc.com.cn	port=8002
+					name＝华泰证券（南京电信一）	ip＝58.213.143.194	port=8002
+					name＝华泰证券（南京电信二）	ip＝202.102.53.99	port=8002
+					name＝华泰证券（南京电信三）	ip＝61.132.54.83	port=8002
+					name＝华泰证券（新疆电信）		ip＝222.81.68.28	port=8002
+					name＝华泰证券（深圳联通）		ip＝210.22.20.117	port=8002
+					name＝华泰证券（深圳电信）		ip＝119.145.1.203	port=8002
+					name＝华泰证券（南京联通一）	ip＝221.6.22.130	port=8002
+					name＝华泰证券（南京移动）		ip＝223.112.2.163	port=8002
+qsmc=中航证券	qsid=311	1826
+* “               name＝深圳电信 area=广东省 ip＝61.144.205.106 port=8002 sp=电信”
+* “               name＝深圳移动 area=广东省 ip＝120.234.42.43 port=8002 sp=移动”
+* “               name＝深圳联通 area=广东省 ip＝58.251.8.106 port=8002 sp=联通”
+qsmc=申万宏源	qsid=302
+					name＝上海电信委托1		ip＝222.66.114.28	port=8102
+					name＝上海电信委托2		ip＝222.66.114.106	port=8102
+					name＝上海电信委托12	ip＝218.80.243.17	port=8102
+					name＝上海电信委托3		ip＝222.66.114.107	port=8102
+					name＝上海电信委托4		ip＝222.66.114.108	port=8102
+					name＝上海电信委托5		ip＝222.66.114.109	port=8102
+					name＝上海电信委托6		ip＝222.66.114.110	port=8102
+					name＝温州电信委托1		ip＝122.228.159.155	port=8102
+					name＝温州电信委托2		ip＝122.228.159.156	port=8102
+					name＝成都电信委托1		ip＝118.114.77.114	port=8102
+					name＝成都网通委托1		ip＝119.6.80.18		port=8102
+					name＝杭州电信委托1		ip＝122.224.201.126	port=8102
+					name＝北京网通委托1		ip＝219.238.118.121	port=8102
+					name＝郑州电信委托		ip＝123.149.20.7	port=8102
+					name＝郑州网通委托		ip＝61.163.100.133	port=8102
+					name＝上海电信新委托1	ip＝218.80.243.88	port=8102
+					name＝上海电信新委托2	ip＝222.66.114.81	port=8102
+					name＝重庆电信委托1		ip＝218.70.12.102	port=8102
+					name＝北京网通委托2		ip＝219.238.118.115	port=8102
+					name＝上海电信委托7		ip＝218.80.243.12	port=8102
+					name＝上海电信委托8		ip＝218.80.243.13	port=8102
+					name＝上海电信委托9		ip＝218.80.243.14	port=8102
+					name＝上海电信委托10	ip＝218.80.243.15	port=8102
+					name＝上海电信委托11	ip＝218.80.243.16	port=8102
+qsmc=申银万国	qsid=166
+* “               name＝申银万国成都网通委托1 area=四川省 ip＝119.6.80.18 port=8002 sp=网通”
+* “               name＝申银万国上海电信委托2 area=上海市 ip＝222.66.114.106 port=8002 sp=电信”
+* “               name＝申银万国北京网通委托1 area=浙江省 ip＝219.238.118.121 port=8002 sp=电信”
+* “               name＝申银万国北京网通委托2 area=浙江省 ip＝219.238.118.115 port=8002 sp=电信”
+* “               name＝申银万国成都电信委托1 area=浙江省 ip＝118.114.77.114 port=8002 sp=电信”
+* “               name＝申银万国温州电信委托2 area=浙江省 ip＝122.228.159.156 port=8002 sp=电信”
+* “               name＝申银万国温州电信委托1 area=上海市 ip＝122.228.159.155 port=8002 sp=电信”
+* “               name＝申银万国上海电信委托5 area=上海市 ip＝222.66.114.109 port=8002 sp=电信”
+* “               name＝申银万国上海电信委托4 area=上海市 ip＝222.66.114.108 port=8002 sp=电信”
+* “               name＝申银万国上海电信委托3 area=上海市 ip＝222.66.114.107 port=8002 sp=电信”
+* “               name＝申银万国上海电信委托1 area=四川省 ip＝222.66.114.28 port=8002 sp=网通”
+* “               name＝申银万国上海电信委托6 area=上海市 ip＝222.66.114.110 port=8002 sp=电信”
+qsmc=九州证券	qsid=199
+* “               name＝九州证券委托深圳联通主站2 area=广东省 ip＝58.251.25.179 port=8002 sp=联通”
+* “               name＝九州证券深圳电信站点1 area=广东省 ip＝218.18.120.235 port=8002 sp=电信”
+* “               name＝九州证券深圳联通站点1 area=广东省 ip＝58.251.25.158 port=8002 sp=联通”
+* “               name＝九州证券委托深圳电信主站2 area=广东省 ip＝218.18.120.228 port=8002 sp=电信”
+qsmc=和兴证券 	qsid=35
+* “               name＝宏信电信站点 area=四川省 ip＝222.211.87.144 port=8006 sp=电信”
+* “               name＝宏信网通站点 area=四川省 ip＝101.204.230.214 port=8006 sp=网通”
+
+
+
+只要同花顺能登录的都支持    暂时就搞这么多吧    
+
+
+
+
+
+
+
