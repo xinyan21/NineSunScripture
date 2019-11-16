@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using NineSunScripture.trade.api;
+using NineSunScripture.model;
 
 namespace NineSunScripture
 {
@@ -36,11 +37,12 @@ namespace NineSunScripture
             byte[] ErrInfo = new byte[256];
             byte[] Result = new byte[1024 * 1024];//  不写大点内存溢出会崩溃
             Console.WriteLine("\nstart to login");
-            int id = TradeAPI.Logon(Qsid, Host, Port, Version, AccountType, Account,
+            int clientId = TradeAPI.Logon(Qsid, Host, Port, Version, AccountType, Account,
                 password, comm_password, false, ErrInfo);
-            if (id > 0)
+            if (clientId > 0)
             {
-                label1.Text = "login success" + id;
+                Funds funds = TradeAPI.QueryFunds(clientId);
+                TradeAPI.QueryQuotes(clientId, "600686");
             }
             else
             {

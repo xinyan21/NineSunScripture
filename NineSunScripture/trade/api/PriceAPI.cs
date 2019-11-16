@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 
 namespace NineSunScripture.trade.api
 {
-    /*
-     *行情专用API
-     */
+    /// <summary>
+    /// 行情专用API
+    /// </summary>
     public class PriceAPI
     {
         //dll必须放在程序同一目录下面，否则调用会报错

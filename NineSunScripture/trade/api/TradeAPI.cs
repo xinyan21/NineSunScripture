@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using NineSunScripture.model;
+using NineSunScripture.trade.helper;
 
 namespace NineSunScripture.trade.api
 {
-    /*
-     * 交易API，附带五档行情API
-     */
+    /// <summary>
+    /// 交易API，附带五档行情API
+    /// </summary>
     public class TradeAPI
     {
         //dll必须放在程序同一目录下面，否则调用会报错
@@ -66,5 +68,71 @@ namespace NineSunScripture.trade.api
         //clientID,//客户端ID
         [DllImport(@dllPath, EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
         public extern static void Logoff(int clientID);
+
+        /// <summary>
+        /// 查询资金
+        /// </summary>
+        /// <param name="clientID">客户端id</param>
+        /// <returns></returns>
+        public static Funds QueryFunds(int clientID) {
+            Funds funds = new Funds();
+            int code = QueryData(clientID, 0, funds.result, funds.errorInfo);
+            if (code > 0) {
+                String[] temp = ApiHelper.parseResult(funds.result);
+                funds.TotalAsset = Double.Parse(temp[0]);
+                funds.RemainingFund = Double.Parse(temp[1]);
+                funds.FrozenAmt = Double.Parse(temp[2]);
+                funds.AvailableAmt = Double.Parse(temp[4]);
+            }
+            return funds;
+        }
+
+        /// <summary>
+        ///  查询券商自带行情
+        /// </summary>
+        /// <param name="clientID">客户端id</param>
+        /// <param name="code">股票代码</param>
+        /// <returns></returns>
+        public static Quotes QueryQuotes(int clientID, String code)
+        {
+            Quotes quotes = new Quotes();
+            int rspCode = QueryHQ(clientID, code, quotes.result, quotes.errorInfo);
+            if (rspCode > 0)
+            {
+                String[] temp = ApiHelper.parseResult(quotes.result);
+                quotes.Code = temp[0];
+                quotes.Name = temp[1];
+                quotes.PreClose = float.Parse(temp[2]);
+                quotes.LatestPrice = float.Parse(temp[3]);
+                quotes.HighLimit = float.Parse(temp[4]);
+                quotes.LowLimit = float.Parse(temp[5]);
+                quotes.High = float.Parse(temp[6]);
+                quotes.Low= float.Parse(temp[7]);
+                quotes.Money = double.Parse(temp[8]);
+                quotes.Volume = int.Parse(temp[9]);
+                quotes.Open = float.Parse(temp[10]);
+                quotes.Sell1 = float.Parse(temp[11]);
+                quotes.Sell2 = float.Parse(temp[12]);
+                quotes.Sell3 = float.Parse(temp[13]);
+                quotes.Sell4 = float.Parse(temp[14]);
+                quotes.Sell5 = float.Parse(temp[15]);
+                quotes.Buy1 = float.Parse(temp[16]);
+                quotes.Buy2 = float.Parse(temp[17]);
+                quotes.Buy3 = float.Parse(temp[18]);
+                quotes.Buy4 = float.Parse(temp[19]);
+                quotes.Buy5 = float.Parse(temp[20]);
+                quotes.Sell1Vol = int.Parse(temp[21].Replace(".000",""));
+                quotes.Sell2Vol = int.Parse(temp[22].Replace(".000", ""));
+                quotes.Sell3Vol = int.Parse(temp[23].Replace(".000", ""));
+                quotes.Sell4Vol = int.Parse(temp[24].Replace(".000", ""));
+                quotes.Sell5Vol = int.Parse(temp[25].Replace(".000", ""));
+                quotes.Buy1Vol = int.Parse(temp[26].Replace(".000", ""));
+                quotes.Buy2Vol = int.Parse(temp[27].Replace(".000", ""));
+                quotes.Buy3Vol = int.Parse(temp[28].Replace(".000", ""));
+                quotes.Buy4Vol = int.Parse(temp[29].Replace(".000", ""));
+                quotes.Buy5Vol = int.Parse(temp[30].Replace(".000", ""));
+            }
+            return quotes;
+        }
     }
 }

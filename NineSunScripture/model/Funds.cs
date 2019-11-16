@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace NineSunScripture.model
 {
-    /*
-     资金
-    */
-    class Funds
+    /// <summary>
+    /// 资金
+    /// </summary>
+    public class Funds : BaseModel
     {
         //总资产
-        public double totalAsset;
+        public double TotalAsset;
         //资金余额
-        public double remainingFund;
+        public double RemainingFund;
         //冻结金额
-        public double frozenAmt;
+        public double FrozenAmt;
         //可用金额
-        public double availableAmt;
+        public double AvailableAmt;
     }
 }

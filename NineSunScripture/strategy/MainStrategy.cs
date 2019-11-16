@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NineSunScripture.trade.helper
+namespace NineSunScripture.strategy
 {
-    class PriceApiHelper
+    /// <summary>
+    /// 主策略
+    /// </summary>
+    class MainStrategy
     {
     }
 }
