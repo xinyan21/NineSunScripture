@@ -74,13 +74,15 @@ namespace NineSunScripture.trade.api
         /// </summary>
         /// <param name="clientID">客户端id</param>
         /// <returns></returns>
-        public static Funds QueryFunds(int clientID) {
+        public static Funds QueryFunds(int clientID)
+        {
             Funds funds = new Funds();
-            int code = QueryData(clientID, 0, funds.result, funds.errorInfo);
-            if (code > 0) {
-                String[] temp = ApiHelper.parseResult(funds.result);
+            int code = QueryData(clientID, 0, funds.Result, funds.ErrorInfo);
+            if (code > 0)
+            {
+                String[] temp = ApiHelper.ParseResult(funds.Result);
                 funds.TotalAsset = Double.Parse(temp[0]);
-                funds.RemainingFund = Double.Parse(temp[1]);
+                funds.FundBalance = Double.Parse(temp[1]);
                 funds.FrozenAmt = Double.Parse(temp[2]);
                 funds.AvailableAmt = Double.Parse(temp[4]);
             }
@@ -96,10 +98,10 @@ namespace NineSunScripture.trade.api
         public static Quotes QueryQuotes(int clientID, String code)
         {
             Quotes quotes = new Quotes();
-            int rspCode = QueryHQ(clientID, code, quotes.result, quotes.errorInfo);
+            int rspCode = QueryHQ(clientID, code, quotes.Result, quotes.ErrorInfo);
             if (rspCode > 0)
             {
-                String[] temp = ApiHelper.parseResult(quotes.result);
+                String[] temp = ApiHelper.ParseResult(quotes.Result);
                 quotes.Code = temp[0];
                 quotes.Name = temp[1];
                 quotes.PreClose = float.Parse(temp[2]);
@@ -107,7 +109,7 @@ namespace NineSunScripture.trade.api
                 quotes.HighLimit = float.Parse(temp[4]);
                 quotes.LowLimit = float.Parse(temp[5]);
                 quotes.High = float.Parse(temp[6]);
-                quotes.Low= float.Parse(temp[7]);
+                quotes.Low = float.Parse(temp[7]);
                 quotes.Money = double.Parse(temp[8]);
                 quotes.Volume = int.Parse(temp[9]);
                 quotes.Open = float.Parse(temp[10]);
@@ -121,7 +123,7 @@ namespace NineSunScripture.trade.api
                 quotes.Buy3 = float.Parse(temp[18]);
                 quotes.Buy4 = float.Parse(temp[19]);
                 quotes.Buy5 = float.Parse(temp[20]);
-                quotes.Sell1Vol = int.Parse(temp[21].Replace(".000",""));
+                quotes.Sell1Vol = int.Parse(temp[21].Replace(".000", ""));
                 quotes.Sell2Vol = int.Parse(temp[22].Replace(".000", ""));
                 quotes.Sell3Vol = int.Parse(temp[23].Replace(".000", ""));
                 quotes.Sell4Vol = int.Parse(temp[24].Replace(".000", ""));
@@ -133,6 +135,40 @@ namespace NineSunScripture.trade.api
                 quotes.Buy5Vol = int.Parse(temp[30].Replace(".000", ""));
             }
             return quotes;
+        }
+
+        /// <summary>
+        /// 委托买入
+        /// </summary>
+        /// <param name="order">委托单对象</param>
+        /// <returns>响应码</returns>
+        public static int Buy(Order order)
+        {
+            int rspId = SendOrder(order.ClientId, Order.CategoryBuy, order.Code, order.ShareholderAcct,
+                order.Price, order.Quantity, order.Result, order.ErrorInfo);
+            return rspId;
+        }
+
+        /// <summary>
+        /// 委托卖出
+        /// </summary>
+        /// <param name="order">委托单对象</param>
+        /// <returns>响应码</returns>
+        public static int Sell(Order order)
+        {
+            int rspId = SendOrder(order.ClientId, Order.CategorySell, order.Code, order.ShareholderAcct,
+                order.Price, order.Quantity, order.Result, order.ErrorInfo);
+            return rspId;
+        }
+
+        /// <summary>
+        /// 撤销委托
+        /// </summary>
+        /// <param name="order">委托对象</param>
+        /// <returns>响应码</returns>
+        public static int CancelOrder(Order order)
+        {
+            return CancelOrder(order.ClientId, order.Code, order.OrderId, order.Result, order.ErrorInfo);
         }
     }
 }

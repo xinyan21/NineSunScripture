@@ -41,8 +41,17 @@ namespace NineSunScripture
                 password, comm_password, false, ErrInfo);
             if (clientId > 0)
             {
-                Funds funds = TradeAPI.QueryFunds(clientId);
-                TradeAPI.QueryQuotes(clientId, "600686");
+                //Funds funds = TradeAPI.QueryFunds(clientId);
+                //TradeAPI.QueryQuotes(clientId, "600686");
+                int rspCode = TradeAPI.QueryData(clientId, 3, Result, ErrInfo);
+                if (rspCode>0)
+                {
+                    label1.Text = Encoding.Default.GetString(Result).TrimEnd('\0');
+                }
+                else
+                {
+                    MessageBox.Show(Encoding.Default.GetString(ErrInfo).TrimEnd('\0'));
+                }
             }
             else
             {
@@ -51,6 +60,11 @@ namespace NineSunScripture
         }
 
         private void Label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void 添加账号ToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }

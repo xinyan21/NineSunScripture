@@ -11,8 +11,8 @@ namespace NineSunScripture.model
     /// </summary>
     public class BaseModel
     {
-        public int clientId;
-        public byte[] result = new byte[1024 * 1024];
-        public byte[] errorInfo = new byte[256];
+        public int ClientId;
+        public byte[] Result = new byte[1024 * 1024];
+        public byte[] ErrorInfo = new byte[256];
     }
 }

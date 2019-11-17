@@ -95,6 +95,7 @@
     <Compile Include="model\BaseModel.cs" />
     <Compile Include="model\Funds.cs" />
     <Compile Include="model\Order.cs" />
+    <Compile Include="model\Position.cs" />
     <Compile Include="model\Quotes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

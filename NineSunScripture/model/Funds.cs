@@ -14,7 +14,7 @@ namespace NineSunScripture.model
         //总资产
         public double TotalAsset;
         //资金余额
-        public double RemainingFund;
+        public double FundBalance;
         //冻结金额
         public double FrozenAmt;
         //可用金额

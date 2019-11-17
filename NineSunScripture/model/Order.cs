@@ -19,8 +19,8 @@ namespace NineSunScripture.model
         //股东账号；交易上海股票填上海的股东账号，交易深圳的股票填入深圳的股东账号。
         //正常情况下留空（留空自动判断）
         public String ShareholderAcct;
-        public String Code;
         public float Price;
         public int Quantity;//委托数量
+        public String Code;
     }
 }
