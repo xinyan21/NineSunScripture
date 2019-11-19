@@ -22,6 +22,11 @@ namespace NineSunScripture.trade.helper
             return temp;
         }
 
+        public static String ParseErrInfo(byte[] errorInfo)
+        {
+            return Encoding.Default.GetString(errorInfo).TrimEnd('\0');
+        }
+
         /// <summary>
         /// 通过股票代码得到对应的股东账号
         /// </summary>

@@ -121,6 +121,7 @@
     <Compile Include="model\Quotes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="strategy\ITrade.cs" />
     <Compile Include="strategy\SellStrategy.cs" />
     <Compile Include="strategy\BuyStrategy.cs" />
     <Compile Include="strategy\MainStrategy.cs" />

@@ -13,27 +13,39 @@ namespace NineSunScripture.strategy
     /// <summary>
     /// 主策略
     /// </summary>
-    class MainStrategy
+    class MainStrategy : ITrade
     {
-        private const int IntervalOfNonTrade = 3000;    
+        private const int IntervalOfNonTrade = 3000;
         private const int IntervalOfTrade = 200;
         //交易时间睡眠间隔为200ms，非交易时间为3s
         private int sleepInterval = IntervalOfTrade;
+        private int tryLoginCnt = 0;
+        private Account mainAcct;
+        private List<Account> accounts;
         private String[] stocks;
-        private int clientId;
         private Thread mainThread;
+        private BuyStrategy buyStrategy;
+        private SellStrategy sellStrategy;
 
-
-        public MainStrategy(int clientId, String[] stocks)
+        public MainStrategy(List<Account> accounts, String[] stocks)
         {
+            this.accounts = accounts;
             this.stocks = stocks;
-            this.clientId = clientId;
+            if (accounts.Count > 0)
+            {
+                mainAcct = accounts[0];
+            }
         }
         public void Start()
         {
             if (null == stocks || stocks.Length == 0)
             {
                 MessageBox.Show("没有可操作的股票");
+                return;
+            }
+            if (null == accounts || accounts.Count == 0)
+            {
+                MessageBox.Show("没有可操作的账户");
                 return;
             }
             if (null == mainThread)
@@ -53,15 +65,19 @@ namespace NineSunScripture.strategy
                 {
                     continue;
                 }
+                Quotes quotes;
                 for (int i = 0; i < stocks.Length; i++)
                 {
-                    Quotes quotes = TradeAPI.QueryQuotes(clientId, stocks[i]);
+                    quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i]);
+                    buyStrategy.Buy(quotes, accounts, null);
+                    sellStrategy.Sell(quotes, accounts, null);
                 }
             }
 
         }
 
-        private bool IsTradeTime() {
+        private bool IsTradeTime()
+        {
             if (DateTime.Now.Hour < 9 || DateTime.Now.Hour == 12 || DateTime.Now.Hour >= 15)
             {
                 if (IntervalOfNonTrade != sleepInterval)
@@ -95,6 +111,21 @@ namespace NineSunScripture.strategy
 
         private void QueryPositions()
         {
+        }
+
+        /// <summary>
+        /// 登录并获取资金和持仓信息
+        /// </summary>
+        private void login()
+        {
+        }
+
+        public void OnTradeResult(int code, string msg)
+        {
+            if (code < 0 && tryLoginCnt < 3)
+            {
+                login();
+            }
         }
     }
 }

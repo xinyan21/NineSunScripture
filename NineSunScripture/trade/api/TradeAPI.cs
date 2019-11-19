@@ -88,6 +88,19 @@ namespace NineSunScripture.trade.api
             }
             return funds;
         }
+        /// <summary>
+        /// TODO 查询当日成交
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        public static List<Order> QueryTodayTransaction(int clientId)
+        {
+            List<Order> orders = new List<Order>();
+            Order order = new Order();
+
+
+            return orders;
+        }
 
         /// <summary>
         ///  查询券商自带行情

@@ -9,7 +9,7 @@ namespace NineSunScripture.model
     /// <summary>
     /// 账户类
     /// </summary>
-    class Account
+    class Account : BaseModel
     {
         //Qsid,//券商id 					这个值可以在IP文件中查看
         //Host,//券商服务器IP
@@ -34,6 +34,6 @@ namespace NineSunScripture.model
         public String SzShareholderAcct;//深圳股东账户
 
         public Funds Funds;
-        public Position Position;
+        public List<Position> Positions;
     }
 }
