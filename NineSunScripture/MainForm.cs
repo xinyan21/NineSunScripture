@@ -23,15 +23,15 @@ namespace NineSunScripture
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            int Qsid = 0;
-            string Host = "trade.10jqka.com.cn";
-            short Port = 8002;
-            string Version = "E065.18.77";
+            int Qsid = 59;
+            string Host = "101.89.64.194";
+            short Port = 8003;
+            string Version = "E065.20.92";
             short AccountType = 0x30;
             //string Account = "49758842";
             //string password = "13231178";
-            string Account = "13534068934";
-            string password = "3594035x";
+            string Account = "321019194496";
+            string password = "198921";
             string comm_password = "";
 
             byte[] ErrInfo = new byte[256];
@@ -43,7 +43,7 @@ namespace NineSunScripture
             {
                 //Funds funds = TradeAPI.QueryFunds(clientId);
                 //TradeAPI.QueryQuotes(clientId, "600686");
-                int rspCode = TradeAPI.QueryData(clientId, 3, Result, ErrInfo);
+                int rspCode = TradeAPI.QueryData(clientId, 4, Result, ErrInfo);
                 if (rspCode>0)
                 {
                     label1.Text = Encoding.Default.GetString(Result).TrimEnd('\0');

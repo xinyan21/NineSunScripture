@@ -8,7 +8,7 @@ using System.Data.SQLite;
 
 namespace NineSunScripture.trade.helper
 {
-    class AccountHelper
+    public class AccountHelper
     {
         //AppDomain.CurrentDomain.BaseDirectory
         public static void Login()
@@ -26,23 +26,26 @@ namespace NineSunScripture.trade.helper
         /// <param name="positions">账户所有持仓</param>
         /// <param name="stock">股票代码</param>
         /// <returns>stock的持仓对象</returns>
-        public static Position GetPositionOf(List<Position> positions, string stock) {
+        public static Position GetPositionOf(List<Position> positions, string stock)
+        {
             foreach (Position position in positions)
             {
-                if (position.Code==stock)
+                if (position.Code == stock)
                 {
                     return position;
                 }
             }
-            return null;        
+            return null;
         }
 
-        public static Position GetPositionOf(List<Account> accounts, string stock) {
+        //TODO 这里应该把所有持仓综合起来
+        public static Position GetPositionOf(List<Account> accounts, string stock)
+        {
             Position position = null;
             foreach (Account account in accounts)
             {
-                position = GetPositionOf(account.Positions,stock);
-                if (null!=position)
+                position = GetPositionOf(account.Positions, stock);
+                if (null != position)
                 {
                     return position;
                 }

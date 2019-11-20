@@ -88,16 +88,128 @@ namespace NineSunScripture.trade.api
             }
             return funds;
         }
+
         /// <summary>
-        /// TODO 查询当日成交
+        /// 查询所有账户总资金
         /// </summary>
-        /// <param name="clientId"></param>
+        /// <param name="accounts">账户列表</param>
         /// <returns></returns>
-        public static List<Order> QueryTodayTransaction(int clientId)
+        public static Funds QueryTotalFunds(List<Account> accounts)
+        {
+            Funds funds = new Funds();
+            foreach (Account account in accounts)
+            {
+                Funds temp = QueryFunds(account.ClientId);
+                funds.AvailableAmt += temp.AvailableAmt;
+                funds.FrozenAmt += temp.FrozenAmt;
+                funds.FundBalance += temp.FundBalance;
+                funds.TotalAsset += temp.TotalAsset;
+            }
+
+            return funds;
+        }
+
+        /// <summary>
+        /// 查询持仓
+        /// </summary>
+        /// <param name="clientId">登录返回的客户Id</param>
+        /// <returns></returns>
+        public static List<Position> QueryPositions(int clientId)
+        {
+            List<Position> positions = new List<Position>();
+            Position position = new Position();
+            int code = QueryData(clientId, 1, position.Result, position.ErrorInfo);
+            if (code > 0)
+            {
+                String[][] temp = ApiHelper.ParseResults(position.Result);
+                for (int i = 0; i < temp.GetLength(0); i++)
+                {
+                    position = new Position();
+                    position.Code = temp[i][0];
+                    position.Name = temp[i][1];
+                    position.QuantityBalance = int.Parse(temp[i][3]);
+                    position.AvailableQuantity = int.Parse(temp[i][4]);
+                    position.FrozenQuantity = int.Parse(temp[i][5]);
+                    position.ProfitAndLoss = int.Parse(temp[i][6]);
+                    position.AvgCost = int.Parse(temp[i][7]);
+                    position.ProfitAndLossPct = int.Parse(temp[i][8]);
+                }
+                positions.Add(position);
+            }
+
+            return positions;
+        }
+
+        /// <summary>
+        /// 查询所有账户总持仓
+        /// </summary>
+        /// <param name="accounts">账户数组</param>
+        /// <returns></returns>
+        public static List<Position> QueryPositions(List<Account> accounts)
+        {
+            List<Position> positions = new List<Position>();
+            foreach (Account account in accounts)
+            {
+                positions.AddRange(QueryPositions(account.ClientId));
+            }
+
+            return positions;
+        }
+
+            /// <summary>
+            /// 查询当日成交
+            /// </summary>
+            /// <param name="clientId">登录返回的客户Id</param>
+            /// <returns></returns>
+            public static List<Order> QueryTodayTransaction(int clientId)
         {
             List<Order> orders = new List<Order>();
             Order order = new Order();
+            int code = QueryData(clientId, 3, order.Result, order.ErrorInfo);
+            if (code > 0)
+            {
+                String[][] temp = ApiHelper.ParseResults(order.Result);
+                for (int i = 0; i < temp.GetLength(0); i++)
+                {
+                    order = new Order();
+                    order.Time = temp[i][0];
+                    order.Code = temp[i][1];
+                    order.Name = temp[i][2];
+                    order.Quantity = int.Parse(temp[i][4]);
+                    order.OrderId = temp[i][7];
+                }
+                orders.Add(order);
+            }
 
+            return orders;
+        }
+
+        /// <summary>
+        /// 查询可撤销委托
+        /// </summary>
+        /// <param name="clientId">登录返回的客户Id</param>
+        /// <returns></returns>
+        public static List<Order> QueryOrdersCanCancel(int clientId)
+        {
+            List<Order> orders = new List<Order>();
+            Order order = new Order();
+            int code = QueryData(clientId, 4, order.Result, order.ErrorInfo);
+            if (code > 0)
+            {
+                String[][] temp = ApiHelper.ParseResults(order.Result);
+                for (int i = 0; i < temp.GetLength(0); i++)
+                {
+                    order = new Order();
+                    order.Time = temp[i][0];
+                    order.Code = temp[i][1];
+                    order.Name = temp[i][2];
+                    order.Operation = temp[i][3];
+                    order.Quantity = int.Parse(temp[i][5]);
+                    order.OrderId = temp[i][10];
+                    order.ShareholderAcct = temp[i][12];
+                }
+                orders.Add(order);
+            }
 
             return orders;
         }
@@ -181,7 +293,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int CancelOrder(Order order)
         {
-            return CancelOrder(order.ClientId, order.Code, order.OrderId, order.Result, order.ErrorInfo);
+            return CancelOrder(order.ClientId, order.ShareholderAcct, order.OrderId, order.Result, order.ErrorInfo);
         }
     }
 }

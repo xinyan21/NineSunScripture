@@ -13,7 +13,7 @@ namespace NineSunScripture.strategy
     /// <summary>
     /// 主策略
     /// </summary>
-    class MainStrategy : ITrade
+    public class MainStrategy : ITrade
     {
         private const int IntervalOfNonTrade = 3000;
         private const int IntervalOfTrade = 200;

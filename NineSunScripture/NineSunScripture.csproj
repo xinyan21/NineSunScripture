@@ -129,6 +129,7 @@
     <Compile Include="trade\api\TradeAPI.cs" />
     <Compile Include="trade\helper\AccountHelper.cs" />
     <Compile Include="trade\helper\ApiHelper.cs" />
+    <Compile Include="util\log\Logger.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -161,6 +162,7 @@
     <Content Include="docs\IP.txt" />
     <Content Include="docs\使用文档.txt" />
     <Content Include="docs\券商检测机制说明.txt" />
+    <Content Include="docs\接口返回数据格式.txt" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

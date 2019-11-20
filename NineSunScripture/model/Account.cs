@@ -9,7 +9,7 @@ namespace NineSunScripture.model
     /// <summary>
     /// 账户类
     /// </summary>
-    class Account : BaseModel
+    public class Account : BaseModel
     {
         //Qsid,//券商id 					这个值可以在IP文件中查看
         //Host,//券商服务器IP

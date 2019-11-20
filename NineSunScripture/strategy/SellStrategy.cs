@@ -1,6 +1,7 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.trade.api;
 using NineSunScripture.trade.helper;
+using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace NineSunScripture.strategy
     /// <summary>
     /// 卖策略
     /// </summary>
-    class SellStrategy
+    public class SellStrategy
     {
         /// <summary>
         /// 三档止盈比例为20%、30%、40%
@@ -49,12 +50,12 @@ namespace NineSunScripture.strategy
                 {
                     if (curPrice > open * 1.04)
                     {
-                        //超低开拉升4%卖
+                        Logger.log("超低开拉升4%卖" + quotes.Name);
                         Sell(quotes, accounts, trade, 1);
                     }
                     if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * 0.95)
                     {
-                        //超低开10:10还小于-5%卖
+                        Logger.log("超低开10:10还小于-5%卖" + quotes.Name);
                         Sell(quotes, accounts, trade, 1);
                     }
                 }
@@ -62,29 +63,29 @@ namespace NineSunScripture.strategy
                 {
                     if (curPrice <= avgCost * 0.92 || curPrice <= preClose * 0.92)
                     {
-                        //小于-8%卖
+                        Logger.log("小于-8%卖" + quotes.Name);
                         Sell(quotes, accounts, trade, 1);
                     }
                     if (now.Hour == 14 && curPrice <= preClose * 1.01)
                     {
-                        //2:00小于1%卖
+                        Logger.log("2:00小于1%卖" + quotes.Name);
                         Sell(quotes, accounts, trade, 1);
                     }
                     if (now.Hour == 14 && now.Minute >= 30 && curPrice <= preClose * 1.05)
                     {
-                        //2:30小于5%卖
+                        Logger.log("2:30小于5%卖" + quotes.Name);
                         Sell(quotes, accounts, trade, 1);
                     }
                 }
             }
             if (now.Hour == 14 && now.Minute >= 55 && curPrice < highLimit)
             {
-                //收盘不板卖
+                Logger.log("收盘不板卖" + quotes.Name);
                 Sell(quotes, accounts, trade, 1);
             }
             if (lastTickPrice[code] == highLimit && curPrice < lastTickPrice[code])
             {
-                //开板卖
+                Logger.log("开板卖" + quotes.Name);
                 Sell(quotes, accounts, trade, 1);
             }
             lastTickPrice[code] = curPrice;
@@ -126,14 +127,17 @@ namespace NineSunScripture.strategy
                     }
                     if (position.ProfitAndLossPct > ThirdClassStopWin)
                     {
+                        Logger.log("40%止盈1/2卖" + quotes.Name);
                         SellByAcct(quotes, account, trade, ThirdStopWinPosition);
                     }
                     else if (position.ProfitAndLossPct > SecondClassStopWin)
                     {
+                        Logger.log("30%止盈1/2卖" + quotes.Name);
                         SellByAcct(quotes, account, trade, SecondStopWinPosition);
                     }
                     else if (position.ProfitAndLossPct > FirstClassStopWin)
                     {
+                        Logger.log("20%止盈3成卖" + quotes.Name);
                         SellByAcct(quotes, account, trade, FirstStopWinPosition);
                     }
                 }
@@ -149,20 +153,22 @@ namespace NineSunScripture.strategy
         private void SellByAcct(Quotes quotes, Account account, ITrade trade, float sellRatio)
         {
             Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
-            if (null == position)
+            if (null == position || position.AvailableQuantity == 0)
             {
                 return;
             }
             Order order = new Order();
             order.ClientId = account.ClientId;
             order.Code = quotes.Code;
-            order.Quantity = position.StockAvailable;
+            order.Quantity = position.AvailableQuantity;
             if (sellRatio > 0)
             {
                 order.Quantity = (int)(order.Quantity * sellRatio);
             }
             int rspCode = TradeAPI.Sell(order);
             trade.OnTradeResult(rspCode, ApiHelper.ParseErrInfo(order.ErrorInfo));
+            string sellLog = account.FundAcct + "卖出" + quotes.Name + "->" + order.Quantity + "股";
+            Logger.log(sellLog);
         }
 
         /// <summary>

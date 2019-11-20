@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NineSunScripture.strategy
 {
-    interface ITrade
+    public interface ITrade
     {
         void OnTradeResult(int code, String msg);
     }
