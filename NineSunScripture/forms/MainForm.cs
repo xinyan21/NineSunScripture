@@ -46,7 +46,6 @@ namespace NineSunScripture
                 int rspCode = TradeAPI.QueryData(clientId, 4, Result, ErrInfo);
                 if (rspCode>0)
                 {
-                    label1.Text = Encoding.Default.GetString(Result).TrimEnd('\0');
                 }
                 else
                 {
@@ -55,16 +54,15 @@ namespace NineSunScripture
             }
             else
             {
-                label1.Text = Encoding.Default.GetString(Result).TrimEnd('\0');
             }
         }
 
-        private void Label1_Click(object sender, EventArgs e)
+        private void BtnAddLongTermSock_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void 添加账号ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void MenuItemManageAcct_Click(object sender, EventArgs e)
         {
 
         }

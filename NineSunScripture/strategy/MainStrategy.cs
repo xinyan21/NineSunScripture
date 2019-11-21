@@ -1,5 +1,7 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.trade.api;
+using NineSunScripture.trade.helper;
+using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +22,7 @@ namespace NineSunScripture.strategy
         //交易时间睡眠间隔为200ms，非交易时间为3s
         private int sleepInterval = IntervalOfTrade;
         private int tryLoginCnt = 0;
+        private bool hasReverseRepurchaseBonds = false;
         private Account mainAcct;
         private List<Account> accounts;
         private String[] stocks;
@@ -57,6 +60,7 @@ namespace NineSunScripture.strategy
 
         private void Process()
         {
+            AccountHelper.Login(accounts, this);
             //到时改到总开关里面去
             while (true)
             {
@@ -68,9 +72,16 @@ namespace NineSunScripture.strategy
                 Quotes quotes;
                 for (int i = 0; i < stocks.Length; i++)
                 {
-                    quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i]);
-                    buyStrategy.Buy(quotes, accounts, null);
-                    sellStrategy.Sell(quotes, accounts, null);
+                    try
+                    {
+                        quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i]);
+                        buyStrategy.Buy(quotes, accounts, this);
+                        sellStrategy.Sell(quotes, accounts, this);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.exception(e);
+                    }
                 }
             }
 
@@ -109,22 +120,10 @@ namespace NineSunScripture.strategy
             return true;
         }
 
-        private void QueryPositions()
-        {
-        }
-
-        /// <summary>
-        /// 登录并获取资金和持仓信息
-        /// </summary>
-        private void login()
-        {
-        }
-
         public void OnTradeResult(int code, string msg)
         {
             if (code < 0 && tryLoginCnt < 3)
             {
-                login();
             }
         }
     }

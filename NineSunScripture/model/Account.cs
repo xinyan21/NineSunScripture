@@ -23,15 +23,16 @@ namespace NineSunScripture.model
         //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
         public int BrokerId;
         public String BrokerServerIP;
-        public String BrokerServerPort;
+        public short BrokerServerPort;
         public String VersionOfTHS;
-        public String AcctType;
+        public short AcctType;
         public String CommPwd;
-        public String MacAddr;
+        public bool IsRandomMac=false;
         public String FundAcct;//资金账号
         public String Password;
         public String ShShareholderAcct;//上海股东账号
         public String SzShareholderAcct;//深圳股东账户
+        public int InitTotalAsset;    //初始总资金，作为单股开仓仓位依据
 
         public Funds Funds;
         public List<Position> Positions;

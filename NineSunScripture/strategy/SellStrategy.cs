@@ -152,6 +152,7 @@ namespace NineSunScripture.strategy
         /// <param name="sellRatio">卖出比例</param>
         private void SellByAcct(Quotes quotes, Account account, ITrade trade, float sellRatio)
         {
+            //因为是卖出，所以当天登录时候的仓位就可以拿来用，如果是买那就得查询最新的
             Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
             if (null == position || position.AvailableQuantity == 0)
             {

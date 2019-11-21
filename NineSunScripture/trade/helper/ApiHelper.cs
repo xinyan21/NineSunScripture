@@ -23,6 +23,16 @@ namespace NineSunScripture.trade.helper
         }
 
         /// <summary>
+        /// 解析错误信息
+        /// </summary>
+        /// <param name="data">源数据</param>
+        /// <returns></returns>
+        public static String ParseErrInfo(byte[] data)
+        {
+            return Encoding.Default.GetString(data).TrimEnd('\0');
+        }
+
+        /// <summary>
         /// 解析接口多个结果字符串
         /// </summary>
         /// <param name="data">接口返回的字节流</param>
@@ -38,11 +48,6 @@ namespace NineSunScripture.trade.helper
                 temp[i] = result.Split(new String[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
             }
             return temp;
-        }
-
-        public static String ParseErrInfo(byte[] errorInfo)
-        {
-            return Encoding.Default.GetString(errorInfo).TrimEnd('\0');
         }
 
         /// <summary>
