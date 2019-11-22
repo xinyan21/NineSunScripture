@@ -49,5 +49,13 @@ namespace NineSunScripture.model
         public int Buy4Vol;
         public int Buy5Vol;
 
+        /// <summary>
+        /// 仓位控制，用于买入策略
+        /// </summary>
+        public float positionCtrl;
+        /// <summary>
+        /// 买入前的成交额限制，用于买入策略
+        /// </summary>
+        public int moneyCtrl;
     }
 }

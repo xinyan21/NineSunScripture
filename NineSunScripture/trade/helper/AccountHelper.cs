@@ -39,9 +39,10 @@ namespace NineSunScripture.trade.helper
                 }
                 else
                 {
-                    Logger.log("资金账号" + account.FundAcct + "登录失败，信息："
-                        + ApiHelper.ParseErrInfo(account.ErrorInfo));
-                    trade.OnTradeResult(0, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    string opLog = "资金账号" + account.FundAcct + "登录失败，信息："
+                        + ApiHelper.ParseErrInfo(account.ErrorInfo);
+                    Logger.log(opLog);
+                    trade.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                 }
                 if (account.InitTotalAsset == 0)
                 {

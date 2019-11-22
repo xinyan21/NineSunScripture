@@ -25,6 +25,7 @@ namespace NineSunScripture.strategy
             float highLimit = quotes.HighLimit;
             float open = quotes.Open;
             string code = quotes.Code;
+            float positionRatioCtrl = 1f;   //仓位比例控制
             //记录开板时间
             if (quotes.Sell1 != highLimit && !openBoardTime.ContainsKey(code))
             {
@@ -35,10 +36,10 @@ namespace NineSunScripture.strategy
             {
                 openBoardTime.Remove(code);
             }
-            //成交额小于8800万不打
-            if (quotes.Money < 8800 * 10000)
+            //成交额小于1亿控制买入仓位为1/3
+            if (quotes.Money < 10000 * 10000)
             {
-                return;
+                positionRatioCtrl = 1 / 3;
             }
             //已经涨停且封单大于1500万，过滤
             if (quotes.Buy1 == highLimit && quotes.Buy2Vol * highLimit > 1500 * 10000)
@@ -64,21 +65,20 @@ namespace NineSunScripture.strategy
                         return;
                     }
                 }
-                CancelOrdersCanCancel(accounts, quotes);
+                CancelOrdersCanCancel(accounts, quotes, trade);
                 Funds funds = TradeAPI.QueryTotalFunds(accounts);
                 //所有账户总可用金额小于每个账号一手的金额或者小于1万，直接退出
                 if (funds.AvailableAmt < 10000 || funds.AvailableAmt < highLimit * 100 * accounts.Count)
                 {
                     return;
                 }
-                float positionRatio = 1f;   //买回仓位比例
                 Order order = new Order();
                 //开板回封买
                 if (getPositionStock(accounts).Contains(code))
                 {
                     if (open != highLimit)
                     {
-                        positionRatio = 1 / 2;
+                        positionRatioCtrl = 1 / 2;
                     }
                     order.Code = code;
                     order.Price = highLimit;
@@ -86,14 +86,14 @@ namespace NineSunScripture.strategy
                     {
                         int quantity = getTodaySoldQuantityOf(account.ClientId, code);
                         order.ClientId = account.ClientId;
-                        order.Quantity = (int)(quantity * positionRatio / highLimit);
+                        order.Quantity = (int)(quantity * positionRatioCtrl / highLimit);
                         order.Code = code;
                         order.Price = highLimit;
                         int rspCode = TradeAPI.Buy(order);
-                        trade.OnTradeResult(rspCode, ApiHelper.ParseErrInfo(order.ErrorInfo));
                         string opLog
                             = account.FundAcct + "买入" + quotes.Name + "->" + order.Quantity + "股";
                         Logger.log(opLog);
+                        trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                     }
                     return;
                 }
@@ -104,20 +104,23 @@ namespace NineSunScripture.strategy
                 foreach (Account account in accounts)
                 {
                     order.ClientId = account.ClientId;
-                    order.Code = code;
-                    order.Price = highLimit;
-                    positionRatio = getNewPositionRatio(account);
+                    //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
+                    float profitPositionCtrl = getNewPositionRatio(account);
                     double availableCash = account.Funds.AvailableAmt;
-                    if (availableCash > account.Funds.TotalAsset * positionRatio)
+                    if (profitPositionCtrl <= positionRatioCtrl)
                     {
-                        availableCash = account.Funds.TotalAsset * positionRatio;
+                        positionRatioCtrl = profitPositionCtrl;
+                    }
+                    if (availableCash > account.Funds.TotalAsset * positionRatioCtrl)
+                    {
+                        availableCash = account.Funds.TotalAsset * positionRatioCtrl;
                     }
                     order.Quantity = (int)(availableCash / highLimit);
                     int rspCode = TradeAPI.Buy(order);
-                    trade.OnTradeResult(rspCode, ApiHelper.ParseErrInfo(order.ErrorInfo));
                     string opLog
                         = account.FundAcct + "买入" + quotes.Name + "->" + order.Quantity + "股";
                     Logger.log(opLog);
+                    trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                 }
             }
         }
@@ -177,11 +180,11 @@ namespace NineSunScripture.strategy
         /// </summary>
         /// <param name="accounts">账户对象数组</param>
         /// <param name="quotes">股票对象</param>
-        private void CancelOrdersCanCancel(List<Account> accounts, Quotes quotes)
+        private void CancelOrdersCanCancel(List<Account> accounts, Quotes quotes, ITrade trade)
         {
-            foreach (Account acccount in accounts)
+            foreach (Account account in accounts)
             {
-                List<Order> orders = TradeAPI.QueryOrdersCanCancel(acccount.ClientId);
+                List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.ClientId);
                 if (null == orders || orders.Count == 0)
                 {
                     return;
@@ -190,8 +193,12 @@ namespace NineSunScripture.strategy
                 {
                     if (order.Code != quotes.Code && order.Operation == Order.OperationBuy)
                     {
-                        order.ClientId = acccount.ClientId;
-                        TradeAPI.CancelOrder(order);
+                        order.ClientId = account.ClientId;
+                        int rspCode = TradeAPI.CancelOrder(order);
+                        string opLog = account.FundAcct + "撤销" + quotes.Name + "委托->"
+                            + order.Quantity + "股";
+                        Logger.log(opLog);
+                        trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                     }
                 }
             }
@@ -226,7 +233,8 @@ namespace NineSunScripture.strategy
         /// 3:25可用资金自动国债逆回购，只买131810深市一天期，每股100
         /// </summary>
         /// <param name="accounts"></param>
-        private void AutoReverseRepurchaseBonds(List<Account> accounts) {
+        private void AutoReverseRepurchaseBonds(List<Account> accounts, ITrade trade)
+        {
             Account mainAcct = null;
             if (accounts.Count > 0)
             {
@@ -243,8 +251,9 @@ namespace NineSunScripture.strategy
                 order.Quantity = (int)(availableCash / 1000 * 10);
                 int rspCode = TradeAPI.Buy(order);
                 string opLog
-                    = account.FundAcct + "逆回购"+(int)(availableCash/1000)*1000;
+                    = account.FundAcct + "逆回购" + (int)(availableCash / 1000) * 1000;
                 Logger.log(opLog);
+                trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
             }
         }
     }

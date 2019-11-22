@@ -92,7 +92,7 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 止盈
+        /// 止盈TODO 这里有个卖出之后成本降低导致收益增高的问题，解决方法一个是在本地记录成本
         /// </summary>
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
@@ -150,7 +150,7 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="account">账户对象</param>
         /// <param name="sellRatio">卖出比例</param>
-        private void SellByAcct(Quotes quotes, Account account, ITrade trade, float sellRatio)
+        private static void SellByAcct(Quotes quotes, Account account, ITrade trade, float sellRatio)
         {
             //因为是卖出，所以当天登录时候的仓位就可以拿来用，如果是买那就得查询最新的
             Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
@@ -167,9 +167,9 @@ namespace NineSunScripture.strategy
                 order.Quantity = (int)(order.Quantity * sellRatio);
             }
             int rspCode = TradeAPI.Sell(order);
-            trade.OnTradeResult(rspCode, ApiHelper.ParseErrInfo(order.ErrorInfo));
-            string sellLog = account.FundAcct + "卖出" + quotes.Name + "->" + order.Quantity + "股";
-            Logger.log(sellLog);
+            string opLog = account.FundAcct + "卖出" + quotes.Name + "->" + order.Quantity + "股";
+            Logger.log(opLog);
+            trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
         /// <param name="sellRatio">卖出比例</param>
-        private void Sell(Quotes quotes, List<Account> accounts, ITrade trade, float sellRatio)
+        private static void Sell(Quotes quotes, List<Account> accounts, ITrade trade, float sellRatio)
         {
             foreach (Account account in accounts)
             {
@@ -186,5 +186,29 @@ namespace NineSunScripture.strategy
             }
         }
 
+        /// <summary>
+        /// 清仓
+        /// </summary>
+        /// <param name="accounts">账户列表</param>
+        /// <param name="trade">交易接口回调</param>
+        public static void SellAll(List<Account> accounts, ITrade trade)
+        {
+            List<Position> positions;
+            Quotes quotes = new Quotes();
+            foreach (Account account in accounts)
+            {
+                positions = TradeAPI.QueryPositions(account.ClientId);
+                if (null == positions || positions.Count == 0)
+                {
+                    continue;
+                }
+                foreach (Position position in positions)
+                {
+                    quotes.Code = position.Code;
+                    quotes.Name = position.Name;
+                    SellByAcct(quotes, account, trade, 1);
+                }
+            }
+        }
     }
 }

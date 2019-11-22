@@ -8,6 +8,6 @@ namespace NineSunScripture.strategy
 {
     public interface ITrade
     {
-        void OnTradeResult(int code, String msg);
+        void OnTradeResult(int rspCode, String msg, String errInfo);
     }
 }

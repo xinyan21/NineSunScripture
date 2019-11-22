@@ -15,25 +15,28 @@ namespace NineSunScripture.strategy
     /// <summary>
     /// 主策略
     /// </summary>
-    public class MainStrategy : ITrade
+    public class MainStrategy
     {
         private const int IntervalOfNonTrade = 3000;
         private const int IntervalOfTrade = 200;
         //交易时间睡眠间隔为200ms，非交易时间为3s
         private int sleepInterval = IntervalOfTrade;
         private int tryLoginCnt = 0;
-        private bool hasReverseRepurchaseBonds = false;
+        private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
+        private bool strategySwitch = true; //策略开关：true开，false关
         private Account mainAcct;
         private List<Account> accounts;
-        private String[] stocks;
+        private List<Quotes> stocks;
         private Thread mainThread;
         private BuyStrategy buyStrategy;
         private SellStrategy sellStrategy;
+        private ITrade onTradeResult;
 
-        public MainStrategy(List<Account> accounts, String[] stocks)
+        public MainStrategy(List<Account> accounts, List<Quotes> stocks, ITrade onTradeResult)
         {
             this.accounts = accounts;
             this.stocks = stocks;
+            this.onTradeResult = onTradeResult;
             if (accounts.Count > 0)
             {
                 mainAcct = accounts[0];
@@ -41,7 +44,7 @@ namespace NineSunScripture.strategy
         }
         public void Start()
         {
-            if (null == stocks || stocks.Length == 0)
+            if (null == stocks || stocks.Count == 0)
             {
                 MessageBox.Show("没有可操作的股票");
                 return;
@@ -55,14 +58,19 @@ namespace NineSunScripture.strategy
             {
                 mainThread = new Thread(Process);
             }
+            strategySwitch = true;
             mainThread.Start();
+        }
+        public void Stop()
+        {
+            strategySwitch = false;
         }
 
         private void Process()
         {
-            AccountHelper.Login(accounts, this);
+            AccountHelper.Login(accounts, onTradeResult);
             //到时改到总开关里面去
-            while (true)
+            while (strategySwitch)
             {
                 Thread.Sleep(sleepInterval);
                 if (!IsTradeTime())
@@ -70,13 +78,13 @@ namespace NineSunScripture.strategy
                     continue;
                 }
                 Quotes quotes;
-                for (int i = 0; i < stocks.Length; i++)
+                for (int i = 0; i < stocks.Count; i++)
                 {
                     try
                     {
-                        quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i]);
-                        buyStrategy.Buy(quotes, accounts, this);
-                        sellStrategy.Sell(quotes, accounts, this);
+                        quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i].Code);
+                        buyStrategy.Buy(quotes, accounts, onTradeResult);
+                        sellStrategy.Sell(quotes, accounts, onTradeResult);
                     }
                     catch (Exception e)
                     {

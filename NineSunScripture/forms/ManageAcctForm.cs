@@ -12,9 +12,16 @@ namespace NineSunScripture.forms
 {
     public partial class ManageAcctForm : Form
     {
-        public ManageAcctForm()
+        private MainForm mainForm;
+        public ManageAcctForm(MainForm mainForm)
         {
             InitializeComponent();
+            this.mainForm = mainForm;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

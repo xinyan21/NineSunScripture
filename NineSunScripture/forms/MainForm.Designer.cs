@@ -28,36 +28,51 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.BtnStart = new System.Windows.Forms.Button();
             this.BtnSellAll = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.LvDragonLeaders = new System.Windows.Forms.ListView();
-            this.BtnAddDragonLeader = new System.Windows.Forms.Button();
+            this.lvDragonLeaders = new System.Windows.Forms.ListView();
+            this.cmsDragonLeader = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsmAddDragonLeader = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmDelDragonLeader = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmClearDragonLeaders = new System.Windows.Forms.ToolStripMenuItem();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.label3 = new System.Windows.Forms.Label();
-            this.LvLongTermStocks = new System.Windows.Forms.ListView();
-            this.BtnAddLongTermSock = new System.Windows.Forms.Button();
+            this.lvLongTermStocks = new System.Windows.Forms.ListView();
+            this.cmsLongTerm = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tspAddLongTermStock = new System.Windows.Forms.ToolStripMenuItem();
+            this.tspDelLongTerm = new System.Windows.Forms.ToolStripMenuItem();
+            this.tspClearLongTerm = new System.Windows.Forms.ToolStripMenuItem();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
-            this.LvTomorrowStocks = new System.Windows.Forms.ListView();
-            this.BtnAddTomorrowStock = new System.Windows.Forms.Button();
-            this.LbRuntimeInfo = new System.Windows.Forms.Label();
-            this.LbTotalAsset = new System.Windows.Forms.Label();
-            this.LbMoneyAvailable = new System.Windows.Forms.Label();
-            this.LbStock1 = new System.Windows.Forms.Label();
-            this.LbStock2 = new System.Windows.Forms.Label();
-            this.MenuMain = new System.Windows.Forms.MenuStrip();
+            this.lvTomorrowStocks = new System.Windows.Forms.ListView();
+            this.cmsTomorrowStocks = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsmAddTomorrowStock = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmpDelTomorrowStock = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmClearTomorrowStocks = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblTotalAsset = new System.Windows.Forms.Label();
+            this.lblMoneyAvailable = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.dgvPositions = new System.Windows.Forms.DataGridView();
             this.Menu = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItemManageAcct = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItemExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.MenuMain = new System.Windows.Forms.MenuStrip();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.tbRuntimeInfo = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1.SuspendLayout();
+            this.cmsDragonLeader.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
+            this.cmsLongTerm.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
-            this.MenuMain.SuspendLayout();
+            this.cmsTomorrowStocks.SuspendLayout();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvPositions)).BeginInit();
+            this.MenuMain.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // BtnStart
@@ -69,9 +84,9 @@
             this.BtnStart.Name = "BtnStart";
             this.BtnStart.Size = new System.Drawing.Size(308, 74);
             this.BtnStart.TabIndex = 0;
-            this.BtnStart.Text = "启动";
+            this.BtnStart.Text = "启  动";
             this.BtnStart.UseVisualStyleBackColor = false;
-            this.BtnStart.Click += new System.EventHandler(this.Button1_Click);
+            this.BtnStart.Click += new System.EventHandler(this.BtnStart_Click);
             // 
             // BtnSellAll
             // 
@@ -84,16 +99,17 @@
             this.BtnSellAll.TabIndex = 1;
             this.BtnSellAll.Text = "一键清仓";
             this.BtnSellAll.UseVisualStyleBackColor = false;
+            this.BtnSellAll.Click += new System.EventHandler(this.BtnSellAll_Click);
             // 
             // flowLayoutPanel1
             // 
+            this.flowLayoutPanel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.flowLayoutPanel1.Controls.Add(this.label1);
-            this.flowLayoutPanel1.Controls.Add(this.LvDragonLeaders);
-            this.flowLayoutPanel1.Controls.Add(this.BtnAddDragonLeader);
+            this.flowLayoutPanel1.Controls.Add(this.lvDragonLeaders);
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(645, 55);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(308, 252);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(308, 274);
             this.flowLayoutPanel1.TabIndex = 2;
             // 
             // label1
@@ -107,35 +123,58 @@
             this.label1.Text = "龙头";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // LvDragonLeaders
+            // lvDragonLeaders
             // 
-            this.LvDragonLeaders.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LvDragonLeaders.Location = new System.Drawing.Point(3, 53);
-            this.LvDragonLeaders.Name = "LvDragonLeaders";
-            this.LvDragonLeaders.Size = new System.Drawing.Size(305, 120);
-            this.LvDragonLeaders.TabIndex = 1;
-            this.LvDragonLeaders.UseCompatibleStateImageBehavior = false;
+            this.lvDragonLeaders.BackColor = System.Drawing.Color.BlanchedAlmond;
+            this.lvDragonLeaders.ContextMenuStrip = this.cmsDragonLeader;
+            this.lvDragonLeaders.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lvDragonLeaders.Location = new System.Drawing.Point(3, 53);
+            this.lvDragonLeaders.Name = "lvDragonLeaders";
+            this.lvDragonLeaders.Size = new System.Drawing.Size(305, 211);
+            this.lvDragonLeaders.TabIndex = 1;
+            this.lvDragonLeaders.UseCompatibleStateImageBehavior = false;
             // 
-            // BtnAddDragonLeader
+            // cmsDragonLeader
             // 
-            this.BtnAddDragonLeader.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.BtnAddDragonLeader.Location = new System.Drawing.Point(3, 179);
-            this.BtnAddDragonLeader.Name = "BtnAddDragonLeader";
-            this.BtnAddDragonLeader.Size = new System.Drawing.Size(305, 66);
-            this.BtnAddDragonLeader.TabIndex = 2;
-            this.BtnAddDragonLeader.Text = "添加";
-            this.BtnAddDragonLeader.UseVisualStyleBackColor = true;
+            this.cmsDragonLeader.ImageScalingSize = new System.Drawing.Size(18, 18);
+            this.cmsDragonLeader.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmAddDragonLeader,
+            this.tsmDelDragonLeader,
+            this.tsmClearDragonLeaders});
+            this.cmsDragonLeader.Name = "cmsDragonLeader";
+            this.cmsDragonLeader.Size = new System.Drawing.Size(135, 76);
+            this.cmsDragonLeader.Text = "股票池管理";
+            // 
+            // tsmAddDragonLeader
+            // 
+            this.tsmAddDragonLeader.Name = "tsmAddDragonLeader";
+            this.tsmAddDragonLeader.Size = new System.Drawing.Size(134, 24);
+            this.tsmAddDragonLeader.Text = "添加龙头";
+            this.tsmAddDragonLeader.Click += new System.EventHandler(this.tsmAddDragonLeader_Click);
+            // 
+            // tsmDelDragonLeader
+            // 
+            this.tsmDelDragonLeader.Name = "tsmDelDragonLeader";
+            this.tsmDelDragonLeader.Size = new System.Drawing.Size(134, 24);
+            this.tsmDelDragonLeader.Text = "删除";
+            // 
+            // tsmClearDragonLeaders
+            // 
+            this.tsmClearDragonLeaders.Name = "tsmClearDragonLeaders";
+            this.tsmClearDragonLeaders.Size = new System.Drawing.Size(134, 24);
+            this.tsmClearDragonLeaders.Text = "清空";
+            this.tsmClearDragonLeaders.Click += new System.EventHandler(this.tsmClearDragonLeaders_Click);
             // 
             // flowLayoutPanel3
             // 
             this.flowLayoutPanel3.BackColor = System.Drawing.Color.Transparent;
+            this.flowLayoutPanel3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.flowLayoutPanel3.Controls.Add(this.label3);
-            this.flowLayoutPanel3.Controls.Add(this.LvLongTermStocks);
-            this.flowLayoutPanel3.Controls.Add(this.BtnAddLongTermSock);
+            this.flowLayoutPanel3.Controls.Add(this.lvLongTermStocks);
             this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel3.Location = new System.Drawing.Point(88, 55);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(313, 346);
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(310, 274);
             this.flowLayoutPanel3.TabIndex = 3;
             // 
             // label3
@@ -149,36 +188,58 @@
             this.label3.Text = "常驻股票池";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // LvLongTermStocks
+            // lvLongTermStocks
             // 
-            this.LvLongTermStocks.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LvLongTermStocks.Location = new System.Drawing.Point(3, 42);
-            this.LvLongTermStocks.Name = "LvLongTermStocks";
-            this.LvLongTermStocks.Size = new System.Drawing.Size(307, 222);
-            this.LvLongTermStocks.TabIndex = 1;
-            this.LvLongTermStocks.UseCompatibleStateImageBehavior = false;
+            this.lvLongTermStocks.BackColor = System.Drawing.Color.PeachPuff;
+            this.lvLongTermStocks.ContextMenuStrip = this.cmsLongTerm;
+            this.lvLongTermStocks.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lvLongTermStocks.Location = new System.Drawing.Point(3, 42);
+            this.lvLongTermStocks.Name = "lvLongTermStocks";
+            this.lvLongTermStocks.Size = new System.Drawing.Size(307, 222);
+            this.lvLongTermStocks.TabIndex = 1;
+            this.lvLongTermStocks.UseCompatibleStateImageBehavior = false;
             // 
-            // BtnAddLongTermSock
+            // cmsLongTerm
             // 
-            this.BtnAddLongTermSock.BackColor = System.Drawing.Color.Gainsboro;
-            this.BtnAddLongTermSock.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.BtnAddLongTermSock.Location = new System.Drawing.Point(3, 270);
-            this.BtnAddLongTermSock.Name = "BtnAddLongTermSock";
-            this.BtnAddLongTermSock.Size = new System.Drawing.Size(307, 63);
-            this.BtnAddLongTermSock.TabIndex = 2;
-            this.BtnAddLongTermSock.Text = "添加";
-            this.BtnAddLongTermSock.UseVisualStyleBackColor = false;
-            this.BtnAddLongTermSock.Click += new System.EventHandler(this.BtnAddLongTermSock_Click);
+            this.cmsLongTerm.ImageScalingSize = new System.Drawing.Size(18, 18);
+            this.cmsLongTerm.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tspAddLongTermStock,
+            this.tspDelLongTerm,
+            this.tspClearLongTerm});
+            this.cmsLongTerm.Name = "cmsLongTerm";
+            this.cmsLongTerm.Size = new System.Drawing.Size(135, 76);
+            this.cmsLongTerm.Text = "股票池管理";
+            // 
+            // tspAddLongTermStock
+            // 
+            this.tspAddLongTermStock.Name = "tspAddLongTermStock";
+            this.tspAddLongTermStock.Size = new System.Drawing.Size(134, 24);
+            this.tspAddLongTermStock.Text = "添加股票";
+            this.tspAddLongTermStock.Click += new System.EventHandler(this.tspAddLongTermStock_Click);
+            // 
+            // tspDelLongTerm
+            // 
+            this.tspDelLongTerm.Name = "tspDelLongTerm";
+            this.tspDelLongTerm.Size = new System.Drawing.Size(134, 24);
+            this.tspDelLongTerm.Text = "删除";
+            this.tspDelLongTerm.Click += new System.EventHandler(this.tspDelLongTerm_Click);
+            // 
+            // tspClearLongTerm
+            // 
+            this.tspClearLongTerm.Name = "tspClearLongTerm";
+            this.tspClearLongTerm.Size = new System.Drawing.Size(134, 24);
+            this.tspClearLongTerm.Text = "清空";
+            this.tspClearLongTerm.Click += new System.EventHandler(this.tspClearLongTerm_Click);
             // 
             // flowLayoutPanel2
             // 
+            this.flowLayoutPanel2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.flowLayoutPanel2.Controls.Add(this.label2);
-            this.flowLayoutPanel2.Controls.Add(this.LvTomorrowStocks);
-            this.flowLayoutPanel2.Controls.Add(this.BtnAddTomorrowStock);
+            this.flowLayoutPanel2.Controls.Add(this.lvTomorrowStocks);
             this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel2.Location = new System.Drawing.Point(645, 371);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(308, 382);
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(308, 372);
             this.flowLayoutPanel2.TabIndex = 4;
             // 
             // label2
@@ -192,130 +253,162 @@
             this.label2.Text = "明日股票池";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // LvTomorrowStocks
+            // lvTomorrowStocks
             // 
-            this.LvTomorrowStocks.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LvTomorrowStocks.Location = new System.Drawing.Point(3, 42);
-            this.LvTomorrowStocks.Name = "LvTomorrowStocks";
-            this.LvTomorrowStocks.Size = new System.Drawing.Size(305, 261);
-            this.LvTomorrowStocks.TabIndex = 1;
-            this.LvTomorrowStocks.UseCompatibleStateImageBehavior = false;
+            this.lvTomorrowStocks.BackColor = System.Drawing.Color.PeachPuff;
+            this.lvTomorrowStocks.ContextMenuStrip = this.cmsTomorrowStocks;
+            this.lvTomorrowStocks.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lvTomorrowStocks.Location = new System.Drawing.Point(3, 42);
+            this.lvTomorrowStocks.Name = "lvTomorrowStocks";
+            this.lvTomorrowStocks.Size = new System.Drawing.Size(303, 319);
+            this.lvTomorrowStocks.TabIndex = 1;
+            this.lvTomorrowStocks.UseCompatibleStateImageBehavior = false;
             // 
-            // BtnAddTomorrowStock
+            // cmsTomorrowStocks
             // 
-            this.BtnAddTomorrowStock.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.BtnAddTomorrowStock.Location = new System.Drawing.Point(3, 309);
-            this.BtnAddTomorrowStock.Name = "BtnAddTomorrowStock";
-            this.BtnAddTomorrowStock.Size = new System.Drawing.Size(305, 64);
-            this.BtnAddTomorrowStock.TabIndex = 2;
-            this.BtnAddTomorrowStock.Text = "添加";
-            this.BtnAddTomorrowStock.UseVisualStyleBackColor = true;
+            this.cmsTomorrowStocks.ImageScalingSize = new System.Drawing.Size(18, 18);
+            this.cmsTomorrowStocks.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmAddTomorrowStock,
+            this.tsmpDelTomorrowStock,
+            this.tsmClearTomorrowStocks});
+            this.cmsTomorrowStocks.Name = "cmsTomorrow";
+            this.cmsTomorrowStocks.Size = new System.Drawing.Size(163, 76);
+            this.cmsTomorrowStocks.Text = "股票池管理";
             // 
-            // LbRuntimeInfo
+            // tsmAddTomorrowStock
             // 
-            this.LbRuntimeInfo.Font = new System.Drawing.Font("微软雅黑", 8.830189F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LbRuntimeInfo.ForeColor = System.Drawing.SystemColors.Info;
-            this.LbRuntimeInfo.Location = new System.Drawing.Point(85, 442);
-            this.LbRuntimeInfo.Name = "LbRuntimeInfo";
-            this.LbRuntimeInfo.Size = new System.Drawing.Size(313, 311);
-            this.LbRuntimeInfo.TabIndex = 5;
-            this.LbRuntimeInfo.Text = "RuntimeInfo";
+            this.tsmAddTomorrowStock.Name = "tsmAddTomorrowStock";
+            this.tsmAddTomorrowStock.Size = new System.Drawing.Size(162, 24);
+            this.tsmAddTomorrowStock.Text = "添加明日股票";
+            this.tsmAddTomorrowStock.Click += new System.EventHandler(this.tsmAddTomorrowStocks_Click);
             // 
-            // LbTotalAsset
+            // tsmpDelTomorrowStock
             // 
-            this.LbTotalAsset.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LbTotalAsset.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.LbTotalAsset.Location = new System.Drawing.Point(3, 0);
-            this.LbTotalAsset.Name = "LbTotalAsset";
-            this.LbTotalAsset.Size = new System.Drawing.Size(209, 100);
-            this.LbTotalAsset.TabIndex = 0;
-            this.LbTotalAsset.Text = "TotalAsset";
+            this.tsmpDelTomorrowStock.Name = "tsmpDelTomorrowStock";
+            this.tsmpDelTomorrowStock.Size = new System.Drawing.Size(162, 24);
+            this.tsmpDelTomorrowStock.Text = "删除";
             // 
-            // LbMoneyAvailable
+            // tsmClearTomorrowStocks
             // 
-            this.LbMoneyAvailable.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LbMoneyAvailable.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.LbMoneyAvailable.Location = new System.Drawing.Point(218, 0);
-            this.LbMoneyAvailable.Name = "LbMoneyAvailable";
-            this.LbMoneyAvailable.Size = new System.Drawing.Size(193, 100);
-            this.LbMoneyAvailable.TabIndex = 1;
-            this.LbMoneyAvailable.Text = "MoneyAvailable";
+            this.tsmClearTomorrowStocks.Name = "tsmClearTomorrowStocks";
+            this.tsmClearTomorrowStocks.Size = new System.Drawing.Size(162, 24);
+            this.tsmClearTomorrowStocks.Text = "清空";
+            this.tsmClearTomorrowStocks.Click += new System.EventHandler(this.tsmClearTomorrowStocks_Click);
             // 
-            // LbStock1
+            // lblTotalAsset
             // 
-            this.LbStock1.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LbStock1.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.LbStock1.Location = new System.Drawing.Point(477, 0);
-            this.LbStock1.Name = "LbStock1";
-            this.LbStock1.Size = new System.Drawing.Size(202, 100);
-            this.LbStock1.TabIndex = 1;
-            this.LbStock1.Text = "Stock1";
+            this.lblTotalAsset.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblTotalAsset.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.lblTotalAsset.Location = new System.Drawing.Point(3, 0);
+            this.lblTotalAsset.Name = "lblTotalAsset";
+            this.lblTotalAsset.Size = new System.Drawing.Size(209, 103);
+            this.lblTotalAsset.TabIndex = 0;
+            this.lblTotalAsset.Text = "TotalAsset";
             // 
-            // LbStock2
+            // lblMoneyAvailable
             // 
-            this.LbStock2.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LbStock2.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.LbStock2.Location = new System.Drawing.Point(685, 0);
-            this.LbStock2.Name = "LbStock2";
-            this.LbStock2.Size = new System.Drawing.Size(177, 100);
-            this.LbStock2.TabIndex = 2;
-            this.LbStock2.Text = "Stock2";
+            this.lblMoneyAvailable.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblMoneyAvailable.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.lblMoneyAvailable.Location = new System.Drawing.Point(218, 0);
+            this.lblMoneyAvailable.Name = "lblMoneyAvailable";
+            this.lblMoneyAvailable.Size = new System.Drawing.Size(193, 103);
+            this.lblMoneyAvailable.TabIndex = 1;
+            this.lblMoneyAvailable.Text = "MoneyAvailable";
             // 
-            // MenuMain
+            // panel1
             // 
-            this.MenuMain.AllowDrop = true;
-            this.MenuMain.ImageScalingSize = new System.Drawing.Size(18, 18);
-            this.MenuMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Menu});
-            this.MenuMain.Location = new System.Drawing.Point(0, 0);
-            this.MenuMain.Name = "MenuMain";
-            this.MenuMain.Size = new System.Drawing.Size(1062, 28);
-            this.MenuMain.TabIndex = 7;
-            this.MenuMain.Text = "菜单";
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panel1.Controls.Add(this.dgvPositions);
+            this.panel1.Controls.Add(this.lblTotalAsset);
+            this.panel1.Controls.Add(this.lblMoneyAvailable);
+            this.panel1.Location = new System.Drawing.Point(85, 780);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(865, 107);
+            this.panel1.TabIndex = 8;
+            // 
+            // dgvPositions
+            // 
+            this.dgvPositions.BackgroundColor = System.Drawing.Color.Sienna;
+            this.dgvPositions.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvPositions.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvPositions.GridColor = System.Drawing.Color.Sienna;
+            this.dgvPositions.Location = new System.Drawing.Point(417, 0);
+            this.dgvPositions.Name = "dgvPositions";
+            this.dgvPositions.RowHeadersWidth = 45;
+            this.dgvPositions.RowTemplate.Height = 24;
+            this.dgvPositions.Size = new System.Drawing.Size(446, 105);
+            this.dgvPositions.TabIndex = 2;
             // 
             // Menu
             // 
+            this.Menu.AutoSize = false;
             this.Menu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItemManageAcct,
             this.MenuItemExit});
+            this.Menu.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Menu.Name = "Menu";
-            this.Menu.Size = new System.Drawing.Size(77, 24);
+            this.Menu.Size = new System.Drawing.Size(86, 40);
             this.Menu.Text = "管理菜单";
             // 
             // MenuItemManageAcct
             // 
             this.MenuItemManageAcct.Name = "MenuItemManageAcct";
-            this.MenuItemManageAcct.Size = new System.Drawing.Size(140, 24);
+            this.MenuItemManageAcct.Size = new System.Drawing.Size(150, 26);
             this.MenuItemManageAcct.Text = "账号管理";
             this.MenuItemManageAcct.Click += new System.EventHandler(this.MenuItemManageAcct_Click);
             // 
             // MenuItemExit
             // 
             this.MenuItemExit.Name = "MenuItemExit";
-            this.MenuItemExit.Size = new System.Drawing.Size(140, 24);
+            this.MenuItemExit.Size = new System.Drawing.Size(150, 26);
             this.MenuItemExit.Text = "Exit";
             // 
-            // panel1
+            // MenuMain
             // 
-            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panel1.Controls.Add(this.LbTotalAsset);
-            this.panel1.Controls.Add(this.LbStock2);
-            this.panel1.Controls.Add(this.LbMoneyAvailable);
-            this.panel1.Controls.Add(this.LbStock1);
-            this.panel1.Location = new System.Drawing.Point(88, 787);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(865, 100);
-            this.panel1.TabIndex = 8;
+            this.MenuMain.AllowDrop = true;
+            this.MenuMain.AutoSize = false;
+            this.MenuMain.ImageScalingSize = new System.Drawing.Size(18, 18);
+            this.MenuMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Menu});
+            this.MenuMain.Location = new System.Drawing.Point(0, 0);
+            this.MenuMain.Name = "MenuMain";
+            this.MenuMain.Size = new System.Drawing.Size(1062, 35);
+            this.MenuMain.TabIndex = 7;
+            this.MenuMain.Text = "菜单";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.BackgroundImage")));
+            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.pictureBox1.Location = new System.Drawing.Point(465, 908);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(125, 111);
+            this.pictureBox1.TabIndex = 12;
+            this.pictureBox1.TabStop = false;
+            // 
+            // tbRuntimeInfo
+            // 
+            this.tbRuntimeInfo.BackColor = System.Drawing.Color.Sienna;
+            this.tbRuntimeInfo.Font = new System.Drawing.Font("微软雅黑", 8.830189F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tbRuntimeInfo.ForeColor = System.Drawing.SystemColors.Info;
+            this.tbRuntimeInfo.Location = new System.Drawing.Point(93, 371);
+            this.tbRuntimeInfo.Multiline = true;
+            this.tbRuntimeInfo.Name = "tbRuntimeInfo";
+            this.tbRuntimeInfo.ReadOnly = true;
+            this.tbRuntimeInfo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.tbRuntimeInfo.Size = new System.Drawing.Size(305, 363);
+            this.tbRuntimeInfo.TabIndex = 14;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.DarkCyan;
+            this.BackColor = System.Drawing.Color.Sienna;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ClientSize = new System.Drawing.Size(1062, 1031);
+            this.Controls.Add(this.tbRuntimeInfo);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.LbRuntimeInfo);
             this.Controls.Add(this.flowLayoutPanel2);
             this.Controls.Add(this.flowLayoutPanel3);
             this.Controls.Add(this.flowLayoutPanel1);
@@ -327,11 +420,16 @@
             this.Name = "MainForm";
             this.Text = "九阳真经";
             this.flowLayoutPanel1.ResumeLayout(false);
+            this.cmsDragonLeader.ResumeLayout(false);
             this.flowLayoutPanel3.ResumeLayout(false);
+            this.cmsLongTerm.ResumeLayout(false);
             this.flowLayoutPanel2.ResumeLayout(false);
+            this.cmsTomorrowStocks.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvPositions)).EndInit();
             this.MenuMain.ResumeLayout(false);
             this.MenuMain.PerformLayout();
-            this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -343,26 +441,35 @@
         private System.Windows.Forms.Button BtnSellAll;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ListView LvDragonLeaders;
-        private System.Windows.Forms.Button BtnAddDragonLeader;
+        private System.Windows.Forms.ListView lvDragonLeaders;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ListView LvLongTermStocks;
-        private System.Windows.Forms.Button BtnAddLongTermSock;
+        private System.Windows.Forms.ListView lvLongTermStocks;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ListView LvTomorrowStocks;
-        private System.Windows.Forms.Button BtnAddTomorrowStock;
-        private System.Windows.Forms.Label LbRuntimeInfo;
-        private System.Windows.Forms.Label LbTotalAsset;
-        private System.Windows.Forms.Label LbMoneyAvailable;
-        private System.Windows.Forms.Label LbStock1;
-        private System.Windows.Forms.Label LbStock2;
-        private System.Windows.Forms.MenuStrip MenuMain;
+        private System.Windows.Forms.ListView lvTomorrowStocks;
+        private System.Windows.Forms.Label lblTotalAsset;
+        private System.Windows.Forms.Label lblMoneyAvailable;
+        private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ToolStripMenuItem Menu;
         private System.Windows.Forms.ToolStripMenuItem MenuItemManageAcct;
         private System.Windows.Forms.ToolStripMenuItem MenuItemExit;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.MenuStrip MenuMain;
+        private System.Windows.Forms.DataGridView dgvPositions;
+        private System.Windows.Forms.ContextMenuStrip cmsDragonLeader;
+        private System.Windows.Forms.ContextMenuStrip cmsLongTerm;
+        private System.Windows.Forms.ToolStripMenuItem tspAddLongTermStock;
+        private System.Windows.Forms.ToolStripMenuItem tspDelLongTerm;
+        private System.Windows.Forms.ToolStripMenuItem tspClearLongTerm;
+        private System.Windows.Forms.ContextMenuStrip cmsTomorrowStocks;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.ToolStripMenuItem tsmAddDragonLeader;
+        private System.Windows.Forms.ToolStripMenuItem tsmDelDragonLeader;
+        private System.Windows.Forms.ToolStripMenuItem tsmClearDragonLeaders;
+        private System.Windows.Forms.ToolStripMenuItem tsmAddTomorrowStock;
+        private System.Windows.Forms.ToolStripMenuItem tsmpDelTomorrowStock;
+        private System.Windows.Forms.ToolStripMenuItem tsmClearTomorrowStocks;
+        private System.Windows.Forms.TextBox tbRuntimeInfo;
     }
 }
 
