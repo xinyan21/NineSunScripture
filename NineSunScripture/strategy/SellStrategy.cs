@@ -29,7 +29,7 @@ namespace NineSunScripture.strategy
         private const float ThirdStopWinPosition = 0.5f;
 
         private Dictionary<string, float> lastTickPrice = new Dictionary<string, float>();
-        public void Sell(Quotes quotes, List<Account> accounts, ITrade trade)
+        public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             float highLimit = quotes.HighLimit;
             float lowLimit = quotes.LowLimit;
@@ -45,18 +45,18 @@ namespace NineSunScripture.strategy
             float avgCost = AccountHelper.GetPositionOf(accounts, quotes.Code).AvgCost;
             if (open != highLimit)
             {
-                StopWin(quotes, accounts, trade);
+                StopWin(quotes, accounts, callback);
                 if (open < quotes.PreClose * 0.92)
                 {
                     if (curPrice > open * 1.04)
                     {
                         Logger.log("超低开拉升4%卖" + quotes.Name);
-                        Sell(quotes, accounts, trade, 1);
+                        Sell(quotes, accounts, callback, 1);
                     }
                     if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * 0.95)
                     {
                         Logger.log("超低开10:10还小于-5%卖" + quotes.Name);
-                        Sell(quotes, accounts, trade, 1);
+                        Sell(quotes, accounts, callback, 1);
                     }
                 }
                 else
@@ -64,29 +64,29 @@ namespace NineSunScripture.strategy
                     if (curPrice <= avgCost * 0.92 || curPrice <= preClose * 0.92)
                     {
                         Logger.log("小于-8%卖" + quotes.Name);
-                        Sell(quotes, accounts, trade, 1);
+                        Sell(quotes, accounts, callback, 1);
                     }
                     if (now.Hour == 14 && curPrice <= preClose * 1.01)
                     {
                         Logger.log("2:00小于1%卖" + quotes.Name);
-                        Sell(quotes, accounts, trade, 1);
+                        Sell(quotes, accounts, callback, 1);
                     }
                     if (now.Hour == 14 && now.Minute >= 30 && curPrice <= preClose * 1.05)
                     {
                         Logger.log("2:30小于5%卖" + quotes.Name);
-                        Sell(quotes, accounts, trade, 1);
+                        Sell(quotes, accounts, callback, 1);
                     }
                 }
             }
             if (now.Hour == 14 && now.Minute >= 55 && curPrice < highLimit)
             {
                 Logger.log("收盘不板卖" + quotes.Name);
-                Sell(quotes, accounts, trade, 1);
+                Sell(quotes, accounts, callback, 1);
             }
             if (lastTickPrice[code] == highLimit && curPrice < lastTickPrice[code])
             {
                 Logger.log("开板卖" + quotes.Name);
-                Sell(quotes, accounts, trade, 1);
+                Sell(quotes, accounts, callback, 1);
             }
             lastTickPrice[code] = curPrice;
         }
@@ -96,8 +96,8 @@ namespace NineSunScripture.strategy
         /// </summary>
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
-        /// <param name="trade">交易结果回调</param>
-        private void StopWin(Quotes quotes, List<Account> accounts, ITrade trade)
+        /// <param name="callback">交易结果回调</param>
+        private void StopWin(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             foreach (Account account in accounts)
             {
@@ -128,17 +128,17 @@ namespace NineSunScripture.strategy
                     if (position.ProfitAndLossPct > ThirdClassStopWin)
                     {
                         Logger.log("40%止盈1/2卖" + quotes.Name);
-                        SellByAcct(quotes, account, trade, ThirdStopWinPosition);
+                        SellByAcct(quotes, account, callback, ThirdStopWinPosition);
                     }
                     else if (position.ProfitAndLossPct > SecondClassStopWin)
                     {
                         Logger.log("30%止盈1/2卖" + quotes.Name);
-                        SellByAcct(quotes, account, trade, SecondStopWinPosition);
+                        SellByAcct(quotes, account, callback, SecondStopWinPosition);
                     }
                     else if (position.ProfitAndLossPct > FirstClassStopWin)
                     {
                         Logger.log("20%止盈3成卖" + quotes.Name);
-                        SellByAcct(quotes, account, trade, FirstStopWinPosition);
+                        SellByAcct(quotes, account, callback, FirstStopWinPosition);
                     }
                 }
             }
@@ -150,7 +150,7 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="account">账户对象</param>
         /// <param name="sellRatio">卖出比例</param>
-        private static void SellByAcct(Quotes quotes, Account account, ITrade trade, float sellRatio)
+        private static void SellByAcct(Quotes quotes, Account account, ITrade callback, float sellRatio)
         {
             //因为是卖出，所以当天登录时候的仓位就可以拿来用，如果是买那就得查询最新的
             Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
@@ -169,7 +169,7 @@ namespace NineSunScripture.strategy
             int rspCode = TradeAPI.Sell(order);
             string opLog = account.FundAcct + "卖出" + quotes.Name + "->" + order.Quantity + "股";
             Logger.log(opLog);
-            trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
+            callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
         }
 
         /// <summary>
@@ -178,11 +178,11 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
         /// <param name="sellRatio">卖出比例</param>
-        private static void Sell(Quotes quotes, List<Account> accounts, ITrade trade, float sellRatio)
+        private static void Sell(Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
         {
             foreach (Account account in accounts)
             {
-                SellByAcct(quotes, account, trade, sellRatio);
+                SellByAcct(quotes, account, callback, sellRatio);
             }
         }
 
@@ -190,8 +190,8 @@ namespace NineSunScripture.strategy
         /// 清仓
         /// </summary>
         /// <param name="accounts">账户列表</param>
-        /// <param name="trade">交易接口回调</param>
-        public static void SellAll(List<Account> accounts, ITrade trade)
+        /// <param name="callback">交易接口回调</param>
+        public static void SellAll(List<Account> accounts, ITrade callback)
         {
             List<Position> positions;
             Quotes quotes = new Quotes();
@@ -206,7 +206,7 @@ namespace NineSunScripture.strategy
                 {
                     quotes.Code = position.Code;
                     quotes.Name = position.Name;
-                    SellByAcct(quotes, account, trade, 1);
+                    SellByAcct(quotes, account, callback, 1);
                 }
             }
         }

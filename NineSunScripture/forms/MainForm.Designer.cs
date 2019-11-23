@@ -56,7 +56,7 @@
             this.lblTotalAsset = new System.Windows.Forms.Label();
             this.lblMoneyAvailable = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.dgvPositions = new System.Windows.Forms.DataGridView();
+            this.lvPositions = new System.Windows.Forms.ListView();
             this.Menu = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItemManageAcct = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItemExit = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,7 +70,6 @@
             this.flowLayoutPanel2.SuspendLayout();
             this.cmsTomorrowStocks.SuspendLayout();
             this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvPositions)).BeginInit();
             this.MenuMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -130,6 +129,7 @@
             this.lvDragonLeaders.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lvDragonLeaders.Location = new System.Drawing.Point(3, 53);
             this.lvDragonLeaders.Name = "lvDragonLeaders";
+            this.lvDragonLeaders.Scrollable = false;
             this.lvDragonLeaders.Size = new System.Drawing.Size(305, 211);
             this.lvDragonLeaders.TabIndex = 1;
             this.lvDragonLeaders.UseCompatibleStateImageBehavior = false;
@@ -195,6 +195,7 @@
             this.lvLongTermStocks.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lvLongTermStocks.Location = new System.Drawing.Point(3, 42);
             this.lvLongTermStocks.Name = "lvLongTermStocks";
+            this.lvLongTermStocks.Scrollable = false;
             this.lvLongTermStocks.Size = new System.Drawing.Size(307, 222);
             this.lvLongTermStocks.TabIndex = 1;
             this.lvLongTermStocks.UseCompatibleStateImageBehavior = false;
@@ -260,6 +261,7 @@
             this.lvTomorrowStocks.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lvTomorrowStocks.Location = new System.Drawing.Point(3, 42);
             this.lvTomorrowStocks.Name = "lvTomorrowStocks";
+            this.lvTomorrowStocks.Scrollable = false;
             this.lvTomorrowStocks.Size = new System.Drawing.Size(303, 319);
             this.lvTomorrowStocks.TabIndex = 1;
             this.lvTomorrowStocks.UseCompatibleStateImageBehavior = false;
@@ -297,28 +299,28 @@
             // 
             // lblTotalAsset
             // 
-            this.lblTotalAsset.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblTotalAsset.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblTotalAsset.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.lblTotalAsset.Location = new System.Drawing.Point(3, 0);
             this.lblTotalAsset.Name = "lblTotalAsset";
-            this.lblTotalAsset.Size = new System.Drawing.Size(209, 103);
+            this.lblTotalAsset.Size = new System.Drawing.Size(209, 50);
             this.lblTotalAsset.TabIndex = 0;
-            this.lblTotalAsset.Text = "TotalAsset";
+            this.lblTotalAsset.Text = "总资产：";
             // 
             // lblMoneyAvailable
             // 
-            this.lblMoneyAvailable.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblMoneyAvailable.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblMoneyAvailable.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.lblMoneyAvailable.Location = new System.Drawing.Point(218, 0);
+            this.lblMoneyAvailable.Location = new System.Drawing.Point(1, 53);
             this.lblMoneyAvailable.Name = "lblMoneyAvailable";
-            this.lblMoneyAvailable.Size = new System.Drawing.Size(193, 103);
+            this.lblMoneyAvailable.Size = new System.Drawing.Size(211, 50);
             this.lblMoneyAvailable.TabIndex = 1;
-            this.lblMoneyAvailable.Text = "MoneyAvailable";
+            this.lblMoneyAvailable.Text = "可用金额：";
             // 
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panel1.Controls.Add(this.dgvPositions);
+            this.panel1.Controls.Add(this.lvPositions);
             this.panel1.Controls.Add(this.lblTotalAsset);
             this.panel1.Controls.Add(this.lblMoneyAvailable);
             this.panel1.Location = new System.Drawing.Point(85, 780);
@@ -326,18 +328,19 @@
             this.panel1.Size = new System.Drawing.Size(865, 107);
             this.panel1.TabIndex = 8;
             // 
-            // dgvPositions
+            // lvPositions
             // 
-            this.dgvPositions.BackgroundColor = System.Drawing.Color.Sienna;
-            this.dgvPositions.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvPositions.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvPositions.GridColor = System.Drawing.Color.Sienna;
-            this.dgvPositions.Location = new System.Drawing.Point(417, 0);
-            this.dgvPositions.Name = "dgvPositions";
-            this.dgvPositions.RowHeadersWidth = 45;
-            this.dgvPositions.RowTemplate.Height = 24;
-            this.dgvPositions.Size = new System.Drawing.Size(446, 105);
-            this.dgvPositions.TabIndex = 2;
+            this.lvPositions.BackColor = System.Drawing.Color.Sienna;
+            this.lvPositions.Font = new System.Drawing.Font("微软雅黑", 8.830189F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lvPositions.ForeColor = System.Drawing.SystemColors.Info;
+            this.lvPositions.Location = new System.Drawing.Point(250, -2);
+            this.lvPositions.MultiSelect = false;
+            this.lvPositions.Name = "lvPositions";
+            this.lvPositions.Scrollable = false;
+            this.lvPositions.Size = new System.Drawing.Size(616, 105);
+            this.lvPositions.TabIndex = 2;
+            this.lvPositions.UseCompatibleStateImageBehavior = false;
+            this.lvPositions.View = System.Windows.Forms.View.Details;
             // 
             // Menu
             // 
@@ -426,7 +429,6 @@
             this.flowLayoutPanel2.ResumeLayout(false);
             this.cmsTomorrowStocks.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvPositions)).EndInit();
             this.MenuMain.ResumeLayout(false);
             this.MenuMain.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -455,7 +457,6 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItemManageAcct;
         private System.Windows.Forms.ToolStripMenuItem MenuItemExit;
         private System.Windows.Forms.MenuStrip MenuMain;
-        private System.Windows.Forms.DataGridView dgvPositions;
         private System.Windows.Forms.ContextMenuStrip cmsDragonLeader;
         private System.Windows.Forms.ContextMenuStrip cmsLongTerm;
         private System.Windows.Forms.ToolStripMenuItem tspAddLongTermStock;
@@ -470,6 +471,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsmpDelTomorrowStock;
         private System.Windows.Forms.ToolStripMenuItem tsmClearTomorrowStocks;
         private System.Windows.Forms.TextBox tbRuntimeInfo;
+        private System.Windows.Forms.ListView lvPositions;
     }
 }
 

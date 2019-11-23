@@ -14,7 +14,7 @@ namespace NineSunScripture.db
     {
         private const String CreateAcctTable =
             "CREATE TABLE IF NOT EXISTS t_acct(id integer NOT NULL PRIMARY KEY AUTOINCREMENT " +
-            "UNIQUE, brokerId integer,  brokerServerIp varchar(20), brokerServerPort varchar(6), " +
+            "UNIQUE, brokerId integer,  brokerName varchar(10), brokerServerIp varchar(20), brokerServerPort varchar(6), " +
             "versionOfTHS varchar(10), acctType varchar(6), commPwd varchar(10), fundAcct varchar(10)," +
             "password varchar(6), shShareholderAcct varchar(10), szShareholderAcct varchar(10)," +
             "initTotalAsset inteter)";
@@ -24,41 +24,47 @@ namespace NineSunScripture.db
         }
         public bool AddAccount(Account account)
         {
-            string sql = "INSERT INTO t_acct(brokerId, brokerServerIp, brokerServerPort, versionOfTHS," +
-                " acctType, commPwd, fundAcct, password) VALUES(@brokerId, @brokerServerIp, " +
-                "@brokerServerPort, @versionOfTHS, @acctType, @commPwd, @fundAcct, @password)";
-            //TODO 不知道param里面要不要传数据类型，有问题再加
+            string sql = "INSERT INTO t_acct(brokerId, brokerName, brokerServerIp, brokerServerPort," +
+                " versionOfTHS, acctType, commPwd, fundAcct, password)" +
+                " VALUES(@brokerId, @brokerName, @brokerServerIp, @brokerServerPort, " +
+                "@versionOfTHS, @acctType, @commPwd, @fundAcct, @password)";
             SQLiteParameter[] parameters = new SQLiteParameter[]{
-             new SQLiteParameter("@brokerId",account.BrokerId),
-           new SQLiteParameter("@brokerServerIp",account.BrokerServerIP),
-           new SQLiteParameter("@brokerServerPort",account.BrokerServerPort),
-           new SQLiteParameter("@versionOfTHS",account.VersionOfTHS),
-           new SQLiteParameter("@acctType",account.AcctType),
-           new SQLiteParameter("@commPwd",account.CommPwd),
-           new SQLiteParameter("@fundAcct",account.FundAcct),
-           new SQLiteParameter("@password",account.Password)};
+               new SQLiteParameter("@brokerId",account.BrokerId),
+               new SQLiteParameter("@brokerName",account.BrokerName),
+               new SQLiteParameter("@brokerServerIp",account.BrokerServerIP),
+               new SQLiteParameter("@brokerServerPort",account.BrokerServerPort),
+               new SQLiteParameter("@versionOfTHS",account.VersionOfTHS),
+               new SQLiteParameter("@acctType",account.AcctType),
+               new SQLiteParameter("@commPwd",account.CommPwd),
+               new SQLiteParameter("@fundAcct",account.FundAcct),
+               new SQLiteParameter("@password",account.Password)};
             int cnt = SQLiteHelper.ExecuteNonQuery(sql, parameters);
             return cnt == 1 ? true : false;
         }
-        public void DelAccount(String fundAcct)
+        public bool DelAccount(String fundAcct)
         {
-            string sql = "DELETE FROM t_acct WHERE fundAcct=" + fundAcct;
-            SQLiteHelper.ExecuteNonQuery(sql, null);
+            string sql = "DELETE FROM t_acct WHERE fundAcct=@fundAcct";
+            SQLiteParameter[] parameters = new SQLiteParameter[]{
+             new SQLiteParameter("@fundAcct",fundAcct) };
+            int cnt = SQLiteHelper.ExecuteNonQuery(sql, parameters);
+            return cnt == 1 ? true : false;
         }
         public bool EditAccount(Account account)
         {
-            string sql = "UPDATE t_acct SET brokerId=@brokerId, brokerServerIp=@brokerServerIp," +
-                " brokerServerPort=@brokerServerPort, versionOfTHS=@versionOfTHS, acctType=@acctType," +
-                    "commPwd=@commPwd, fundAcct=@fundAcct, password=@password";
+            string sql = "UPDATE t_acct SET brokerId=@brokerId, brokerName=@brokerName,  " +
+                "brokerServerIp=@brokerServerIp,  brokerServerPort=@brokerServerPort, " +
+                "versionOfTHS=@versionOfTHS, acctType=@acctType, commPwd=@commPwd, " +
+                "password=@password  WHERE fundAcct=@fundAcct";
             SQLiteParameter[] parameters = new SQLiteParameter[]{
-             new SQLiteParameter("@brokerId",account.BrokerId),
-           new SQLiteParameter("@brokerServerIp",account.BrokerServerIP),
-           new SQLiteParameter("@brokerServerPort",account.BrokerServerPort),
-           new SQLiteParameter("@versionOfTHS",account.VersionOfTHS),
-           new SQLiteParameter("@acctType",account.AcctType),
-           new SQLiteParameter("@commPwd",account.CommPwd),
-           new SQLiteParameter("@fundAcct",account.FundAcct),
-           new SQLiteParameter("@password",account.Password)};
+               new SQLiteParameter("@brokerId",account.BrokerId),
+               new SQLiteParameter("@brokerName",account.BrokerName),
+               new SQLiteParameter("@brokerServerIp",account.BrokerServerIP),
+               new SQLiteParameter("@brokerServerPort",account.BrokerServerPort),
+               new SQLiteParameter("@versionOfTHS",account.VersionOfTHS),
+               new SQLiteParameter("@acctType",account.AcctType),
+               new SQLiteParameter("@commPwd",account.CommPwd),
+               new SQLiteParameter("@password",account.Password),
+                new SQLiteParameter("@fundAcct",account.FundAcct)};
             int cnt = SQLiteHelper.ExecuteNonQuery(sql, parameters);
             return cnt == 1 ? true : false;
         }
@@ -85,10 +91,7 @@ namespace NineSunScripture.db
 
         public List<Account> GetAccounts()
         {
-            //TODO 不行就换下面的SQL
             string sql = "SELECT * FROM t_acct";
-            //string sql = "SELECT brokerId, brokerServerIp, brokerServerPort, versionOfTHS, acctType," +
-            //     "commPwd, macAddr, fundAcct, password FROM t_acct";
             DataTable dt = SQLiteHelper.GetDataTable(sql, null);
             List<Account> accounts = new List<Account>();
             if (dt.Rows.Count > 0)
@@ -106,6 +109,20 @@ namespace NineSunScripture.db
             return accounts;
         }
 
+        public Account GetAccountByFundAcct(string fundAcct)
+        {
+            Account acct = null;
+            string sql = "SELECT * FROM t_acct  WHERE fundAcct=@fundAcct";
+            SQLiteParameter[] parameters = new SQLiteParameter[]{
+             new SQLiteParameter("@fundAcct",fundAcct) };
+            DataTable dt = SQLiteHelper.GetDataTable(sql, parameters);
+            if (dt.Rows.Count > 0)
+            {
+                acct = DataRowToModel(dt.Rows[0]);
+            }
+            return acct;
+        }
+
         public Account DataRowToModel(DataRow row)
         {
             Account acct = new Account();
@@ -114,6 +131,10 @@ namespace NineSunScripture.db
                 if (null != row["brokerId"])
                 {
                     acct.BrokerId = int.Parse(row["brokerId"].ToString());
+                }
+                if (null != row["brokerName"])
+                {
+                    acct.BrokerName = row["brokerName"].ToString();
                 }
                 if (null != row["brokerServerIp"])
                 {
@@ -135,7 +156,8 @@ namespace NineSunScripture.db
                 {
                     acct.CommPwd = row["commPwd"].ToString();
                 }
-                if (null != row["initTotalAsset"])
+                if (null != row["initTotalAsset"]
+                    && !string.IsNullOrEmpty(row["initTotalAsset"].ToString()))
                 {
                     acct.InitTotalAsset = int.Parse(row["initTotalAsset"].ToString());
                 }

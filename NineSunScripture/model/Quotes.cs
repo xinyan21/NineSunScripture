@@ -9,8 +9,21 @@ namespace NineSunScripture.model
     /// <summary>
     /// 行情实体类
     /// </summary>
-    public class Quotes : BaseModel
+    public class Quotes : BaseModel, IEquatable<Quotes>
     {
+        /// <summary>
+        /// 常驻股票池中的股票
+        /// </summary>
+        public  const short CategoryLongTerm = 0;
+        /// <summary>
+        /// 龙头股票池中的股票
+        /// </summary>
+        public const short CategoryDragonLeader = 1;
+        /// <summary>
+        /// 明日股票池中的股票
+        /// </summary>
+        public const short CategoryTomorrow = 2;
+
         public String Code;
         public String Name;
         //昨收
@@ -52,10 +65,19 @@ namespace NineSunScripture.model
         /// <summary>
         /// 仓位控制，用于买入策略
         /// </summary>
-        public float positionCtrl;
+        public float PositionCtrl;
         /// <summary>
         /// 买入前的成交额限制，用于买入策略
         /// </summary>
-        public int moneyCtrl;
+        public int MoneyCtrl;
+        /// <summary>
+        /// 股票类型：常驻0、龙头1、明日2
+        /// </summary>
+        public short StockCategory;
+
+        public bool Equals(Quotes other)
+        {
+            return this.Code == other.Code;
+        }
     }
 }

@@ -85,9 +85,13 @@ namespace NineSunScripture.db
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = sqlString;
-                    foreach (SQLiteParameter parameter in parameters)
+                    if (null != parameters && parameters.Length > 0)
                     {
-                        cmd.Parameters.Add(parameter);
+
+                        foreach (SQLiteParameter parameter in parameters)
+                        {
+                            cmd.Parameters.Add(parameter);
+                        }
                     }
                     return cmd.ExecuteNonQuery();
                 }
@@ -109,9 +113,13 @@ namespace NineSunScripture.db
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = sqlString;
-                    foreach (SQLiteParameter parameter in parameters)
+                    if (null != parameters && parameters.Length > 0)
                     {
-                        cmd.Parameters.Add(parameter);
+
+                        foreach (SQLiteParameter parameter in parameters)
+                        {
+                            cmd.Parameters.Add(parameter);
+                        }
                     }
                     return cmd.ExecuteScalar();
                 }
@@ -133,9 +141,13 @@ namespace NineSunScripture.db
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = sqlString;
-                    foreach (SQLiteParameter parameter in parameters)
+                    if (null != parameters && parameters.Length > 0)
                     {
-                        cmd.Parameters.Add(parameter);
+
+                        foreach (SQLiteParameter parameter in parameters)
+                        {
+                            cmd.Parameters.Add(parameter);
+                        }
                     }
                     DataSet ds = new DataSet();
                     SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd);

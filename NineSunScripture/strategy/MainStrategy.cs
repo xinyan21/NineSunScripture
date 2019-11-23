@@ -17,7 +17,7 @@ namespace NineSunScripture.strategy
     /// </summary>
     public class MainStrategy
     {
-        private const int IntervalOfNonTrade = 3000;
+        private const int IntervalOfNonTrade = 200;
         private const int IntervalOfTrade = 200;
         //交易时间睡眠间隔为200ms，非交易时间为3s
         private int sleepInterval = IntervalOfTrade;
@@ -30,29 +30,22 @@ namespace NineSunScripture.strategy
         private Thread mainThread;
         private BuyStrategy buyStrategy;
         private SellStrategy sellStrategy;
-        private ITrade onTradeResult;
+        private ITrade callback;
+        private IAcctInfoListener fundListener;
 
-        public MainStrategy(List<Account> accounts, List<Quotes> stocks, ITrade onTradeResult)
+        public MainStrategy(List<Quotes> stocks, ITrade callback)
         {
-            this.accounts = accounts;
             this.stocks = stocks;
-            this.onTradeResult = onTradeResult;
-            if (accounts.Count > 0)
-            {
-                mainAcct = accounts[0];
-            }
+            this.callback = callback;
+            buyStrategy = new BuyStrategy();
+            sellStrategy = new SellStrategy();
         }
-        public void Start()
+        public bool Start()
         {
             if (null == stocks || stocks.Count == 0)
             {
                 MessageBox.Show("没有可操作的股票");
-                return;
-            }
-            if (null == accounts || accounts.Count == 0)
-            {
-                MessageBox.Show("没有可操作的账户");
-                return;
+                return false;
             }
             if (null == mainThread)
             {
@@ -60,6 +53,8 @@ namespace NineSunScripture.strategy
             }
             strategySwitch = true;
             mainThread.Start();
+
+            return true;
         }
         public void Stop()
         {
@@ -68,31 +63,58 @@ namespace NineSunScripture.strategy
 
         private void Process()
         {
-            AccountHelper.Login(accounts, onTradeResult);
-            //到时改到总开关里面去
+            accounts = AccountHelper.Login(callback);
+            if (null == accounts || accounts.Count == 0)
+            {
+                MessageBox.Show("没有可操作的账户");
+                return;
+            }
+            mainAcct = accounts[0];
             while (strategySwitch)
             {
                 Thread.Sleep(sleepInterval);
-                if (!IsTradeTime())
+                UpdateFundsInfo();
+                /*if (!IsTradeTime())
                 {
                     continue;
-                }
+                }*/
                 Quotes quotes;
-                for (int i = 0; i < stocks.Count; i++)
+                lock (stocks)
                 {
-                    try
+                    for (int i = 0; i < stocks.Count; i++)
                     {
-                        quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i].Code);
-                        buyStrategy.Buy(quotes, accounts, onTradeResult);
-                        sellStrategy.Sell(quotes, accounts, onTradeResult);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.exception(e);
+                        try
+                        {
+                            quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i].Code);
+                            buyStrategy.Buy(quotes, accounts, callback);
+                            sellStrategy.Sell(quotes, accounts, callback);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.exception(e);
+                        }
                     }
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 每隔10s更新一下账户信息
+        /// </summary>
+        private void UpdateFundsInfo()
+        {
+            if (DateTime.Now.Second % 3 != 0)
+            {
+                return;
+            }
+            if (null != fundListener)
+            {
+                Account account = new Account();
+                account.Funds = AccountHelper.QueryTotalFunds(accounts);
+                account.Positions = AccountHelper.QueryPositions(accounts);
+                fundListener.onAcctInfoListen(account);
+            }
         }
 
         private bool IsTradeTime()
@@ -128,11 +150,29 @@ namespace NineSunScripture.strategy
             return true;
         }
 
-        public void OnTradeResult(int code, string msg)
+        public void SellAll(ITrade callBack)
         {
-            if (code < 0 && tryLoginCnt < 3)
+            if (null == accounts || accounts.Count == 0)
             {
+                MessageBox.Show("没有可操作的账户");
+                return;
             }
+            SellStrategy.SellAll(accounts, callBack);
+        }
+
+        public void updateStocks(List<Quotes> quotes)
+        {
+            //策略是在线程里跑的，修改前要加锁
+            lock (stocks)
+            {
+                this.stocks.Clear();
+                this.stocks.AddRange(quotes);
+            }
+        }
+
+        public void setFundListener(IAcctInfoListener fundListener)
+        {
+            this.fundListener = fundListener;
         }
     }
 }

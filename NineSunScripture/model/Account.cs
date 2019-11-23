@@ -22,12 +22,13 @@ namespace NineSunScripture.model
         //comm_password,//通讯密码	可空
         //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
         public int BrokerId;
+        public string BrokerName;
         public String BrokerServerIP;
         public short BrokerServerPort;
         public String VersionOfTHS;
         public short AcctType;
         public String CommPwd;
-        public bool IsRandomMac=false;
+        public bool IsRandomMac = false;
         public String FundAcct;//资金账号
         public String Password;
         public String ShShareholderAcct;//上海股东账号

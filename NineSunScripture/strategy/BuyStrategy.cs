@@ -16,7 +16,7 @@ namespace NineSunScripture.strategy
     class BuyStrategy
     {
         private Dictionary<string, DateTime> openBoardTime = new Dictionary<string, DateTime>();
-        public void Buy(Quotes quotes, List<Account> accounts, ITrade trade)
+        public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30)
             {
@@ -36,10 +36,10 @@ namespace NineSunScripture.strategy
             {
                 openBoardTime.Remove(code);
             }
-            //成交额小于1亿控制买入仓位为1/3
-            if (quotes.Money < 10000 * 10000)
+            //成交额小于7000万过滤
+            if (quotes.Money < 7000 * 10000)
             {
-                positionRatioCtrl = 1 / 3;
+                return;
             }
             //已经涨停且封单大于1500万，过滤
             if (quotes.Buy1 == highLimit && quotes.Buy2Vol * highLimit > 1500 * 10000)
@@ -65,8 +65,8 @@ namespace NineSunScripture.strategy
                         return;
                     }
                 }
-                CancelOrdersCanCancel(accounts, quotes, trade);
-                Funds funds = TradeAPI.QueryTotalFunds(accounts);
+                CancelOrdersCanCancel(accounts, quotes, callback);
+                Funds funds = AccountHelper.QueryTotalFunds(accounts);
                 //所有账户总可用金额小于每个账号一手的金额或者小于1万，直接退出
                 if (funds.AvailableAmt < 10000 || funds.AvailableAmt < highLimit * 100 * accounts.Count)
                 {
@@ -93,7 +93,7 @@ namespace NineSunScripture.strategy
                         string opLog
                             = account.FundAcct + "买入" + quotes.Name + "->" + order.Quantity + "股";
                         Logger.log(opLog);
-                        trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                        callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                     }
                     return;
                 }
@@ -120,7 +120,7 @@ namespace NineSunScripture.strategy
                     string opLog
                         = account.FundAcct + "买入" + quotes.Name + "->" + order.Quantity + "股";
                     Logger.log(opLog);
-                    trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                    callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                 }
             }
         }
@@ -160,7 +160,7 @@ namespace NineSunScripture.strategy
         private String getPositionStock(List<Account> accounts)
         {
             string stocks = "";
-            List<Position> positions = TradeAPI.QueryPositions(accounts);
+            List<Position> positions = AccountHelper.QueryPositions(accounts);
             if (null == positions || positions.Count == 0)
             {
                 return stocks;
@@ -180,7 +180,7 @@ namespace NineSunScripture.strategy
         /// </summary>
         /// <param name="accounts">账户对象数组</param>
         /// <param name="quotes">股票对象</param>
-        private void CancelOrdersCanCancel(List<Account> accounts, Quotes quotes, ITrade trade)
+        private void CancelOrdersCanCancel(List<Account> accounts, Quotes quotes, ITrade callback)
         {
             foreach (Account account in accounts)
             {
@@ -198,7 +198,7 @@ namespace NineSunScripture.strategy
                         string opLog = account.FundAcct + "撤销" + quotes.Name + "委托->"
                             + order.Quantity + "股";
                         Logger.log(opLog);
-                        trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                        callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                     }
                 }
             }
@@ -233,7 +233,7 @@ namespace NineSunScripture.strategy
         /// 3:25可用资金自动国债逆回购，只买131810深市一天期，每股100
         /// </summary>
         /// <param name="accounts"></param>
-        private void AutoReverseRepurchaseBonds(List<Account> accounts, ITrade trade)
+        private void AutoReverseRepurchaseBonds(List<Account> accounts, ITrade callback)
         {
             Account mainAcct = null;
             if (accounts.Count > 0)
@@ -253,7 +253,7 @@ namespace NineSunScripture.strategy
                 string opLog
                     = account.FundAcct + "逆回购" + (int)(availableCash / 1000) * 1000;
                 Logger.log(opLog);
-                trade.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
             }
         }
     }

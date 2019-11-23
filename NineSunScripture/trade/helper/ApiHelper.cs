@@ -37,15 +37,23 @@ namespace NineSunScripture.trade.helper
         /// </summary>
         /// <param name="data">接口返回的字节流</param>
         /// <returns>结果分割后的二维字符数组</returns>
-        public static String[][] ParseResults(byte[] data)
+        public static String[,] ParseResults(byte[] data)
         {
             String result = Encoding.Default.GetString(data).TrimEnd('\0');
             result = result.Substring(result.IndexOf("\n") + 1);
-            String[] rows = result.Split(new String[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            string[][] temp = new string[][] { };
+            String[] rows = result.Split(new String[] { "\n" }, 
+                StringSplitOptions.RemoveEmptyEntries);
+            int cols = rows[0].Split(new String[] { "\t" },
+                StringSplitOptions.RemoveEmptyEntries).Length;
+            string[,] temp = new string[rows.Length, cols];
             for (int i = 0; i < rows.Length; i++)
             {
-                temp[i] = result.Split(new String[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] items = rows[i].Split(new String[] { "\t" },
+                    StringSplitOptions.RemoveEmptyEntries);
+                for (int j = 0; j < items.Length; j++)
+                {
+                    temp[i, j] = items[j];
+                }
             }
             return temp;
         }

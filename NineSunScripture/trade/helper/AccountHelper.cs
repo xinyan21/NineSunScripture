@@ -17,13 +17,13 @@ namespace NineSunScripture.trade.helper
         /// <summary>
         /// 登录所有账户，首次在客户端登录会记录初始总资金到数据库
         /// </summary>
-        /// <param name="accounts"></param>
-        /// <param name="trade"></param>
-        public static void Login(List<Account> accounts, ITrade trade)
+        /// <param name="trade">回调接口</param>
+        public static List<Account> Login(ITrade trade)
         {
+            List<Account> accounts = new AcctDbHelper().GetAccounts();
             if (null == accounts || accounts.Count == 0)
             {
-                return;
+                return null;
             }
             foreach (Account account in accounts)
             {
@@ -33,6 +33,7 @@ namespace NineSunScripture.trade.helper
                     account.IsRandomMac, account.ErrorInfo);
                 if (userId > 0)
                 {
+                    account.ClientId = userId;
                     account.Funds = TradeAPI.QueryFunds(userId);
                     account.Positions = TradeAPI.QueryPositions(userId);
                     Logger.log("资金账号" + account.FundAcct + "登录成功，ID为" + userId);
@@ -49,6 +50,7 @@ namespace NineSunScripture.trade.helper
                     new AcctDbHelper().EditInitTotalAsset(account);
                 }
             }
+            return accounts;
         }
 
         /// <summary>
@@ -92,6 +94,68 @@ namespace NineSunScripture.trade.helper
                 position.ProfitAndLossPct = (position.ProfitAndLossPct + temp.ProfitAndLossPct) / 2;
             }
             return position;
+        }
+
+        /// <summary>
+        /// 查询所有账户总持仓：个股数据全部汇总到一起成为一个账户
+        /// </summary>
+        /// <param name="accounts">账户数组</param>
+        /// <returns></returns>
+        public static List<Position> QueryPositions(List<Account> accounts)
+        {
+            List<Position> positions = new List<Position>();
+            List<Position> allPositions = new List<Position>(); //所有账户持仓原始数据
+            foreach (Account account in accounts)
+            {
+                allPositions.AddRange(TradeAPI.QueryPositions(account.ClientId));
+            }
+            List<Position> temp = allPositions.Distinct().ToList();
+            foreach (Position item in temp)
+            {
+                Position position = new Position();
+                position.Code = item.Code;
+                position.Name = item.Name;
+                position.Price = item.Price;
+                positions.Add(position);
+            }
+            //把所有个股持仓数据分别汇总
+            foreach (Position item in allPositions)
+            {
+                foreach (Position item2 in positions)
+                {
+                    if (item.Code == item2.Code)
+                    {
+                        item2.AvailableQuantity += item.AvailableQuantity;
+                        item2.AvgCost += item.AvgCost;
+                        item2.FrozenQuantity += item.FrozenQuantity;
+                        item2.ProfitAndLoss += item.ProfitAndLoss;
+                        item2.ProfitAndLossPct += item.ProfitAndLossPct;
+                        item2.QuantityBalance += item.QuantityBalance;
+                    }
+                }
+            }
+
+            return positions;
+        }
+
+        /// <summary>
+        /// 查询所有账户总资金
+        /// </summary>
+        /// <param name="accounts">账户列表</param>
+        /// <returns></returns>
+        public static Funds QueryTotalFunds(List<Account> accounts)
+        {
+            Funds funds = new Funds();
+            foreach (Account account in accounts)
+            {
+                Funds temp = TradeAPI.QueryFunds(account.ClientId);
+                funds.AvailableAmt += temp.AvailableAmt;
+                funds.FrozenAmt += temp.FrozenAmt;
+                funds.FundBalance += temp.FundBalance;
+                funds.TotalAsset += temp.TotalAsset;
+            }
+
+            return funds;
         }
     }
 }

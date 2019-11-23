@@ -11,7 +11,7 @@ namespace NineSunScripture.model
     /// 证券代码\t证券名称\t持仓数量\t可用数量\t冻结数量\t参考盈亏\t成本价
     /// \t盈亏比例\t市价\t市值\t交易市场\t股东账户
     /// </summary>
-    public class Position : BaseModel
+    public class Position : BaseModel, IEquatable<Position>
     {
         public String Code;
         public String Name;
@@ -39,5 +39,10 @@ namespace NineSunScripture.model
         public float Price;
         public String Market;
         public String ShareholderAcct;
+
+        public bool Equals(Position other)
+        {
+            return this.Code == other.Code;
+        }
     }
 }

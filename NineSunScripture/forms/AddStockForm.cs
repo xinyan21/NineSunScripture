@@ -14,13 +14,13 @@ namespace NineSunScripture.forms
     public partial class AddStockForm : Form
     {
         private MainForm mainForm;
-        private int category;
+        private short category;
         public AddStockForm()
         {
             InitializeComponent();
         }
 
-        public AddStockForm(MainForm mainForm, int category)
+        public AddStockForm(MainForm mainForm, short category)
         {
             InitializeComponent();
             this.mainForm = mainForm;
@@ -29,12 +29,18 @@ namespace NineSunScripture.forms
 
         private void btnAddStcok_Click(object sender, EventArgs e)
         {
+            if (tbMoney.Text.Contains("."))
+            {
+                MessageBox.Show("成交额只能输入整数！");
+                return;
+            }
             Quotes quotes = new Quotes();
             quotes.Code = tbCode.Text;
             quotes.Name = tbName.Text;
-            quotes.positionCtrl = float.Parse(tbPosition.Text);
-            quotes.moneyCtrl = int.Parse(tbMoney.Text);
-            mainForm.AddStock(category, quotes);
+            quotes.PositionCtrl = float.Parse(tbPosition.Text);
+            quotes.MoneyCtrl = int.Parse(tbMoney.Text);
+            quotes.StockCategory = category;
+            mainForm.AddStock(quotes);
             Close();
         }
     }
