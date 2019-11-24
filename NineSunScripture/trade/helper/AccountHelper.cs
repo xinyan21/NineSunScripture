@@ -20,7 +20,8 @@ namespace NineSunScripture.trade.helper
         /// <param name="trade">回调接口</param>
         public static List<Account> Login(ITrade trade)
         {
-            List<Account> accounts = new AcctDbHelper().GetAccounts();
+            AcctDbHelper dbHelper = new AcctDbHelper();
+            List<Account> accounts = dbHelper.GetAccounts();
             if (null == accounts || accounts.Count == 0)
             {
                 return null;
@@ -36,6 +37,11 @@ namespace NineSunScripture.trade.helper
                     account.ClientId = userId;
                     account.Funds = TradeAPI.QueryFunds(userId);
                     account.Positions = TradeAPI.QueryPositions(userId);
+                    if (account.InitTotalAsset == 0)
+                    {
+                        account.InitTotalAsset = (int)account.Funds.TotalAsset;
+                        dbHelper.EditInitTotalAsset(account);
+                    }
                     Logger.log("资金账号" + account.FundAcct + "登录成功，ID为" + userId);
                 }
                 else
@@ -44,10 +50,6 @@ namespace NineSunScripture.trade.helper
                         + ApiHelper.ParseErrInfo(account.ErrorInfo);
                     Logger.log(opLog);
                     trade.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
-                }
-                if (account.InitTotalAsset == 0)
-                {
-                    new AcctDbHelper().EditInitTotalAsset(account);
                 }
             }
             return accounts;
@@ -136,6 +138,26 @@ namespace NineSunScripture.trade.helper
             }
 
             return positions;
+        }
+
+        /// <summary>
+        /// 查询总账户持仓股
+        /// </summary>
+        /// <param name="accounts">账号列表</param>
+        /// <returns></returns>
+        public static List<Quotes> QueryPositionStocks(List<Account> accounts)
+        {
+            List<Quotes> quotes = new List<Quotes>();
+            List<Position> positions = QueryPositions(accounts);
+            Quotes quote;
+            foreach (Position position in positions)
+            {
+                quote = new Quotes();
+                quote.Code = position.Code;
+                quote.Name = position.Name;
+            }
+
+            return quotes;
         }
 
         /// <summary>

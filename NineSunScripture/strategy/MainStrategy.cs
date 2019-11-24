@@ -17,9 +17,9 @@ namespace NineSunScripture.strategy
     /// </summary>
     public class MainStrategy
     {
-        private const int IntervalOfNonTrade = 200;
-        private const int IntervalOfTrade = 200;
-        //交易时间睡眠间隔为200ms，非交易时间为3s
+        private const int IntervalOfNonTrade = 3000;
+        //没有level2没必要设置太低
+        private const int IntervalOfTrade = 1000;
         private int sleepInterval = IntervalOfTrade;
         private int tryLoginCnt = 0;
         private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
@@ -33,12 +33,11 @@ namespace NineSunScripture.strategy
         private ITrade callback;
         private IAcctInfoListener fundListener;
 
-        public MainStrategy(List<Quotes> stocks, ITrade callback)
+        public MainStrategy()
         {
-            this.stocks = stocks;
-            this.callback = callback;
-            buyStrategy = new BuyStrategy();
-            sellStrategy = new SellStrategy();
+            this.stocks = new List<Quotes>();
+            this.buyStrategy = new BuyStrategy();
+            this.sellStrategy = new SellStrategy();
         }
         public bool Start()
         {
@@ -47,10 +46,7 @@ namespace NineSunScripture.strategy
                 MessageBox.Show("没有可操作的股票");
                 return false;
             }
-            if (null == mainThread)
-            {
-                mainThread = new Thread(Process);
-            }
+            mainThread = new Thread(Process);
             strategySwitch = true;
             mainThread.Start();
 
@@ -69,15 +65,30 @@ namespace NineSunScripture.strategy
                 MessageBox.Show("没有可操作的账户");
                 return;
             }
+            List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
+            //TODO实盘账户使用代码
+            //stocks.AddRange(positionStocks);
+            //TODO模拟账户使用代码BEGIN
+            string reserveStocks = "000001|000002|000005|300233|600235";
+            foreach (Quotes quote in positionStocks)
+            {
+                if (reserveStocks.Contains(quote.Code))
+                {
+                    continue;
+                }
+                stocks.Add(quote);
+            }
+            //TODO模拟账户使用代码END
+            //TODO买了行情协议的时候主账户直接写死在程序里好点
             mainAcct = accounts[0];
             while (strategySwitch)
             {
                 Thread.Sleep(sleepInterval);
                 UpdateFundsInfo();
-                /*if (!IsTradeTime())
+                if (!IsTradeTime())
                 {
                     continue;
-                }*/
+                }
                 Quotes quotes;
                 lock (stocks)
                 {
@@ -86,6 +97,7 @@ namespace NineSunScripture.strategy
                         try
                         {
                             quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i].Code);
+                            SetBuyPlan(quotes);
                             buyStrategy.Buy(quotes, accounts, callback);
                             sellStrategy.Sell(quotes, accounts, callback);
                         }
@@ -96,7 +108,22 @@ namespace NineSunScripture.strategy
                     }
                 }
             }
+        }
 
+        /// <summary>
+        /// 设置买入计划，以便在买策略里面直接拿到仓位和成交量限制值
+        /// </summary>
+        /// <param name="quotes">行情对象</param>
+        private void SetBuyPlan(Quotes quotes)
+        {
+            foreach (Quotes item in stocks)
+            {
+                if (item.Code == quotes.Code)
+                {
+                    quotes.PositionCtrl = item.PositionCtrl;
+                    quotes.MoneyCtrl = item.MoneyCtrl;
+                }
+            }
         }
 
         /// <summary>
@@ -162,17 +189,18 @@ namespace NineSunScripture.strategy
 
         public void updateStocks(List<Quotes> quotes)
         {
-            //策略是在线程里跑的，修改前要加锁
-            lock (stocks)
-            {
-                this.stocks.Clear();
-                this.stocks.AddRange(quotes);
-            }
+            this.stocks.Clear();
+            this.stocks.AddRange(quotes);
         }
 
         public void setFundListener(IAcctInfoListener fundListener)
         {
             this.fundListener = fundListener;
+        }
+
+        public void setTradeCallback(ITrade callback)
+        {
+            this.callback = callback;
         }
     }
 }

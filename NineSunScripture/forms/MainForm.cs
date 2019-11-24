@@ -33,10 +33,11 @@ namespace NineSunScripture
             InitializeComponent();
             stockDbHelper = new StockDbHelper();
             stocks = new List<Quotes>();
-            mainStrategy = new MainStrategy(stocks, this);
+            mainStrategy = new MainStrategy();
             InitializeListViews();
             BindStocksData();
             mainStrategy.setFundListener(this);
+            mainStrategy.setTradeCallback(this);
         }
 
         private void InitializeListViews()
@@ -163,13 +164,31 @@ namespace NineSunScripture
             }
         }
 
+        /// <summary>
+        /// 汇总股票池=常驻+明日，龙头不需要加进去，因为龙头是用来指导卖点的，只有持仓里有才会设置
+        /// </summary>
         private void PutStocksTogether()
         {
             stocks.Clear();
-            stocks.AddRange(longTermStocks);
-            stocks.AddRange(tomorrowStocks);
-            stocks.AddRange(dragonLeaders);
-            stocks = stocks.Distinct().ToList();
+            if (tomorrowStocks.Count > 0)
+            {
+                stocks.AddRange(tomorrowStocks);
+                if (longTermStocks.Count > 0)
+                {
+                    foreach (Quotes quotes in longTermStocks)
+                    {
+                        if (!stocks.Contains(quotes))
+                        {
+                            stocks.Add(quotes);
+                        }
+                    }
+                }
+            }
+            else if (longTermStocks.Count > 0)
+            {
+                stocks.AddRange(longTermStocks);
+            }
+
             mainStrategy.updateStocks(stocks);
         }
 
@@ -186,13 +205,11 @@ namespace NineSunScripture
         }
         private void AddRuntimeInfo(string text)
         {
-            tbRuntimeInfo.Text = DateTime.Now.ToString("HH:mm:ss") + " " + text + "\r\n"
-                + tbRuntimeInfo.Text;
+            tbRuntimeInfo.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + text + "\r\n");
+            tbRuntimeInfo.ScrollToCaret();
         }
         private void BtnStart_Click(object sender, EventArgs e)
         {
-            PutStocksTogether();
-            mainStrategy.updateStocks(stocks);
             if (isProgramStarted)
             {
                 mainStrategy.Stop();
@@ -202,6 +219,8 @@ namespace NineSunScripture
                 AddRuntimeInfo("策略已停止");
                 return;
             }
+            PutStocksTogether();
+            mainStrategy.updateStocks(stocks);
             bool isStarted = mainStrategy.Start();
             if (!isStarted)
             {

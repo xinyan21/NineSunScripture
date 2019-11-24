@@ -42,7 +42,7 @@ namespace NineSunScripture.model
 
         public bool Equals(Position other)
         {
-            return this.Code == other.Code;
+            return this.Code.Equals(other.Code);
         }
     }
 }

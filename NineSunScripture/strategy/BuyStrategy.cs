@@ -41,6 +41,11 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
+            //买入计划里设置了成交额（单位为万）限制，这里就要判断
+            if (quotes.MoneyCtrl > 0 && quotes.Money < quotes.MoneyCtrl * 10000)
+            {
+                return;
+            }
             //已经涨停且封单大于1500万，过滤
             if (quotes.Buy1 == highLimit && quotes.Buy2Vol * highLimit > 1500 * 10000)
             {
@@ -54,6 +59,10 @@ namespace NineSunScripture.strategy
             //买一是涨停价、卖一或者卖二是涨停价符合买点
             if (quotes.Buy1 == highLimit || quotes.Sell1 == highLimit || quotes.Sell2 == highLimit)
             {
+                if (quotes.PositionCtrl > 0)
+                {
+                    positionRatioCtrl = quotes.PositionCtrl;
+                }
                 if (open == highLimit)
                 {
                     int openBoardInterval
@@ -78,6 +87,7 @@ namespace NineSunScripture.strategy
                 {
                     if (open != highLimit)
                     {
+                        //买入股票列表里面不会有持仓股，所以这里的仓位控制不会跟买入计划里的仓位冲突
                         positionRatioCtrl = 1 / 2;
                     }
                     order.Code = code;
@@ -105,6 +115,7 @@ namespace NineSunScripture.strategy
                 {
                     order.ClientId = account.ClientId;
                     //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
+                    //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
                     float profitPositionCtrl = getNewPositionRatio(account);
                     double availableCash = account.Funds.AvailableAmt;
                     if (profitPositionCtrl <= positionRatioCtrl)
