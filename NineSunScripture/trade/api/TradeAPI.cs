@@ -28,7 +28,8 @@ namespace NineSunScripture.trade.api
         //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串
         [DllImport(@dllPath, EntryPoint = "Logon", CallingConvention = CallingConvention.Winapi)]
-        public extern static int Logon(int qsid, string host, short port, string version, short accountType,
+        public extern static int Logon(int qsid, string host, short port, string version,
+            short salesDepartId, short accountType,
             string account, string password, string commPassword, bool dommac, byte[] errInfo);
         //功能：查询各种交易数据
         //clientID,//客户端 ID
@@ -180,6 +181,32 @@ namespace NineSunScripture.trade.api
         }
 
         /// <summary>
+        /// 查询股东账号
+        /// </summary>
+        /// <param name="clientId">登录返回的客户Id</param>
+        /// <returns></returns>
+        public static List<ShareHolderAcct> QueryShareHolderAccts(int clientId)
+        {
+            List<ShareHolderAcct> accounts = new List<ShareHolderAcct>();
+            ShareHolderAcct account = new ShareHolderAcct();
+            int code = QueryData(clientId, 5, account.Result, account.ErrorInfo);
+            if (code > 0)
+            {
+                String[,] temp = ApiHelper.ParseResults(account.Result);
+                for (int i = 0; i < temp.GetLength(0); i++)
+                {
+                    account = new ShareHolderAcct();
+                    account.code = temp[i, 0];
+                    account.category = temp[i, 1];
+                    account.name = temp[i, 2];
+                    accounts.Add(account);
+                }
+            }
+
+            return accounts;
+        }
+
+        /// <summary>
         ///  查询券商自带行情
         /// </summary>
         /// <param name="clientID">客户端id</param>
@@ -234,7 +261,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Buy(Order order)
         {
-            int rspId = SendOrder(order.ClientId, Order.CategoryBuy, order.Code, order.ShareholderAcct,
+            int rspId = SendOrder(order.ClientId, Order.CategoryBuy, order.ShareholderAcct, order.Code,
                 order.Price, order.Quantity, order.Result, order.ErrorInfo);
             return rspId;
         }
@@ -246,7 +273,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Sell(Order order)
         {
-            int rspId = SendOrder(order.ClientId, Order.CategorySell, order.Code, order.ShareholderAcct,
+            int rspId = SendOrder(order.ClientId, Order.CategorySell, order.ShareholderAcct, order.Code,
                 order.Price, order.Quantity, order.Result, order.ErrorInfo);
             return rspId;
         }

@@ -16,6 +16,7 @@ namespace NineSunScripture.strategy
     class BuyStrategy
     {
         private Dictionary<string, DateTime> openBoardTime = new Dictionary<string, DateTime>();
+        private Dictionary<string, Quotes> lastTickQuotes = new Dictionary<string, Quotes>();
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30)
@@ -27,12 +28,18 @@ namespace NineSunScripture.strategy
             string code = quotes.Code;
             float positionRatioCtrl = 1f;   //仓位比例控制
             //记录开板时间
-            if (quotes.Sell1 != highLimit && !openBoardTime.ContainsKey(code))
+            bool isBoardLastTick = lastTickQuotes.ContainsKey(code)
+                && (lastTickQuotes[quotes.Code].Buy1 == highLimit
+                || lastTickQuotes[quotes.Code].Sell1 == highLimit);
+            bool isNotBoardThisTick = lastTickQuotes.ContainsKey(code)
+                && quotes.Sell1 < highLimit && 0 != quotes.Sell1;
+            if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
                 openBoardTime.Add(code, DateTime.Now);
             }
-            //重置开板时间
-            if (quotes.Sell1 == highLimit && openBoardTime.ContainsKey(code))
+            //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
+            bool isBoardThisTick = quotes.Sell1 == highLimit || quotes.Buy1 == highLimit;
+            if (isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
                 openBoardTime.Remove(code);
             }
@@ -65,6 +72,11 @@ namespace NineSunScripture.strategy
                 }
                 if (open == highLimit)
                 {
+                    //没开板，过滤
+                    if (!openBoardTime.ContainsKey(code))
+                    {
+                        return;
+                    }
                     int openBoardInterval
                         = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
                     //涨停开盘，开板时间小于30秒，过滤
@@ -96,7 +108,9 @@ namespace NineSunScripture.strategy
                     {
                         int quantity = getTodaySoldQuantityOf(account.ClientId, code);
                         order.ClientId = account.ClientId;
-                        order.Quantity = (int)(quantity * positionRatioCtrl / highLimit);
+                        SetShareholderAcct(account, quotes, order);
+                        //数量是整百整百的
+                        order.Quantity = ((int)(quantity * positionRatioCtrl / (highLimit * 100))) * 100;
                         order.Code = code;
                         order.Price = highLimit;
                         int rspCode = TradeAPI.Buy(order);
@@ -114,6 +128,7 @@ namespace NineSunScripture.strategy
                 foreach (Account account in accounts)
                 {
                     order.ClientId = account.ClientId;
+                    SetShareholderAcct(account, quotes, order);
                     //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
                     //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
                     float profitPositionCtrl = getNewPositionRatio(account);
@@ -126,13 +141,33 @@ namespace NineSunScripture.strategy
                     {
                         availableCash = account.Funds.TotalAsset * positionRatioCtrl;
                     }
-                    order.Quantity = (int)(availableCash / highLimit);
+                    //数量是整百整百的
+                    order.Quantity = ((int)(availableCash / (highLimit * 100))) * 100;
                     int rspCode = TradeAPI.Buy(order);
                     string opLog
                         = account.FundAcct + "买入" + quotes.Name + "->" + order.Quantity + "股";
                     Logger.log(opLog);
                     callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                 }
+            }
+            lastTickQuotes[quotes.Code] = quotes;
+        }
+
+        /// <summary>
+        /// 设置订单的股东代码
+        /// </summary>
+        /// <param name="account">账号对象</param>
+        /// <param name="quotes">股票对象</param>
+        /// <param name="order">订单对象</param>
+        private void SetShareholderAcct(Account account,Quotes quotes,Order order)
+        {
+            if (quotes.Code.StartsWith("6"))
+            {
+                order.ShareholderAcct = account.ShShareholderAcct;
+            }
+            else
+            {
+                order.ShareholderAcct = account.SzShareholderAcct;
             }
         }
 
@@ -147,11 +182,11 @@ namespace NineSunScripture.strategy
             double totalProfitPct = account.Funds.TotalAsset / account.InitTotalAsset;
             if (totalProfitPct < 1.1)
             {
-                return 1 / 3;
+                return 1 / 3f;
             }
             else if (totalProfitPct < 1.2)
             {
-                return 1 / 2;
+                return 1 / 2f;
             }
             else if (totalProfitPct < 1.3)
             {
@@ -159,7 +194,7 @@ namespace NineSunScripture.strategy
             }
             else
             {
-                return 1;
+                return 1f;
             }
         }
 
@@ -202,11 +237,11 @@ namespace NineSunScripture.strategy
                 }
                 foreach (Order order in orders)
                 {
-                    if (order.Code != quotes.Code && order.Operation == Order.OperationBuy)
+                    if (order.Code != quotes.Code && order.Operation.Contains(Order.OperationBuy))
                     {
                         order.ClientId = account.ClientId;
                         int rspCode = TradeAPI.CancelOrder(order);
-                        string opLog = account.FundAcct + "撤销" + quotes.Name + "委托->"
+                        string opLog = account.FundAcct + "撤销[" + quotes.Name + "]委托->"
                             + order.Quantity + "股";
                         Logger.log(opLog);
                         callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
@@ -231,7 +266,7 @@ namespace NineSunScripture.strategy
             }
             foreach (Order order in todaySold)
             {
-                if (order.Code == code && order.Operation == Order.OperationSell)
+                if (order.Code == code && order.Operation.Contains(Order.OperationSell))
                 {
                     quantity += order.Quantity;
                 }
@@ -258,6 +293,7 @@ namespace NineSunScripture.strategy
             foreach (Account account in accounts)
             {
                 order.ClientId = account.ClientId;
+                SetShareholderAcct(account, quotes, order);
                 double availableCash = account.Funds.AvailableAmt;
                 order.Quantity = (int)(availableCash / 1000 * 10);
                 int rspCode = TradeAPI.Buy(order);

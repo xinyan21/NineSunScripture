@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NineSunScripture.db
 {
-    public class SQLiteHelper
+    public static class SQLiteHelper
     {
         //创建数据库文件
         public static void CreateDBFile(string fileName)

@@ -20,11 +20,10 @@ namespace NineSunScripture.forms
             InitializeComponent();
         }
 
-        public AddStockForm(MainForm mainForm, short category)
+        public AddStockForm(MainForm mainForm)
         {
             InitializeComponent();
             this.mainForm = mainForm;
-            this.category = category;
         }
 
         private void btnAddStcok_Click(object sender, EventArgs e)
@@ -42,6 +41,21 @@ namespace NineSunScripture.forms
             quotes.StockCategory = category;
             mainForm.AddStock(quotes);
             Close();
+        }
+
+        private void rbtnDragonLeader_CheckedChanged(object sender, EventArgs e)
+        {
+            this.category = Quotes.CategoryDragonLeader;
+        }
+
+        private void rbtnLongTerm_CheckedChanged(object sender, EventArgs e)
+        {
+            this.category = Quotes.CategoryLongTerm;
+        }
+
+        private void rbtnTomorrow_CheckedChanged(object sender, EventArgs e)
+        {
+            this.category = Quotes.CategoryTomorrow;
         }
     }
 }

@@ -17,6 +17,7 @@ namespace NineSunScripture.strategy
     /// </summary>
     public class MainStrategy
     {
+        public const string ReserveStocks = "000001|000002|000005|300233|600235";
         private const int IntervalOfNonTrade = 3000;
         //没有level2没必要设置太低
         private const int IntervalOfTrade = 1000;
@@ -65,26 +66,26 @@ namespace NineSunScripture.strategy
                 MessageBox.Show("没有可操作的账户");
                 return;
             }
+            UpdateFundsInfo(false);
             List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
-            //TODO实盘账户使用代码
+            //TODO 实盘账户使用代码
             //stocks.AddRange(positionStocks);
-            //TODO模拟账户使用代码BEGIN
-            string reserveStocks = "000001|000002|000005|300233|600235";
+            //TODO 模拟账户使用代码BEGIN
             foreach (Quotes quote in positionStocks)
             {
-                if (reserveStocks.Contains(quote.Code))
+                if (ReserveStocks.Contains(quote.Code))
                 {
                     continue;
                 }
                 stocks.Add(quote);
             }
-            //TODO模拟账户使用代码END
-            //TODO买了行情协议的时候主账户直接写死在程序里好点
+            //TODO 模拟账户使用代码END
+            //TODO 买了行情协议的时候主账户直接写死在程序里好点
             mainAcct = accounts[0];
             while (strategySwitch)
             {
                 Thread.Sleep(sleepInterval);
-                UpdateFundsInfo();
+                UpdateFundsInfo(true);
                 if (!IsTradeTime())
                 {
                     continue;
@@ -122,6 +123,7 @@ namespace NineSunScripture.strategy
                 {
                     quotes.PositionCtrl = item.PositionCtrl;
                     quotes.MoneyCtrl = item.MoneyCtrl;
+                    break;
                 }
             }
         }
@@ -129,9 +131,10 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 每隔10s更新一下账户信息
         /// </summary>
-        private void UpdateFundsInfo()
+        /// <param name="ctrlFrequency">是否控制频率</param>
+        private void UpdateFundsInfo(bool ctrlFrequency)
         {
-            if (DateTime.Now.Second % 3 != 0)
+            if (ctrlFrequency && DateTime.Now.Second % 3 != 0)
             {
                 return;
             }

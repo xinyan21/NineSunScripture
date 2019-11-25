@@ -13,8 +13,8 @@ namespace NineSunScripture.model
     {
         public const short CategoryBuy = 0;
         public const short CategorySell = 1;
-        public const string OperationBuy = "证券买入";
-        public const string OperationSell = "证券卖出";
+        public const string OperationBuy = "买入";
+        public const string OperationSell = "卖出";
 
         public String OrderId;
         /// <summary>

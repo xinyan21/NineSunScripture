@@ -27,6 +27,7 @@ namespace NineSunScripture
         private bool isProgramStarted = false;
         private StockDbHelper stockDbHelper;
         private Account account;
+        private string runtimeInfo;
 
         public MainForm()
         {
@@ -56,112 +57,90 @@ namespace NineSunScripture
             money.Width = 100;
             money.TextAlign = HorizontalAlignment.Center;
 
-            lvLongTermStocks.Columns.Add(stock);
-            lvLongTermStocks.Columns.Add(position);
-            lvLongTermStocks.Columns.Add(money);
-            lvLongTermStocks.MultiSelect = false;
-            lvLongTermStocks.GridLines = true;
-            lvLongTermStocks.View = View.Details;
-
             stock = (ColumnHeader)stock.Clone();
             position = (ColumnHeader)position.Clone();
             money = (ColumnHeader)money.Clone();
-            lvDragonLeaders.Columns.Add(stock);
-            lvDragonLeaders.Columns.Add(position);
-            lvDragonLeaders.Columns.Add(money);
-            lvDragonLeaders.MultiSelect = false;
-            lvDragonLeaders.GridLines = true;
-            lvDragonLeaders.View = View.Details;
+            lvStocks.Columns.Add(stock);
+            lvStocks.Columns.Add(position);
+            lvStocks.Columns.Add(money);
+            lvStocks.MultiSelect = false;
+            lvStocks.View = View.Details;
 
-            stock = (ColumnHeader)stock.Clone();
-            position = (ColumnHeader)position.Clone();
-            money = (ColumnHeader)money.Clone();
-            lvTomorrowStocks.Columns.Add(stock);
-            lvTomorrowStocks.Columns.Add(position);
-            lvTomorrowStocks.Columns.Add(money);
-            lvTomorrowStocks.MultiSelect = false;
-            lvTomorrowStocks.GridLines = true;
-            lvTomorrowStocks.View = View.Details;
-
-            lvPositions.Columns.Add("股票", 70, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("股票", 100, HorizontalAlignment.Center);
             lvPositions.Columns.Add("持仓数量", 100, HorizontalAlignment.Center);
             lvPositions.Columns.Add("可用", 100, HorizontalAlignment.Center);
             lvPositions.Columns.Add("盈亏", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("盈亏比例", 60, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("盈亏比例", 100, HorizontalAlignment.Center);
             lvPositions.Columns.Add("市值", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("仓位", 70, HorizontalAlignment.Center);
-        }
+            lvPositions.Columns.Add("仓位", 100, HorizontalAlignment.Center);
 
+            ImageList imgList = new ImageList();
+            imgList.ImageSize = new Size(1, 32);//分别是宽和高
+            lvStocks.SmallImageList = imgList;
+            lvPositions.SmallImageList = imgList;
+        }
+        /// <summary>
+        /// 绑定股票到listview
+        /// </summary>
         private void BindStocksData()
         {
+            ListViewGroup lvgDragonLeader = new ListViewGroup("龙头");
+            ListViewGroup lvgLongTerm = new ListViewGroup("常驻");
+            ListViewGroup lvgTomorrow = new ListViewGroup("明日");
+            lvStocks.Groups.Add(lvgDragonLeader);
+            lvStocks.Groups.Add(lvgLongTerm);
+            lvStocks.Groups.Add(lvgTomorrow);
             ListViewItem lvi;
             List<Quotes> quotes = stockDbHelper.GetStocksBy(Quotes.CategoryDragonLeader);
             dragonLeaders = quotes;
             if (quotes.Count > 0)
             {
-                lvDragonLeaders.BeginUpdate();
                 foreach (Quotes item in quotes)
                 {
-                    lvi = new ListViewItem(item.Name);
+                    lvi = new ListViewItem(item.Name, lvgDragonLeader);
                     lvi.SubItems.Add(item.PositionCtrl + "");
                     lvi.SubItems.Add(item.MoneyCtrl + "");
-                    lvDragonLeaders.Items.Add(lvi);
+                    lvi.Tag = item.Code;
+                    lvStocks.Items.Add(lvi);
                 }
-                lvDragonLeaders.EndUpdate();
             }
             longTermStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryLongTerm);
             if (quotes.Count > 0)
             {
-                lvLongTermStocks.BeginUpdate();
                 foreach (Quotes item in quotes)
                 {
-                    lvi = new ListViewItem(item.Name);
+                    lvi = new ListViewItem(item.Name, lvgLongTerm);
                     lvi.SubItems.Add(item.PositionCtrl + "");
                     lvi.SubItems.Add(item.MoneyCtrl + "");
-                    lvLongTermStocks.Items.Add(lvi);
+                    lvi.Tag = item.Code;
+                    lvStocks.Items.Add(lvi);
                 }
-                lvLongTermStocks.EndUpdate();
             }
             tomorrowStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryTomorrow);
             if (quotes.Count > 0)
             {
-                lvTomorrowStocks.BeginUpdate();
                 foreach (Quotes item in quotes)
                 {
-                    lvi = new ListViewItem(item.Name);
+                    lvi = new ListViewItem(item.Name, lvgTomorrow);
                     lvi.SubItems.Add(item.PositionCtrl + "");
                     lvi.SubItems.Add(item.MoneyCtrl + "");
-                    lvTomorrowStocks.Items.Add(lvi);
+                    lvi.Tag = item.Code;
+                    lvStocks.Items.Add(lvi);
                 }
-                lvTomorrowStocks.EndUpdate();
             }
         }
 
+        /// <summary>
+        /// 添加股票
+        /// </summary>
+        /// <param name="quotes">股票对象</param>
         public void AddStock(Quotes quotes)
         {
             stockDbHelper.AddStock(quotes);
-            ListViewItem lvi = new ListViewItem(quotes.Name);
-            lvi.SubItems.Add(quotes.PositionCtrl + "");
-            lvi.SubItems.Add(quotes.MoneyCtrl + "");
-            lvi.Tag = quotes.Code;
-            switch (quotes.StockCategory)
-            {
-                case Quotes.CategoryDragonLeader:
-                    dragonLeaders.Add(quotes);
-                    lvDragonLeaders.Items.Add(lvi);
-                    break;
-                case Quotes.CategoryLongTerm:
-                    longTermStocks.Add(quotes);
-                    lvLongTermStocks.Items.Add(lvi);
-                    break;
-                case Quotes.CategoryTomorrow:
-                    tomorrowStocks.Add(quotes);
-                    lvTomorrowStocks.Items.Add(lvi);
-                    break;
-
-                default:
-                    break;
-            }
+            lvStocks.BeginUpdate();
+            lvStocks.Items.Clear();
+            BindStocksData();
+            lvStocks.EndUpdate();
         }
 
         /// <summary>
@@ -196,112 +175,56 @@ namespace NineSunScripture
         {
             if (rspCode > 0)
             {
-                AddRuntimeInfo(msg);
+                runtimeInfo = msg + ">成功";
             }
             else
             {
-                AddRuntimeInfo(errInfo);
+                runtimeInfo = msg + ">失败，错误信息：" + errInfo;
             }
+            Invoke(new MethodInvoker(AddRuntimeInfo));
         }
-        private void AddRuntimeInfo(string text)
+        private void AddRuntimeInfo()
         {
-            tbRuntimeInfo.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + text + "\r\n");
+            tbRuntimeInfo.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + runtimeInfo + "\r\n");
             tbRuntimeInfo.ScrollToCaret();
-        }
-        private void BtnStart_Click(object sender, EventArgs e)
-        {
-            if (isProgramStarted)
-            {
-                mainStrategy.Stop();
-                BtnStart.Text = "启  动";
-                BtnStart.BackColor = Color.Red;
-                isProgramStarted = false;
-                AddRuntimeInfo("策略已停止");
-                return;
-            }
-            PutStocksTogether();
-            mainStrategy.updateStocks(stocks);
-            bool isStarted = mainStrategy.Start();
-            if (!isStarted)
-            {
-                return;
-            }
-            BtnStart.Text = "停  止";
-            BtnStart.BackColor = Color.DarkGray;
-            isProgramStarted = true;
-            AddRuntimeInfo("策略已启动");
         }
 
         private void MenuItemManageAcct_Click(object sender, EventArgs e)
         {
             new ManageAcctForm().Show();
         }
-        private void BtnSellAll_Click(object sender, EventArgs e)
-        {
-            mainStrategy.SellAll(this);
-        }
 
-        private void tspClearLongTerm_Click(object sender, EventArgs e)
+        private void tsmClearStocks_Click(object sender, EventArgs e)
         {
-            lvLongTermStocks.Items.Clear();
+            lvStocks.Items.Clear();
+            stockDbHelper.DelAllBy(Quotes.CategoryTomorrow);
             stockDbHelper.DelAllBy(Quotes.CategoryLongTerm);
-        }
-
-        private void tsmClearDragonLeaders_Click(object sender, EventArgs e)
-        {
-            lvDragonLeaders.Items.Clear();
             stockDbHelper.DelAllBy(Quotes.CategoryDragonLeader);
         }
 
-        private void tsmClearTomorrowStocks_Click(object sender, EventArgs e)
+        private void tsmDelStock_Click(object sender, EventArgs e)
         {
-            lvTomorrowStocks.Items.Clear();
-            stockDbHelper.DelAllBy(Quotes.CategoryTomorrow);
-        }
-
-        private void tspDelLongTerm_Click(object sender, EventArgs e)
-        {
-            if (lvLongTermStocks.SelectedItems.Count > 0)
+            if (lvStocks.SelectedItems.Count <= 0)
             {
-                stockDbHelper.DelStockBy(Quotes.CategoryLongTerm,
-                   lvTomorrowStocks.SelectedItems[0].Tag.ToString());
-                lvLongTermStocks.Items.Remove(lvLongTermStocks.SelectedItems[0]);
+                return;
             }
-        }
-        private void tspDelDragonLeaders_Click(object sender, EventArgs e)
-        {
-            if (lvDragonLeaders.SelectedItems.Count > 0)
+            string strCategory = lvStocks.SelectedItems[0].Group.Header;
+            short category = Quotes.CategoryTomorrow;
+            if (strCategory == "龙头")
             {
-                stockDbHelper.DelStockBy(Quotes.CategoryDragonLeader,
-                   lvTomorrowStocks.SelectedItems[0].Tag.ToString());
-                lvDragonLeaders.Items.Remove(lvDragonLeaders.SelectedItems[0]);
+                category = Quotes.CategoryDragonLeader;
             }
-        }
-        private void tspDelTomorrowStocks_Click(object sender, EventArgs e)
-        {
-            if (lvTomorrowStocks.SelectedItems.Count > 0)
+            else if (strCategory == "常驻")
             {
-                stockDbHelper.DelStockBy(Quotes.CategoryTomorrow,
-                    lvTomorrowStocks.SelectedItems[0].Tag.ToString());
-                lvTomorrowStocks.Items.Remove(lvTomorrowStocks.SelectedItems[0]);
+                category = Quotes.CategoryLongTerm;
             }
+            stockDbHelper.DelStockBy(category, lvStocks.SelectedItems[0].Tag.ToString());
+            lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
         }
 
-        private void tspAddLongTermStock_Click(object sender, EventArgs e)
+        private void tsmAddStock_Click(object sender, EventArgs e)
         {
-            AddStockForm addStockForm = new AddStockForm(this, Quotes.CategoryLongTerm);
-            addStockForm.Show();
-        }
-
-        private void tsmAddDragonLeader_Click(object sender, EventArgs e)
-        {
-            AddStockForm addStockForm = new AddStockForm(this, Quotes.CategoryDragonLeader);
-            addStockForm.Show();
-        }
-
-        private void tsmAddTomorrowStocks_Click(object sender, EventArgs e)
-        {
-            AddStockForm addStockForm = new AddStockForm(this, Quotes.CategoryTomorrow);
+            AddStockForm addStockForm = new AddStockForm(this);
             addStockForm.Show();
         }
 
@@ -322,6 +245,11 @@ namespace NineSunScripture
             lvPositions.Items.Clear();
             foreach (Position position in account.Positions)
             {
+                //TODO 模拟交易代码
+                if (MainStrategy.ReserveStocks.Contains(position.Code))
+                {
+                    continue;
+                }
                 ListViewItem lvi = new ListViewItem(position.Name);
                 lvi.SubItems.Add(position.QuantityBalance + "");
                 lvi.SubItems.Add(position.AvailableQuantity + "");
@@ -335,6 +263,45 @@ namespace NineSunScripture
                 lvPositions.Items.Add(lvi);
             }
             lvPositions.EndUpdate();
+        }
+
+        private void tspManageAcct_Click(object sender, EventArgs e)
+        {
+            new ManageAcctForm().Show();
+        }
+
+        private void tsmiSwitch_Click(object sender, EventArgs e)
+        {
+            if (isProgramStarted)
+            {
+                mainStrategy.Stop();
+                tsmiSwitch.Text = "启动";
+                isProgramStarted = false;
+                runtimeInfo = "策略已停止";
+                AddRuntimeInfo();
+                return;
+            }
+            PutStocksTogether();
+            mainStrategy.updateStocks(stocks);
+            bool isStarted = mainStrategy.Start();
+            if (!isStarted)
+            {
+                return;
+            }
+            tsmiSwitch.Text = "停止";
+            isProgramStarted = true;
+            runtimeInfo = "策略已启动";
+            AddRuntimeInfo();
+        }
+
+        private void tsmiClearPositions_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("确认要清仓吗？", "警告",
+                MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if (dr == DialogResult.OK)
+            {
+                mainStrategy.SellAll(this);
+            }
         }
     }
 

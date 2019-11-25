@@ -28,8 +28,9 @@ namespace NineSunScripture.trade.helper
             }
             foreach (Account account in accounts)
             {
+                //TODO 新版本加了营业部ID，后面看要不要加到数据库
                 int userId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
-                    account.BrokerServerPort, account.VersionOfTHS, account.AcctType,
+                    account.BrokerServerPort, account.VersionOfTHS, 0, account.AcctType,
                     account.FundAcct, account.Password, account.CommPwd,
                     account.IsRandomMac, account.ErrorInfo);
                 if (userId > 0)
@@ -37,12 +38,27 @@ namespace NineSunScripture.trade.helper
                     account.ClientId = userId;
                     account.Funds = TradeAPI.QueryFunds(userId);
                     account.Positions = TradeAPI.QueryPositions(userId);
+                    account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(userId);
                     if (account.InitTotalAsset == 0)
                     {
                         account.InitTotalAsset = (int)account.Funds.TotalAsset;
                         dbHelper.EditInitTotalAsset(account);
                     }
                     Logger.log("资金账号" + account.FundAcct + "登录成功，ID为" + userId);
+                    if (account.ShareHolderAccts.Count > 0)
+                    {
+                        foreach (ShareHolderAcct shareHolderAcct in account.ShareHolderAccts)
+                        {
+                            if (shareHolderAcct.category == "上海A股")
+                            {
+                                account.ShShareholderAcct = shareHolderAcct.code;
+                            }
+                            else
+                            {
+                                account.SzShareholderAcct = shareHolderAcct.code;
+                            }
+                        }
+                    }
                 }
                 else
                 {

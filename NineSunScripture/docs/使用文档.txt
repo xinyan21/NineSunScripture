@@ -1,7 +1,7 @@
 ——————————————————————————————————————————同花顺证券交易协议————————————————————————————————————————————————————
 //功能：查询各种交易数据
 //ClientID,//客户端 ID
-//Category,//查询信息的种类 0资金	1股份 2当日委托	3当日成交 4可撤单 5股东账户 
+//Category,//查询信息的种类 0资金	1股份 2当日委托	3当日成交 4可撤单 5股东账户 12新股信息 13新股额度 14配号查询 15中签查询
 //Result, //内保存了返回的查询数据, 形式为表格数据，行数据之间通过\n 字符分割，列数据之间通过\t 分隔。一般要分配 1024 * 1024 字节的空间。出错时为空字符串。
 //ErrInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串。
 int WINAPI QueryData(int ClientID,int Category,char *Result,char *ErrInfo)
@@ -41,13 +41,14 @@ int WINAPI CancelOrder(int ClientID,const char *Gddm,const char *OrderID,char *R
 //Host,//券商服务器IP
 //Port,//券商服务器端口
 //Version,//同花顺客户端版本号		目前通用版本号E065.20.92			目前发现，海通需要使用老版本号E065.18.77
+//YybId, 营业部ID   特殊的几个券商需要这个值
 //AccountType,//账户类型 0x20自动判断(有些券商可能不支持) 0x30资金账户 0x31深圳账户 0x32上海账户 0x33基金账户 0x34深圳B股 0x35上海B股 0x6B客户号
 //Account,//券商账号“账号类型需要与上面的对应”
 //Password,//券商密码
 //comm_password,//通讯密码	可空
 //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
 //ErrInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串
-int WINAPI  Logon(int Qsid,const char *Host,short Port,const char *Version,short AccountType,const char *Account,const char *Password,const char *comm_password,bool dommac,char *ErrInfo)
+int WINAPI  Logon(int Qsid,const char *Host,short Port,const char *Version,short YybId,short AccountType,const char *Account,const char *Password,const char *comm_password,bool dommac,char *ErrInfo)
 
 
 //功能：退出登录	无返回值
@@ -63,7 +64,7 @@ int WINAPI QuerySQ(const char *Account)
 
 //功能：历史数据
 //ClientID - 客户端 ID
-//Category - 查询信息的种类 0 历史委托 1 历史成交 2 资金流水 3 交割单 12新股信息 13新股额度 14配号查询 15中签查询
+//Category - 查询信息的种类 0 历史委托 1 历史成交 2 资金流水 3 交割单 
 //BeginDate - 开始日期，格式为 yyyyMMdd,比如 2017 年 2 月 1 日为 20170201
 //EndDate - 结束日期，格式为 yyyyMMdd,比如 2017 年 2 月 1 日为 20170201
 //Result-此API执行返回后，Result内保存了返回的查询数据，形式为表格数据，行数据之间通过\n字符分割，列数据之间通过\t分隔。一般要分配 1024*1024 字节的空间。出错时为空字符串。

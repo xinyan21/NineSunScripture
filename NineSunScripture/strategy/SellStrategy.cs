@@ -37,12 +37,13 @@ namespace NineSunScripture.strategy
             float open = quotes.Open;
             float preClose = quotes.PreClose;
             string code = quotes.Code;
-            if (curPrice == highLimit || curPrice == lowLimit)
+            Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
+            if (curPrice == highLimit || curPrice == lowLimit || null == position)
             {
                 return;
             }
             DateTime now = DateTime.Now;
-            float avgCost = AccountHelper.GetPositionOf(accounts, quotes.Code).AvgCost;
+            float avgCost = position.AvgCost;
             if (open != highLimit)
             {
                 StopWin(quotes, accounts, callback);
@@ -92,7 +93,7 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 止盈TODO 这里有个卖出之后成本降低导致收益增高的问题，解决方法一个是在本地记录成本
+        /// TODO 止盈 这里有个卖出之后成本降低导致收益增高的问题，解决方法一个是在本地记录成本
         /// </summary>
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
@@ -204,6 +205,11 @@ namespace NineSunScripture.strategy
                 }
                 foreach (Position position in positions)
                 {
+                    //TODO 模拟盘代码
+                    if (MainStrategy.ReserveStocks.Contains(position.Code))
+                    {
+                        continue;
+                    }
                     quotes.Code = position.Code;
                     quotes.Name = position.Name;
                     SellByAcct(quotes, account, callback, 1);
