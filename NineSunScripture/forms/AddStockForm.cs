@@ -14,7 +14,7 @@ namespace NineSunScripture.forms
     public partial class AddStockForm : Form
     {
         private MainForm mainForm;
-        private short category;
+        private short category = Quotes.CategoryLatest;
         public AddStockForm()
         {
             InitializeComponent();
@@ -55,7 +55,7 @@ namespace NineSunScripture.forms
 
         private void rbtnTomorrow_CheckedChanged(object sender, EventArgs e)
         {
-            this.category = Quotes.CategoryTomorrow;
+            this.category = Quotes.CategoryLatest;
         }
     }
 }

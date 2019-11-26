@@ -20,9 +20,9 @@ namespace NineSunScripture.model
         /// </summary>
         public const short CategoryDragonLeader = 1;
         /// <summary>
-        /// 明日股票池中的股票
+        /// 最新股票池中的股票
         /// </summary>
-        public const short CategoryTomorrow = 2;
+        public const short CategoryLatest = 2;
 
         public String Code;
         public String Name;
@@ -71,7 +71,7 @@ namespace NineSunScripture.model
         /// </summary>
         public int MoneyCtrl;
         /// <summary>
-        /// 股票类型：常驻0、龙头1、明日2
+        /// 股票类型：常驻0、龙头1、最新2
         /// </summary>
         public short StockCategory;
 

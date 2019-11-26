@@ -33,7 +33,7 @@ namespace NineSunScripture.model
         public int Quantity;
         public String Code;
 
-        //冗余字段：用于当日成交、撤单等查询
+        //冗余字段：用于最新成交、撤单等查询
         public String Name;
         public String Time;
         /// <summary>

@@ -14,6 +14,8 @@ using NineSunScripture.forms;
 using NineSunScripture.trade.helper;
 using NineSunScripture.strategy;
 using NineSunScripture.db;
+using NineSunScripture.util.log;
+using System.Threading;
 
 namespace NineSunScripture
 {
@@ -39,6 +41,9 @@ namespace NineSunScripture
             BindStocksData();
             mainStrategy.setFundListener(this);
             mainStrategy.setTradeCallback(this);
+            Thread.Sleep(3000);
+            //程序启动自动启动策略
+            tsmiSwitch_Click(null, null);
         }
 
         private void InitializeListViews()
@@ -86,7 +91,7 @@ namespace NineSunScripture
         {
             ListViewGroup lvgDragonLeader = new ListViewGroup("龙头");
             ListViewGroup lvgLongTerm = new ListViewGroup("常驻");
-            ListViewGroup lvgTomorrow = new ListViewGroup("明日");
+            ListViewGroup lvgTomorrow = new ListViewGroup("最新");
             lvStocks.Groups.Add(lvgDragonLeader);
             lvStocks.Groups.Add(lvgLongTerm);
             lvStocks.Groups.Add(lvgTomorrow);
@@ -116,7 +121,7 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            tomorrowStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryTomorrow);
+            tomorrowStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryLatest);
             if (quotes.Count > 0)
             {
                 foreach (Quotes item in quotes)
@@ -144,7 +149,7 @@ namespace NineSunScripture
         }
 
         /// <summary>
-        /// 汇总股票池=常驻+明日，龙头不需要加进去，因为龙头是用来指导卖点的，只有持仓里有才会设置
+        /// 汇总股票池=常驻+最新，龙头不需要加进去，因为龙头是用来指导卖点的，只有持仓里有才会设置
         /// </summary>
         private void PutStocksTogether()
         {
@@ -197,7 +202,7 @@ namespace NineSunScripture
         private void tsmClearStocks_Click(object sender, EventArgs e)
         {
             lvStocks.Items.Clear();
-            stockDbHelper.DelAllBy(Quotes.CategoryTomorrow);
+            stockDbHelper.DelAllBy(Quotes.CategoryLatest);
             stockDbHelper.DelAllBy(Quotes.CategoryLongTerm);
             stockDbHelper.DelAllBy(Quotes.CategoryDragonLeader);
         }
@@ -209,7 +214,7 @@ namespace NineSunScripture
                 return;
             }
             string strCategory = lvStocks.SelectedItems[0].Group.Header;
-            short category = Quotes.CategoryTomorrow;
+            short category = Quotes.CategoryLatest;
             if (strCategory == "龙头")
             {
                 category = Quotes.CategoryDragonLeader;
@@ -272,6 +277,9 @@ namespace NineSunScripture
 
         private void tsmiSwitch_Click(object sender, EventArgs e)
         {
+            runtimeInfo = "策略开始启动";
+            AddRuntimeInfo();
+            Logger.log(runtimeInfo);
             if (isProgramStarted)
             {
                 mainStrategy.Stop();
@@ -286,6 +294,10 @@ namespace NineSunScripture
             bool isStarted = mainStrategy.Start();
             if (!isStarted)
             {
+                string log = "策略启动失败";
+                runtimeInfo = log;
+                AddRuntimeInfo();
+                Logger.log(log);
                 return;
             }
             tsmiSwitch.Text = "停止";

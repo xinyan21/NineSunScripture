@@ -15,8 +15,21 @@ namespace NineSunScripture.strategy
     /// </summary>
     class BuyStrategy
     {
+        /// <summary>
+        /// 默认成交额限制是7000万，低于的过滤
+        /// </summary>
+        private const int DefaultMoneyCtrl = 7000;
+        /// <summary>
+        /// 最小买一涨幅
+        /// </summary>
+        private const float MinBuy1Ratio = 1.07f;
+        /// <summary>
+        /// 最大买一额限制默认是1500万
+        /// </summary>
+        private const int MaxBuy1MoneyCtrl = 1500;
         private Dictionary<string, DateTime> openBoardTime = new Dictionary<string, DateTime>();
         private Dictionary<string, Quotes> lastTickQuotes = new Dictionary<string, Quotes>();
+
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30)
@@ -44,22 +57,21 @@ namespace NineSunScripture.strategy
                 openBoardTime.Remove(code);
             }
             //成交额小于7000万过滤
-            if (quotes.Money < 7000 * 10000)
-            {
-                return;
-            }
             //买入计划里设置了成交额（单位为万）限制，这里就要判断
-            if (quotes.MoneyCtrl > 0 && quotes.Money < quotes.MoneyCtrl * 10000)
+            bool isMoneyNotQuolified = quotes.MoneyCtrl > 0
+                && quotes.Money < quotes.MoneyCtrl * 10000;
+            //买入计划的成交额限制与7000万限制只要满足一个即可买入
+            if (isMoneyNotQuolified && quotes.Money < DefaultMoneyCtrl * 10000)
             {
                 return;
             }
             //已经涨停且封单大于1500万，过滤
-            if (quotes.Buy1 == highLimit && quotes.Buy2Vol * highLimit > 1500 * 10000)
+            if (quotes.Buy1 == highLimit && quotes.Buy2Vol * highLimit > MaxBuy1MoneyCtrl * 10000)
             {
                 return;
             }
             //买一小于7%的直线拉板，过滤
-            if (quotes.Buy1 < quotes.PreClose * 1.07)
+            if (quotes.Buy1 < quotes.PreClose * MinBuy1Ratio)
             {
                 return;
             }
@@ -79,13 +91,14 @@ namespace NineSunScripture.strategy
                     }
                     int openBoardInterval
                         = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
-                    //涨停开盘，开板时间小于30秒，过滤
-                    if (openBoardInterval < 30)
+                    //涨停开盘，开板时间小于20秒，过滤
+                    if (openBoardInterval < 20)
                     {
                         Logger.log("openBoardInterval->" + openBoardInterval);
                         return;
                     }
                 }
+                //这里取消撤单后，后面要重新查询资金，否则白撤
                 CancelOrdersCanCancel(accounts, quotes, callback);
                 Funds funds = AccountHelper.QueryTotalFunds(accounts);
                 //所有账户总可用金额小于每个账号一手的金额或者小于1万，直接退出
@@ -115,7 +128,8 @@ namespace NineSunScripture.strategy
                         order.Price = highLimit;
                         int rspCode = TradeAPI.Buy(order);
                         string opLog
-                            = account.FundAcct + "买入" + quotes.Name + "->" + order.Quantity + "股";
+                            = account.FundAcct + "策略回封买入" + quotes.Name + "->"
+                            + order.Quantity * order.Price + "元";
                         Logger.log(opLog);
                         callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                     }
@@ -127,6 +141,7 @@ namespace NineSunScripture.strategy
                 order.Price = highLimit;
                 foreach (Account account in accounts)
                 {
+                    account.Funds = TradeAPI.QueryFunds(account.ClientId);
                     order.ClientId = account.ClientId;
                     SetShareholderAcct(account, quotes, order);
                     //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
@@ -145,7 +160,8 @@ namespace NineSunScripture.strategy
                     order.Quantity = ((int)(availableCash / (highLimit * 100))) * 100;
                     int rspCode = TradeAPI.Buy(order);
                     string opLog
-                        = account.FundAcct + "买入" + quotes.Name + "->" + order.Quantity + "股";
+                        = account.FundAcct + "策略买入" + quotes.Name + "->"
+                        + order.Quantity * order.Price + "元";
                     Logger.log(opLog);
                     callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                 }
@@ -159,7 +175,7 @@ namespace NineSunScripture.strategy
         /// <param name="account">账号对象</param>
         /// <param name="quotes">股票对象</param>
         /// <param name="order">订单对象</param>
-        private void SetShareholderAcct(Account account,Quotes quotes,Order order)
+        public static void SetShareholderAcct(Account account, Quotes quotes, Order order)
         {
             if (quotes.Code.StartsWith("6"))
             {
@@ -226,7 +242,8 @@ namespace NineSunScripture.strategy
         /// </summary>
         /// <param name="accounts">账户对象数组</param>
         /// <param name="quotes">股票对象</param>
-        private void CancelOrdersCanCancel(List<Account> accounts, Quotes quotes, ITrade callback)
+        public static void CancelOrdersCanCancel(
+            List<Account> accounts, Quotes quotes, ITrade callback)
         {
             foreach (Account account in accounts)
             {

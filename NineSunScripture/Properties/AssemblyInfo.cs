@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("NineSunScripture")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("九阳真经")]
+[assembly: AssemblyDescription("九阳真经策略量化交易客户端")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("NineSunScripture")]
+[assembly: AssemblyCompany("N羿")]
+[assembly: AssemblyProduct("九阳真经策略")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

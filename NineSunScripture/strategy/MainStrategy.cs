@@ -44,7 +44,9 @@ namespace NineSunScripture.strategy
         {
             if (null == stocks || stocks.Count == 0)
             {
-                MessageBox.Show("没有可操作的股票");
+                string hint = "没有可操作的股票";
+                MessageBox.Show(hint);
+                Logger.log(hint);
                 return false;
             }
             mainThread = new Thread(Process);
@@ -56,6 +58,13 @@ namespace NineSunScripture.strategy
         public void Stop()
         {
             strategySwitch = false;
+            if (accounts.Count > 0)
+            {
+                foreach (Account account in accounts)
+                {
+                    TradeAPI.Logoff(account.ClientId);
+                }
+            }
         }
 
         private void Process()

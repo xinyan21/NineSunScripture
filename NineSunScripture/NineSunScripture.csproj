@@ -26,8 +26,11 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <ProductName>九阳真经策略</ProductName>
+    <PublisherName>N羿</PublisherName>
+    <SuiteName>九阳真经</SuiteName>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>2</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -92,6 +95,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon_app128x128.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.3.0\lib\net45\EntityFramework.dll</HintPath>
@@ -136,6 +142,12 @@
     <Compile Include="forms\AddStockForm.Designer.cs">
       <DependentUpon>AddStockForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="forms\BuyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="forms\BuyForm.Designer.cs">
+      <DependentUpon>BuyForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -171,8 +183,12 @@
     <Compile Include="trade\helper\AccountHelper.cs" />
     <Compile Include="trade\helper\ApiHelper.cs" />
     <Compile Include="util\log\Logger.cs" />
+    <Compile Include="util\test\TestTrade.cs" />
     <EmbeddedResource Include="forms\AddStockForm.resx">
       <DependentUpon>AddStockForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="forms\BuyForm.resx">
+      <DependentUpon>BuyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -205,11 +221,13 @@
     <Content Include="docs\IP.txt" />
     <Content Include="docs\使用文档.txt" />
     <Content Include="docs\券商检测机制说明.txt" />
+    <Content Include="docs\开发计划.txt" />
     <Content Include="docs\接口返回数据格式.txt" />
     <None Include="Resources\3%281%29.png" />
     <None Include="Resources\10.jpg" />
     <None Include="Resources\66.png" />
     <None Include="Resources\6.jpg" />
+    <Content Include="icon_app128x128.ico" />
     <Content Include="Resources\bg_list.jpg" />
     <None Include="Resources\bg_list1.png" />
     <None Include="Resources\bg_list.png" />

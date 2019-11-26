@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            this.resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
             this.cmsStocks = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -258,7 +258,7 @@
             // 
             this.tsmiClearPositions.Name = "tsmiClearPositions";
             this.tsmiClearPositions.Size = new System.Drawing.Size(150, 26);
-            this.tsmiClearPositions.Text = "清仓";
+            this.tsmiClearPositions.Text = "一键清仓";
             this.tsmiClearPositions.Click += new System.EventHandler(this.tsmiClearPositions_Click);
             // 
             // tspExit
@@ -324,7 +324,7 @@
             this.MainMenuStrip = this.MenuMain;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "MainForm";
-            this.Text = "九阳真经";
+            this.Text = "九阳真经策略";
             this.flowLayoutPanel2.ResumeLayout(false);
             this.cmsStocks.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
@@ -337,6 +337,7 @@
         }
 
         #endregion
+        private System.ComponentModel.ComponentResourceManager resources;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lblTotalAsset;

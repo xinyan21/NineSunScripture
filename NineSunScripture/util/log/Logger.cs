@@ -72,7 +72,7 @@ namespace NineSunScripture.util.log
 
                 lock (logLock)
                 {
-                    File.AppendAllLines(basePath + "\\Log\\" + dataString + logFileName, logText);
+                    File.AppendAllLines(basePath + "\\Log\\" + dataString + "\\" + logFileName, logText);
                 }
             }
             catch (Exception) { }

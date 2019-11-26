@@ -33,7 +33,7 @@ namespace NineSunScripture.trade.api
             string account, string password, string commPassword, bool dommac, byte[] errInfo);
         //功能：查询各种交易数据
         //clientID,//客户端 ID
-        //category,//查询信息的种类 0资金	1股份 2当日委托	3当日成交 4可撤单 5股东账户 
+        //category,//查询信息的种类 0资金	1股份 2最新委托	3最新成交 4可撤单 5股东账户 
         //result, //内保存了返回的查询数据, 形式为表格数据，行数据之间通过\n 字符分割，列数据之间通过\t 分隔。一般要分配 1024 * 1024 字节的空间。出错时为空字符串。
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串。
         [DllImport(@dllPath, EntryPoint = "QueryData", CallingConvention = CallingConvention.Winapi)]
@@ -123,7 +123,7 @@ namespace NineSunScripture.trade.api
         }
 
         /// <summary>
-        /// 查询当日成交
+        /// 查询最新成交
         /// </summary>
         /// <param name="clientId">登录返回的客户Id</param>
         /// <returns></returns>

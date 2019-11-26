@@ -27,6 +27,22 @@ namespace NineSunScripture.strategy
         private const float FirstStopWinPosition = 0.3f;
         private const float SecondStopWinPosition = 0.5f;
         private const float ThirdStopWinPosition = 0.5f;
+        /// <summary>
+        /// 止损跌幅
+        /// </summary>
+        private const float StopLossRatio = 0.92f;
+        /// <summary>
+        /// 太弱跌幅
+        /// </summary>
+        private const float TooWeakRatio = 0.95f;
+        /// <summary>
+        /// 2点不够强涨幅
+        /// </summary>
+        private const float NotGoodRatio = 1.01f;
+        /// <summary>
+        /// 2:30不够强卖出涨幅
+        /// </summary>
+        private const float GoodByeRatio = 1.05f;
 
         private Dictionary<string, float> lastTickPrice = new Dictionary<string, float>();
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
@@ -47,14 +63,14 @@ namespace NineSunScripture.strategy
             if (open != highLimit)
             {
                 StopWin(quotes, accounts, callback);
-                if (open < quotes.PreClose * 0.92)
+                if (open < quotes.PreClose * StopLossRatio)
                 {
                     if (curPrice > open * 1.04)
                     {
                         Logger.log("超低开拉升4%卖" + quotes.Name);
                         Sell(quotes, accounts, callback, 1);
                     }
-                    if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * 0.95)
+                    if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * TooWeakRatio)
                     {
                         Logger.log("超低开10:10还小于-5%卖" + quotes.Name);
                         Sell(quotes, accounts, callback, 1);
@@ -62,17 +78,17 @@ namespace NineSunScripture.strategy
                 }
                 else
                 {
-                    if (curPrice <= avgCost * 0.92 || curPrice <= preClose * 0.92)
+                    if (curPrice <= avgCost * StopLossRatio || curPrice <= preClose * StopLossRatio)
                     {
                         Logger.log("小于-8%卖" + quotes.Name);
                         Sell(quotes, accounts, callback, 1);
                     }
-                    if (now.Hour == 14 && curPrice <= preClose * 1.01)
+                    if (now.Hour == 14 && curPrice <= preClose * NotGoodRatio)
                     {
                         Logger.log("2:00小于1%卖" + quotes.Name);
                         Sell(quotes, accounts, callback, 1);
                     }
-                    if (now.Hour == 14 && now.Minute >= 30 && curPrice <= preClose * 1.05)
+                    if (now.Hour == 14 && now.Minute >= 30 && curPrice <= preClose * GoodByeRatio)
                     {
                         Logger.log("2:30小于5%卖" + quotes.Name);
                         Sell(quotes, accounts, callback, 1);
@@ -93,7 +109,9 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// TODO 止盈 这里有个卖出之后成本降低导致收益增高的问题，解决方法一个是在本地记录成本
+        /// TODO 【重点】止盈 这里有个卖出之后成本降低导致收益增高的问题，解决方法一个是在本地记录成本
+        /// 还有就是开板清掉买回，这个成本如何算
+        /// 好像就只有20%这档会触发，除非一直不开板到结尾
         /// </summary>
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
@@ -168,7 +186,8 @@ namespace NineSunScripture.strategy
                 order.Quantity = (int)(order.Quantity * sellRatio);
             }
             int rspCode = TradeAPI.Sell(order);
-            string opLog = account.FundAcct + "卖出" + quotes.Name + "->" + order.Quantity + "股";
+            string opLog = account.FundAcct + "策略卖出" + quotes.Name + "->"
+                + order.Quantity * order.Price + "元";
             Logger.log(opLog);
             callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
         }
