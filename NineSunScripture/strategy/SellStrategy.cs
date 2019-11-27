@@ -173,21 +173,21 @@ namespace NineSunScripture.strategy
         {
             //因为是卖出，所以当天登录时候的仓位就可以拿来用，如果是买那就得查询最新的
             Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
-            if (null == position || position.AvailableQuantity == 0)
+            if (null == position || position.AvailableBalance == 0)
             {
                 return;
             }
             Order order = new Order();
             order.ClientId = account.ClientId;
             order.Code = quotes.Code;
-            order.Quantity = position.AvailableQuantity;
+            order.Quantity = position.AvailableBalance;
             if (sellRatio > 0)
             {
                 order.Quantity = (int)(order.Quantity * sellRatio);
             }
             int rspCode = TradeAPI.Sell(order);
             string opLog = account.FundAcct + "策略卖出" + quotes.Name + "->"
-                + order.Quantity * order.Price + "元";
+                + (order.Quantity * order.Price).ToString("0.00####") + "万元";
             Logger.log(opLog);
             callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
         }

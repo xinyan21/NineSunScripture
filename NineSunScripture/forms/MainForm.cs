@@ -190,6 +190,7 @@ namespace NineSunScripture
         }
         private void AddRuntimeInfo()
         {
+            Logger.log(runtimeInfo);
             tbRuntimeInfo.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + runtimeInfo + "\r\n");
             tbRuntimeInfo.ScrollToCaret();
         }
@@ -256,12 +257,12 @@ namespace NineSunScripture
                     continue;
                 }
                 ListViewItem lvi = new ListViewItem(position.Name);
-                lvi.SubItems.Add(position.QuantityBalance + "");
-                lvi.SubItems.Add(position.AvailableQuantity + "");
+                lvi.SubItems.Add(position.StockBalance + "");
+                lvi.SubItems.Add(position.AvailableBalance + "");
                 lvi.SubItems.Add(position.ProfitAndLoss + "");
                 lvi.SubItems.Add(position.ProfitAndLossPct + "%");
-                lvi.SubItems.Add(position.QuantityBalance * position.Price + "");
-                int positionRatio = (int)(position.QuantityBalance * position.Price
+                lvi.SubItems.Add(position.StockBalance * position.Price + "");
+                int positionRatio = (int)(position.StockBalance * position.Price
                     / account.Funds.TotalAsset * 100);
                 lvi.SubItems.Add(positionRatio + "%");
 

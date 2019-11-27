@@ -30,7 +30,8 @@ namespace NineSunScripture.db
         private static string CreateConnectionString()
         {
             SQLiteConnectionStringBuilder connectionString = new SQLiteConnectionStringBuilder();
-            connectionString.DataSource = @"data/NineSunScripture.db";
+            connectionString.DataSource = System.Environment.CurrentDirectory
+                + @"/data/NineSunScripture.db";
 
             string conStr = connectionString.ToString();
             return conStr;

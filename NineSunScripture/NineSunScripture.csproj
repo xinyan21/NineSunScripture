@@ -219,6 +219,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="docs\IP.txt" />
+    <Content Include="docs\买入策略流程图.png" />
     <Content Include="docs\使用文档.txt" />
     <Content Include="docs\券商检测机制说明.txt" />
     <Content Include="docs\开发计划.txt" />

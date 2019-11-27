@@ -101,11 +101,15 @@ namespace NineSunScripture.trade.helper
             foreach (Account account in accounts)
             {
                 Position temp = GetPositionOf(account.Positions, stock);
-                if (null == position)
+                if (null == temp)
                 {
                     continue;
                 }
-                position.AvailableQuantity += temp.AvailableQuantity;
+                if (null==position)
+                {
+                    position = new Position();
+                }
+                position.AvailableBalance += temp.AvailableBalance;
                 position.AvgCost = (position.AvgCost + temp.AvgCost) / 2;
                 position.FrozenQuantity += temp.FrozenQuantity;
                 position.ProfitAndLoss += temp.ProfitAndLoss;
@@ -143,12 +147,12 @@ namespace NineSunScripture.trade.helper
                 {
                     if (item.Code == item2.Code)
                     {
-                        item2.AvailableQuantity += item.AvailableQuantity;
+                        item2.AvailableBalance += item.AvailableBalance;
                         item2.AvgCost += item.AvgCost;
                         item2.FrozenQuantity += item.FrozenQuantity;
                         item2.ProfitAndLoss += item.ProfitAndLoss;
                         item2.ProfitAndLossPct += item.ProfitAndLossPct;
-                        item2.QuantityBalance += item.QuantityBalance;
+                        item2.StockBalance += item.StockBalance;
                     }
                 }
             }

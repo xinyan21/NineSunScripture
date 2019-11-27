@@ -39,7 +39,7 @@ namespace NineSunScripture.strategy
             float highLimit = quotes.HighLimit;
             float open = quotes.Open;
             string code = quotes.Code;
-            float positionRatioCtrl = 1f;   //仓位比例控制
+            float positionRatioCtrl = 1f;   //买入计划仓位比例
             //记录开板时间
             bool isBoardLastTick = lastTickQuotes.ContainsKey(code)
                 && (lastTickQuotes[quotes.Code].Buy1 == highLimit
@@ -78,10 +78,6 @@ namespace NineSunScripture.strategy
             //买一是涨停价、卖一或者卖二是涨停价符合买点
             if (quotes.Buy1 == highLimit || quotes.Sell1 == highLimit || quotes.Sell2 == highLimit)
             {
-                if (quotes.PositionCtrl > 0)
-                {
-                    positionRatioCtrl = quotes.PositionCtrl;
-                }
                 if (open == highLimit)
                 {
                     //没开板，过滤
@@ -98,6 +94,12 @@ namespace NineSunScripture.strategy
                         return;
                     }
                 }
+                //###############以上都是买点判断########################
+                //###############下面是买入策略########################
+                if (quotes.PositionCtrl > 0)
+                {
+                    positionRatioCtrl = quotes.PositionCtrl;
+                }
                 //这里取消撤单后，后面要重新查询资金，否则白撤
                 CancelOrdersCanCancel(accounts, quotes, callback);
                 Funds funds = AccountHelper.QueryTotalFunds(accounts);
@@ -107,64 +109,95 @@ namespace NineSunScripture.strategy
                     return;
                 }
                 Order order = new Order();
-                //开板回封买
-                if (getPositionStock(accounts).Contains(code))
-                {
-                    if (open != highLimit)
-                    {
-                        //买入股票列表里面不会有持仓股，所以这里的仓位控制不会跟买入计划里的仓位冲突
-                        positionRatioCtrl = 1 / 2;
-                    }
-                    order.Code = code;
-                    order.Price = highLimit;
-                    foreach (Account account in accounts)
-                    {
-                        int quantity = getTodaySoldQuantityOf(account.ClientId, code);
-                        order.ClientId = account.ClientId;
-                        SetShareholderAcct(account, quotes, order);
-                        //数量是整百整百的
-                        order.Quantity = ((int)(quantity * positionRatioCtrl / (highLimit * 100))) * 100;
-                        order.Code = code;
-                        order.Price = highLimit;
-                        int rspCode = TradeAPI.Buy(order);
-                        string opLog
-                            = account.FundAcct + "策略回封买入" + quotes.Name + "->"
-                            + order.Quantity * order.Price + "元";
-                        Logger.log(opLog);
-                        callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
-                    }
-                    return;
-                }
-                //新开仓个股买
                 order = new Order();
                 order.Code = code;
                 order.Price = highLimit;
                 foreach (Account account in accounts)
                 {
                     account.Funds = TradeAPI.QueryFunds(account.ClientId);
+                    if (funds.AvailableAmt < 5000 || funds.AvailableAmt < highLimit * 100)
+                    {
+                        continue;
+                    }
+                    Position position = AccountHelper.GetPositionOf(account.Positions, code);
+                    //################计算买入数量BEGIN#######################
+                    if (null != position)
+                    {
+                        //查询已卖数量得到买入数量（可用大于0说明今天之前买的，这种情况只回补仓位）
+                        if (position.AvailableBalance > 0)
+                        {
+                            int quantity = getTodaySoldQuantityOf(account.ClientId, code);
+                            if (open == highLimit)
+                            {
+                                order.Quantity = quantity;
+                            }
+                            else
+                            {
+                                order.Quantity = (int)(quantity / 2);
+                            }
+                        }
+                        else      //计划买入-股票余额=剩余可买数量（持仓存在但是都不可用，说明今天买过了）
+                        {
+                            if (positionRatioCtrl > 0)
+                            {
+                                //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
+                                //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
+                                float acctPositionCtrl = getNewPositionRatio(account);
+                                double availableCash = account.Funds.AvailableAmt;
+                                if (acctPositionCtrl <= positionRatioCtrl)
+                                {
+                                    positionRatioCtrl = acctPositionCtrl;
+                                }
+                                if (availableCash > account.Funds.TotalAsset * positionRatioCtrl)
+                                {
+                                    availableCash = account.Funds.TotalAsset * positionRatioCtrl;
+                                }
+                                //数量是整百整百的
+                                int planQuantity = ((int)(availableCash / (highLimit * 100))) * 100;
+                                order.Quantity = planQuantity - position.StockBalance;
+                            }
+                            else//没有仓位控制，说明
+                            {
+                                continue;
+                            }
+                        }
+                        //仓位买够，不再买了
+                        if (order.Quantity <= 0)
+                        {
+                            continue;
+                        }
+                    }
+                    else    //新开仓买入
+                    {
+                        //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
+                        //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
+                        float acctPositionCtrl = getNewPositionRatio(account);
+                        double availableCash = account.Funds.AvailableAmt;
+                        if (acctPositionCtrl <= positionRatioCtrl)
+                        {
+                            positionRatioCtrl = acctPositionCtrl;
+                        }
+                        if (availableCash > account.Funds.TotalAsset * positionRatioCtrl)
+                        {
+                            availableCash = account.Funds.TotalAsset * positionRatioCtrl;
+                        }
+                        //数量是整百整百的
+                        order.Quantity = ((int)(availableCash / (highLimit * 100))) * 100;
+                    }
+                    //################计算买入数量END#######################
+                    //计算出来的数量不够资金买，那么把剩余资金买完
+                    if (account.Funds.AvailableAmt < order.Quantity * highLimit)
+                    {
+                        order.Quantity = ((int)(account.Funds.AvailableAmt / (highLimit * 100))) * 100;
+                    }
                     order.ClientId = account.ClientId;
                     SetShareholderAcct(account, quotes, order);
-                    //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
-                    //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
-                    float profitPositionCtrl = getNewPositionRatio(account);
-                    double availableCash = account.Funds.AvailableAmt;
-                    if (profitPositionCtrl <= positionRatioCtrl)
-                    {
-                        positionRatioCtrl = profitPositionCtrl;
-                    }
-                    if (availableCash > account.Funds.TotalAsset * positionRatioCtrl)
-                    {
-                        availableCash = account.Funds.TotalAsset * positionRatioCtrl;
-                    }
-                    //数量是整百整百的
-                    order.Quantity = ((int)(availableCash / (highLimit * 100))) * 100;
                     int rspCode = TradeAPI.Buy(order);
-                    string opLog
-                        = account.FundAcct + "策略买入" + quotes.Name + "->"
-                        + order.Quantity * order.Price + "元";
+                    string opLog = account.FundAcct + "策略买入" + quotes.Name + "->"
+                        + (order.Quantity * order.Price).ToString("0.00####") + "万元";
                     Logger.log(opLog);
                     callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
-                }
+                }//END FOR ACCOUNT
             }
             lastTickQuotes[quotes.Code] = quotes;
         }
@@ -259,7 +292,7 @@ namespace NineSunScripture.strategy
                         order.ClientId = account.ClientId;
                         int rspCode = TradeAPI.CancelOrder(order);
                         string opLog = account.FundAcct + "撤销[" + quotes.Name + "]委托->"
-                            + order.Quantity + "股";
+                            + (order.Quantity * order.Price).ToString("0.00####") + "万元";
                         Logger.log(opLog);
                         callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                     }

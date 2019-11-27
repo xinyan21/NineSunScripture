@@ -108,8 +108,8 @@ namespace NineSunScripture.trade.api
                     position = new Position();
                     position.Code = temp[i, 0];
                     position.Name = temp[i, 1];
-                    position.QuantityBalance = int.Parse(temp[i, 2]);
-                    position.AvailableQuantity = int.Parse(temp[i, 3]);
+                    position.StockBalance = int.Parse(temp[i, 2]);
+                    position.AvailableBalance = int.Parse(temp[i, 3]);
                     position.FrozenQuantity = int.Parse(temp[i, 4]);
                     position.ProfitAndLoss = float.Parse(temp[i, 5]);
                     position.AvgCost = float.Parse(temp[i, 6]);

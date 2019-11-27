@@ -16,13 +16,13 @@ namespace NineSunScripture.model
         public String Code;
         public String Name;
         /// <summary>
-        /// 持仓数量
+        /// 股票余额=持有数量
         /// </summary>
-        public int QuantityBalance;
+        public int StockBalance;
         /// <summary>
-        /// 可用数量
+        /// 可用余额=可以卖的股票数
         /// </summary>
-        public int AvailableQuantity;
+        public int AvailableBalance;
         /// <summary>
         /// 冻结数量
         /// </summary>
