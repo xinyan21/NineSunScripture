@@ -16,7 +16,7 @@ namespace NineSunScripture.trade.api
     {
         //dll必须放在程序同一目录下面，否则调用会报错
         private const string dllPath = "ths.dll";
-        //功能：登录 成功返回clientID	失败返回0
+        //功能：登录 成功返回sessionId	失败返回0
         //Qsid,//券商id 					这个值可以在IP文件中查看
         //Host,//券商服务器IP
         //Port,//券商服务器端口
@@ -32,21 +32,21 @@ namespace NineSunScripture.trade.api
             short salesDepartId, short accountType,
             string account, string password, string commPassword, bool dommac, byte[] errInfo);
         //功能：查询各种交易数据
-        //clientID,//客户端 ID
+        //sessionId,//客户端 ID
         //category,//查询信息的种类 0资金	1股份 2最新委托	3最新成交 4可撤单 5股东账户 
         //result, //内保存了返回的查询数据, 形式为表格数据，行数据之间通过\n 字符分割，列数据之间通过\t 分隔。一般要分配 1024 * 1024 字节的空间。出错时为空字符串。
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串。
         [DllImport(@dllPath, EntryPoint = "QueryData", CallingConvention = CallingConvention.Winapi)]
-        public extern static int QueryData(int clientID, int category, byte[] result, byte[] errInfo);
+        public extern static int QueryData(int sessionId, int category, byte[] result, byte[] errInfo);
         //功能：查行情 券商提供的行情虽然只有5档 但是速度快
-        //clientID,//客户端ID
+        //sessionId,//客户端ID
         //zqdm,//股票代码
         //result,//内保存了返回的查询数据
         //errInfo//执行返回后，如果出错，保存了错误信息说明
         [DllImport(@dllPath, EntryPoint = "QueryHQ", CallingConvention = CallingConvention.Winapi)]
-        public extern static int QueryHQ(int clientID, string gddm, byte[] result, byte[] errInfo);
+        public extern static int QueryHQ(int sessionId, string gddm, byte[] result, byte[] errInfo);
         //功能：委托下单
-        //clientID,//客户端ID
+        //sessionId,//客户端ID
         //category,//委托种类 0买入 1卖出
         //gddm,//股东账号；交易上海股票填上海的股东账号，交易深圳的股票填入深圳的股东账号。 正常情况下留空（留空自动判断）
         //zqdm,//证券代码
@@ -55,30 +55,30 @@ namespace NineSunScripture.trade.api
         //result,//内保存了返回的查询数据, 含有委托编号数据 出错时为空字符串。
         //errInfo//如果出错，保存了错误信息说明。一般要分配 256 字节的空间
         [DllImport(@dllPath, EntryPoint = "SendOrder", CallingConvention = CallingConvention.Winapi)]
-        public extern static int SendOrder(int clientID, int category, string gddm, string zqdm,
+        public extern static int SendOrder(int sessionId, int category, string gddm, string zqdm,
             float price, int quantity, byte[] result, byte[] errInfo);
         //功能：取消订单
-        //clientID,//客户端ID
+        //sessionId,//客户端ID
         //gddm,//股东账号 必写
         //OrderID,//表示要撤的目标委托的编号
         //result,//内保存了返回的查询数据
         //errInfo//执行返回后，如果出错，保存了错误信息说明
         [DllImport(@dllPath, EntryPoint = "CancelOrder", CallingConvention = CallingConvention.Winapi)]
-        public extern static int CancelOrder(int clientID, string gddm, string orderID, byte[] result, byte[] errInfo);
+        public extern static int CancelOrder(int sessionId, string gddm, string orderID, byte[] result, byte[] errInfo);
         //功能：退出登录	无返回值
-        //clientID,//客户端ID
+        //sessionId,//客户端ID
         [DllImport(@dllPath, EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
-        public extern static void Logoff(int clientID);
+        public extern static void Logoff(int sessionId);
 
         /// <summary>
         /// 查询资金
         /// </summary>
-        /// <param name="clientID">客户端id</param>
+        /// <param name="sessionId">客户端id</param>
         /// <returns></returns>
-        public static Funds QueryFunds(int clientID)
+        public static Funds QueryFunds(int sessionId)
         {
             Funds funds = new Funds();
-            int code = QueryData(clientID, 0, funds.Result, funds.ErrorInfo);
+            int code = QueryData(sessionId, 0, funds.Result, funds.ErrorInfo);
             if (code > 0)
             {
                 String[] temp = ApiHelper.ParseResult(funds.Result);
@@ -93,13 +93,13 @@ namespace NineSunScripture.trade.api
         /// <summary>
         /// 查询持仓
         /// </summary>
-        /// <param name="clientId">登录返回的客户Id</param>
+        /// <param name="sessionId">登录返回的客户Id</param>
         /// <returns></returns>
-        public static List<Position> QueryPositions(int clientId)
+        public static List<Position> QueryPositions(int sessionId)
         {
             List<Position> positions = new List<Position>();
             Position position = new Position();
-            int code = QueryData(clientId, 1, position.Result, position.ErrorInfo);
+            int code = QueryData(sessionId, 1, position.Result, position.ErrorInfo);
             if (code > 0)
             {
                 String[,] temp = ApiHelper.ParseResults(position.Result);
@@ -125,13 +125,13 @@ namespace NineSunScripture.trade.api
         /// <summary>
         /// 查询最新成交
         /// </summary>
-        /// <param name="clientId">登录返回的客户Id</param>
+        /// <param name="sessionId">登录返回的客户Id</param>
         /// <returns></returns>
-        public static List<Order> QueryTodayTransaction(int clientId)
+        public static List<Order> QueryTodayTransaction(int sessionId)
         {
             List<Order> orders = new List<Order>();
             Order order = new Order();
-            int code = QueryData(clientId, 3, order.Result, order.ErrorInfo);
+            int code = QueryData(sessionId, 3, order.Result, order.ErrorInfo);
             if (code > 0)
             {
                 String[,] temp = ApiHelper.ParseResults(order.Result);
@@ -153,13 +153,13 @@ namespace NineSunScripture.trade.api
         /// <summary>
         /// 查询可撤销委托
         /// </summary>
-        /// <param name="clientId">登录返回的客户Id</param>
+        /// <param name="sessionId">登录返回的客户Id</param>
         /// <returns></returns>
-        public static List<Order> QueryOrdersCanCancel(int clientId)
+        public static List<Order> QueryOrdersCanCancel(int sessionId)
         {
             List<Order> orders = new List<Order>();
             Order order = new Order();
-            int code = QueryData(clientId, 4, order.Result, order.ErrorInfo);
+            int code = QueryData(sessionId, 4, order.Result, order.ErrorInfo);
             if (code > 0)
             {
                 String[,] temp = ApiHelper.ParseResults(order.Result);
@@ -183,13 +183,13 @@ namespace NineSunScripture.trade.api
         /// <summary>
         /// 查询股东账号
         /// </summary>
-        /// <param name="clientId">登录返回的客户Id</param>
+        /// <param name="sessionId">登录返回的客户Id</param>
         /// <returns></returns>
-        public static List<ShareHolderAcct> QueryShareHolderAccts(int clientId)
+        public static List<ShareHolderAcct> QueryShareHolderAccts(int sessionId)
         {
             List<ShareHolderAcct> accounts = new List<ShareHolderAcct>();
             ShareHolderAcct account = new ShareHolderAcct();
-            int code = QueryData(clientId, 5, account.Result, account.ErrorInfo);
+            int code = QueryData(sessionId, 5, account.Result, account.ErrorInfo);
             if (code > 0)
             {
                 String[,] temp = ApiHelper.ParseResults(account.Result);
@@ -209,13 +209,13 @@ namespace NineSunScripture.trade.api
         /// <summary>
         ///  查询券商自带行情
         /// </summary>
-        /// <param name="clientID">客户端id</param>
+        /// <param name="sessionId">客户端id</param>
         /// <param name="code">股票代码</param>
         /// <returns></returns>
-        public static Quotes QueryQuotes(int clientID, String code)
+        public static Quotes QueryQuotes(int sessionId, String code)
         {
             Quotes quotes = new Quotes();
-            int rspCode = QueryHQ(clientID, code, quotes.Result, quotes.ErrorInfo);
+            int rspCode = QueryHQ(sessionId, code, quotes.Result, quotes.ErrorInfo);
             if (rspCode > 0)
             {
                 String[] temp = ApiHelper.ParseResult(quotes.Result);
@@ -261,7 +261,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Buy(Order order)
         {
-            int rspId = SendOrder(order.ClientId, Order.CategoryBuy, order.ShareholderAcct, order.Code,
+            int rspId = SendOrder(order.SessionId, Order.CategoryBuy, order.ShareholderAcct, order.Code,
                 order.Price, order.Quantity, order.Result, order.ErrorInfo);
             return rspId;
         }
@@ -273,7 +273,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Sell(Order order)
         {
-            int rspId = SendOrder(order.ClientId, Order.CategorySell, order.ShareholderAcct, order.Code,
+            int rspId = SendOrder(order.SessionId, Order.CategorySell, order.ShareholderAcct, order.Code,
                 order.Price, order.Quantity, order.Result, order.ErrorInfo);
             return rspId;
         }
@@ -285,7 +285,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int CancelOrder(Order order)
         {
-            return CancelOrder(order.ClientId, order.ShareholderAcct, order.OrderId, order.Result, order.ErrorInfo);
+            return CancelOrder(order.SessionId, order.ShareholderAcct, order.OrderId, order.Result, order.ErrorInfo);
         }
     }
 }

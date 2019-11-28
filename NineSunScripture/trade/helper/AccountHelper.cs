@@ -17,8 +17,8 @@ namespace NineSunScripture.trade.helper
         /// <summary>
         /// 登录所有账户，首次在客户端登录会记录初始总资金到数据库
         /// </summary>
-        /// <param name="trade">回调接口</param>
-        public static List<Account> Login(ITrade trade)
+        /// <param name="callback">回调接口</param>
+        public static List<Account> Login(ITrade callback)
         {
             AcctDbHelper dbHelper = new AcctDbHelper();
             List<Account> accounts = dbHelper.GetAccounts();
@@ -29,22 +29,22 @@ namespace NineSunScripture.trade.helper
             foreach (Account account in accounts)
             {
                 //TODO 新版本加了营业部ID，后面看要不要加到数据库
-                int userId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
+                int sessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
                     account.BrokerServerPort, account.VersionOfTHS, 0, account.AcctType,
                     account.FundAcct, account.Password, account.CommPwd,
                     account.IsRandomMac, account.ErrorInfo);
-                if (userId > 0)
+                if (sessionId > 0)
                 {
-                    account.ClientId = userId;
-                    account.Funds = TradeAPI.QueryFunds(userId);
-                    account.Positions = TradeAPI.QueryPositions(userId);
-                    account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(userId);
+                    account.SessionId = sessionId;
+                    account.Funds = TradeAPI.QueryFunds(sessionId);
+                    account.Positions = TradeAPI.QueryPositions(sessionId);
+                    account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(sessionId);
                     if (account.InitTotalAsset == 0)
                     {
                         account.InitTotalAsset = (int)account.Funds.TotalAsset;
                         dbHelper.EditInitTotalAsset(account);
                     }
-                    Logger.log("资金账号" + account.FundAcct + "登录成功，ID为" + userId);
+                    Logger.log("资金账号" + account.FundAcct + "登录成功，ID为" + sessionId);
                     if (account.ShareHolderAccts.Count > 0)
                     {
                         foreach (ShareHolderAcct shareHolderAcct in account.ShareHolderAccts)
@@ -65,7 +65,10 @@ namespace NineSunScripture.trade.helper
                     string opLog = "资金账号" + account.FundAcct + "登录失败，信息："
                         + ApiHelper.ParseErrInfo(account.ErrorInfo);
                     Logger.log(opLog);
-                    trade.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    if (null!=callback)
+                    {
+                        callback.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    }
                 }
             }
             return accounts;
@@ -129,7 +132,7 @@ namespace NineSunScripture.trade.helper
             List<Position> allPositions = new List<Position>(); //所有账户持仓原始数据
             foreach (Account account in accounts)
             {
-                allPositions.AddRange(TradeAPI.QueryPositions(account.ClientId));
+                allPositions.AddRange(TradeAPI.QueryPositions(account.SessionId));
             }
             List<Position> temp = allPositions.Distinct().ToList();
             foreach (Position item in temp)
@@ -190,7 +193,7 @@ namespace NineSunScripture.trade.helper
             Funds funds = new Funds();
             foreach (Account account in accounts)
             {
-                Funds temp = TradeAPI.QueryFunds(account.ClientId);
+                Funds temp = TradeAPI.QueryFunds(account.SessionId);
                 funds.AvailableAmt += temp.AvailableAmt;
                 funds.FrozenAmt += temp.FrozenAmt;
                 funds.FundBalance += temp.FundBalance;
@@ -198,6 +201,20 @@ namespace NineSunScripture.trade.helper
             }
 
             return funds;
+        }
+
+        /// <summary>
+        /// 获取code对应股票的可撤委托
+        /// </summary>
+        /// <param name="sessionId">会话ID</param>
+        /// <param name="code">股票代码</param>
+        /// <returns></returns>
+        public static List<Order> GetOrdersCanCancelOf(int sessionId, string code)
+        {
+            List<Order> orders = TradeAPI.QueryOrdersCanCancel(sessionId);
+            orders = orders.FindAll(order => order.Code == code);
+
+            return orders;
         }
     }
 }

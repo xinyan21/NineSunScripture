@@ -130,7 +130,7 @@ namespace NineSunScripture.strategy
         {
             foreach (Account account in accounts)
             {
-                List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(account.ClientId);
+                List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(account.SessionId);
                 bool isSoldToday = false;
                 if (todayTransactions.Count > 0)
                 {
@@ -188,7 +188,7 @@ namespace NineSunScripture.strategy
                 return;
             }
             Order order = new Order();
-            order.ClientId = account.ClientId;
+            order.SessionId = account.SessionId;
             order.Code = quotes.Code;
             order.Quantity = position.AvailableBalance;
             if (sellRatio > 0)
@@ -199,7 +199,10 @@ namespace NineSunScripture.strategy
             string opLog = account.FundAcct + "策略卖出【" + quotes.Name + "】"
                 + (order.Quantity * order.Price).ToString("0.00####") + "万元";
             Logger.log(opLog);
-            callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
+            if (null != callback)
+            {
+                callback.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+            }
         }
 
         /// <summary>
@@ -227,7 +230,7 @@ namespace NineSunScripture.strategy
             Quotes quotes = new Quotes();
             foreach (Account account in accounts)
             {
-                positions = TradeAPI.QueryPositions(account.ClientId);
+                positions = TradeAPI.QueryPositions(account.SessionId);
                 if (null == positions || positions.Count == 0)
                 {
                     continue;

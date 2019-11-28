@@ -42,6 +42,9 @@
             this.lblMoneyAvailable = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.lvPositions = new System.Windows.Forms.ListView();
+            this.cmsPositionsMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsmiSell = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiSellInForm = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItemManageAcct = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItemExit = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,15 +58,13 @@
             this.tbRuntimeInfo = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.cmsPositionsMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.tsmiSell = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiSellInForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTest = new System.Windows.Forms.ToolStripMenuItem();
             this.flowLayoutPanel2.SuspendLayout();
             this.cmsStocks.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.cmsPositionsMenu.SuspendLayout();
             this.MenuMain.SuspendLayout();
             this.panel2.SuspendLayout();
-            this.cmsPositionsMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // flowLayoutPanel2
@@ -207,6 +208,36 @@
             this.lvPositions.UseCompatibleStateImageBehavior = false;
             this.lvPositions.View = System.Windows.Forms.View.Details;
             // 
+            // cmsPositionsMenu
+            // 
+            this.cmsPositionsMenu.BackColor = System.Drawing.SystemColors.Control;
+            this.cmsPositionsMenu.ImageScalingSize = new System.Drawing.Size(18, 18);
+            this.cmsPositionsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmiSell,
+            this.tsmiSellInForm});
+            this.cmsPositionsMenu.Name = "cmsPositionsMenu";
+            this.cmsPositionsMenu.Size = new System.Drawing.Size(144, 94);
+            this.cmsPositionsMenu.Text = "持仓菜单";
+            // 
+            // tsmiSell
+            // 
+            this.tsmiSell.AutoSize = false;
+            this.tsmiSell.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tsmiSell.Margin = new System.Windows.Forms.Padding(0, 10, 0, 0);
+            this.tsmiSell.Name = "tsmiSell";
+            this.tsmiSell.Size = new System.Drawing.Size(214, 40);
+            this.tsmiSell.Text = "一键卖出";
+            this.tsmiSell.Click += new System.EventHandler(this.tsmiSell_Click);
+            // 
+            // tsmiSellInForm
+            // 
+            this.tsmiSellInForm.AutoSize = false;
+            this.tsmiSellInForm.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tsmiSellInForm.Name = "tsmiSellInForm";
+            this.tsmiSellInForm.Size = new System.Drawing.Size(192, 40);
+            this.tsmiSellInForm.Text = "窗口卖出";
+            this.tsmiSellInForm.Click += new System.EventHandler(this.tsmiSellInForm_Click);
+            // 
             // Menu
             // 
             this.Menu.AutoSize = false;
@@ -256,6 +287,7 @@
             this.tsmiBuyStock,
             this.tspManageAcct,
             this.tsmiClearPositions,
+            this.tsmiTest,
             this.tspExit});
             this.管理菜单ToolStripMenuItem.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.管理菜单ToolStripMenuItem.ForeColor = System.Drawing.Color.DarkGreen;
@@ -343,35 +375,13 @@
             this.panel2.Size = new System.Drawing.Size(306, 757);
             this.panel2.TabIndex = 16;
             // 
-            // cmsPositionsMenu
+            // tsmiTest
             // 
-            this.cmsPositionsMenu.BackColor = System.Drawing.SystemColors.Control;
-            this.cmsPositionsMenu.ImageScalingSize = new System.Drawing.Size(18, 18);
-            this.cmsPositionsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsmiSell,
-            this.tsmiSellInForm});
-            this.cmsPositionsMenu.Name = "cmsPositionsMenu";
-            this.cmsPositionsMenu.Size = new System.Drawing.Size(144, 94);
-            this.cmsPositionsMenu.Text = "持仓菜单";
-            // 
-            // tsmiSell
-            // 
-            this.tsmiSell.AutoSize = false;
-            this.tsmiSell.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tsmiSell.Margin = new System.Windows.Forms.Padding(0, 10, 0, 0);
-            this.tsmiSell.Name = "tsmiSell";
-            this.tsmiSell.Size = new System.Drawing.Size(214, 40);
-            this.tsmiSell.Text = "一键卖出";
-            this.tsmiSell.Click += new System.EventHandler(this.tsmiSell_Click);
-            // 
-            // tsmiSellInForm
-            // 
-            this.tsmiSellInForm.AutoSize = false;
-            this.tsmiSellInForm.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tsmiSellInForm.Name = "tsmiSellInForm";
-            this.tsmiSellInForm.Size = new System.Drawing.Size(192, 40);
-            this.tsmiSellInForm.Text = "窗口卖出";
-            this.tsmiSellInForm.Click += new System.EventHandler(this.tsmiSellInForm_Click);
+            this.tsmiTest.AutoSize = false;
+            this.tsmiTest.Name = "tsmiTest";
+            this.tsmiTest.Size = new System.Drawing.Size(198, 40);
+            this.tsmiTest.Text = "测试";
+            this.tsmiTest.Click += new System.EventHandler(this.tsmiTest_Click);
             // 
             // MainForm
             // 
@@ -396,11 +406,11 @@
             this.flowLayoutPanel2.ResumeLayout(false);
             this.cmsStocks.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
+            this.cmsPositionsMenu.ResumeLayout(false);
             this.MenuMain.ResumeLayout(false);
             this.MenuMain.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
-            this.cmsPositionsMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -435,6 +445,7 @@
         private System.Windows.Forms.ContextMenuStrip cmsPositionsMenu;
         private System.Windows.Forms.ToolStripMenuItem tsmiSell;
         private System.Windows.Forms.ToolStripMenuItem tsmiSellInForm;
+        private System.Windows.Forms.ToolStripMenuItem tsmiTest;
     }
 }
 

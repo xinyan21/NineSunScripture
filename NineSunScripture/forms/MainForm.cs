@@ -16,6 +16,7 @@ using NineSunScripture.strategy;
 using NineSunScripture.db;
 using NineSunScripture.util.log;
 using System.Threading;
+using NineSunScripture.util.test;
 
 namespace NineSunScripture
 {
@@ -333,7 +334,7 @@ namespace NineSunScripture
         /// <param name="e"></param>
         private void tsmiBuyStock_Click(object sender, EventArgs e)
         {
-            new TradeForm(mainStrategy.GetAccounts()).Show();
+            new TradeForm(mainStrategy.GetAccounts(), this).Show();
         }
         /// <summary>
         /// 股票池列表右键菜单买入
@@ -348,7 +349,7 @@ namespace NineSunScripture
             }
             Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
             string code = quotes.Code;
-            new TradeForm(mainStrategy.GetAccounts(), quotes).Show();
+            new TradeForm(mainStrategy.GetAccounts(), quotes,this).Show();
         }
 
         /// <summary>
@@ -390,7 +391,12 @@ namespace NineSunScripture
             quotes.Code = position.Code;
             quotes.Name = position.Name;
             string code = quotes.Code;
-            new TradeForm(mainStrategy.GetAccounts(), quotes, Order.CategorySell).Show();
+            new TradeForm(mainStrategy.GetAccounts(), quotes, this, Order.CategorySell).Show();
+        }
+
+        private void tsmiTest_Click(object sender, EventArgs e)
+        {
+            new TestForm().Show();
         }
     }
 

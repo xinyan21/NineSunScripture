@@ -41,16 +41,19 @@ namespace NineSunScripture.model
         //成交量
         public int Volume;
         public float Open;
+        //卖一到卖五
         public float Sell1;
         public float Sell2;
         public float Sell3;
         public float Sell4;
         public float Sell5;
+        //买一到买五
         public float Buy1;
         public float Buy2;
         public float Buy3;
         public float Buy4;
         public float Buy5;
+        //对应的委托量
         public int Sell1Vol;
         public int Sell2Vol;
         public int Sell3Vol;
@@ -79,6 +82,7 @@ namespace NineSunScripture.model
         {
             return this.Code == other.Code;
         }
+
         //重写Equals和GetHashCode方法可以在List里面使用Contains方法
         public override int GetHashCode()
         {

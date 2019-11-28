@@ -183,6 +183,12 @@
     <Compile Include="trade\helper\AccountHelper.cs" />
     <Compile Include="trade\helper\ApiHelper.cs" />
     <Compile Include="util\log\Logger.cs" />
+    <Compile Include="util\test\TestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="util\test\TestForm.Designer.cs">
+      <DependentUpon>TestForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="util\test\TestTrade.cs" />
     <EmbeddedResource Include="forms\AddStockForm.resx">
       <DependentUpon>AddStockForm.cs</DependentUpon>
@@ -200,6 +206,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="util\test\TestForm.resx">
+      <DependentUpon>TestForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="NineSunScripture_TemporaryKey.pfx" />
     <None Include="packages.config" />
@@ -219,7 +228,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="docs\IP.txt" />
-    <Content Include="docs\买入策略流程图.png" />
     <Content Include="docs\使用文档.txt" />
     <Content Include="docs\券商检测机制说明.txt" />
     <Content Include="docs\开发计划.txt" />

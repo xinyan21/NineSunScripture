@@ -62,7 +62,7 @@ namespace NineSunScripture.strategy
             {
                 foreach (Account account in accounts)
                 {
-                    TradeAPI.Logoff(account.ClientId);
+                    TradeAPI.Logoff(account.SessionId);
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace NineSunScripture.strategy
                 {
                     try
                     {
-                        quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i].Code);
+                        quotes = TradeAPI.QueryQuotes(mainAcct.SessionId, stocks[i].Code);
                         SetBuyPlan(quotes);
                         buyStrategy.Buy(quotes, accounts, callback);
                         sellStrategy.Sell(quotes, accounts, callback);
@@ -112,7 +112,10 @@ namespace NineSunScripture.strategy
                     catch (Exception e)
                     {
                         Logger.exception(e);
-                        callback.OnTradeResult(0, "策略执行发生异常", e.Message);
+                        if (null != callback)
+                        {
+                            callback.OnTradeResult(0, "策略执行发生异常", e.Message);
+                        }
                     }
                 }
             }

@@ -9,7 +9,7 @@ namespace NineSunScripture.model
     /// <summary>
     /// 订单
     /// </summary>
-    public class Order : BaseModel
+    public class Order : BaseModel, IEquatable<Order>
     {
         public const short CategoryBuy = 0;
         public const short CategorySell = 1;
@@ -40,5 +40,16 @@ namespace NineSunScripture.model
         /// 操作：证券买入|证券卖出
         /// </summary>
         public String Operation;
+
+        public bool Equals(Order other)
+        {
+            return this.Code == other.Code;
+        }
+
+        //重写Equals和GetHashCode方法可以在List里面使用Contains方法
+        public override int GetHashCode()
+        {
+            return this.Code.GetHashCode();
+        }
     }
 }
