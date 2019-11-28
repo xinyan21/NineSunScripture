@@ -142,11 +142,11 @@
     <Compile Include="forms\AddStockForm.Designer.cs">
       <DependentUpon>AddStockForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="forms\BuyForm.cs">
+    <Compile Include="forms\TradeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="forms\BuyForm.Designer.cs">
-      <DependentUpon>BuyForm.cs</DependentUpon>
+    <Compile Include="forms\TradeForm.Designer.cs">
+      <DependentUpon>TradeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="forms\MainForm.cs">
       <SubType>Form</SubType>
@@ -187,8 +187,8 @@
     <EmbeddedResource Include="forms\AddStockForm.resx">
       <DependentUpon>AddStockForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="forms\BuyForm.resx">
-      <DependentUpon>BuyForm.cs</DependentUpon>
+    <EmbeddedResource Include="forms\TradeForm.resx">
+      <DependentUpon>TradeForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

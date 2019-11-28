@@ -43,8 +43,12 @@ namespace NineSunScripture.strategy
         /// 2:30不够强卖出涨幅
         /// </summary>
         private const float GoodByeRatio = 1.05f;
+        /// <summary>
+        /// 队列的大小由查询频率控制，保存一分钟的tick数据，主要是供SellIfSealDecrease使用
+        /// </summary>
+        private Dictionary<string, Queue<Quotes>> historyTicks
+            = new Dictionary<string, Queue<Quotes>>();
 
-        private Dictionary<string, float> lastTickPrice = new Dictionary<string, float>();
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             float highLimit = quotes.HighLimit;
@@ -100,12 +104,18 @@ namespace NineSunScripture.strategy
                 Logger.log("收盘不板卖" + quotes.Name);
                 Sell(quotes, accounts, callback, 1);
             }
-            if (lastTickPrice[code] == highLimit && curPrice < lastTickPrice[code])
+            Quotes[] ticks = historyTicks[quotes.Code].ToArray();
+            if (ticks.Last().Sell1 == highLimit && curPrice < highLimit)
             {
                 Logger.log("开板卖" + quotes.Name);
                 Sell(quotes, accounts, callback, 1);
             }
-            lastTickPrice[code] = curPrice;
+            SellIfSealDecrease(accounts, quotes, callback);
+            if (historyTicks.Count == 60)
+            {
+                historyTicks[code].Dequeue();
+            }
+            historyTicks[code].Enqueue(quotes);
         }
 
         /// <summary>
@@ -169,7 +179,7 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="account">账户对象</param>
         /// <param name="sellRatio">卖出比例</param>
-        private static void SellByAcct(Quotes quotes, Account account, ITrade callback, float sellRatio)
+        public static void SellByAcct(Quotes quotes, Account account, ITrade callback, float sellRatio)
         {
             //因为是卖出，所以当天登录时候的仓位就可以拿来用，如果是买那就得查询最新的
             Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
@@ -186,7 +196,7 @@ namespace NineSunScripture.strategy
                 order.Quantity = (int)(order.Quantity * sellRatio);
             }
             int rspCode = TradeAPI.Sell(order);
-            string opLog = account.FundAcct + "策略卖出" + quotes.Name + "->"
+            string opLog = account.FundAcct + "策略卖出【" + quotes.Name + "】"
                 + (order.Quantity * order.Price).ToString("0.00####") + "万元";
             Logger.log(opLog);
             callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
@@ -198,7 +208,7 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
         /// <param name="sellRatio">卖出比例</param>
-        private static void Sell(Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
+        public static void Sell(Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
         {
             foreach (Account account in accounts)
             {
@@ -233,6 +243,26 @@ namespace NineSunScripture.strategy
                     quotes.Name = position.Name;
                     SellByAcct(quotes, account, callback, 1);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 封单减少到2000万卖
+        /// </summary>
+        /// <param name="accounts">账户列表</param>
+        /// <param name="quotes">股票对象</param>
+        /// <param name="callback">交易接口回调</param>
+        private void SellIfSealDecrease(List<Account> accounts, Quotes quotes, ITrade callback)
+        {
+            Quotes[] ticks = historyTicks[quotes.Code].ToArray();
+            if (ticks.Length < 2)
+            {
+                return;
+            }
+            if (ticks.First().Buy1Vol * quotes.HighLimit > 3000 * 10000
+                && ticks.Last().Buy1Vol * quotes.HighLimit < 2000 * 10000)
+            {
+                Sell(quotes, accounts, callback);
             }
         }
     }

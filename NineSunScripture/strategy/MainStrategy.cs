@@ -100,21 +100,19 @@ namespace NineSunScripture.strategy
                     continue;
                 }
                 Quotes quotes;
-                lock (stocks)
+                for (int i = 0; i < stocks.Count; i++)
                 {
-                    for (int i = 0; i < stocks.Count; i++)
+                    try
                     {
-                        try
-                        {
-                            quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i].Code);
-                            SetBuyPlan(quotes);
-                            buyStrategy.Buy(quotes, accounts, callback);
-                            sellStrategy.Sell(quotes, accounts, callback);
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.exception(e);
-                        }
+                        quotes = TradeAPI.QueryQuotes(mainAcct.ClientId, stocks[i].Code);
+                        SetBuyPlan(quotes);
+                        buyStrategy.Buy(quotes, accounts, callback);
+                        sellStrategy.Sell(quotes, accounts, callback);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.exception(e);
+                        callback.OnTradeResult(0, "策略执行发生异常", e.Message);
                     }
                 }
             }
@@ -143,7 +141,7 @@ namespace NineSunScripture.strategy
         /// <param name="ctrlFrequency">是否控制频率</param>
         private void UpdateFundsInfo(bool ctrlFrequency)
         {
-            if (ctrlFrequency && DateTime.Now.Second % 3 != 0)
+            if (ctrlFrequency && DateTime.Now.Second % 10 != 0)
             {
                 return;
             }
@@ -154,6 +152,8 @@ namespace NineSunScripture.strategy
                 account.Positions = AccountHelper.QueryPositions(accounts);
                 fundListener.onAcctInfoListen(account);
             }
+            //调用接口要有时间间隔
+            Thread.Sleep(200);
         }
 
         private bool IsTradeTime()
@@ -199,6 +199,16 @@ namespace NineSunScripture.strategy
             SellStrategy.SellAll(accounts, callBack);
         }
 
+        public void SellStock(Quotes quotes, ITrade callBack)
+        {
+            if (null == accounts || accounts.Count == 0)
+            {
+                MessageBox.Show("没有可操作的账户");
+                return;
+            }
+            SellStrategy.Sell(quotes, accounts, callBack, 1);
+        }
+
         public void updateStocks(List<Quotes> quotes)
         {
             this.stocks.Clear();
@@ -213,6 +223,11 @@ namespace NineSunScripture.strategy
         public void setTradeCallback(ITrade callback)
         {
             this.callback = callback;
+        }
+
+        public List<Account> GetAccounts()
+        {
+            return accounts;
         }
     }
 }

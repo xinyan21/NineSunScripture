@@ -1,6 +1,7 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.strategy;
 using NineSunScripture.trade.api;
+using NineSunScripture.trade.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
@@ -14,18 +15,60 @@ using System.Windows.Forms;
 
 namespace NineSunScripture.forms
 {
-    public partial class BuyForm : Form
+    public partial class TradeForm : Form
     {
         private float positionRatio = 1 / 3;
         private List<Account> accounts;
         private Quotes quotes;
-        public BuyForm(List<Account> accounts)
+        private short opDirection;  //buy or sell, @Order const
+        private ITrade callback;
+        public TradeForm(List<Account> accounts, ITrade callback, short opDirection = Order.CategoryBuy)
         {
             InitializeComponent();
+            this.opDirection = opDirection;
             this.accounts = accounts;
+            this.callback = callback;
+            if (opDirection == Order.CategorySell)
+            {
+                SetSellView();
+            }
+        }
+        public TradeForm(List<Account> accounts, Quotes quotes,
+            ITrade callback, short opDirection = Order.CategoryBuy)
+        {
+            InitializeComponent();
+            this.opDirection = opDirection;
+            this.accounts = accounts;
+            this.quotes = quotes;
+            tbCode.Text = quotes.Code;
+            tbName.Text = quotes.Name;
+            this.callback = callback;
+            if (opDirection == Order.CategorySell)
+            {
+                SetSellView();
+            }
+        }
+
+        private void SetSellView()
+        {
+            this.Text = "卖出";
+            this.btnBuy.BackgroundImage = Properties.Resources.btn_green;
+            this.btnBuy.Text = "卖出";
         }
 
         private void btnBuy_Click(object sender, EventArgs e)
+        {
+            if (opDirection == Order.CategorySell)
+            {
+                Sell();
+            }
+            else
+            {
+                Buy();
+            }
+        }
+
+        private void Buy()
         {
             Order order = new Order();
             order.Code = tbCode.Text;
@@ -42,10 +85,16 @@ namespace NineSunScripture.forms
                 order.Quantity = ((int)(money / (order.Price * 100))) * 100;
                 int rspCode = TradeAPI.Buy(order);
                 string opLog
-                    = account.FundAcct + "窗口买入" + quotes.Name + "->"
+                    = account.FundAcct + "窗口买入【" + quotes.Name + "】"
                     + order.Quantity * order.Price + "元";
                 Logger.log(opLog);
+                callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
             }
+        }
+
+        private void Sell()
+        {
+            SellStrategy.Sell(quotes, accounts, callback, positionRatio);
         }
 
         private void tbCode_TextChanged(object sender, EventArgs e)

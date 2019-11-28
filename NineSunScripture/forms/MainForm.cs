@@ -28,7 +28,7 @@ namespace NineSunScripture
         private List<Quotes> tomorrowStocks;
         private bool isProgramStarted = false;
         private StockDbHelper stockDbHelper;
-        private Account account;
+        private Account account;//用来临时保存总账户信息
         private string runtimeInfo;
 
         public MainForm()
@@ -105,7 +105,7 @@ namespace NineSunScripture
                     lvi = new ListViewItem(item.Name, lvgDragonLeader);
                     lvi.SubItems.Add(item.PositionCtrl + "");
                     lvi.SubItems.Add(item.MoneyCtrl + "");
-                    lvi.Tag = item.Code;
+                    lvi.Tag = item;
                     lvStocks.Items.Add(lvi);
                 }
             }
@@ -117,7 +117,7 @@ namespace NineSunScripture
                     lvi = new ListViewItem(item.Name, lvgLongTerm);
                     lvi.SubItems.Add(item.PositionCtrl + "");
                     lvi.SubItems.Add(item.MoneyCtrl + "");
-                    lvi.Tag = item.Code;
+                    lvi.Tag = item;
                     lvStocks.Items.Add(lvi);
                 }
             }
@@ -129,7 +129,7 @@ namespace NineSunScripture
                     lvi = new ListViewItem(item.Name, lvgTomorrow);
                     lvi.SubItems.Add(item.PositionCtrl + "");
                     lvi.SubItems.Add(item.MoneyCtrl + "");
-                    lvi.Tag = item.Code;
+                    lvi.Tag = item;
                     lvStocks.Items.Add(lvi);
                 }
             }
@@ -202,10 +202,15 @@ namespace NineSunScripture
 
         private void tsmClearStocks_Click(object sender, EventArgs e)
         {
-            lvStocks.Items.Clear();
-            stockDbHelper.DelAllBy(Quotes.CategoryLatest);
-            stockDbHelper.DelAllBy(Quotes.CategoryLongTerm);
-            stockDbHelper.DelAllBy(Quotes.CategoryDragonLeader);
+            DialogResult dr = MessageBox.Show("确认要清空股票池吗？", "警告",
+                MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if (dr == DialogResult.OK)
+            {
+                lvStocks.Items.Clear();
+                stockDbHelper.DelAllBy(Quotes.CategoryLatest);
+                stockDbHelper.DelAllBy(Quotes.CategoryLongTerm);
+                stockDbHelper.DelAllBy(Quotes.CategoryDragonLeader);
+            }
         }
 
         private void tsmDelStock_Click(object sender, EventArgs e)
@@ -265,6 +270,7 @@ namespace NineSunScripture
                 int positionRatio = (int)(position.StockBalance * position.Price
                     / account.Funds.TotalAsset * 100);
                 lvi.SubItems.Add(positionRatio + "%");
+                lvi.Tag = position;
 
                 lvPositions.Items.Add(lvi);
             }
@@ -278,11 +284,11 @@ namespace NineSunScripture
 
         private void tsmiSwitch_Click(object sender, EventArgs e)
         {
-            runtimeInfo = "策略开始启动";
-            AddRuntimeInfo();
-            Logger.log(runtimeInfo);
             if (isProgramStarted)
             {
+                runtimeInfo = "策略开始停止";
+                AddRuntimeInfo();
+                Logger.log(runtimeInfo);
                 mainStrategy.Stop();
                 tsmiSwitch.Text = "启动";
                 isProgramStarted = false;
@@ -290,6 +296,9 @@ namespace NineSunScripture
                 AddRuntimeInfo();
                 return;
             }
+            runtimeInfo = "策略开始启动";
+            AddRuntimeInfo();
+            Logger.log(runtimeInfo);
             PutStocksTogether();
             mainStrategy.updateStocks(stocks);
             bool isStarted = mainStrategy.Start();
@@ -315,6 +324,73 @@ namespace NineSunScripture
             {
                 mainStrategy.SellAll(this);
             }
+        }
+
+        /// <summary>
+        /// 管理菜单买入
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tsmiBuyStock_Click(object sender, EventArgs e)
+        {
+            new TradeForm(mainStrategy.GetAccounts()).Show();
+        }
+        /// <summary>
+        /// 股票池列表右键菜单买入
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tsmiBuy_Click(object sender, EventArgs e)
+        {
+            if (lvStocks.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+            Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
+            string code = quotes.Code;
+            new TradeForm(mainStrategy.GetAccounts(), quotes).Show();
+        }
+
+        /// <summary>
+        /// 持仓列表右键卖出
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tsmiSell_Click(object sender, EventArgs e)
+        {
+            if (lvPositions.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+            Position position = (Position)lvPositions.SelectedItems[0].Tag;
+            Quotes quotes = new Quotes();
+            quotes.Code = position.Code;
+            quotes.Name = position.Name;
+            DialogResult dr = MessageBox.Show("确认要全部【" + quotes.Name + "】卖出吗？", "警告",
+                MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if (dr == DialogResult.OK)
+            {
+                mainStrategy.SellStock(quotes, this);
+            }
+        }
+
+        /// <summary>
+        /// 持仓列表窗口卖出
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tsmiSellInForm_Click(object sender, EventArgs e)
+        {
+            if (lvPositions.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+            Position position = (Position)lvPositions.SelectedItems[0].Tag;
+            Quotes quotes = new Quotes();
+            quotes.Code = position.Code;
+            quotes.Name = position.Name;
+            string code = quotes.Code;
+            new TradeForm(mainStrategy.GetAccounts(), quotes, Order.CategorySell).Show();
         }
     }
 

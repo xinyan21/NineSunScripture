@@ -32,7 +32,8 @@ namespace NineSunScripture.strategy
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30)
+            if ((DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30) 
+                || DateTime.Now.Hour > 14)
             {
                 return;
             }
@@ -193,7 +194,7 @@ namespace NineSunScripture.strategy
                     order.ClientId = account.ClientId;
                     SetShareholderAcct(account, quotes, order);
                     int rspCode = TradeAPI.Buy(order);
-                    string opLog = account.FundAcct + "策略买入" + quotes.Name + "->"
+                    string opLog = account.FundAcct + "策略买入【" + quotes.Name + "】"
                         + (order.Quantity * order.Price).ToString("0.00####") + "万元";
                     Logger.log(opLog);
                     callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
@@ -291,7 +292,7 @@ namespace NineSunScripture.strategy
                     {
                         order.ClientId = account.ClientId;
                         int rspCode = TradeAPI.CancelOrder(order);
-                        string opLog = account.FundAcct + "撤销[" + quotes.Name + "]委托->"
+                        string opLog = account.FundAcct + "撤销【" + quotes.Name + "】委托->"
                             + (order.Quantity * order.Price).ToString("0.00####") + "万元";
                         Logger.log(opLog);
                         callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
