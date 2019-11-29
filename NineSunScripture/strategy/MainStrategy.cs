@@ -17,6 +17,7 @@ namespace NineSunScripture.strategy
     /// </summary>
     public class MainStrategy
     {
+        public const bool IsTest = true;
         public const string ReserveStocks = "000001|000002|000005|300233|600235";
         private const int IntervalOfNonTrade = 3000;
         //没有level2没必要设置太低
@@ -24,7 +25,6 @@ namespace NineSunScripture.strategy
         private int sleepInterval = IntervalOfTrade;
         private int tryLoginCnt = 0;
         private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
-        private bool strategySwitch = true; //策略开关：true开，false关
         private Account mainAcct;
         private List<Account> accounts;
         private List<Quotes> stocks;
@@ -39,32 +39,6 @@ namespace NineSunScripture.strategy
             this.stocks = new List<Quotes>();
             this.buyStrategy = new BuyStrategy();
             this.sellStrategy = new SellStrategy();
-        }
-        public bool Start()
-        {
-            if (null == stocks || stocks.Count == 0)
-            {
-                string hint = "没有可操作的股票";
-                MessageBox.Show(hint);
-                Logger.log(hint);
-                return false;
-            }
-            mainThread = new Thread(Process);
-            strategySwitch = true;
-            mainThread.Start();
-
-            return true;
-        }
-        public void Stop()
-        {
-            strategySwitch = false;
-            if (accounts.Count > 0)
-            {
-                foreach (Account account in accounts)
-                {
-                    TradeAPI.Logoff(account.SessionId);
-                }
-            }
         }
 
         private void Process()
@@ -91,11 +65,15 @@ namespace NineSunScripture.strategy
             //TODO 模拟账户使用代码END
             //TODO 买了行情协议的时候主账户直接写死在程序里好点
             mainAcct = accounts[0];
-            while (strategySwitch)
+            while (true)
             {
                 Thread.Sleep(sleepInterval);
                 UpdateFundsInfo(true);
-                if (!IsTradeTime())
+                if (!IsTradeTime() && !IsTest)
+                {
+                    continue;
+                }
+                if (null==stocks||stocks.Count==0)
                 {
                     continue;
                 }
@@ -117,6 +95,30 @@ namespace NineSunScripture.strategy
                             callback.OnTradeResult(0, "策略执行发生异常", e.Message);
                         }
                     }
+                    finally
+                    {
+                        quotes = null;
+                    }
+                }
+            }
+        }
+
+        public bool Start()
+        {
+            mainThread = new Thread(Process);
+            mainThread.Start();
+
+            return true;
+        }
+
+        public void Stop()
+        {
+            mainThread.Abort();
+            if (accounts.Count > 0)
+            {
+                foreach (Account account in accounts)
+                {
+                    TradeAPI.Logoff(account.SessionId);
                 }
             }
         }
@@ -142,7 +144,7 @@ namespace NineSunScripture.strategy
         /// 每隔10s更新一下账户信息
         /// </summary>
         /// <param name="ctrlFrequency">是否控制频率</param>
-        private void UpdateFundsInfo(bool ctrlFrequency)
+        public void UpdateFundsInfo(bool ctrlFrequency)
         {
             if (ctrlFrequency && DateTime.Now.Second % 10 != 0)
             {

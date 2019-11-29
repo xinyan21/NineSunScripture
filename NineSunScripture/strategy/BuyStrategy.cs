@@ -32,10 +32,10 @@ namespace NineSunScripture.strategy
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            /*if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30)
+            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 && !MainStrategy.IsTest)
             {
                 return;
-            }*/
+            }
             float highLimit = quotes.HighLimit;
             float open = quotes.Open;
             string code = quotes.Code;
@@ -221,7 +221,7 @@ namespace NineSunScripture.strategy
                         order.Quantity = ((int)(account.Funds.AvailableAmt / (highLimit * 100))) * 100;
                     }
                     order.SessionId = account.SessionId;
-                    SetShareholderAcct(account, quotes, order);
+                    ApiHelper.SetShareholderAcct(account, quotes, order);
                     int rspCode = TradeAPI.Buy(order);
                     string opLog = account.FundAcct + "策略买入【" + quotes.Name + "】"
                         + (order.Quantity * order.Price).ToString("0.00####") + "万元";
@@ -233,24 +233,6 @@ namespace NineSunScripture.strategy
                 }//END FOR ACCOUNT
             }
             lastTickQuotes[quotes.Code] = quotes;
-        }
-
-        /// <summary>
-        /// 设置订单的股东代码
-        /// </summary>
-        /// <param name="account">账号对象</param>
-        /// <param name="quotes">股票对象</param>
-        /// <param name="order">订单对象</param>
-        public static void SetShareholderAcct(Account account, Quotes quotes, Order order)
-        {
-            if (quotes.Code.StartsWith("6"))
-            {
-                order.ShareholderAcct = account.ShShareholderAcct;
-            }
-            else
-            {
-                order.ShareholderAcct = account.SzShareholderAcct;
-            }
         }
 
         /// <summary>
@@ -329,7 +311,7 @@ namespace NineSunScripture.strategy
                         Logger.log(opLog);
                         if (null != callback)
                         {
-                            callback.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                            callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                         }
                     }
                 }
@@ -379,7 +361,7 @@ namespace NineSunScripture.strategy
             foreach (Account account in accounts)
             {
                 order.SessionId = account.SessionId;
-                SetShareholderAcct(account, quotes, order);
+                ApiHelper.SetShareholderAcct(account, quotes, order);
                 double availableCash = account.Funds.AvailableAmt;
                 order.Quantity = (int)(availableCash / 1000 * 10);
                 int rspCode = TradeAPI.Buy(order);
@@ -388,7 +370,7 @@ namespace NineSunScripture.strategy
                 Logger.log(opLog);
                 if (null != callback)
                 {
-                    callback.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                 }
             }
         }

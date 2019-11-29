@@ -75,5 +75,23 @@ namespace NineSunScripture.trade.helper
                 return acct.SzShareholderAcct;
             }
         }
+
+        /// <summary>
+        /// 设置订单的股东代码
+        /// </summary>
+        /// <param name="account">账号对象</param>
+        /// <param name="quotes">股票对象</param>
+        /// <param name="order">订单对象</param>
+        public static void SetShareholderAcct(Account account, Quotes quotes, Order order)
+        {
+            if (quotes.Code.StartsWith("6"))
+            {
+                order.ShareholderAcct = account.ShShareholderAcct;
+            }
+            else
+            {
+                order.ShareholderAcct = account.SzShareholderAcct;
+            }
+        }
     }
 }

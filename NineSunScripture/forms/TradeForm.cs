@@ -79,7 +79,7 @@ namespace NineSunScripture.forms
             {
                 order.SessionId = account.SessionId;
                 account.Funds = TradeAPI.QueryFunds(account.SessionId);
-                BuyStrategy.SetShareholderAcct(account, quotes, order);
+                ApiHelper.SetShareholderAcct(account, quotes, order);
                 //数量是整百整百的
                 double money = account.Funds.AvailableAmt * positionRatio;
                 order.Quantity = ((int)(money / (order.Price * 100))) * 100;
@@ -90,7 +90,7 @@ namespace NineSunScripture.forms
                 Logger.log(opLog);
                 if (null != callback)
                 {
-                    callback.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                 }
             }
         }

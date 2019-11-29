@@ -26,8 +26,8 @@ namespace NineSunScripture
         private List<Quotes> stocks;
         private List<Quotes> longTermStocks;
         private List<Quotes> dragonLeaders;
-        private List<Quotes> tomorrowStocks;
-        private bool isProgramStarted = false;
+        private List<Quotes> latestStocks;
+        private bool isStrategyStarted = false;
         private StockDbHelper stockDbHelper;
         private Account account;//用来临时保存总账户信息
         private string runtimeInfo;
@@ -49,28 +49,7 @@ namespace NineSunScripture
 
         private void InitializeListViews()
         {
-            ColumnHeader stock = new ColumnHeader();
-            ColumnHeader position = new ColumnHeader();
-            ColumnHeader money = new ColumnHeader();
-
-            stock.Text = "股票";
-            stock.Width = 100;
-            stock.TextAlign = HorizontalAlignment.Center;
-            position.Text = "仓位";
-            position.Width = 100;
-            position.TextAlign = HorizontalAlignment.Center;
-            money.Text = "成交额";
-            money.Width = 100;
-            money.TextAlign = HorizontalAlignment.Center;
-
-            stock = (ColumnHeader)stock.Clone();
-            position = (ColumnHeader)position.Clone();
-            money = (ColumnHeader)money.Clone();
-            lvStocks.Columns.Add(stock);
-            lvStocks.Columns.Add(position);
-            lvStocks.Columns.Add(money);
-            lvStocks.MultiSelect = false;
-            lvStocks.View = View.Details;
+            InitLvStocksHeader();
 
             lvPositions.Columns.Add("股票", 100, HorizontalAlignment.Center);
             lvPositions.Columns.Add("持仓数量", 100, HorizontalAlignment.Center);
@@ -85,6 +64,30 @@ namespace NineSunScripture
             lvStocks.SmallImageList = imgList;
             lvPositions.SmallImageList = imgList;
         }
+
+        private void InitLvStocksHeader()
+        {
+            ColumnHeader stock = new ColumnHeader();
+            ColumnHeader position = new ColumnHeader();
+            ColumnHeader money = new ColumnHeader();
+
+            stock.Text = "股票";
+            stock.Width = 100;
+            stock.TextAlign = HorizontalAlignment.Center;
+            position.Text = "仓位";
+            position.Width = 100;
+            position.TextAlign = HorizontalAlignment.Center;
+            money.Text = "成交额";
+            money.Width = 100;
+            money.TextAlign = HorizontalAlignment.Center;
+
+            lvStocks.Columns.Add(stock);
+            lvStocks.Columns.Add(position);
+            lvStocks.Columns.Add(money);
+            lvStocks.MultiSelect = false;
+            lvStocks.View = View.Details;
+        }
+
         /// <summary>
         /// 绑定股票到listview
         /// </summary>
@@ -122,7 +125,7 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            tomorrowStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryLatest);
+            latestStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryLatest);
             if (quotes.Count > 0)
             {
                 foreach (Quotes item in quotes)
@@ -143,6 +146,12 @@ namespace NineSunScripture
         public void AddStock(Quotes quotes)
         {
             stockDbHelper.AddStock(quotes);
+            refreshStocksListView();
+            RebootStrategy();
+        }
+
+        private void refreshStocksListView()
+        {
             lvStocks.BeginUpdate();
             lvStocks.Items.Clear();
             BindStocksData();
@@ -155,9 +164,9 @@ namespace NineSunScripture
         private void PutStocksTogether()
         {
             stocks.Clear();
-            if (tomorrowStocks.Count > 0)
+            if (latestStocks.Count > 0)
             {
-                stocks.AddRange(tomorrowStocks);
+                stocks.AddRange(latestStocks);
                 if (longTermStocks.Count > 0)
                 {
                     foreach (Quotes quotes in longTermStocks)
@@ -177,10 +186,27 @@ namespace NineSunScripture
             mainStrategy.updateStocks(stocks);
         }
 
+        private void RebootStrategy()
+        {
+            runtimeInfo = "股票池变更，重启策略中...";
+            AddRuntimeInfo();
+            if (isStrategyStarted)
+            {
+                tsmiSwitch_Click(null, null);
+                Thread.Sleep(3000);
+                tsmiSwitch_Click(null, null);
+            }
+            else
+            {
+                tsmiSwitch_Click(null, null);
+            }
+        }
+
         public void OnTradeResult(int rspCode, string msg, string errInfo)
         {
             if (rspCode > 0)
             {
+                mainStrategy.UpdateFundsInfo(false);
                 runtimeInfo = msg + ">成功";
             }
             else
@@ -189,62 +215,10 @@ namespace NineSunScripture
             }
             Invoke(new MethodInvoker(AddRuntimeInfo));
         }
-        private void AddRuntimeInfo()
-        {
-            Logger.log(runtimeInfo);
-            tbRuntimeInfo.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + runtimeInfo + "\r\n");
-            tbRuntimeInfo.ScrollToCaret();
-        }
 
-        private void MenuItemManageAcct_Click(object sender, EventArgs e)
-        {
-            new ManageAcctForm().Show();
-        }
-
-        private void tsmClearStocks_Click(object sender, EventArgs e)
-        {
-            DialogResult dr = MessageBox.Show("确认要清空股票池吗？", "警告",
-                MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-            if (dr == DialogResult.OK)
-            {
-                lvStocks.Items.Clear();
-                stockDbHelper.DelAllBy(Quotes.CategoryLatest);
-                stockDbHelper.DelAllBy(Quotes.CategoryLongTerm);
-                stockDbHelper.DelAllBy(Quotes.CategoryDragonLeader);
-            }
-        }
-
-        private void tsmDelStock_Click(object sender, EventArgs e)
-        {
-            if (lvStocks.SelectedItems.Count <= 0)
-            {
-                return;
-            }
-            string strCategory = lvStocks.SelectedItems[0].Group.Header;
-            short category = Quotes.CategoryLatest;
-            if (strCategory == "龙头")
-            {
-                category = Quotes.CategoryDragonLeader;
-            }
-            else if (strCategory == "常驻")
-            {
-                category = Quotes.CategoryLongTerm;
-            }
-            stockDbHelper.DelStockBy(category, lvStocks.SelectedItems[0].Tag.ToString());
-            lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
-        }
-
-        private void tsmAddStock_Click(object sender, EventArgs e)
-        {
-            AddStockForm addStockForm = new AddStockForm(this);
-            addStockForm.Show();
-        }
-
-        public void onAcctInfoListen(Account account)
-        {
-            this.account = account;
-            Invoke(new MethodInvoker(UpdateAcctInfo));
-        }
+        /// <summary>
+        /// 更新总账户信息
+        /// </summary>
         private void UpdateAcctInfo()
         {
             lblTotalAsset.Text = "总资产：\n" + account.Funds.TotalAsset;
@@ -278,21 +252,118 @@ namespace NineSunScripture
             lvPositions.EndUpdate();
         }
 
-        private void tspManageAcct_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 添加运行时信息
+        /// </summary>
+        private void AddRuntimeInfo()
+        {
+            Logger.log(runtimeInfo);
+            tbRuntimeInfo.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + runtimeInfo + "\r\n");
+            tbRuntimeInfo.ScrollToCaret();
+        }
+
+        /// <summary>
+        /// 清空股票池
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tsmClearStocks_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("确认要清空股票池吗？", "警告",
+                MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if (dr == DialogResult.OK)
+            {
+                lvStocks.Items.Clear();
+                stockDbHelper.DelAllBy(Quotes.CategoryLatest);
+                stockDbHelper.DelAllBy(Quotes.CategoryLongTerm);
+                stockDbHelper.DelAllBy(Quotes.CategoryDragonLeader);
+
+                stocks.Clear();
+                lvStocks.Clear();
+
+                InitLvStocksHeader();
+                refreshStocksListView();
+                RebootStrategy();
+            }
+        }
+
+        /// <summary>
+        /// 删除股票池股票
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tsmDelStock_Click(object sender, EventArgs e)
+        {
+            if (lvStocks.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+            string strCategory = lvStocks.SelectedItems[0].Group.Header;
+            short category = Quotes.CategoryLatest;
+            Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
+            if (strCategory == "龙头")
+            {
+                category = Quotes.CategoryDragonLeader;
+                dragonLeaders.Remove(quotes);
+            }
+            else if (strCategory == "常驻")
+            {
+                category = Quotes.CategoryLongTerm;
+                longTermStocks.Remove(quotes);
+            }
+            else
+            {
+                latestStocks.Remove(quotes);
+            }
+            stockDbHelper.DelStockBy(category, quotes.Code);
+            lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
+            refreshStocksListView();
+            RebootStrategy();
+        }
+
+        /// <summary>
+        /// 添加股票
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tsmAddStock_Click(object sender, EventArgs e)
+        {
+            AddStockForm addStockForm = new AddStockForm(this);
+            addStockForm.Show();
+            RebootStrategy();
+        }
+
+        public void onAcctInfoListen(Account account)
+        {
+            this.account = account;
+            Invoke(new MethodInvoker(UpdateAcctInfo));
+        }
+
+        /// <summary>
+        /// 账号管理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tsmiManageAcct_Click(object sender, EventArgs e)
         {
             new ManageAcctForm().Show();
         }
 
+        /// <summary>
+        /// 策略开关
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void tsmiSwitch_Click(object sender, EventArgs e)
         {
-            if (isProgramStarted)
+            if (isStrategyStarted)
             {
                 runtimeInfo = "策略开始停止";
                 AddRuntimeInfo();
                 Logger.log(runtimeInfo);
                 mainStrategy.Stop();
                 tsmiSwitch.Text = "启动";
-                isProgramStarted = false;
+                isStrategyStarted = false;
                 runtimeInfo = "策略已停止";
                 AddRuntimeInfo();
                 return;
@@ -312,11 +383,16 @@ namespace NineSunScripture
                 return;
             }
             tsmiSwitch.Text = "停止";
-            isProgramStarted = true;
+            isStrategyStarted = true;
             runtimeInfo = "策略已启动";
             AddRuntimeInfo();
         }
 
+        /// <summary>
+        /// 清仓
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void tsmiClearPositions_Click(object sender, EventArgs e)
         {
             DialogResult dr = MessageBox.Show("确认要清仓吗？", "警告",
@@ -349,7 +425,7 @@ namespace NineSunScripture
             }
             Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
             string code = quotes.Code;
-            new TradeForm(mainStrategy.GetAccounts(), quotes,this).Show();
+            new TradeForm(mainStrategy.GetAccounts(), quotes, this).Show();
         }
 
         /// <summary>
@@ -367,7 +443,7 @@ namespace NineSunScripture
             Quotes quotes = new Quotes();
             quotes.Code = position.Code;
             quotes.Name = position.Name;
-            DialogResult dr = MessageBox.Show("确认要全部【" + quotes.Name + "】卖出吗？", "警告",
+            DialogResult dr = MessageBox.Show("确认要全部卖出【" + quotes.Name + "】吗？", "警告",
                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (dr == DialogResult.OK)
             {
@@ -397,6 +473,16 @@ namespace NineSunScripture
         private void tsmiTest_Click(object sender, EventArgs e)
         {
             new TestForm().Show();
+        }
+
+        private void MainForm_Closing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("确认要退出策略吗？", "警告",
+                MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if (dr == DialogResult.OK)
+            {
+                Application.ExitThread();
+            }
         }
     }
 

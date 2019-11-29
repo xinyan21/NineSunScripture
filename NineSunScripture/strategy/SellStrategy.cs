@@ -57,6 +57,10 @@ namespace NineSunScripture.strategy
             float open = quotes.Open;
             float preClose = quotes.PreClose;
             string code = quotes.Code;
+            if (!historyTicks.ContainsKey(code))
+            {
+                historyTicks.Add(code, new Queue<Quotes>(60));
+            }
             Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
             if (curPrice == highLimit || curPrice == lowLimit || null == position)
             {
@@ -104,14 +108,17 @@ namespace NineSunScripture.strategy
                 Logger.log("收盘不板卖" + quotes.Name);
                 Sell(quotes, accounts, callback, 1);
             }
-            Quotes[] ticks = historyTicks[quotes.Code].ToArray();
-            if (ticks.Last().Sell1 == highLimit && curPrice < highLimit)
+            if (historyTicks.ContainsKey(code))
             {
-                Logger.log("开板卖" + quotes.Name);
-                Sell(quotes, accounts, callback, 1);
+                Quotes[] ticks = historyTicks[code].ToArray();
+                if (ticks.Length > 1 && ticks.Last().Sell1 == highLimit && curPrice < highLimit)
+                {
+                    Logger.log("开板卖" + quotes.Name);
+                    Sell(quotes, accounts, callback, 1);
+                }
             }
             SellIfSealDecrease(accounts, quotes, callback);
-            if (historyTicks.Count == 60)
+            if (historyTicks.ContainsKey(code) && historyTicks[code].Count == 60)
             {
                 historyTicks[code].Dequeue();
             }
@@ -187,10 +194,16 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
+            if (quotes.LatestPrice == 0)
+            {
+                quotes = TradeAPI.QueryQuotes(account.SessionId, quotes.Code);
+            }
             Order order = new Order();
             order.SessionId = account.SessionId;
             order.Code = quotes.Code;
+            order.Price = quotes.Buy2;
             order.Quantity = position.AvailableBalance;
+            ApiHelper.SetShareholderAcct(account, quotes, order);
             if (sellRatio > 0)
             {
                 order.Quantity = (int)(order.Quantity * sellRatio);
@@ -201,7 +214,7 @@ namespace NineSunScripture.strategy
             Logger.log(opLog);
             if (null != callback)
             {
-                callback.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
             }
         }
 
@@ -257,6 +270,10 @@ namespace NineSunScripture.strategy
         /// <param name="callback">交易接口回调</param>
         private void SellIfSealDecrease(List<Account> accounts, Quotes quotes, ITrade callback)
         {
+            if (!historyTicks.ContainsKey(quotes.Code))
+            {
+                return;
+            }
             Quotes[] ticks = historyTicks[quotes.Code].ToArray();
             if (ticks.Length < 2)
             {
@@ -265,6 +282,7 @@ namespace NineSunScripture.strategy
             if (ticks.First().Buy1Vol * quotes.HighLimit > 3000 * 10000
                 && ticks.Last().Buy1Vol * quotes.HighLimit < 2000 * 10000)
             {
+                Logger.log("封单减少到2000万卖" + quotes.Name);
                 Sell(quotes, accounts, callback);
             }
         }

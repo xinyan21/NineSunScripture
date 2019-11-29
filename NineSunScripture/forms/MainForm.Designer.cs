@@ -52,13 +52,13 @@
             this.管理菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiSwitch = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiBuyStock = new System.Windows.Forms.ToolStripMenuItem();
-            this.tspManageAcct = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiManageAcct = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiClearPositions = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTest = new System.Windows.Forms.ToolStripMenuItem();
             this.tspExit = new System.Windows.Forms.ToolStripMenuItem();
             this.tbRuntimeInfo = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.tsmiTest = new System.Windows.Forms.ToolStripMenuItem();
             this.flowLayoutPanel2.SuspendLayout();
             this.cmsStocks.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -100,6 +100,7 @@
             this.lvStocks.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lvStocks.ForeColor = System.Drawing.Color.Yellow;
             this.lvStocks.Location = new System.Drawing.Point(3, 42);
+            this.lvStocks.MultiSelect = false;
             this.lvStocks.Name = "lvStocks";
             this.lvStocks.Size = new System.Drawing.Size(305, 712);
             this.lvStocks.TabIndex = 1;
@@ -255,7 +256,6 @@
             this.MenuItemManageAcct.Name = "MenuItemManageAcct";
             this.MenuItemManageAcct.Size = new System.Drawing.Size(150, 26);
             this.MenuItemManageAcct.Text = "账号管理";
-            this.MenuItemManageAcct.Click += new System.EventHandler(this.MenuItemManageAcct_Click);
             // 
             // MenuItemExit
             // 
@@ -285,7 +285,7 @@
             this.管理菜单ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmiSwitch,
             this.tsmiBuyStock,
-            this.tspManageAcct,
+            this.tsmiManageAcct,
             this.tsmiClearPositions,
             this.tsmiTest,
             this.tspExit});
@@ -314,13 +314,13 @@
             this.tsmiBuyStock.Text = "买入";
             this.tsmiBuyStock.Click += new System.EventHandler(this.tsmiBuyStock_Click);
             // 
-            // tspManageAcct
+            // tsmiManageAcct
             // 
-            this.tspManageAcct.AutoSize = false;
-            this.tspManageAcct.Name = "tspManageAcct";
-            this.tspManageAcct.Size = new System.Drawing.Size(150, 40);
-            this.tspManageAcct.Text = "账号管理";
-            this.tspManageAcct.Click += new System.EventHandler(this.tspManageAcct_Click);
+            this.tsmiManageAcct.AutoSize = false;
+            this.tsmiManageAcct.Name = "tsmiManageAcct";
+            this.tsmiManageAcct.Size = new System.Drawing.Size(150, 40);
+            this.tsmiManageAcct.Text = "账号管理";
+            this.tsmiManageAcct.Click += new System.EventHandler(this.tsmiManageAcct_Click);
             // 
             // tsmiClearPositions
             // 
@@ -329,6 +329,14 @@
             this.tsmiClearPositions.Size = new System.Drawing.Size(150, 40);
             this.tsmiClearPositions.Text = "一键清仓";
             this.tsmiClearPositions.Click += new System.EventHandler(this.tsmiClearPositions_Click);
+            // 
+            // tsmiTest
+            // 
+            this.tsmiTest.AutoSize = false;
+            this.tsmiTest.Name = "tsmiTest";
+            this.tsmiTest.Size = new System.Drawing.Size(198, 40);
+            this.tsmiTest.Text = "测试";
+            this.tsmiTest.Click += new System.EventHandler(this.tsmiTest_Click);
             // 
             // tspExit
             // 
@@ -375,14 +383,6 @@
             this.panel2.Size = new System.Drawing.Size(306, 757);
             this.panel2.TabIndex = 16;
             // 
-            // tsmiTest
-            // 
-            this.tsmiTest.AutoSize = false;
-            this.tsmiTest.Name = "tsmiTest";
-            this.tsmiTest.Size = new System.Drawing.Size(198, 40);
-            this.tsmiTest.Text = "测试";
-            this.tsmiTest.Click += new System.EventHandler(this.tsmiTest_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
@@ -403,6 +403,7 @@
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "MainForm";
             this.Text = "九阳真经策略";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_Closing);
             this.flowLayoutPanel2.ResumeLayout(false);
             this.cmsStocks.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
@@ -433,7 +434,7 @@
         private System.Windows.Forms.TextBox tbRuntimeInfo;
         private System.Windows.Forms.ListView lvPositions;
         private System.Windows.Forms.ToolStripMenuItem 管理菜单ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem tspManageAcct;
+        private System.Windows.Forms.ToolStripMenuItem tsmiManageAcct;
         private System.Windows.Forms.ToolStripMenuItem tspExit;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel panel2;
