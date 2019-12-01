@@ -12,10 +12,9 @@ namespace NineSunScripture.util.log
     {
         #region Instance
         private static object logLock;
-
         private static Logger _instance;
-
         private static string logFileName;
+        private static string exceptionFileName;
         private Logger() { }
 
         /// <summary>
@@ -30,6 +29,7 @@ namespace NineSunScripture.util.log
                     _instance = new Logger();
                     logLock = new object();
                     logFileName = "debug.log";
+                    exceptionFileName = "exception.log";
                 }
                 return _instance;
             }
@@ -70,9 +70,14 @@ namespace NineSunScripture.util.log
                 string[] logText = new string[] { DateTime.Now.ToString("hh:mm:ss") + ": "
                     + logType.ToString() + ": " + logContent };
 
+                string fileName = logFileName;
+                if (logType == LogType.Error)
+                {
+                    fileName = exceptionFileName;
+                }
                 lock (logLock)
                 {
-                    File.AppendAllLines(basePath + "\\Log\\" + dataString + "\\" + logFileName, logText);
+                    File.AppendAllLines(basePath + "\\Log\\" + dataString + "\\" + fileName, logText);
                 }
             }
             catch (Exception) { }

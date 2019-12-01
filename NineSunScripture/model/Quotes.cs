@@ -70,7 +70,7 @@ namespace NineSunScripture.model
         /// </summary>
         public float PositionCtrl;
         /// <summary>
-        /// 买入前的成交额限制，用于买入策略
+        /// 买入前的成交额限制，用于买入策略（单位为万）
         /// </summary>
         public int MoneyCtrl;
         /// <summary>

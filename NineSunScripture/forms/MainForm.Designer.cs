@@ -45,6 +45,7 @@
             this.cmsPositionsMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmiSell = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiSellInForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.pbWorkStatus = new System.Windows.Forms.PictureBox();
             this.Menu = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItemManageAcct = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItemExit = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,6 +64,7 @@
             this.cmsStocks.SuspendLayout();
             this.panel1.SuspendLayout();
             this.cmsPositionsMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbWorkStatus)).BeginInit();
             this.MenuMain.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -160,7 +162,7 @@
             this.lblTotalAsset.Location = new System.Drawing.Point(4, 10);
             this.lblTotalAsset.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTotalAsset.Name = "lblTotalAsset";
-            this.lblTotalAsset.Size = new System.Drawing.Size(209, 45);
+            this.lblTotalAsset.Size = new System.Drawing.Size(148, 45);
             this.lblTotalAsset.TabIndex = 0;
             this.lblTotalAsset.Text = "总资产：";
             // 
@@ -172,7 +174,7 @@
             this.lblMoneyAvailable.Location = new System.Drawing.Point(2, 69);
             this.lblMoneyAvailable.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblMoneyAvailable.Name = "lblMoneyAvailable";
-            this.lblMoneyAvailable.Size = new System.Drawing.Size(211, 52);
+            this.lblMoneyAvailable.Size = new System.Drawing.Size(150, 52);
             this.lblMoneyAvailable.TabIndex = 1;
             this.lblMoneyAvailable.Text = "可用金额：";
             // 
@@ -238,6 +240,18 @@
             this.tsmiSellInForm.Size = new System.Drawing.Size(192, 40);
             this.tsmiSellInForm.Text = "窗口卖出";
             this.tsmiSellInForm.Click += new System.EventHandler(this.tsmiSellInForm_Click);
+            // 
+            // pbWorkStatus
+            // 
+            this.pbWorkStatus.BackColor = System.Drawing.Color.Transparent;
+            this.pbWorkStatus.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.pbWorkStatus.Image = global::NineSunScripture.Properties.Resources.taiji;
+            this.pbWorkStatus.InitialImage = null;
+            this.pbWorkStatus.Location = new System.Drawing.Point(354, 339);
+            this.pbWorkStatus.Name = "pbWorkStatus";
+            this.pbWorkStatus.Size = new System.Drawing.Size(514, 510);
+            this.pbWorkStatus.TabIndex = 3;
+            this.pbWorkStatus.TabStop = false;
             // 
             // Menu
             // 
@@ -344,6 +358,7 @@
             this.tspExit.Name = "tspExit";
             this.tspExit.Size = new System.Drawing.Size(150, 40);
             this.tspExit.Text = "退出";
+            this.tspExit.Click += new System.EventHandler(this.tspExit_Click);
             // 
             // tbRuntimeInfo
             // 
@@ -387,10 +402,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
-            this.BackgroundImage = global::NineSunScripture.Properties.Resources._6;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.BackColor = System.Drawing.Color.LightCoral;
+            this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1211, 1214);
+            this.Controls.Add(this.pbWorkStatus);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.flowLayoutPanel2);
@@ -408,6 +424,7 @@
             this.cmsStocks.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.cmsPositionsMenu.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pbWorkStatus)).EndInit();
             this.MenuMain.ResumeLayout(false);
             this.MenuMain.PerformLayout();
             this.panel2.ResumeLayout(false);
@@ -447,6 +464,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiSell;
         private System.Windows.Forms.ToolStripMenuItem tsmiSellInForm;
         private System.Windows.Forms.ToolStripMenuItem tsmiTest;
+        private System.Windows.Forms.PictureBox pbWorkStatus;
     }
 }
 

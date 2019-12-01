@@ -30,6 +30,9 @@ namespace NineSunScripture.forms
             lvAccounts.MultiSelect = false;
             lvAccounts.GridLines = true;
             lvAccounts.View = View.Details;
+            ImageList imgList = new ImageList();
+            imgList.ImageSize = new Size(1, 32);//分别是宽和高
+            lvAccounts.SmallImageList = imgList;
 
             lvAccounts.BeginUpdate();
             accounts = dbHelper.GetAccounts();

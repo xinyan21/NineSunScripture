@@ -82,9 +82,11 @@
             this.tbCode.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tbCode.Location = new System.Drawing.Point(172, 101);
             this.tbCode.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbCode.MaxLength = 6;
             this.tbCode.Name = "tbCode";
             this.tbCode.Size = new System.Drawing.Size(147, 31);
             this.tbCode.TabIndex = 1;
+            this.tbCode.TextChanged += new System.EventHandler(this.tbCode_TextChanged);
             // 
             // label2
             // 
@@ -130,6 +132,7 @@
             this.tbMoney.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tbMoney.Location = new System.Drawing.Point(565, 215);
             this.tbMoney.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbMoney.MaxLength = 5;
             this.tbMoney.Name = "tbMoney";
             this.tbMoney.Size = new System.Drawing.Size(147, 31);
             this.tbMoney.TabIndex = 4;
@@ -139,6 +142,7 @@
             this.tbName.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tbName.Location = new System.Drawing.Point(172, 215);
             this.tbName.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbName.MaxLength = 4;
             this.tbName.Name = "tbName";
             this.tbName.Size = new System.Drawing.Size(147, 31);
             this.tbName.TabIndex = 3;
@@ -148,6 +152,7 @@
             this.tbPosition.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tbPosition.Location = new System.Drawing.Point(565, 103);
             this.tbPosition.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbPosition.MaxLength = 3;
             this.tbPosition.Name = "tbPosition";
             this.tbPosition.Size = new System.Drawing.Size(147, 31);
             this.tbPosition.TabIndex = 2;

@@ -42,16 +42,14 @@ namespace NineSunScripture.strategy
             float positionRatioCtrl = 1f;   //买入计划仓位比例
             //记录开板时间
             bool isBoardLastTick = lastTickQuotes.ContainsKey(code)
-                && (lastTickQuotes[quotes.Code].Buy1 == highLimit
-                || lastTickQuotes[quotes.Code].Sell1 == highLimit);
-            bool isNotBoardThisTick = lastTickQuotes.ContainsKey(code)
-                && quotes.Sell1 < highLimit && 0 != quotes.Sell1;
+                && lastTickQuotes[quotes.Code].LatestPrice == highLimit; ;
+            bool isNotBoardThisTick = quotes.Sell1 < highLimit && 0 != quotes.Sell1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
                 openBoardTime.Add(code, DateTime.Now);
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
-            bool isBoardThisTick = quotes.Sell1 == highLimit || quotes.Buy1 == highLimit;
+            bool isBoardThisTick = quotes.LatestPrice == highLimit;
             if (isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
                 openBoardTime.Remove(code);
@@ -232,7 +230,14 @@ namespace NineSunScripture.strategy
                     }
                 }//END FOR ACCOUNT
             }
-            lastTickQuotes[quotes.Code] = quotes;
+            if (lastTickQuotes.ContainsKey(code))
+            {
+                lastTickQuotes[code] = quotes;
+            }
+            else
+            {
+                lastTickQuotes.Add(code, quotes);
+            }
         }
 
         /// <summary>
@@ -372,7 +377,7 @@ namespace NineSunScripture.strategy
                 {
                     callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                 }
-            }
-        }
+            }//END FOR
+        }//END METHOD
     }
 }

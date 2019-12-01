@@ -17,10 +17,11 @@ using NineSunScripture.db;
 using NineSunScripture.util.log;
 using System.Threading;
 using NineSunScripture.util.test;
+using NineSunScripture.util;
 
 namespace NineSunScripture
 {
-    public partial class MainForm : Form, ITrade, IAcctInfoListener
+    public partial class MainForm : Form, ITrade, IAcctInfoListener, IShowWorkingSatus
     {
         private MainStrategy mainStrategy;
         private List<Quotes> stocks;
@@ -31,6 +32,8 @@ namespace NineSunScripture
         private StockDbHelper stockDbHelper;
         private Account account;//用来临时保存总账户信息
         private string runtimeInfo;
+        private Image imgTaiJi;
+        private int rotateDegree = 0;
 
         public MainForm()
         {
@@ -40,11 +43,12 @@ namespace NineSunScripture
             mainStrategy = new MainStrategy();
             InitializeListViews();
             BindStocksData();
-            mainStrategy.setFundListener(this);
-            mainStrategy.setTradeCallback(this);
-            Thread.Sleep(3000);
-            //程序启动自动启动策略
-            tsmiSwitch_Click(null, null);
+            mainStrategy.SetFundListener(this);
+            mainStrategy.SetTradeCallback(this);
+            mainStrategy.SetShowWorkingStatus(this);
+            imgTaiJi = Properties.Resources.taiji;
+
+            new Thread(InvokeRebootStrategy).Start();
         }
 
         private void InitializeListViews()
@@ -183,17 +187,28 @@ namespace NineSunScripture
                 stocks.AddRange(longTermStocks);
             }
 
-            mainStrategy.updateStocks(stocks);
+            mainStrategy.UpdateStocks(stocks);
+        }
+
+        private void InvokeAddRunInfo()
+        {
+            Invoke(new MethodInvoker(AddRuntimeInfo));
+        }
+
+        private void InvokeRebootStrategy()
+        {
+            Thread.Sleep(1000);
+            Invoke(new MethodInvoker(RebootStrategy));
         }
 
         private void RebootStrategy()
         {
-            runtimeInfo = "股票池变更，重启策略中...";
-            AddRuntimeInfo();
+            InvokeAddRunInfo();
             if (isStrategyStarted)
             {
+                runtimeInfo = "股票池变更，重启策略中...";
                 tsmiSwitch_Click(null, null);
-                Thread.Sleep(3000);
+                Thread.Sleep(1000);
                 tsmiSwitch_Click(null, null);
             }
             else
@@ -212,8 +227,12 @@ namespace NineSunScripture
             else
             {
                 runtimeInfo = msg + ">失败，错误信息：" + errInfo;
+                if (errInfo.Contains("超时"))
+                {
+                    InvokeRebootStrategy();
+                }
             }
-            Invoke(new MethodInvoker(AddRuntimeInfo));
+            InvokeAddRunInfo();
         }
 
         /// <summary>
@@ -328,16 +347,15 @@ namespace NineSunScripture
         /// <param name="e"></param>
         private void tsmAddStock_Click(object sender, EventArgs e)
         {
-            AddStockForm addStockForm = new AddStockForm(this);
-            addStockForm.Show();
-            RebootStrategy();
+            new AddStockForm(mainStrategy.GetAccounts(), this).Show();
         }
 
-        public void onAcctInfoListen(Account account)
+        public void OnAcctInfoListen(Account account)
         {
             this.account = account;
             Invoke(new MethodInvoker(UpdateAcctInfo));
         }
+
 
         /// <summary>
         /// 账号管理
@@ -359,33 +377,33 @@ namespace NineSunScripture
             if (isStrategyStarted)
             {
                 runtimeInfo = "策略开始停止";
-                AddRuntimeInfo();
+                InvokeAddRunInfo();
                 Logger.log(runtimeInfo);
                 mainStrategy.Stop();
                 tsmiSwitch.Text = "启动";
                 isStrategyStarted = false;
                 runtimeInfo = "策略已停止";
-                AddRuntimeInfo();
+                InvokeAddRunInfo();
                 return;
             }
             runtimeInfo = "策略开始启动";
-            AddRuntimeInfo();
+            InvokeAddRunInfo();
             Logger.log(runtimeInfo);
             PutStocksTogether();
-            mainStrategy.updateStocks(stocks);
+            mainStrategy.UpdateStocks(stocks);
             bool isStarted = mainStrategy.Start();
             if (!isStarted)
             {
                 string log = "策略启动失败";
                 runtimeInfo = log;
-                AddRuntimeInfo();
+                InvokeAddRunInfo();
                 Logger.log(log);
                 return;
             }
             tsmiSwitch.Text = "停止";
             isStrategyStarted = true;
             runtimeInfo = "策略已启动";
-            AddRuntimeInfo();
+            InvokeAddRunInfo();
         }
 
         /// <summary>
@@ -481,13 +499,33 @@ namespace NineSunScripture
                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (dr == DialogResult.OK)
             {
-                Application.ExitThread();
+                Environment.Exit(0);
+            }
+        }
+
+        private void tspExit_Click(object sender, EventArgs e)
+        {
+            MainForm_Closing(null, null);
+        }
+
+        public void RotateStatusImg()
+        {
+            Image image = pbWorkStatus.Image;
+            pbWorkStatus.Image = Utils.RotateImage(imgTaiJi, rotateDegree++);
+            if (null != image)
+            {
+                image.Dispose();
             }
         }
     }
 
     public interface IAcctInfoListener
     {
-        void onAcctInfoListen(Account account);
+        void OnAcctInfoListen(Account account);
+    }
+
+    public interface IShowWorkingSatus
+    {
+        void RotateStatusImg();
     }
 }

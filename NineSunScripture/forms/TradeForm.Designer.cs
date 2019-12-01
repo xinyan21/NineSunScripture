@@ -41,6 +41,7 @@
             this.btnBuy = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.tbName = new System.Windows.Forms.TextBox();
+            this.rbtnOneFourth = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -100,12 +101,13 @@
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox1.Controls.Add(this.rbtnOneFourth);
             this.groupBox1.Controls.Add(this.rbtnAllIn);
             this.groupBox1.Controls.Add(this.rbtnOneSecond);
             this.groupBox1.Controls.Add(this.rbtnOneThird);
             this.groupBox1.Location = new System.Drawing.Point(500, 177);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(256, 61);
+            this.groupBox1.Size = new System.Drawing.Size(295, 61);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             // 
@@ -114,7 +116,7 @@
             this.rbtnAllIn.AutoSize = true;
             this.rbtnAllIn.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnAllIn.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnAllIn.Location = new System.Drawing.Point(165, 22);
+            this.rbtnAllIn.Location = new System.Drawing.Point(214, 21);
             this.rbtnAllIn.Name = "rbtnAllIn";
             this.rbtnAllIn.Size = new System.Drawing.Size(68, 29);
             this.rbtnAllIn.TabIndex = 2;
@@ -127,7 +129,7 @@
             this.rbtnOneSecond.AutoSize = true;
             this.rbtnOneSecond.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneSecond.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneSecond.Location = new System.Drawing.Point(82, 22);
+            this.rbtnOneSecond.Location = new System.Drawing.Point(148, 21);
             this.rbtnOneSecond.Name = "rbtnOneSecond";
             this.rbtnOneSecond.Size = new System.Drawing.Size(60, 29);
             this.rbtnOneSecond.TabIndex = 1;
@@ -141,7 +143,7 @@
             this.rbtnOneThird.Checked = true;
             this.rbtnOneThird.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneThird.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneThird.Location = new System.Drawing.Point(6, 22);
+            this.rbtnOneThird.Location = new System.Drawing.Point(82, 21);
             this.rbtnOneThird.Name = "rbtnOneThird";
             this.rbtnOneThird.Size = new System.Drawing.Size(60, 29);
             this.rbtnOneThird.TabIndex = 0;
@@ -188,7 +190,22 @@
             this.tbName.Size = new System.Drawing.Size(167, 31);
             this.tbName.TabIndex = 10;
             // 
-            // BuyForm
+            // rbtnOneFourth
+            // 
+            this.rbtnOneFourth.AutoSize = true;
+            this.rbtnOneFourth.Checked = true;
+            this.rbtnOneFourth.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.rbtnOneFourth.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.rbtnOneFourth.Location = new System.Drawing.Point(6, 21);
+            this.rbtnOneFourth.Name = "rbtnOneFourth";
+            this.rbtnOneFourth.Size = new System.Drawing.Size(60, 29);
+            this.rbtnOneFourth.TabIndex = 4;
+            this.rbtnOneFourth.TabStop = true;
+            this.rbtnOneFourth.Text = "1/4";
+            this.rbtnOneFourth.UseVisualStyleBackColor = true;
+            this.rbtnOneFourth.CheckedChanged += new System.EventHandler(this.rbtnOneFourth_CheckedChanged);
+            // 
+            // TradeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -206,7 +223,7 @@
             this.Controls.Add(this.tbCode);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "BuyForm";
+            this.Name = "TradeForm";
             this.Text = "买入";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -229,5 +246,6 @@
         private System.Windows.Forms.Button btnBuy;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox tbName;
+        private System.Windows.Forms.RadioButton rbtnOneFourth;
     }
 }

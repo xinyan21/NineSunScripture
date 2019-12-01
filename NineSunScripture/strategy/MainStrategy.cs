@@ -1,6 +1,7 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.trade.api;
 using NineSunScripture.trade.helper;
+using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,16 @@ namespace NineSunScripture.strategy
     /// </summary>
     public class MainStrategy
     {
+        /// <summary>
+        /// 是否是测试状态，实盘的时候改为false
+        /// </summary>
         public const bool IsTest = true;
         public const string ReserveStocks = "000001|000002|000005|300233|600235";
-        private const int IntervalOfNonTrade = 3000;
+        private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
-        private const int IntervalOfTrade = 1000;
-        private int sleepInterval = IntervalOfTrade;
+        private const int SleepIntervalOfTrade = 300;
+
+        private int sleepInterval = SleepIntervalOfTrade;
         private int tryLoginCnt = 0;
         private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
         private Account mainAcct;
@@ -33,12 +38,15 @@ namespace NineSunScripture.strategy
         private SellStrategy sellStrategy;
         private ITrade callback;
         private IAcctInfoListener fundListener;
+        private IShowWorkingSatus showWorkingSatus;
+        private bool isHoliday;
 
         public MainStrategy()
         {
             this.stocks = new List<Quotes>();
             this.buyStrategy = new BuyStrategy();
             this.sellStrategy = new SellStrategy();
+            isHoliday = Utils.IsHolidayByDate(DateTime.Now);
         }
 
         private void Process()
@@ -50,6 +58,10 @@ namespace NineSunScripture.strategy
                 return;
             }
             UpdateFundsInfo(false);
+            if (isHoliday && !IsTest)
+            {
+                return;
+            }
             List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
             //TODO 实盘账户使用代码
             //stocks.AddRange(positionStocks);
@@ -65,15 +77,16 @@ namespace NineSunScripture.strategy
             //TODO 模拟账户使用代码END
             //TODO 买了行情协议的时候主账户直接写死在程序里好点
             mainAcct = accounts[0];
+            bool isWorkingRight = true;
             while (true)
             {
                 Thread.Sleep(sleepInterval);
                 UpdateFundsInfo(true);
-                if (!IsTradeTime() && !IsTest)
+                if (!IsTest && !IsTradeTime())
                 {
                     continue;
                 }
-                if (null==stocks||stocks.Count==0)
+                if (null == stocks || stocks.Count == 0)
                 {
                     continue;
                 }
@@ -83,12 +96,19 @@ namespace NineSunScripture.strategy
                     try
                     {
                         quotes = TradeAPI.QueryQuotes(mainAcct.SessionId, stocks[i].Code);
+                        if (quotes.LatestPrice == 0)
+                        {
+                            isWorkingRight = false;
+                            callback.OnTradeResult(0, "策略执行发生异常", "行情接口返回0");
+                            return;
+                        }
                         SetBuyPlan(quotes);
                         buyStrategy.Buy(quotes, accounts, callback);
                         sellStrategy.Sell(quotes, accounts, callback);
                     }
                     catch (Exception e)
                     {
+                        isWorkingRight = false;
                         Logger.exception(e);
                         if (null != callback)
                         {
@@ -99,6 +119,10 @@ namespace NineSunScripture.strategy
                     {
                         quotes = null;
                     }
+                }
+                if (null != showWorkingSatus && isWorkingRight)
+                {
+                    showWorkingSatus.RotateStatusImg();
                 }
             }
         }
@@ -146,7 +170,7 @@ namespace NineSunScripture.strategy
         /// <param name="ctrlFrequency">是否控制频率</param>
         public void UpdateFundsInfo(bool ctrlFrequency)
         {
-            if (ctrlFrequency && DateTime.Now.Second % 10 != 0)
+            if (ctrlFrequency && DateTime.Now.Second % 5 != 0)
             {
                 return;
             }
@@ -155,7 +179,7 @@ namespace NineSunScripture.strategy
                 Account account = new Account();
                 account.Funds = AccountHelper.QueryTotalFunds(accounts);
                 account.Positions = AccountHelper.QueryPositions(accounts);
-                fundListener.onAcctInfoListen(account);
+                fundListener.OnAcctInfoListen(account);
             }
             //调用接口要有时间间隔
             Thread.Sleep(200);
@@ -163,33 +187,41 @@ namespace NineSunScripture.strategy
 
         private bool IsTradeTime()
         {
-            if (DateTime.Now.Hour < 9 || DateTime.Now.Hour == 12 || DateTime.Now.Hour >= 15)
+            if (DateTime.Now.Hour < 9 || DateTime.Now.Hour >= 15)
             {
-                if (IntervalOfNonTrade != sleepInterval)
+                if (SleepIntervalOfNonTrade != sleepInterval)
                 {
-                    sleepInterval = IntervalOfNonTrade;
+                    sleepInterval = SleepIntervalOfNonTrade;
                 }
                 return false;
             }
             if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 29)
             {
-                if (IntervalOfNonTrade != sleepInterval)
+                if (SleepIntervalOfNonTrade != sleepInterval)
                 {
-                    sleepInterval = IntervalOfNonTrade;
+                    sleepInterval = SleepIntervalOfNonTrade;
+                }
+                return false;
+            }
+            if (DateTime.Now.Hour == 12 && DateTime.Now.Minute < 59)
+            {
+                if (SleepIntervalOfNonTrade != sleepInterval)
+                {
+                    sleepInterval = SleepIntervalOfNonTrade;
                 }
                 return false;
             }
             if (DateTime.Now.Hour == 11 && DateTime.Now.Minute > 30)
             {
-                if (IntervalOfNonTrade != sleepInterval)
+                if (SleepIntervalOfNonTrade != sleepInterval)
                 {
-                    sleepInterval = IntervalOfNonTrade;
+                    sleepInterval = SleepIntervalOfNonTrade;
                 }
                 return false;
             }
-            if (IntervalOfTrade != sleepInterval)
+            if (SleepIntervalOfTrade != sleepInterval)
             {
-                sleepInterval = IntervalOfTrade;
+                sleepInterval = SleepIntervalOfTrade;
             }
             return true;
         }
@@ -214,20 +246,25 @@ namespace NineSunScripture.strategy
             SellStrategy.Sell(quotes, accounts, callBack, 1);
         }
 
-        public void updateStocks(List<Quotes> quotes)
+        public void UpdateStocks(List<Quotes> quotes)
         {
             this.stocks.Clear();
             this.stocks.AddRange(quotes);
         }
 
-        public void setFundListener(IAcctInfoListener fundListener)
+        public void SetFundListener(IAcctInfoListener fundListener)
         {
             this.fundListener = fundListener;
         }
 
-        public void setTradeCallback(ITrade callback)
+        public void SetTradeCallback(ITrade callback)
         {
             this.callback = callback;
+        }
+
+        public void SetShowWorkingStatus(IShowWorkingSatus showWorkingSatus)
+        {
+            this.showWorkingSatus = showWorkingSatus;
         }
 
         public List<Account> GetAccounts()

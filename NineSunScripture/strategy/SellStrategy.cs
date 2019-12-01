@@ -108,17 +108,14 @@ namespace NineSunScripture.strategy
                 Logger.log("收盘不板卖" + quotes.Name);
                 Sell(quotes, accounts, callback, 1);
             }
-            if (historyTicks.ContainsKey(code))
+            Quotes[] ticks = historyTicks[code].ToArray();
+            if (ticks.Length > 1 && ticks.Last().Sell1 == highLimit && curPrice < highLimit)
             {
-                Quotes[] ticks = historyTicks[code].ToArray();
-                if (ticks.Length > 1 && ticks.Last().Sell1 == highLimit && curPrice < highLimit)
-                {
-                    Logger.log("开板卖" + quotes.Name);
-                    Sell(quotes, accounts, callback, 1);
-                }
+                Logger.log("开板卖" + quotes.Name);
+                Sell(quotes, accounts, callback, 1);
             }
             SellIfSealDecrease(accounts, quotes, callback);
-            if (historyTicks.ContainsKey(code) && historyTicks[code].Count == 60)
+            if (historyTicks[code].Count == 60)
             {
                 historyTicks[code].Dequeue();
             }
@@ -270,10 +267,6 @@ namespace NineSunScripture.strategy
         /// <param name="callback">交易接口回调</param>
         private void SellIfSealDecrease(List<Account> accounts, Quotes quotes, ITrade callback)
         {
-            if (!historyTicks.ContainsKey(quotes.Code))
-            {
-                return;
-            }
             Quotes[] ticks = historyTicks[quotes.Code].ToArray();
             if (ticks.Length < 2)
             {

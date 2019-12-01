@@ -183,13 +183,14 @@
     <Compile Include="trade\helper\AccountHelper.cs" />
     <Compile Include="trade\helper\ApiHelper.cs" />
     <Compile Include="util\log\Logger.cs" />
-    <Compile Include="util\test\TestForm.cs">
+    <Compile Include="test\TestForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="util\test\TestForm.Designer.cs">
+    <Compile Include="test\TestForm.Designer.cs">
       <DependentUpon>TestForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="util\test\TestTrade.cs" />
+    <Compile Include="test\TestTrade.cs" />
+    <Compile Include="util\Utils.cs" />
     <EmbeddedResource Include="forms\AddStockForm.resx">
       <DependentUpon>AddStockForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -207,7 +208,7 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="util\test\TestForm.resx">
+    <EmbeddedResource Include="test\TestForm.resx">
       <DependentUpon>TestForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="NineSunScripture_TemporaryKey.pfx" />
@@ -232,6 +233,7 @@
     <Content Include="docs\券商检测机制说明.txt" />
     <Content Include="docs\开发计划.txt" />
     <Content Include="docs\接口返回数据格式.txt" />
+    <None Include="Resources\taiji.png" />
     <None Include="Resources\3%281%29.png" />
     <None Include="Resources\10.jpg" />
     <None Include="Resources\66.png" />

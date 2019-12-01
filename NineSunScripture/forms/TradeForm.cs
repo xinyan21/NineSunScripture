@@ -17,11 +17,12 @@ namespace NineSunScripture.forms
 {
     public partial class TradeForm : Form
     {
-        private float positionRatio = 1 / 3;
+        private float positionRatio = 1 / 3f;
         private List<Account> accounts;
         private Quotes quotes;
         private short opDirection;  //buy or sell, @Order const
         private ITrade callback;
+
         public TradeForm(List<Account> accounts, ITrade callback, short opDirection = Order.CategoryBuy)
         {
             InitializeComponent();
@@ -66,6 +67,7 @@ namespace NineSunScripture.forms
             {
                 Buy();
             }
+            Close();
         }
 
         private void Buy()
@@ -107,24 +109,29 @@ namespace NineSunScripture.forms
                 quotes = TradeAPI.QueryQuotes(accounts[0].SessionId, tbCode.Text);
                 if (quotes.Name.Length > 0)
                 {
-                    tbName.Text = quotes.Name + "[" + quotes.Sell1 + "]";
+                    tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
                 }
             }
         }
 
         private void rbtnOneThird_CheckedChanged(object sender, EventArgs e)
         {
-            positionRatio = 1 / 3;
+            positionRatio = 1 / 3f;
         }
 
         private void rbtnOneSecond_CheckedChanged(object sender, EventArgs e)
         {
-            positionRatio = 1 / 2;
+            positionRatio = 1 / 2f;
         }
 
         private void rbtnAllIn_CheckedChanged(object sender, EventArgs e)
         {
             positionRatio = 1;
+        }
+
+        private void rbtnOneFourth_CheckedChanged(object sender, EventArgs e)
+        {
+            positionRatio = 1 / 4f;
         }
     }
 }
