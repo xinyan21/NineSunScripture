@@ -205,7 +205,6 @@
             this.lvPositions.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.lvPositions.MultiSelect = false;
             this.lvPositions.Name = "lvPositions";
-            this.lvPositions.Scrollable = false;
             this.lvPositions.Size = new System.Drawing.Size(701, 136);
             this.lvPositions.TabIndex = 2;
             this.lvPositions.UseCompatibleStateImageBehavior = false;
@@ -249,7 +248,7 @@
             this.pbWorkStatus.InitialImage = null;
             this.pbWorkStatus.Location = new System.Drawing.Point(354, 339);
             this.pbWorkStatus.Name = "pbWorkStatus";
-            this.pbWorkStatus.Size = new System.Drawing.Size(514, 510);
+            this.pbWorkStatus.Size = new System.Drawing.Size(514, 506);
             this.pbWorkStatus.TabIndex = 3;
             this.pbWorkStatus.TabStop = false;
             // 

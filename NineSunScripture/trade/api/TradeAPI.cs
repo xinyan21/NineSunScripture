@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using NineSunScripture.model;
 using NineSunScripture.trade.helper;
+using NineSunScripture.util.log;
 
 namespace NineSunScripture.trade.api
 {
@@ -87,6 +88,10 @@ namespace NineSunScripture.trade.api
                 funds.FrozenAmt = Double.Parse(temp[2]);
                 funds.AvailableAmt = Double.Parse(temp[4]);
             }
+            else
+            {
+                Logger.log("QueryFunds：" + ApiHelper.ParseErrInfo(funds.ErrorInfo));
+            }
             return funds;
         }
 
@@ -118,7 +123,10 @@ namespace NineSunScripture.trade.api
                     positions.Add(position);
                 }
             }
-
+            else
+            {
+                Logger.log("QueryPositions：" + ApiHelper.ParseErrInfo(position.ErrorInfo));
+            }
             return positions;
         }
 
@@ -146,6 +154,11 @@ namespace NineSunScripture.trade.api
                     orders.Add(order);
                 }
             }
+            else
+            {
+                Logger.log("QueryTodayTransaction接口调用异常：" +
+                    ApiHelper.ParseErrInfo(order.ErrorInfo));
+            }
 
             return orders;
         }
@@ -171,10 +184,16 @@ namespace NineSunScripture.trade.api
                     order.Name = temp[i, 2];
                     order.Operation = temp[i, 3];
                     order.Quantity = int.Parse(temp[i, 5]);
+                    order.TransactionQuantity = int.Parse(temp[i, 7]);
+                    order.TransactionPrice = float.Parse(temp[i, 9]);
                     order.OrderId = temp[i, 10];
                     order.ShareholderAcct = temp[i, 12];
                     orders.Add(order);
                 }
+            }
+            else
+            {
+                Logger.log("QueryOrdersCanCancel：" + ApiHelper.ParseErrInfo(order.ErrorInfo));
             }
 
             return orders;
@@ -202,7 +221,10 @@ namespace NineSunScripture.trade.api
                     accounts.Add(account);
                 }
             }
-
+            else
+            {
+                Logger.log("QueryShareHolderAccts：" + ApiHelper.ParseErrInfo(account.ErrorInfo));
+            }
             return accounts;
         }
 
@@ -251,6 +273,10 @@ namespace NineSunScripture.trade.api
                 quotes.Buy4Vol = int.Parse(temp[29].Replace(".000", ""));
                 quotes.Buy5Vol = int.Parse(temp[30].Replace(".000", ""));
             }
+            else
+            {
+                Logger.log("QueryQuotes：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
+            }
             return quotes;
         }
 
@@ -261,8 +287,8 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Buy(Order order)
         {
-            int rspId = SendOrder(order.SessionId, Order.CategoryBuy, order.ShareholderAcct, order.Code,
-                order.Price, order.Quantity, order.Result, order.ErrorInfo);
+            int rspId = SendOrder(order.SessionId, Order.CategoryBuy, order.ShareholderAcct,
+                order.Code, order.Price, order.Quantity, order.Result, order.ErrorInfo);
             return rspId;
         }
 
@@ -273,8 +299,8 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Sell(Order order)
         {
-            int rspId = SendOrder(order.SessionId, Order.CategorySell, order.ShareholderAcct, order.Code,
-                order.Price, order.Quantity, order.Result, order.ErrorInfo);
+            int rspId = SendOrder(order.SessionId, Order.CategorySell, order.ShareholderAcct,
+                order.Code, order.Price, order.Quantity, order.Result, order.ErrorInfo);
             return rspId;
         }
 
@@ -285,7 +311,8 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int CancelOrder(Order order)
         {
-            return CancelOrder(order.SessionId, order.ShareholderAcct, order.OrderId, order.Result, order.ErrorInfo);
+            return CancelOrder(order.SessionId, order.ShareholderAcct,
+                order.OrderId, order.Result, order.ErrorInfo);
         }
     }
 }

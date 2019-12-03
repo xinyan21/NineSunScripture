@@ -53,7 +53,7 @@ namespace NineSunScripture.strategy
         {
             float highLimit = quotes.HighLimit;
             float lowLimit = quotes.LowLimit;
-            float curPrice = quotes.Sell1;
+            float curPrice = quotes.LatestPrice;
             float open = quotes.Open;
             float preClose = quotes.PreClose;
             string code = quotes.Code;
@@ -62,7 +62,8 @@ namespace NineSunScripture.strategy
                 historyTicks.Add(code, new Queue<Quotes>(60));
             }
             Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
-            if (curPrice == highLimit || curPrice == lowLimit || null == position)
+            if (curPrice == highLimit || curPrice == lowLimit || null == position ||
+                quotes.LatestPrice == 0 || quotes.Buy1 == 0 || position.AvailableBalance == 0)
             {
                 return;
             }
@@ -191,9 +192,9 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            if (quotes.LatestPrice == 0)
+            if (quotes.Buy2 == 0)
             {
-                quotes = TradeAPI.QueryQuotes(account.SessionId, quotes.Code);
+                quotes = TradeAPI.QueryQuotes(account.SessionId, position.Code);
             }
             Order order = new Order();
             order.SessionId = account.SessionId;
@@ -207,7 +208,7 @@ namespace NineSunScripture.strategy
             }
             int rspCode = TradeAPI.Sell(order);
             string opLog = account.FundAcct + "策略卖出【" + quotes.Name + "】"
-                + (order.Quantity * order.Price).ToString("0.00####") + "万元";
+                + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
             Logger.log(opLog);
             if (null != callback)
             {
@@ -230,7 +231,7 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 清仓
+        /// 一键清仓，挂当前价-5%的价格砸，最低价是跌停价砸
         /// </summary>
         /// <param name="accounts">账户列表</param>
         /// <param name="callback">交易接口回调</param>
@@ -252,8 +253,13 @@ namespace NineSunScripture.strategy
                     {
                         continue;
                     }
-                    quotes.Code = position.Code;
-                    quotes.Name = position.Name;
+                    quotes = TradeAPI.QueryQuotes(account.SessionId, position.Code);
+                    quotes.Buy2 = quotes.LatestPrice * 0.95f;
+                    if (quotes.Buy2 < quotes.LowLimit)
+                    {
+                        quotes.Buy2 = quotes.LowLimit;
+                    }
+
                     SellByAcct(quotes, account, callback, 1);
                 }
             }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NineSunScripture.model;
+using NineSunScripture.trade.helper;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,14 +15,31 @@ namespace NineSunScripture.util.test
     public partial class TestForm : Form
     {
         private TestTrade testTrade = new TestTrade();
+        private List<Account> accounts;
         public TestForm()
         {
             InitializeComponent();
+
+        }
+
+        private void Login()
+        {
+            accounts = AccountHelper.Login(null);
         }
 
         private void btnTestBuy_Click(object sender, EventArgs e)
         {
-            testTrade.TestBuyStrategy();
+            testTrade.TestBuyStrategy(accounts );
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            testTrade.TestSellStrategy(accounts);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Login();
         }
     }
 }

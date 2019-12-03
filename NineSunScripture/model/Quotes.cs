@@ -14,7 +14,7 @@ namespace NineSunScripture.model
         /// <summary>
         /// 常驻股票池中的股票
         /// </summary>
-        public  const short CategoryLongTerm = 0;
+        public const short CategoryLongTerm = 0;
         /// <summary>
         /// 龙头股票池中的股票
         /// </summary>
@@ -87,6 +87,20 @@ namespace NineSunScripture.model
         public override int GetHashCode()
         {
             return this.Code.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(">Code: ").Append(Code);
+            sb.Append(">Name: ").Append(Name);
+            sb.Append(">LatestPrice: ").Append(LatestPrice);
+            sb.Append(">Money: ").Append(Money);
+            sb.Append(">Sell1: ").Append(Sell1);
+            sb.Append(">Buy1: ").Append(Buy1);
+            sb.Append(">Sell1Vol: ").Append(Sell1Vol);
+            sb.Append(">Buy1Vol: ").Append(Buy1Vol);
+            return sb.ToString();
         }
     }
 }

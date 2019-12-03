@@ -38,5 +38,9 @@ namespace NineSunScripture.model
         public Funds Funds;
         public List<Position> Positions;
         public List<ShareHolderAcct> ShareHolderAccts;
+        /// <summary>
+        /// 撤单
+        /// </summary>
+        public List<Order> CancelOrders;    
     }
 }

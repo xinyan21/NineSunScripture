@@ -65,7 +65,7 @@ namespace NineSunScripture.trade.helper
                     string opLog = "资金账号" + account.FundAcct + "登录失败，信息："
                         + ApiHelper.ParseErrInfo(account.ErrorInfo);
                     Logger.log(opLog);
-                    if (null!=callback)
+                    if (null != callback)
                     {
                         callback.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                     }
@@ -108,7 +108,7 @@ namespace NineSunScripture.trade.helper
                 {
                     continue;
                 }
-                if (null==position)
+                if (null == position)
                 {
                     position = new Position();
                 }
@@ -178,6 +178,10 @@ namespace NineSunScripture.trade.helper
                 quote = new Quotes();
                 quote.Code = position.Code;
                 quote.Name = position.Name;
+                if (null == quotes.Find(item => item.Code == position.Code))
+                {
+                    quotes.Add(quote);
+                }
             }
 
             return quotes;
@@ -215,6 +219,38 @@ namespace NineSunScripture.trade.helper
             orders = orders.FindAll(order => order.Code == code);
 
             return orders;
+        }
+
+        /// <summary>
+        /// 查询总账户的可撤单，按股票汇总
+        /// </summary>
+        /// <param name="accounts"></param>
+        /// <returns></returns>
+        public static List<Order> QueryTotalCancelOrders(List<Account> accounts)
+        {
+            List<Order> sourceOrders = new List<Order>();
+            List<Order> resultOrders = new List<Order>();
+            foreach (Account account in accounts)
+            {
+                sourceOrders.AddRange(TradeAPI.QueryOrdersCanCancel(account.SessionId));
+            }
+            foreach (Order order in sourceOrders)
+            {
+                if (resultOrders.Contains(order))
+                {
+                    Order item = resultOrders.Find(temp => temp.Code == order.Code
+                     && temp.Operation == order.Operation);
+                    item.Quantity += order.Quantity;
+                    item.Price = (item.Price + order.Price) / 2;
+                    item.TransactionPrice += order.TransactionPrice;
+                    item.TransactionQuantity += order.TransactionQuantity;
+                }
+                else
+                {
+                    resultOrders.Add(order);
+                }
+            }
+            return resultOrders;
         }
     }
 }

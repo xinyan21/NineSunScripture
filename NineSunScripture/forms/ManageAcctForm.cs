@@ -28,7 +28,6 @@ namespace NineSunScripture.forms
             lvAccounts.Columns.Add("券商", 150, HorizontalAlignment.Center);
             lvAccounts.Columns.Add("资金账号", 350, HorizontalAlignment.Center);
             lvAccounts.MultiSelect = false;
-            lvAccounts.GridLines = true;
             lvAccounts.View = View.Details;
             ImageList imgList = new ImageList();
             imgList.ImageSize = new Size(1, 32);//分别是宽和高

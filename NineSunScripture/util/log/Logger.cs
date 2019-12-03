@@ -14,7 +14,8 @@ namespace NineSunScripture.util.log
         private static object logLock;
         private static Logger _instance;
         private static string logFileName;
-        private static string exceptionFileName;
+        private static string excFileName;
+        private static string quotesFileName;
         private Logger() { }
 
         /// <summary>
@@ -29,7 +30,8 @@ namespace NineSunScripture.util.log
                     _instance = new Logger();
                     logLock = new object();
                     logFileName = "debug.log";
-                    exceptionFileName = "exception.log";
+                    excFileName = "exception.log";
+                    quotesFileName = "quotes.log";
                 }
                 return _instance;
             }
@@ -73,7 +75,11 @@ namespace NineSunScripture.util.log
                 string fileName = logFileName;
                 if (logType == LogType.Error)
                 {
-                    fileName = exceptionFileName;
+                    fileName = excFileName;
+                }
+                else if (logType == LogType.Quotes)
+                {
+                    fileName = quotesFileName;
                 }
                 lock (logLock)
                 {
@@ -122,6 +128,7 @@ namespace NineSunScripture.util.log
         Success,
         Failure,
         Warning,
-        Error
+        Error,
+        Quotes
     }
 }

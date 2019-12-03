@@ -99,6 +99,7 @@ namespace NineSunScripture.forms
 
         private void Sell()
         {
+            quotes.Buy2 = float.Parse(tbPrice.Text);
             SellStrategy.Sell(quotes, accounts, callback, positionRatio);
         }
 

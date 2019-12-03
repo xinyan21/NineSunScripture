@@ -53,15 +53,8 @@ namespace NineSunScripture
 
         private void InitializeListViews()
         {
-            InitLvStocksHeader();
-
-            lvPositions.Columns.Add("股票", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("持仓数量", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("可用", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("盈亏", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("盈亏比例", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("市值", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("仓位", 100, HorizontalAlignment.Center);
+            InitLvStocks();
+            InitLvPositions();
 
             ImageList imgList = new ImageList();
             imgList.ImageSize = new Size(1, 32);//分别是宽和高
@@ -69,7 +62,7 @@ namespace NineSunScripture
             lvPositions.SmallImageList = imgList;
         }
 
-        private void InitLvStocksHeader()
+        private void InitLvStocks()
         {
             ColumnHeader stock = new ColumnHeader();
             ColumnHeader position = new ColumnHeader();
@@ -90,6 +83,31 @@ namespace NineSunScripture
             lvStocks.Columns.Add(money);
             lvStocks.MultiSelect = false;
             lvStocks.View = View.Details;
+        }
+
+        private void InitLvPositions()
+        {
+            lvPositions.Columns.Add("股票", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("持仓数量", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("可用", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("盈亏", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("盈亏比例", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("市值", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("仓位", 100, HorizontalAlignment.Center);
+        }
+
+        /// <summary>
+        /// 可撤单和持仓公用一个ListView
+        /// </summary>
+        private void InitLvCancelOrders()
+        {
+            lvPositions.Columns.Add("股票", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("操作", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("委托数量", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("成交数量", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("委托价格", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("成交均价", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("撤销数量", 100, HorizontalAlignment.Center);
         }
 
         /// <summary>
@@ -141,6 +159,58 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
+        }
+
+        private void BindPositionsData()
+        {
+            lvPositions.BeginUpdate();
+            lvPositions.Items.Clear();
+            foreach (Position position in account.Positions)
+            {
+                //TODO 模拟交易代码
+                if (MainStrategy.ReserveStocks.Contains(position.Code))
+                {
+                    continue;
+                }
+                ListViewItem lvi = new ListViewItem(position.Name);
+                lvi.SubItems.Add(position.StockBalance + "");
+                lvi.SubItems.Add(position.AvailableBalance + "");
+                lvi.SubItems.Add(position.ProfitAndLoss + "");
+                lvi.SubItems.Add(position.ProfitAndLossPct + "%");
+                lvi.SubItems.Add(position.StockBalance * position.Price + "");
+                int positionRatio = (int)(position.StockBalance * position.Price
+                    / account.Funds.TotalAsset * 100);
+                lvi.SubItems.Add(positionRatio + "%");
+                lvi.Tag = position;
+
+                lvPositions.Items.Add(lvi);
+            }
+            lvPositions.EndUpdate();
+        }
+
+        private void BindCancelOrdersData()
+        {
+            lvPositions.BeginUpdate();
+            lvPositions.Items.Clear();
+            foreach (Order order in account.CancelOrders)
+            {
+                //TODO 模拟交易代码
+                if (MainStrategy.ReserveStocks.Contains(order.Code))
+                {
+                    continue;
+                }
+                ListViewItem lvi = new ListViewItem(order.Name);
+                lvi.SubItems.Add(order.Operation + "");
+                lvi.SubItems.Add(order.Quantity + "");
+                lvi.SubItems.Add(order.TransactionQuantity + "");
+                lvi.SubItems.Add(order.Price + "%");
+                lvi.SubItems.Add(order.TransactionPrice + "");
+                lvi.SubItems.Add(order.CanceledQuantity + "%");
+                lvi.Tag = order;
+
+                lvPositions.Items.Add(lvi);
+            }
+            lvPositions.EndUpdate();
         }
 
         /// <summary>
@@ -197,10 +267,13 @@ namespace NineSunScripture
 
         private void InvokeRebootStrategy()
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             Invoke(new MethodInvoker(RebootStrategy));
         }
 
+        /// <summary>
+        /// 重启策略
+        /// </summary>
         private void RebootStrategy()
         {
             InvokeAddRunInfo();
@@ -223,16 +296,15 @@ namespace NineSunScripture
             {
                 mainStrategy.UpdateFundsInfo(false);
                 runtimeInfo = msg + ">成功";
+                InvokeAddRunInfo();
             }
             else
             {
                 runtimeInfo = msg + ">失败，错误信息：" + errInfo;
-                if (errInfo.Contains("超时"))
-                {
-                    InvokeRebootStrategy();
-                }
+                InvokeAddRunInfo();
+                InvokeRebootStrategy();
             }
-            InvokeAddRunInfo();
+            Logger.log(runtimeInfo);
         }
 
         /// <summary>
@@ -246,29 +318,7 @@ namespace NineSunScripture
             {
                 return;
             }
-            lvPositions.BeginUpdate();
-            lvPositions.Items.Clear();
-            foreach (Position position in account.Positions)
-            {
-                //TODO 模拟交易代码
-                if (MainStrategy.ReserveStocks.Contains(position.Code))
-                {
-                    continue;
-                }
-                ListViewItem lvi = new ListViewItem(position.Name);
-                lvi.SubItems.Add(position.StockBalance + "");
-                lvi.SubItems.Add(position.AvailableBalance + "");
-                lvi.SubItems.Add(position.ProfitAndLoss + "");
-                lvi.SubItems.Add(position.ProfitAndLossPct + "%");
-                lvi.SubItems.Add(position.StockBalance * position.Price + "");
-                int positionRatio = (int)(position.StockBalance * position.Price
-                    / account.Funds.TotalAsset * 100);
-                lvi.SubItems.Add(positionRatio + "%");
-                lvi.Tag = position;
-
-                lvPositions.Items.Add(lvi);
-            }
-            lvPositions.EndUpdate();
+            BindPositionsData();
         }
 
         /// <summary>
@@ -300,7 +350,7 @@ namespace NineSunScripture
                 stocks.Clear();
                 lvStocks.Clear();
 
-                InitLvStocksHeader();
+                InitLvStocks();
                 refreshStocksListView();
                 RebootStrategy();
             }
@@ -430,6 +480,7 @@ namespace NineSunScripture
         {
             new TradeForm(mainStrategy.GetAccounts(), this).Show();
         }
+
         /// <summary>
         /// 股票池列表右键菜单买入
         /// </summary>
@@ -447,7 +498,7 @@ namespace NineSunScripture
         }
 
         /// <summary>
-        /// 持仓列表右键卖出
+        /// 持仓列表右键一键卖出
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -508,10 +559,18 @@ namespace NineSunScripture
             MainForm_Closing(null, null);
         }
 
-        public void RotateStatusImg()
+        public void RotateStatusImg(int degree)
         {
             Image image = pbWorkStatus.Image;
-            pbWorkStatus.Image = Utils.RotateImage(imgTaiJi, rotateDegree++);
+            if (degree > 0)
+            {
+                rotateDegree += degree;
+                pbWorkStatus.Image = Utils.RotateImage(imgTaiJi, rotateDegree);
+            }
+            else
+            {
+                pbWorkStatus.Image = imgTaiJi;
+            }
             if (null != image)
             {
                 image.Dispose();
@@ -526,6 +585,6 @@ namespace NineSunScripture
 
     public interface IShowWorkingSatus
     {
-        void RotateStatusImg();
+        void RotateStatusImg(int degree);
     }
 }

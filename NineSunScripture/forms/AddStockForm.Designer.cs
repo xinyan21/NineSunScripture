@@ -107,7 +107,7 @@
             this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label3.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label3.Location = new System.Drawing.Point(475, 109);
+            this.label3.Location = new System.Drawing.Point(91, 221);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(69, 25);
@@ -120,7 +120,7 @@
             this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label4.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label4.Location = new System.Drawing.Point(91, 221);
+            this.label4.Location = new System.Drawing.Point(475, 107);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(69, 25);
@@ -140,19 +140,20 @@
             // tbName
             // 
             this.tbName.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbName.Location = new System.Drawing.Point(172, 215);
+            this.tbName.Location = new System.Drawing.Point(565, 104);
             this.tbName.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbName.MaxLength = 4;
             this.tbName.Name = "tbName";
+            this.tbName.ReadOnly = true;
             this.tbName.Size = new System.Drawing.Size(147, 31);
             this.tbName.TabIndex = 3;
             // 
             // tbPosition
             // 
             this.tbPosition.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbPosition.Location = new System.Drawing.Point(565, 103);
+            this.tbPosition.Location = new System.Drawing.Point(172, 215);
             this.tbPosition.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tbPosition.MaxLength = 3;
+            this.tbPosition.MaxLength = 4;
             this.tbPosition.Name = "tbPosition";
             this.tbPosition.Size = new System.Drawing.Size(147, 31);
             this.tbPosition.TabIndex = 2;

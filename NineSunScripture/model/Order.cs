@@ -40,6 +40,18 @@ namespace NineSunScripture.model
         /// 操作：证券买入|证券卖出
         /// </summary>
         public String Operation;
+        /// <summary>
+        /// 成交数量
+        /// </summary>
+        public int TransactionQuantity;
+        /// <summary>
+        /// 成交均价
+        /// </summary>
+        public float TransactionPrice;
+        /// <summary>
+        /// 撤销数量
+        /// </summary>
+        public int CanceledQuantity;
 
         public bool Equals(Order other)
         {

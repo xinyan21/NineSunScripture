@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NineSunScripture.model;
+using NineSunScripture.util.log;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -59,6 +61,15 @@ namespace NineSunScripture.util
             g.TranslateTransform(-dx, -dy);
             g.DrawImage(image, new PointF(0, 0));
             return rotatedBmp;
+        }
+
+        public static void SamplingLogQuotes(Quotes quotes)
+        {
+            if (DateTime.Now.Second != 0 || null == quotes)
+            {
+                return;
+            }
+            Logger.log(quotes.ToString(), LogType.Quotes);
         }
     }
 }

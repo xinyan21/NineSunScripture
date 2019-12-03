@@ -35,13 +35,13 @@
             this.label4 = new System.Windows.Forms.Label();
             this.tbPrice = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.rbtnOneFourth = new System.Windows.Forms.RadioButton();
             this.rbtnAllIn = new System.Windows.Forms.RadioButton();
             this.rbtnOneSecond = new System.Windows.Forms.RadioButton();
             this.rbtnOneThird = new System.Windows.Forms.RadioButton();
             this.btnBuy = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.tbName = new System.Windows.Forms.TextBox();
-            this.rbtnOneFourth = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -111,6 +111,21 @@
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             // 
+            // rbtnOneFourth
+            // 
+            this.rbtnOneFourth.AutoSize = true;
+            this.rbtnOneFourth.Checked = true;
+            this.rbtnOneFourth.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.rbtnOneFourth.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.rbtnOneFourth.Location = new System.Drawing.Point(6, 21);
+            this.rbtnOneFourth.Name = "rbtnOneFourth";
+            this.rbtnOneFourth.Size = new System.Drawing.Size(60, 29);
+            this.rbtnOneFourth.TabIndex = 4;
+            this.rbtnOneFourth.TabStop = true;
+            this.rbtnOneFourth.Text = "1/4";
+            this.rbtnOneFourth.UseVisualStyleBackColor = true;
+            this.rbtnOneFourth.CheckedChanged += new System.EventHandler(this.rbtnOneFourth_CheckedChanged);
+            // 
             // rbtnAllIn
             // 
             this.rbtnAllIn.AutoSize = true;
@@ -161,7 +176,7 @@
             this.btnBuy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBuy.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnBuy.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnBuy.Location = new System.Drawing.Point(261, 325);
+            this.btnBuy.Location = new System.Drawing.Point(263, 392);
             this.btnBuy.Name = "btnBuy";
             this.btnBuy.Size = new System.Drawing.Size(294, 72);
             this.btnBuy.TabIndex = 8;
@@ -190,28 +205,13 @@
             this.tbName.Size = new System.Drawing.Size(167, 31);
             this.tbName.TabIndex = 10;
             // 
-            // rbtnOneFourth
-            // 
-            this.rbtnOneFourth.AutoSize = true;
-            this.rbtnOneFourth.Checked = true;
-            this.rbtnOneFourth.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.rbtnOneFourth.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneFourth.Location = new System.Drawing.Point(6, 21);
-            this.rbtnOneFourth.Name = "rbtnOneFourth";
-            this.rbtnOneFourth.Size = new System.Drawing.Size(60, 29);
-            this.rbtnOneFourth.TabIndex = 4;
-            this.rbtnOneFourth.TabStop = true;
-            this.rbtnOneFourth.Text = "1/4";
-            this.rbtnOneFourth.UseVisualStyleBackColor = true;
-            this.rbtnOneFourth.CheckedChanged += new System.EventHandler(this.rbtnOneFourth_CheckedChanged);
-            // 
             // TradeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(831, 464);
+            this.ClientSize = new System.Drawing.Size(831, 569);
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnBuy);

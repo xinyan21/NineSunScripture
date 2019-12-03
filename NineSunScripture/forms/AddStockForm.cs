@@ -35,7 +35,6 @@ namespace NineSunScripture.forms
             }
 
             quotes.Code = tbCode.Text;
-            quotes.Name = tbName.Text;
             quotes.PositionCtrl = float.Parse(tbPosition.Text);
             if (tbMoney.Text.Length > 0)
             {

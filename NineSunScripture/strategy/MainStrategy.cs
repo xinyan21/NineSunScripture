@@ -21,7 +21,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public const bool IsTest = true;
+        public const bool IsTest = false;
         public const string ReserveStocks = "000001|000002|000005|300233|600235";
         private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
@@ -84,6 +84,10 @@ namespace NineSunScripture.strategy
                 UpdateFundsInfo(true);
                 if (!IsTest && !IsTradeTime())
                 {
+                    if (null != showWorkingSatus)
+                    {
+                        showWorkingSatus.RotateStatusImg(-1);
+                    }
                     continue;
                 }
                 if (null == stocks || stocks.Count == 0)
@@ -91,13 +95,16 @@ namespace NineSunScripture.strategy
                     continue;
                 }
                 Quotes quotes;
+                //TODO 暂时没有level控制下频率，每秒刷新一下，300Ms频率用来旋转太极图
                 for (int i = 0; i < stocks.Count; i++)
                 {
                     try
                     {
                         quotes = TradeAPI.QueryQuotes(mainAcct.SessionId, stocks[i].Code);
+                        Utils.SamplingLogQuotes(quotes);
                         if (quotes.LatestPrice == 0)
                         {
+                            Logger.log(quotes.ToString(), LogType.Quotes);
                             isWorkingRight = false;
                             callback.OnTradeResult(0, "策略执行发生异常", "行情接口返回0");
                             return;
@@ -119,10 +126,17 @@ namespace NineSunScripture.strategy
                     {
                         quotes = null;
                     }
-                }
-                if (null != showWorkingSatus && isWorkingRight)
+                }//END FOR
+                if (null != showWorkingSatus)
                 {
-                    showWorkingSatus.RotateStatusImg();
+                    if (isWorkingRight)
+                    {
+                        showWorkingSatus.RotateStatusImg(1);
+                    }
+                    else
+                    {
+                        showWorkingSatus.RotateStatusImg(-1);
+                    }
                 }
             }
         }
@@ -165,12 +179,12 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 每隔10s更新一下账户信息
+        /// 每隔3s更新一下账户信息
         /// </summary>
         /// <param name="ctrlFrequency">是否控制频率</param>
         public void UpdateFundsInfo(bool ctrlFrequency)
         {
-            if (ctrlFrequency && DateTime.Now.Second % 5 != 0)
+            if (ctrlFrequency && DateTime.Now.Second % 3 != 0)
             {
                 return;
             }
@@ -179,6 +193,7 @@ namespace NineSunScripture.strategy
                 Account account = new Account();
                 account.Funds = AccountHelper.QueryTotalFunds(accounts);
                 account.Positions = AccountHelper.QueryPositions(accounts);
+                account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
                 fundListener.OnAcctInfoListen(account);
             }
             //调用接口要有时间间隔
