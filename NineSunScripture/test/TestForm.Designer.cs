@@ -35,7 +35,7 @@
             // 
             // btnTestBuy
             // 
-            this.btnTestBuy.Location = new System.Drawing.Point(53, 176);
+            this.btnTestBuy.Location = new System.Drawing.Point(40, 40);
             this.btnTestBuy.Name = "btnTestBuy";
             this.btnTestBuy.Size = new System.Drawing.Size(155, 46);
             this.btnTestBuy.TabIndex = 0;
@@ -45,7 +45,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(312, 176);
+            this.button1.Location = new System.Drawing.Point(40, 150);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(155, 46);
             this.button1.TabIndex = 1;
@@ -55,11 +55,11 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(53, 44);
+            this.button2.Location = new System.Drawing.Point(401, 40);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(155, 46);
             this.button2.TabIndex = 2;
-            this.button2.Text = "登录";
+            this.button2.Text = "查询当日成交";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 

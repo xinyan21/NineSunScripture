@@ -18,9 +18,9 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 三档止盈比例为20%、30%、40%
         /// </summary>
-        private const float FirstClassStopWin = 0.2f;
-        private const float SecondClassStopWin = 0.3f;
-        private const float ThirdClassStopWin = 0.4f;
+        private const float FirstClassStopWin = 20;
+        private const float SecondClassStopWin = 30;
+        private const float ThirdClassStopWin = 40;
         /// <summary>
         /// 三档止盈仓位为30%、50%、50%
         /// </summary>
@@ -141,7 +141,7 @@ namespace NineSunScripture.strategy
                 {
                     foreach (Order order in todayTransactions)
                     {
-                        if (order.Code == quotes.Code)
+                        if (order.Code == quotes.Code && order.Operation.Contains(Order.OperationSell))
                         {
                             isSoldToday = true;
                             break;
@@ -152,28 +152,25 @@ namespace NineSunScripture.strategy
                         continue;
                     }
                 }
-                else
+                Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
+                if (null == position)
                 {
-                    Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
-                    if (null == position)
-                    {
-                        continue;
-                    }
-                    if (position.ProfitAndLossPct > ThirdClassStopWin)
-                    {
-                        Logger.log("40%止盈1/2卖" + quotes.Name);
-                        SellByAcct(quotes, account, callback, ThirdStopWinPosition);
-                    }
-                    else if (position.ProfitAndLossPct > SecondClassStopWin)
-                    {
-                        Logger.log("30%止盈1/2卖" + quotes.Name);
-                        SellByAcct(quotes, account, callback, SecondStopWinPosition);
-                    }
-                    else if (position.ProfitAndLossPct > FirstClassStopWin)
-                    {
-                        Logger.log("20%止盈3成卖" + quotes.Name);
-                        SellByAcct(quotes, account, callback, FirstStopWinPosition);
-                    }
+                    continue;
+                }
+                if (position.ProfitAndLossPct > ThirdClassStopWin)
+                {
+                    Logger.log("40%止盈1/2卖" + quotes.Name);
+                    SellByAcct(quotes, account, callback, ThirdStopWinPosition);
+                }
+                else if (position.ProfitAndLossPct > SecondClassStopWin)
+                {
+                    Logger.log("30%止盈1/2卖" + quotes.Name);
+                    SellByAcct(quotes, account, callback, SecondStopWinPosition);
+                }
+                else if (position.ProfitAndLossPct > FirstClassStopWin)
+                {
+                    Logger.log("20%止盈3成卖" + quotes.Name);
+                    SellByAcct(quotes, account, callback, FirstStopWinPosition);
                 }
             }
         }

@@ -112,6 +112,7 @@
             // cmsStocks
             // 
             this.cmsStocks.AutoSize = false;
+            this.cmsStocks.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.cmsStocks.ImageScalingSize = new System.Drawing.Size(18, 18);
             this.cmsStocks.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmAddTomorrowStock,
@@ -120,37 +121,42 @@
             this.tsmClearTomorrowStocks});
             this.cmsStocks.Margin = new System.Windows.Forms.Padding(0, 10, 0, 0);
             this.cmsStocks.Name = "cmsTomorrow";
-            this.cmsStocks.Size = new System.Drawing.Size(193, 142);
+            this.cmsStocks.Size = new System.Drawing.Size(193, 200);
             this.cmsStocks.Text = "股票池管理";
             // 
             // tsmAddTomorrowStock
             // 
+            this.tsmAddTomorrowStock.AutoSize = false;
+            this.tsmAddTomorrowStock.Margin = new System.Windows.Forms.Padding(0, 10, 0, 0);
             this.tsmAddTomorrowStock.Name = "tsmAddTomorrowStock";
-            this.tsmAddTomorrowStock.Size = new System.Drawing.Size(134, 24);
+            this.tsmAddTomorrowStock.Size = new System.Drawing.Size(192, 30);
             this.tsmAddTomorrowStock.Text = "添加股票";
             this.tsmAddTomorrowStock.Click += new System.EventHandler(this.tsmAddStock_Click);
             // 
             // tsmiBuy
             // 
+            this.tsmiBuy.AutoSize = false;
             this.tsmiBuy.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
             this.tsmiBuy.Name = "tsmiBuy";
-            this.tsmiBuy.Size = new System.Drawing.Size(134, 24);
+            this.tsmiBuy.Size = new System.Drawing.Size(192, 30);
             this.tsmiBuy.Text = "买入";
             this.tsmiBuy.Click += new System.EventHandler(this.tsmiBuy_Click);
             // 
             // tsmDelTomorrowStock
             // 
+            this.tsmDelTomorrowStock.AutoSize = false;
             this.tsmDelTomorrowStock.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
             this.tsmDelTomorrowStock.Name = "tsmDelTomorrowStock";
-            this.tsmDelTomorrowStock.Size = new System.Drawing.Size(134, 24);
+            this.tsmDelTomorrowStock.Size = new System.Drawing.Size(192, 30);
             this.tsmDelTomorrowStock.Text = "删除";
             this.tsmDelTomorrowStock.Click += new System.EventHandler(this.tsmDelStock_Click);
             // 
             // tsmClearTomorrowStocks
             // 
+            this.tsmClearTomorrowStocks.AutoSize = false;
             this.tsmClearTomorrowStocks.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
             this.tsmClearTomorrowStocks.Name = "tsmClearTomorrowStocks";
-            this.tsmClearTomorrowStocks.Size = new System.Drawing.Size(134, 24);
+            this.tsmClearTomorrowStocks.Size = new System.Drawing.Size(192, 30);
             this.tsmClearTomorrowStocks.Text = "清空";
             this.tsmClearTomorrowStocks.Click += new System.EventHandler(this.tsmClearStocks_Click);
             // 

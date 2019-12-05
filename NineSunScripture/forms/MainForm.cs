@@ -47,7 +47,6 @@ namespace NineSunScripture
             mainStrategy.SetTradeCallback(this);
             mainStrategy.SetShowWorkingStatus(this);
             imgTaiJi = Properties.Resources.taiji;
-
             new Thread(InvokeRebootStrategy).Start();
         }
 
@@ -541,7 +540,7 @@ namespace NineSunScripture
 
         private void tsmiTest_Click(object sender, EventArgs e)
         {
-            new TestForm().Show();
+            new TestForm(mainStrategy.GetAccounts()).Show();
         }
 
         private void MainForm_Closing(object sender, FormClosingEventArgs e)
@@ -571,7 +570,8 @@ namespace NineSunScripture
             {
                 pbWorkStatus.Image = imgTaiJi;
             }
-            if (null != image)
+            //imgTaiJi是原图，而且会不停地赋值给控件，不能dispose
+            if (null != image && image != imgTaiJi)
             {
                 image.Dispose();
             }

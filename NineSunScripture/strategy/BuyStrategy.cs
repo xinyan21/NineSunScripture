@@ -32,7 +32,8 @@ namespace NineSunScripture.strategy
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 && !MainStrategy.IsTest)
+            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 && !MainStrategy.IsTest ||
+                DateTime.Now.Hour > 14)
             {
                 return;
             }

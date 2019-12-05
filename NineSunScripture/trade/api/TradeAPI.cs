@@ -191,10 +191,6 @@ namespace NineSunScripture.trade.api
                     orders.Add(order);
                 }
             }
-            else
-            {
-                Logger.log("QueryOrdersCanCancel：" + ApiHelper.ParseErrInfo(order.ErrorInfo));
-            }
 
             return orders;
         }
@@ -240,38 +236,47 @@ namespace NineSunScripture.trade.api
             int rspCode = QueryHQ(sessionId, code, quotes.Result, quotes.ErrorInfo);
             if (rspCode > 0)
             {
-                String[] temp = ApiHelper.ParseResult(quotes.Result);
-                quotes.Code = temp[0];
-                quotes.Name = temp[1];
-                quotes.PreClose = float.Parse(temp[2]);
-                quotes.LatestPrice = float.Parse(temp[3]);
-                quotes.HighLimit = float.Parse(temp[4]);
-                quotes.LowLimit = float.Parse(temp[5]);
-                quotes.High = float.Parse(temp[6]);
-                quotes.Low = float.Parse(temp[7]);
-                quotes.Money = double.Parse(temp[8]);
-                quotes.Volume = int.Parse(temp[9]);
-                quotes.Open = float.Parse(temp[10]);
-                quotes.Sell1 = float.Parse(temp[11]);
-                quotes.Sell2 = float.Parse(temp[12]);
-                quotes.Sell3 = float.Parse(temp[13]);
-                quotes.Sell4 = float.Parse(temp[14]);
-                quotes.Sell5 = float.Parse(temp[15]);
-                quotes.Buy1 = float.Parse(temp[16]);
-                quotes.Buy2 = float.Parse(temp[17]);
-                quotes.Buy3 = float.Parse(temp[18]);
-                quotes.Buy4 = float.Parse(temp[19]);
-                quotes.Buy5 = float.Parse(temp[20]);
-                quotes.Sell1Vol = int.Parse(temp[21].Replace(".000", ""));
-                quotes.Sell2Vol = int.Parse(temp[22].Replace(".000", ""));
-                quotes.Sell3Vol = int.Parse(temp[23].Replace(".000", ""));
-                quotes.Sell4Vol = int.Parse(temp[24].Replace(".000", ""));
-                quotes.Sell5Vol = int.Parse(temp[25].Replace(".000", ""));
-                quotes.Buy1Vol = int.Parse(temp[26].Replace(".000", ""));
-                quotes.Buy2Vol = int.Parse(temp[27].Replace(".000", ""));
-                quotes.Buy3Vol = int.Parse(temp[28].Replace(".000", ""));
-                quotes.Buy4Vol = int.Parse(temp[29].Replace(".000", ""));
-                quotes.Buy5Vol = int.Parse(temp[30].Replace(".000", ""));
+                try
+                {
+                    String[] temp = ApiHelper.ParseResult(quotes.Result);
+                    quotes.Code = temp[0];
+                    quotes.Name = temp[1];
+                    quotes.PreClose = float.Parse(temp[2]);
+                    quotes.LatestPrice = float.Parse(temp[3]);
+                    quotes.HighLimit = float.Parse(temp[4]);
+                    quotes.LowLimit = float.Parse(temp[5]);
+                    quotes.High = float.Parse(temp[6]);
+                    quotes.Low = float.Parse(temp[7]);
+                    quotes.Money = double.Parse(temp[8]);
+                    quotes.Volume = int.Parse(temp[9]);
+                    quotes.Open = float.Parse(temp[10]);
+                    quotes.Sell1 = float.Parse(temp[11]);
+                    quotes.Sell2 = float.Parse(temp[12]);
+                    quotes.Sell3 = float.Parse(temp[13]);
+                    quotes.Sell4 = float.Parse(temp[14]);
+                    quotes.Sell5 = float.Parse(temp[15]);
+                    quotes.Buy1 = float.Parse(temp[16]);
+                    quotes.Buy2 = float.Parse(temp[17]);
+                    quotes.Buy3 = float.Parse(temp[18]);
+                    quotes.Buy4 = float.Parse(temp[19]);
+                    quotes.Buy5 = float.Parse(temp[20]);
+                    quotes.Sell1Vol = int.Parse(temp[21].Replace(".000", ""));
+                    quotes.Sell2Vol = int.Parse(temp[22].Replace(".000", ""));
+                    quotes.Sell3Vol = int.Parse(temp[23].Replace(".000", ""));
+                    quotes.Sell4Vol = int.Parse(temp[24].Replace(".000", ""));
+                    quotes.Sell5Vol = int.Parse(temp[25].Replace(".000", ""));
+                    quotes.Buy1Vol = int.Parse(temp[26].Replace(".000", ""));
+                    quotes.Buy2Vol = int.Parse(temp[27].Replace(".000", ""));
+                    quotes.Buy3Vol = int.Parse(temp[28].Replace(".000", ""));
+                    quotes.Buy4Vol = int.Parse(temp[29].Replace(".000", ""));
+                    quotes.Buy5Vol = int.Parse(temp[30].Replace(".000", ""));
+                }
+                catch (Exception e)
+                {
+                    Logger.log("QueryQuotes解析异常：" + ApiHelper.ParseErrInfo(quotes.Result));
+                    Logger.exception(e, ApiHelper.ParseErrInfo(quotes.Result));
+                    throw e;
+                }
             }
             else
             {

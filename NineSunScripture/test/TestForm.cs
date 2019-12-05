@@ -1,4 +1,5 @@
 ﻿using NineSunScripture.model;
+using NineSunScripture.trade.api;
 using NineSunScripture.trade.helper;
 using System;
 using System.Collections.Generic;
@@ -16,15 +17,10 @@ namespace NineSunScripture.util.test
     {
         private TestTrade testTrade = new TestTrade();
         private List<Account> accounts;
-        public TestForm()
+        public TestForm(List<Account> accounts )
         {
             InitializeComponent();
-
-        }
-
-        private void Login()
-        {
-            accounts = AccountHelper.Login(null);
+            this.accounts = accounts;
         }
 
         private void btnTestBuy_Click(object sender, EventArgs e)
@@ -39,7 +35,7 @@ namespace NineSunScripture.util.test
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Login();
+            List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(accounts[0].SessionId);
         }
     }
 }

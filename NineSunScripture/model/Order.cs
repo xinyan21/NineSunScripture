@@ -11,8 +11,10 @@ namespace NineSunScripture.model
     /// </summary>
     public class Order : BaseModel, IEquatable<Order>
     {
+        //下面2个用作下单分类
         public const short CategoryBuy = 0;
         public const short CategorySell = 1;
+        //下面2个用作查询分类
         public const string OperationBuy = "买入";
         public const string OperationSell = "卖出";
 

@@ -22,7 +22,7 @@ namespace NineSunScripture.strategy
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
         public const bool IsTest = false;
-        public const string ReserveStocks = "000001|000002|000005|300233|600235";
+        public const string ReserveStocks = "159915";
         private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
         private const int SleepIntervalOfTrade = 300;
@@ -158,6 +158,7 @@ namespace NineSunScripture.strategy
                 {
                     TradeAPI.Logoff(account.SessionId);
                 }
+                accounts.Clear();
             }
         }
 
@@ -202,7 +203,7 @@ namespace NineSunScripture.strategy
 
         private bool IsTradeTime()
         {
-            if (DateTime.Now.Hour < 9 || DateTime.Now.Hour >= 15)
+            if (DateTime.Now.Hour < 9 || DateTime.Now.Hour > 14)
             {
                 if (SleepIntervalOfNonTrade != sleepInterval)
                 {
@@ -226,7 +227,7 @@ namespace NineSunScripture.strategy
                 }
                 return false;
             }
-            if (DateTime.Now.Hour == 11 && DateTime.Now.Minute > 30)
+            if (DateTime.Now.Hour == 11 && DateTime.Now.Minute >= 30)
             {
                 if (SleepIntervalOfNonTrade != sleepInterval)
                 {
