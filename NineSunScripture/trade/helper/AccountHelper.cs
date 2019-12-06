@@ -21,12 +21,13 @@ namespace NineSunScripture.trade.helper
         public static List<Account> Login(ITrade callback)
         {
             AcctDbHelper dbHelper = new AcctDbHelper();
-            List<Account> accounts = dbHelper.GetAccounts();
-            if (null == accounts || accounts.Count == 0)
+            List<Account> dbAccounts = dbHelper.GetAccounts();
+            if (null == dbAccounts || dbAccounts.Count == 0)
             {
                 return null;
             }
-            foreach (Account account in accounts)
+            List<Account> loginAccts = new List<Account>();
+            foreach (Account account in dbAccounts)
             {
                 //TODO 新版本加了营业部ID，后面看要不要加到数据库
                 int sessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
@@ -59,6 +60,7 @@ namespace NineSunScripture.trade.helper
                             }
                         }
                     }
+                    loginAccts.Add(account);
                 }
                 else
                 {
@@ -67,11 +69,11 @@ namespace NineSunScripture.trade.helper
                     Logger.log(opLog);
                     if (null != callback)
                     {
-                        callback.OnTradeResult(1, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                        callback.OnTradeResult(0, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                     }
                 }
             }
-            return accounts;
+            return loginAccts;
         }
 
         /// <summary>
@@ -195,6 +197,10 @@ namespace NineSunScripture.trade.helper
         public static Funds QueryTotalFunds(List<Account> accounts)
         {
             Funds funds = new Funds();
+            if (null == accounts)
+            {
+                return funds;
+            }
             foreach (Account account in accounts)
             {
                 Funds temp = TradeAPI.QueryFunds(account.SessionId);

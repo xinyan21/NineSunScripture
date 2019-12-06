@@ -166,11 +166,6 @@ namespace NineSunScripture
             lvPositions.Items.Clear();
             foreach (Position position in account.Positions)
             {
-                //TODO 模拟交易代码
-                if (MainStrategy.ReserveStocks.Contains(position.Code))
-                {
-                    continue;
-                }
                 ListViewItem lvi = new ListViewItem(position.Name);
                 lvi.SubItems.Add(position.StockBalance + "");
                 lvi.SubItems.Add(position.AvailableBalance + "");
@@ -193,11 +188,6 @@ namespace NineSunScripture
             lvPositions.Items.Clear();
             foreach (Order order in account.CancelOrders)
             {
-                //TODO 模拟交易代码
-                if (MainStrategy.ReserveStocks.Contains(order.Code))
-                {
-                    continue;
-                }
                 ListViewItem lvi = new ListViewItem(order.Name);
                 lvi.SubItems.Add(order.Operation + "");
                 lvi.SubItems.Add(order.Quantity + "");

@@ -149,6 +149,7 @@ namespace NineSunScripture.trade.api
                     order.Time = temp[i, 0];
                     order.Code = temp[i, 1];
                     order.Name = temp[i, 2];
+                    order.Operation = temp[i, 3];
                     order.Quantity = int.Parse(temp[i, 4]);
                     order.OrderId = temp[i, 7];
                     orders.Add(order);

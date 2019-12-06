@@ -245,11 +245,6 @@ namespace NineSunScripture.strategy
                 }
                 foreach (Position position in positions)
                 {
-                    //TODO 模拟盘代码
-                    if (MainStrategy.ReserveStocks.Contains(position.Code))
-                    {
-                        continue;
-                    }
                     quotes = TradeAPI.QueryQuotes(account.SessionId, position.Code);
                     quotes.Buy2 = quotes.LatestPrice * 0.95f;
                     if (quotes.Buy2 < quotes.LowLimit)

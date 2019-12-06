@@ -22,7 +22,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 最小买一涨幅
         /// </summary>
-        private const float MinBuy1Ratio = 1.07f;
+        private const float MinBuy1Ratio = 1.085f;
         /// <summary>
         /// 最大买一额限制默认是1500万
         /// </summary>
@@ -37,6 +37,10 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
+            if (quotes.LatestPrice < quotes.PreClose * 1.08)
+            {
+                return;
+            }
             float highLimit = quotes.HighLimit;
             float open = quotes.Open;
             string code = quotes.Code;
@@ -47,12 +51,14 @@ namespace NineSunScripture.strategy
             bool isNotBoardThisTick = quotes.Sell1 < highLimit && 0 != quotes.Sell1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
+                Logger.log(quotes.Name + "开板");
                 openBoardTime.Add(code, DateTime.Now);
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
             bool isBoardThisTick = quotes.LatestPrice == highLimit;
             if (isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
+                Logger.log(quotes.Name + "回封");
                 openBoardTime.Remove(code);
             }
             //成交额小于7000万过滤
@@ -64,19 +70,40 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            //已经涨停且封单大于1500万，过滤
-            if (quotes.Buy1 == highLimit && quotes.Buy1Vol * highLimit > MaxBuy1MoneyCtrl * 10000)
-            {
-                return;
-            }
-            //买一小于7%的直线拉板，过滤
+            //买一小于MinBuy1Ratio的直线拉板，过滤
             if (quotes.Buy1 < quotes.PreClose * MinBuy1Ratio)
             {
                 return;
             }
+            //已经涨停且封单大于MaxBuy1MoneyCtrl，过滤
+            if (quotes.Buy1 == highLimit)
+            {
+                if (quotes.Buy1Vol * highLimit > MaxBuy1MoneyCtrl * 10000)
+                {
+                    return;
+                }
+                else
+                {
+                    if (lastTickQuotes[code].Buy1 == highLimit)
+                    {
+                        return;
+                    }
+                }
+            }
+            //开板时间小于30秒，过滤
+            if (openBoardTime.ContainsKey(code))
+            {
+                int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
+                if (openBoardInterval < 30)
+                {
+                    Logger.log("openBoardInterval->" + openBoardInterval);
+                    return;
+                }
+            }
             //买一是涨停价、卖一或者卖二是涨停价符合买点
             if (quotes.Buy1 == highLimit || quotes.Sell1 == highLimit || quotes.Sell2 == highLimit)
             {
+                //T字板
                 if (open == highLimit)
                 {
                     //没开板，过滤
@@ -86,8 +113,8 @@ namespace NineSunScripture.strategy
                     }
                     int openBoardInterval
                         = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
-                    //涨停开盘，开板时间小于20秒，过滤
-                    if (openBoardInterval < 20)
+                    //涨停开盘，开板时间小于30秒，过滤
+                    if (openBoardInterval < 30)
                     {
                         Logger.log("openBoardInterval->" + openBoardInterval);
                         return;
@@ -171,7 +198,7 @@ namespace NineSunScripture.strategy
                         order.Quantity = ((int)(availableCash / (highLimit * 100))) * 100;
                         Logger.log("【" + quotes.Name + "】触发买点，账户["
                             + account.FundAcct + "]结束于经过仓位控制后可买数量为" + order.Quantity + "股");
-                    }//END NEW BUY
+                    }//END else 新开仓买入
                     int boughtQuantity = getTodayTransactionQuantityOf(
                            account.SessionId, code, Order.OperationBuy);
                     if (order.Quantity <= boughtQuantity)

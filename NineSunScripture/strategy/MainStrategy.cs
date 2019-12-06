@@ -21,15 +21,15 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public const bool IsTest = false;
-        public const string ReserveStocks = "159915";
+        public const bool IsTest = true;
         private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
-        private const int SleepIntervalOfTrade = 300;
+        private const int SleepIntervalOfTrade = 1000;
 
         private int sleepInterval = SleepIntervalOfTrade;
         private int tryLoginCnt = 0;
         private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
+
         private Account mainAcct;
         private List<Account> accounts;
         private List<Quotes> stocks;
@@ -63,18 +63,7 @@ namespace NineSunScripture.strategy
                 return;
             }
             List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
-            //TODO 实盘账户使用代码
-            //stocks.AddRange(positionStocks);
-            //TODO 模拟账户使用代码BEGIN
-            foreach (Quotes quote in positionStocks)
-            {
-                if (ReserveStocks.Contains(quote.Code))
-                {
-                    continue;
-                }
-                stocks.Add(quote);
-            }
-            //TODO 模拟账户使用代码END
+            stocks.AddRange(positionStocks);
             //TODO 买了行情协议的时候主账户直接写死在程序里好点
             mainAcct = accounts[0];
             bool isWorkingRight = true;
@@ -112,6 +101,10 @@ namespace NineSunScripture.strategy
                         SetBuyPlan(quotes);
                         buyStrategy.Buy(quotes, accounts, callback);
                         sellStrategy.Sell(quotes, accounts, callback);
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        Logger.log("----------策略运行线程终止------------");
                     }
                     catch (Exception e)
                     {
@@ -152,7 +145,7 @@ namespace NineSunScripture.strategy
         public void Stop()
         {
             mainThread.Abort();
-            if (accounts.Count > 0)
+            if (null != accounts && accounts.Count > 0)
             {
                 foreach (Account account in accounts)
                 {

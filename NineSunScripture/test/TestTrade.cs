@@ -31,25 +31,52 @@ namespace NineSunScripture.util.test
             int cnt = 0;
             Funds funds;
             BuyStrategy buyStrategy = new BuyStrategy();
-            if (DateTime.Now.Second % 10 == 0)
-            {
-                funds = AccountHelper.QueryTotalFunds(accounts);
-                Thread.Sleep(200);
-            }
             Quotes quotes = new Quotes();
-            quotes.Code = "002652";
-            quotes.Name = "扬子新材";
-            quotes.PreClose = 4f;
-            quotes.Buy1 = 4.4f;
+            quotes.Code = "002713";
+            quotes.Name = "新易日升";
+            quotes.PreClose = 7.12f;
+            quotes.LatestPrice = 7.76f;
+            quotes.Buy1 = 7.80f;
             quotes.Buy1Vol = 10000;
-            quotes.Sell1 = 0f;
-            quotes.HighLimit = 4.4f;
+            quotes.Sell1 = 7.83f;
+            quotes.HighLimit = 7.83f;
             quotes.Money = 5000 * 10000;
             quotes.MoneyCtrl = 4000;
             quotes.PositionCtrl = 0.1f;
 
             buyStrategy.Buy(quotes, accounts, null);
+
+            quotes = new Quotes();
+            quotes.Code = "002713";
+            quotes.Name = "新易日升";
+            quotes.PreClose = 7.12f;
+            quotes.LatestPrice = 7.83f;
+            quotes.Buy1 = 7.83f;
+            quotes.Buy1Vol = 390000;
+            quotes.Sell1 = 0f;
+            quotes.HighLimit = 7.83f;
+            quotes.Money = 5000 * 10000;
+            quotes.MoneyCtrl = 4000;
+            quotes.PositionCtrl = 0.1f;
+
             buyStrategy.Buy(quotes, accounts, null);
+
+            quotes = new Quotes();
+            quotes.Code = "002713";
+            quotes.Name = "新易日升";
+            quotes.PreClose = 7.12f;
+            quotes.LatestPrice = 7.83f;
+            quotes.Buy1 = 7.83f;
+            quotes.Buy1Vol = 4917000;
+            quotes.Sell1 = 0f;
+            quotes.HighLimit = 7.83f;
+            quotes.Money = 5000 * 10000;
+            quotes.MoneyCtrl = 4000;
+            quotes.PositionCtrl = 0.1f;
+
+            buyStrategy.Buy(quotes, accounts, null);
+
+            /*buyStrategy.Buy(quotes, accounts, null);
             Thread.Sleep(3000);
             quotes.Code = "002907";
             quotes.Name = "华森制药";
@@ -63,7 +90,7 @@ namespace NineSunScripture.util.test
             quotes.PositionCtrl = 0.1f;
 
             buyStrategy.Buy(quotes, accounts, null);
-            buyStrategy.Buy(quotes, accounts, null);
+            buyStrategy.Buy(quotes, accounts, null);*/
         }
 
         public void TestSellStrategy(List<Account> accounts)

@@ -65,6 +65,10 @@ namespace NineSunScripture.util
 
         public static void SamplingLogQuotes(Quotes quotes)
         {
+            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute <= 30)
+            {
+                Logger.log(quotes.ToString(), LogType.Quotes);
+            }
             if (DateTime.Now.Second != 0 || null == quotes)
             {
                 return;
