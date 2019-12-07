@@ -258,5 +258,20 @@ namespace NineSunScripture.trade.helper
             }
             return resultOrders;
         }
+
+        public static void CancelTotalOrders(List<Account> accounts, Order order, ITrade callback)
+        {
+            string info = "撤单【" + order.Name + "】";
+            foreach (Account account in accounts)
+            {
+                order.SessionId = account.SessionId;
+                int rspCode = TradeAPI.CancelOrder(order);
+                if (null != callback)
+                {
+                    info = "资金账号【" + account.FundAcct + "】" + info;
+                    callback.OnTradeResult(rspCode, info, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                }
+            }
+        }
     }
 }

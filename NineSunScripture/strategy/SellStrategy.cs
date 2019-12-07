@@ -204,7 +204,7 @@ namespace NineSunScripture.strategy
                 order.Quantity = (int)(order.Quantity * sellRatio);
             }
             int rspCode = TradeAPI.Sell(order);
-            string opLog = account.FundAcct + "策略卖出【" + quotes.Name + "】"
+            string opLog = "资金账号【" + account.FundAcct + "】" + "策略卖出【" + quotes.Name + "】"
                 + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
             Logger.log(opLog);
             if (null != callback)

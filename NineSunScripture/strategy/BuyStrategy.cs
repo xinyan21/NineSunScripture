@@ -249,7 +249,8 @@ namespace NineSunScripture.strategy
                     order.SessionId = account.SessionId;
                     ApiHelper.SetShareholderAcct(account, quotes, order);
                     int rspCode = TradeAPI.Buy(order);
-                    string opLog = account.FundAcct + "策略买入【" + quotes.Name + "】"
+                    string opLog = "资金账号【" + account.FundAcct + "】" + "策略买入【"
+                        + quotes.Name + "】"
                         + (order.Quantity * order.Price).ToString("0.00####") + "万元";
                     Logger.log(opLog);
                     if (null != callback)
@@ -339,7 +340,8 @@ namespace NineSunScripture.strategy
                     {
                         order.SessionId = account.SessionId;
                         int rspCode = TradeAPI.CancelOrder(order);
-                        string opLog = account.FundAcct + "撤销【" + quotes.Name + "】委托->"
+                        string opLog = "资金账号【" + account.FundAcct + "】" + "撤销【"
+                            + quotes.Name + "】委托->"
                             + (order.Quantity * order.Price).ToString("0.00####") + "万元";
                         Logger.log(opLog);
                         if (null != callback)
@@ -401,7 +403,8 @@ namespace NineSunScripture.strategy
                 order.Quantity = (int)(availableCash / 1000 * 10);
                 int rspCode = TradeAPI.Buy(order);
                 string opLog
-                    = account.FundAcct + "逆回购" + (int)(availableCash / 1000) * 1000;
+                    = "资金账号【" + account.FundAcct + "】" + "逆回购"
+                    + (int)(availableCash / 1000) * 1000;
                 Logger.log(opLog);
                 if (null != callback)
                 {

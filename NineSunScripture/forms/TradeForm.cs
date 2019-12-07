@@ -87,7 +87,7 @@ namespace NineSunScripture.forms
                 order.Quantity = ((int)(money / (order.Price * 100))) * 100;
                 int rspCode = TradeAPI.Buy(order);
                 string opLog
-                    = account.FundAcct + "窗口买入【" + quotes.Name + "】"
+                    = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
                     + order.Quantity * order.Price + "元";
                 Logger.log(opLog);
                 if (null != callback)

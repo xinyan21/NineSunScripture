@@ -54,11 +54,14 @@ namespace NineSunScripture
         {
             InitLvStocks();
             InitLvPositions();
+            InitLvCancelOrders();
+
 
             ImageList imgList = new ImageList();
             imgList.ImageSize = new Size(1, 32);//分别是宽和高
             lvStocks.SmallImageList = imgList;
             lvPositions.SmallImageList = imgList;
+            lvCancelOrders.SmallImageList = imgList;
         }
 
         private void InitLvStocks()
@@ -100,13 +103,13 @@ namespace NineSunScripture
         /// </summary>
         private void InitLvCancelOrders()
         {
-            lvPositions.Columns.Add("股票", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("操作", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("委托数量", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("成交数量", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("委托价格", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("成交均价", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("撤销数量", 100, HorizontalAlignment.Center);
+            lvCancelOrders.Columns.Add("股票", 100, HorizontalAlignment.Center);
+            lvCancelOrders.Columns.Add("操作", 100, HorizontalAlignment.Center);
+            lvCancelOrders.Columns.Add("委托数量", 100, HorizontalAlignment.Center);
+            lvCancelOrders.Columns.Add("成交数量", 100, HorizontalAlignment.Center);
+            lvCancelOrders.Columns.Add("委托价格", 100, HorizontalAlignment.Center);
+            lvCancelOrders.Columns.Add("成交均价", 100, HorizontalAlignment.Center);
+            lvCancelOrders.Columns.Add("撤销数量", 100, HorizontalAlignment.Center);
         }
 
         /// <summary>
@@ -162,6 +165,10 @@ namespace NineSunScripture
 
         private void BindPositionsData()
         {
+            if (null == account.Positions)
+            {
+                return;
+            }
             lvPositions.BeginUpdate();
             lvPositions.Items.Clear();
             foreach (Position position in account.Positions)
@@ -184,22 +191,26 @@ namespace NineSunScripture
 
         private void BindCancelOrdersData()
         {
-            lvPositions.BeginUpdate();
-            lvPositions.Items.Clear();
+            if (null == account.CancelOrders)
+            {
+                return;
+            }
+            lvCancelOrders.BeginUpdate();
+            lvCancelOrders.Items.Clear();
             foreach (Order order in account.CancelOrders)
             {
                 ListViewItem lvi = new ListViewItem(order.Name);
                 lvi.SubItems.Add(order.Operation + "");
                 lvi.SubItems.Add(order.Quantity + "");
                 lvi.SubItems.Add(order.TransactionQuantity + "");
-                lvi.SubItems.Add(order.Price + "%");
+                lvi.SubItems.Add(order.Price + "");
                 lvi.SubItems.Add(order.TransactionPrice + "");
-                lvi.SubItems.Add(order.CanceledQuantity + "%");
+                lvi.SubItems.Add(order.CanceledQuantity + "");
                 lvi.Tag = order;
 
-                lvPositions.Items.Add(lvi);
+                lvCancelOrders.Items.Add(lvi);
             }
-            lvPositions.EndUpdate();
+            lvCancelOrders.EndUpdate();
         }
 
         /// <summary>
@@ -303,11 +314,22 @@ namespace NineSunScripture
         {
             lblTotalAsset.Text = "总资产：\n" + account.Funds.TotalAsset;
             lblMoneyAvailable.Text = "可用金额：\n" + account.Funds.AvailableAmt;
-            if (account.Positions.Count == 0)
+            if (account.Positions.Count > 0)
             {
-                return;
+                BindPositionsData();
             }
-            BindPositionsData();
+            else
+            {
+                lvPositions.Items.Clear();
+            }
+            if (account.CancelOrders.Count > 0)
+            {
+                BindCancelOrdersData();
+            }
+            else
+            {
+                lvCancelOrders.Items.Clear();
+            }
         }
 
         /// <summary>
@@ -506,6 +528,7 @@ namespace NineSunScripture
             if (dr == DialogResult.OK)
             {
                 mainStrategy.SellStock(quotes, this);
+                mainStrategy.UpdateFundsInfo(false);
             }
         }
 
@@ -565,6 +588,29 @@ namespace NineSunScripture
             {
                 image.Dispose();
             }
+        }
+
+        private void tsmiCancel_Click(object sender, EventArgs e)
+        {
+            if (lvCancelOrders.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+            Order order = (Order)lvCancelOrders.SelectedItems[0].Tag;
+            AccountHelper.CancelTotalOrders(mainStrategy.GetAccounts(), order, this);
+            mainStrategy.UpdateFundsInfo(false);
+        }
+
+        private void btnSwtichPositions_Click(object sender, EventArgs e)
+        {
+            lvCancelOrders.Visible = false;
+            lvPositions.Visible = true;
+        }
+
+        private void btnSwitchCancelOrders_Click(object sender, EventArgs e)
+        {
+            lvCancelOrders.Visible = true;
+            lvPositions.Visible = false;
         }
     }
 

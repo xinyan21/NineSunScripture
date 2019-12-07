@@ -60,6 +60,11 @@
             this.tbRuntimeInfo = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.lvCancelOrders = new System.Windows.Forms.ListView();
+            this.cmsCancelOrders = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsmiCancel = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnSwtichPositions = new System.Windows.Forms.Button();
+            this.btnSwitchCancelOrders = new System.Windows.Forms.Button();
             this.flowLayoutPanel2.SuspendLayout();
             this.cmsStocks.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -67,6 +72,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pbWorkStatus)).BeginInit();
             this.MenuMain.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.cmsCancelOrders.SuspendLayout();
             this.SuspendLayout();
             // 
             // flowLayoutPanel2
@@ -99,7 +105,7 @@
             this.lvStocks.BackgroundImageTiled = true;
             this.lvStocks.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lvStocks.ContextMenuStrip = this.cmsStocks;
-            this.lvStocks.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lvStocks.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lvStocks.ForeColor = System.Drawing.Color.Yellow;
             this.lvStocks.Location = new System.Drawing.Point(3, 42);
             this.lvStocks.MultiSelect = false;
@@ -190,6 +196,9 @@
             this.panel1.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panel1.Controls.Add(this.btnSwitchCancelOrders);
+            this.panel1.Controls.Add(this.btnSwtichPositions);
+            this.panel1.Controls.Add(this.lvCancelOrders);
             this.panel1.Controls.Add(this.lvPositions);
             this.panel1.Controls.Add(this.lblTotalAsset);
             this.panel1.Controls.Add(this.lblMoneyAvailable);
@@ -205,7 +214,7 @@
             this.lvPositions.BackgroundImageTiled = true;
             this.lvPositions.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lvPositions.ContextMenuStrip = this.cmsPositionsMenu;
-            this.lvPositions.Font = new System.Drawing.Font("微软雅黑", 8.830189F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lvPositions.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lvPositions.ForeColor = System.Drawing.SystemColors.Info;
             this.lvPositions.Location = new System.Drawing.Point(283, -2);
             this.lvPositions.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -403,6 +412,74 @@
             this.panel2.Size = new System.Drawing.Size(306, 757);
             this.panel2.TabIndex = 16;
             // 
+            // lvCancelOrders
+            // 
+            this.lvCancelOrders.BackColor = System.Drawing.Color.LightCoral;
+            this.lvCancelOrders.BackgroundImageTiled = true;
+            this.lvCancelOrders.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lvCancelOrders.ContextMenuStrip = this.cmsCancelOrders;
+            this.lvCancelOrders.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lvCancelOrders.ForeColor = System.Drawing.SystemColors.Info;
+            this.lvCancelOrders.Location = new System.Drawing.Point(283, -2);
+            this.lvCancelOrders.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.lvCancelOrders.MultiSelect = false;
+            this.lvCancelOrders.Name = "lvCancelOrders";
+            this.lvCancelOrders.Size = new System.Drawing.Size(701, 133);
+            this.lvCancelOrders.TabIndex = 3;
+            this.lvCancelOrders.UseCompatibleStateImageBehavior = false;
+            this.lvCancelOrders.View = System.Windows.Forms.View.Details;
+            this.lvCancelOrders.Visible = false;
+            // 
+            // cmsCancelOrders
+            // 
+            this.cmsCancelOrders.BackColor = System.Drawing.SystemColors.Control;
+            this.cmsCancelOrders.ImageScalingSize = new System.Drawing.Size(18, 18);
+            this.cmsCancelOrders.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmiCancel});
+            this.cmsCancelOrders.Name = "cmsPositionsMenu";
+            this.cmsCancelOrders.Size = new System.Drawing.Size(193, 73);
+            this.cmsCancelOrders.Text = "持仓菜单";
+            // 
+            // tsmiCancel
+            // 
+            this.tsmiCancel.AutoSize = false;
+            this.tsmiCancel.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tsmiCancel.Margin = new System.Windows.Forms.Padding(0, 10, 0, 0);
+            this.tsmiCancel.Name = "tsmiCancel";
+            this.tsmiCancel.Size = new System.Drawing.Size(214, 35);
+            this.tsmiCancel.Text = "撤单";
+            this.tsmiCancel.Click += new System.EventHandler(this.tsmiCancel_Click);
+            // 
+            // btnSwtichPositions
+            // 
+            this.btnSwtichPositions.BackColor = System.Drawing.Color.Salmon;
+            this.btnSwtichPositions.FlatAppearance.BorderColor = System.Drawing.Color.Green;
+            this.btnSwtichPositions.FlatAppearance.BorderSize = 2;
+            this.btnSwtichPositions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSwtichPositions.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.btnSwtichPositions.Location = new System.Drawing.Point(159, 21);
+            this.btnSwtichPositions.Name = "btnSwtichPositions";
+            this.btnSwtichPositions.Size = new System.Drawing.Size(126, 42);
+            this.btnSwtichPositions.TabIndex = 18;
+            this.btnSwtichPositions.Text = "持仓";
+            this.btnSwtichPositions.UseVisualStyleBackColor = false;
+            this.btnSwtichPositions.Click += new System.EventHandler(this.btnSwtichPositions_Click);
+            // 
+            // btnSwitchCancelOrders
+            // 
+            this.btnSwitchCancelOrders.BackColor = System.Drawing.Color.Green;
+            this.btnSwitchCancelOrders.FlatAppearance.BorderColor = System.Drawing.Color.Red;
+            this.btnSwitchCancelOrders.FlatAppearance.BorderSize = 2;
+            this.btnSwitchCancelOrders.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSwitchCancelOrders.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.btnSwitchCancelOrders.Location = new System.Drawing.Point(159, 64);
+            this.btnSwitchCancelOrders.Name = "btnSwitchCancelOrders";
+            this.btnSwitchCancelOrders.Size = new System.Drawing.Size(126, 42);
+            this.btnSwitchCancelOrders.TabIndex = 19;
+            this.btnSwitchCancelOrders.Text = "撤单";
+            this.btnSwitchCancelOrders.UseVisualStyleBackColor = false;
+            this.btnSwitchCancelOrders.Click += new System.EventHandler(this.btnSwitchCancelOrders_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
@@ -434,6 +511,7 @@
             this.MenuMain.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            this.cmsCancelOrders.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -470,6 +548,11 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiSellInForm;
         private System.Windows.Forms.ToolStripMenuItem tsmiTest;
         private System.Windows.Forms.PictureBox pbWorkStatus;
+        private System.Windows.Forms.ListView lvCancelOrders;
+        private System.Windows.Forms.ContextMenuStrip cmsCancelOrders;
+        private System.Windows.Forms.ToolStripMenuItem tsmiCancel;
+        private System.Windows.Forms.Button btnSwitchCancelOrders;
+        private System.Windows.Forms.Button btnSwtichPositions;
     }
 }
 

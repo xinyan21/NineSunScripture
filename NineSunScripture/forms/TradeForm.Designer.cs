@@ -114,14 +114,12 @@
             // rbtnOneFourth
             // 
             this.rbtnOneFourth.AutoSize = true;
-            this.rbtnOneFourth.Checked = true;
             this.rbtnOneFourth.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneFourth.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.rbtnOneFourth.Location = new System.Drawing.Point(6, 21);
             this.rbtnOneFourth.Name = "rbtnOneFourth";
             this.rbtnOneFourth.Size = new System.Drawing.Size(60, 29);
             this.rbtnOneFourth.TabIndex = 4;
-            this.rbtnOneFourth.TabStop = true;
             this.rbtnOneFourth.Text = "1/4";
             this.rbtnOneFourth.UseVisualStyleBackColor = true;
             this.rbtnOneFourth.CheckedChanged += new System.EventHandler(this.rbtnOneFourth_CheckedChanged);
@@ -162,7 +160,6 @@
             this.rbtnOneThird.Name = "rbtnOneThird";
             this.rbtnOneThird.Size = new System.Drawing.Size(60, 29);
             this.rbtnOneThird.TabIndex = 0;
-            this.rbtnOneThird.TabStop = true;
             this.rbtnOneThird.Text = "1/3";
             this.rbtnOneThird.UseVisualStyleBackColor = true;
             this.rbtnOneThird.CheckedChanged += new System.EventHandler(this.rbtnOneThird_CheckedChanged);

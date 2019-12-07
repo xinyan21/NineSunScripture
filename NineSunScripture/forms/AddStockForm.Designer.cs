@@ -146,7 +146,7 @@
             this.tbName.Name = "tbName";
             this.tbName.ReadOnly = true;
             this.tbName.Size = new System.Drawing.Size(147, 31);
-            this.tbName.TabIndex = 3;
+            this.tbName.TabIndex = 11;
             // 
             // tbPosition
             // 
@@ -195,7 +195,7 @@
             this.rbtnTomorrow.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnTomorrow.Name = "rbtnTomorrow";
             this.rbtnTomorrow.Size = new System.Drawing.Size(68, 29);
-            this.rbtnTomorrow.TabIndex = 2;
+            this.rbtnTomorrow.TabIndex = 5;
             this.rbtnTomorrow.TabStop = true;
             this.rbtnTomorrow.Text = "最新";
             this.rbtnTomorrow.UseVisualStyleBackColor = true;
