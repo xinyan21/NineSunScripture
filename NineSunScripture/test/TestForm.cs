@@ -15,7 +15,7 @@ namespace NineSunScripture.util.test
 {
     public partial class TestForm : Form
     {
-        private TestTrade testTrade = new TestTrade();
+        private TradeTestCase testTrade = new TradeTestCase();
         private List<Account> accounts;
         public TestForm(List<Account> accounts )
         {

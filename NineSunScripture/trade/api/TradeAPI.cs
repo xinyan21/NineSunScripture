@@ -185,7 +185,9 @@ namespace NineSunScripture.trade.api
                     order.Name = temp[i, 2];
                     order.Operation = temp[i, 3];
                     order.Quantity = int.Parse(temp[i, 5]);
-                    order.TransactionQuantity = int.Parse(temp[i, 7]);
+                    order.TransactionQuantity = int.Parse(temp[i, 6]);
+                    order.CanceledQuantity = int.Parse(temp[i, 7]);
+                    order.Price = float.Parse(temp[i, 8]);
                     order.TransactionPrice = float.Parse(temp[i, 9]);
                     order.OrderId = temp[i, 10];
                     order.ShareholderAcct = temp[i, 12];

@@ -61,6 +61,13 @@ namespace NineSunScripture.strategy
             {
                 historyTicks.Add(code, new Queue<Quotes>(60));
             }
+            if (historyTicks[code].Count == 60)
+            {
+                historyTicks[code].Dequeue();
+            }
+            //由于逻辑关系会return，数据必须在进来时就放进去，上一个取倒数第二就行了
+            historyTicks[code].Enqueue(quotes);
+
             Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
             if (curPrice == highLimit || curPrice == lowLimit || null == position ||
                 quotes.LatestPrice == 0 || quotes.Buy1 == 0 || position.AvailableBalance == 0)
@@ -110,17 +117,16 @@ namespace NineSunScripture.strategy
                 Sell(quotes, accounts, callback, 1);
             }
             Quotes[] ticks = historyTicks[code].ToArray();
-            if (ticks.Length > 1 && ticks.Last().Sell1 == highLimit && curPrice < highLimit)
+            if (ticks.Length >= 2 && ticks[ticks.Length - 2].LatestPrice == highLimit 
+                && curPrice < highLimit)
             {
                 Logger.log("开板卖" + quotes.Name);
                 Sell(quotes, accounts, callback, 1);
             }
-            SellIfSealDecrease(accounts, quotes, callback);
-            if (historyTicks[code].Count == 60)
+            if (curPrice == highLimit)
             {
-                historyTicks[code].Dequeue();
+                SellIfSealDecrease(accounts, quotes, callback);
             }
-            historyTicks[code].Enqueue(quotes);
         }
 
         /// <summary>
@@ -258,7 +264,7 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 封单减少到2000万卖
+        /// 封单减少到2000万卖1/2
         /// </summary>
         /// <param name="accounts">账户列表</param>
         /// <param name="quotes">股票对象</param>
@@ -273,8 +279,8 @@ namespace NineSunScripture.strategy
             if (ticks.First().Buy1Vol * quotes.HighLimit > 3000 * 10000
                 && ticks.Last().Buy1Vol * quotes.HighLimit < 2000 * 10000)
             {
-                Logger.log("封单减少到2000万卖" + quotes.Name);
-                Sell(quotes, accounts, callback);
+                Logger.log("封单减少到2000万卖1/2" + quotes.Name);
+                Sell(quotes, accounts, callback, 0.5f);
             }
         }
     }

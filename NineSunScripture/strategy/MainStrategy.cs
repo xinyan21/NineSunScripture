@@ -21,7 +21,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public const bool IsTest = true;
+        public const bool IsTest = false;
         private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
         private const int SleepIntervalOfTrade = 1000;

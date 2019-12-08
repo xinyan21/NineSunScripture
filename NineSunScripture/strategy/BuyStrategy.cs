@@ -28,12 +28,27 @@ namespace NineSunScripture.strategy
         /// </summary>
         private const int MaxBuy1MoneyCtrl = 1500;
         private Dictionary<string, DateTime> openBoardTime = new Dictionary<string, DateTime>();
-        private Dictionary<string, Quotes> lastTickQuotes = new Dictionary<string, Quotes>();
+        private Dictionary<string, Queue<Quotes>> historyTicks
+            = new Dictionary<string, Queue<Quotes>>();
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 && !MainStrategy.IsTest ||
-                DateTime.Now.Hour > 14)
+            float highLimit = quotes.HighLimit;
+            float open = quotes.Open;
+            string code = quotes.Code;
+            if (!historyTicks.ContainsKey(code))
+            {
+                historyTicks.Add(code, new Queue<Quotes>(60));
+            }
+            if (historyTicks[code].Count == 60)
+            {
+                historyTicks[code].Dequeue();
+            }
+            //由于逻辑关系会return，数据必须在进来时就放进去，上一个取倒数第二就行了
+            historyTicks[code].Enqueue(quotes);
+
+            if ((DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 || DateTime.Now.Hour > 14)
+                && !MainStrategy.IsTest)
             {
                 return;
             }
@@ -41,14 +56,16 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            float highLimit = quotes.HighLimit;
-            float open = quotes.Open;
-            string code = quotes.Code;
+            Quotes[] ticks = historyTicks[code].ToArray();
+            Quotes lastTickQuotes = null;
+            if (ticks.Length >= 2)
+            {
+                lastTickQuotes = ticks[ticks.Length - 2];
+            }
             float positionRatioCtrl = 0.33f;   //买入计划仓位比例
             //记录开板时间
-            bool isBoardLastTick = lastTickQuotes.ContainsKey(code)
-                && lastTickQuotes[quotes.Code].LatestPrice == highLimit; ;
-            bool isNotBoardThisTick = quotes.Sell1 < highLimit && 0 != quotes.Sell1;
+            bool isBoardLastTick = null != lastTickQuotes && lastTickQuotes.LatestPrice == highLimit;
+            bool isNotBoardThisTick = quotes.LatestPrice < highLimit && 0 != quotes.LatestPrice;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
                 Logger.log(quotes.Name + "开板");
@@ -56,7 +73,7 @@ namespace NineSunScripture.strategy
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
             bool isBoardThisTick = quotes.LatestPrice == highLimit;
-            if (isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
+            if (!isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
                 Logger.log(quotes.Name + "回封");
                 openBoardTime.Remove(code);
@@ -84,7 +101,7 @@ namespace NineSunScripture.strategy
                 }
                 else
                 {
-                    if (lastTickQuotes[code].Buy1 == highLimit)
+                    if (null != lastTickQuotes && lastTickQuotes.Buy1 == highLimit)
                     {
                         return;
                     }
@@ -96,7 +113,6 @@ namespace NineSunScripture.strategy
                 int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
                 if (openBoardInterval < 30)
                 {
-                    Logger.log("openBoardInterval->" + openBoardInterval);
                     return;
                 }
             }
@@ -197,7 +213,7 @@ namespace NineSunScripture.strategy
                         //数量是整百整百的
                         order.Quantity = ((int)(availableCash / (highLimit * 100))) * 100;
                         Logger.log("【" + quotes.Name + "】触发买点，账户["
-                            + account.FundAcct + "]结束于经过仓位控制后可买数量为" + order.Quantity + "股");
+                            + account.FundAcct + "]经过仓位控制后可买数量为" + order.Quantity + "股");
                     }//END else 新开仓买入
                     int boughtQuantity = getTodayTransactionQuantityOf(
                            account.SessionId, code, Order.OperationBuy);
@@ -258,14 +274,6 @@ namespace NineSunScripture.strategy
                         callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
                     }
                 }//END FOR ACCOUNT
-            }
-            if (lastTickQuotes.ContainsKey(code))
-            {
-                lastTickQuotes[code] = quotes;
-            }
-            else
-            {
-                lastTickQuotes.Add(code, quotes);
             }
         }
 

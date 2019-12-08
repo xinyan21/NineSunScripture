@@ -250,6 +250,7 @@ namespace NineSunScripture.trade.helper
                     item.Price = (item.Price + order.Price) / 2;
                     item.TransactionPrice += order.TransactionPrice;
                     item.TransactionQuantity += order.TransactionQuantity;
+                    item.CanceledQuantity += order.CanceledQuantity;
                 }
                 else
                 {

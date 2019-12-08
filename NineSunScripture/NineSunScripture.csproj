@@ -189,7 +189,7 @@
     <Compile Include="test\TestForm.Designer.cs">
       <DependentUpon>TestForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="test\TestTrade.cs" />
+    <Compile Include="test\TradeTestCase.cs" />
     <Compile Include="util\Utils.cs" />
     <EmbeddedResource Include="forms\AddStockForm.resx">
       <DependentUpon>AddStockForm.cs</DependentUpon>
