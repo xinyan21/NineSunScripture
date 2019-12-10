@@ -47,7 +47,13 @@ namespace NineSunScripture
             mainStrategy.SetTradeCallback(this);
             mainStrategy.SetShowWorkingStatus(this);
             imgTaiJi = Properties.Resources.taiji;
-            new Thread(InvokeRebootStrategy).Start();
+            new Thread(AutoStartStrategy).Start();
+        }
+
+        private void AutoStartStrategy()
+        {
+            Thread.Sleep(3000);
+            InvokeRebootStrategy();
         }
 
         private void InitializeListViews()
@@ -267,7 +273,6 @@ namespace NineSunScripture
 
         private void InvokeRebootStrategy()
         {
-            Thread.Sleep(2000);
             Invoke(new MethodInvoker(RebootStrategy));
         }
 
@@ -276,12 +281,14 @@ namespace NineSunScripture
         /// </summary>
         private void RebootStrategy()
         {
-            InvokeAddRunInfo();
             if (isStrategyStarted)
             {
                 runtimeInfo = "股票池变更，重启策略中...";
+                InvokeAddRunInfo();
+                //Stop
                 tsmiSwitch_Click(null, null);
                 Thread.Sleep(1000);
+                //Start
                 tsmiSwitch_Click(null, null);
             }
             else

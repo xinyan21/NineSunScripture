@@ -34,6 +34,7 @@ namespace NineSunScripture.trade.helper
                     account.BrokerServerPort, account.VersionOfTHS, 0, account.AcctType,
                     account.FundAcct, account.Password, account.CommPwd,
                     account.IsRandomMac, account.ErrorInfo);
+                string opLog = "";
                 if (sessionId > 0)
                 {
                     account.SessionId = sessionId;
@@ -45,7 +46,6 @@ namespace NineSunScripture.trade.helper
                         account.InitTotalAsset = (int)account.Funds.TotalAsset;
                         dbHelper.EditInitTotalAsset(account);
                     }
-                    Logger.log("资金账号" + account.FundAcct + "登录成功，ID为" + sessionId);
                     if (account.ShareHolderAccts.Count > 0)
                     {
                         foreach (ShareHolderAcct shareHolderAcct in account.ShareHolderAccts)
@@ -61,16 +61,18 @@ namespace NineSunScripture.trade.helper
                         }
                     }
                     loginAccts.Add(account);
+                    opLog = "资金账号【" + account.FundAcct + "】登录成功，ID为" + sessionId;
+                    Logger.log(opLog);
                 }
                 else
                 {
-                    string opLog = "资金账号" + account.FundAcct + "登录失败，信息："
+                    opLog = "资金账号【" + account.FundAcct + "】登录失败，信息："
                         + ApiHelper.ParseErrInfo(account.ErrorInfo);
                     Logger.log(opLog);
-                    if (null != callback)
-                    {
-                        callback.OnTradeResult(0, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
-                    }
+                }
+                if (null != callback)
+                {
+                   callback.OnTradeResult(sessionId, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                 }
             }
             return loginAccts;

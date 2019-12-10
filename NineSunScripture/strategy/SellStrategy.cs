@@ -69,7 +69,7 @@ namespace NineSunScripture.strategy
             historyTicks[code].Enqueue(quotes);
 
             Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
-            if (curPrice == highLimit || curPrice == lowLimit || null == position ||
+            if (curPrice == lowLimit || null == position ||
                 quotes.LatestPrice == 0 || quotes.Buy1 == 0 || position.AvailableBalance == 0)
             {
                 return;
@@ -84,12 +84,12 @@ namespace NineSunScripture.strategy
                     if (curPrice > open * 1.04)
                     {
                         Logger.log("超低开拉升4%卖" + quotes.Name);
-                        Sell(quotes, accounts, callback, 1);
+                        SellByRatio(quotes, accounts, callback, 1);
                     }
                     if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * TooWeakRatio)
                     {
                         Logger.log("超低开10:10还小于-5%卖" + quotes.Name);
-                        Sell(quotes, accounts, callback, 1);
+                        SellByRatio(quotes, accounts, callback, 1);
                     }
                 }
                 else
@@ -97,35 +97,38 @@ namespace NineSunScripture.strategy
                     if (curPrice <= avgCost * StopLossRatio || curPrice <= preClose * StopLossRatio)
                     {
                         Logger.log("小于-8%卖" + quotes.Name);
-                        Sell(quotes, accounts, callback, 1);
-                    }
-                    if (now.Hour == 14 && curPrice <= preClose * NotGoodRatio)
-                    {
-                        Logger.log("2:00小于1%卖" + quotes.Name);
-                        Sell(quotes, accounts, callback, 1);
-                    }
-                    if (now.Hour == 14 && now.Minute >= 30 && curPrice <= preClose * GoodByeRatio)
-                    {
-                        Logger.log("2:30小于5%卖" + quotes.Name);
-                        Sell(quotes, accounts, callback, 1);
+                        SellByRatio(quotes, accounts, callback, 1);
                     }
                 }
             }
-            if (now.Hour == 14 && now.Minute >= 55 && curPrice < highLimit)
-            {
-                Logger.log("收盘不板卖" + quotes.Name);
-                Sell(quotes, accounts, callback, 1);
-            }
             Quotes[] ticks = historyTicks[code].ToArray();
-            if (ticks.Length >= 2 && ticks[ticks.Length - 2].LatestPrice == highLimit 
-                && curPrice < highLimit)
+            if (ticks.Length >= 2 && ticks[ticks.Length - 2].LatestPrice == highLimit
+                && quotes.Buy1 < highLimit)
             {
                 Logger.log("开板卖" + quotes.Name);
-                Sell(quotes, accounts, callback, 1);
+                SellByRatio(quotes, accounts, callback, 1);
             }
             if (curPrice == highLimit)
             {
                 SellIfSealDecrease(accounts, quotes, callback);
+            }
+            if (now.Hour == 14)
+            {
+                if (curPrice <= preClose * NotGoodRatio)
+                {
+                    Logger.log("2:00小于1%卖" + quotes.Name);
+                    SellByRatio(quotes, accounts, callback, 1);
+                }
+                if (now.Minute >= 30 && curPrice <= preClose * GoodByeRatio)
+                {
+                    Logger.log("2:30小于5%卖" + quotes.Name);
+                    SellByRatio(quotes, accounts, callback, 1);
+                }
+                if (now.Minute >= 55 && curPrice < highLimit)
+                {
+                    Logger.log("收盘不板卖" + quotes.Name);
+                    SellByRatio(quotes, accounts, callback, 1);
+                }
             }
         }
 
@@ -225,7 +228,7 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
         /// <param name="sellRatio">卖出比例</param>
-        public static void Sell(Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
+        public static void SellByRatio(Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
         {
             foreach (Account account in accounts)
             {
@@ -279,8 +282,14 @@ namespace NineSunScripture.strategy
             if (ticks.First().Buy1Vol * quotes.HighLimit > 3000 * 10000
                 && ticks.Last().Buy1Vol * quotes.HighLimit < 2000 * 10000)
             {
-                Logger.log("封单减少到2000万卖1/2" + quotes.Name);
-                Sell(quotes, accounts, callback, 0.5f);
+                Logger.log("封单减少到2000万以下卖1/2" + quotes.Name);
+                SellByRatio(quotes, accounts, callback, 0.5f);
+            }
+            if (ticks.First().Buy1Vol * quotes.HighLimit > 3000 * 10000
+               && ticks.Last().Buy1Vol * quotes.HighLimit < 1000 * 10000)
+            {
+                Logger.log("封单减少到1000万以下清" + quotes.Name);
+                SellByRatio(quotes, accounts, callback, 1);
             }
         }
     }

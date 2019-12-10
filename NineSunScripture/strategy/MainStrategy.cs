@@ -29,6 +29,7 @@ namespace NineSunScripture.strategy
         private int sleepInterval = SleepIntervalOfTrade;
         private int tryLoginCnt = 0;
         private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
+        private short fundUpdateCtrl = 0;
 
         private Account mainAcct;
         private List<Account> accounts;
@@ -46,7 +47,7 @@ namespace NineSunScripture.strategy
             this.stocks = new List<Quotes>();
             this.buyStrategy = new BuyStrategy();
             this.sellStrategy = new SellStrategy();
-            isHoliday = Utils.IsHolidayByDate(DateTime.Now);
+            this.isHoliday = Utils.IsHolidayByDate(DateTime.Now);
         }
 
         private void Process()
@@ -173,16 +174,20 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 每隔3s更新一下账户信息
+        /// 每隔3个心跳更新一下账户信息
         /// </summary>
         /// <param name="ctrlFrequency">是否控制频率</param>
         public void UpdateFundsInfo(bool ctrlFrequency)
         {
-            if (ctrlFrequency && DateTime.Now.Second % 3 != 0)
+            if (ctrlFrequency && fundUpdateCtrl++ % 3 != 0)
             {
+                if (fundUpdateCtrl > 3)
+                {
+                    fundUpdateCtrl = 0;
+                }
                 return;
             }
-            if (null != fundListener)
+            if (null != fundListener && null != accounts)
             {
                 Account account = new Account();
                 account.Funds = AccountHelper.QueryTotalFunds(accounts);
@@ -191,7 +196,7 @@ namespace NineSunScripture.strategy
                 fundListener.OnAcctInfoListen(account);
             }
             //调用接口要有时间间隔
-            Thread.Sleep(200);
+            Thread.Sleep(100);
         }
 
         private bool IsTradeTime()
@@ -252,7 +257,7 @@ namespace NineSunScripture.strategy
                 MessageBox.Show("没有可操作的账户");
                 return;
             }
-            SellStrategy.Sell(quotes, accounts, callBack, 1);
+            SellStrategy.SellByRatio(quotes, accounts, callBack, 1);
         }
 
         public void UpdateStocks(List<Quotes> quotes)

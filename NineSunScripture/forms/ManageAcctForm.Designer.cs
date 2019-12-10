@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageAcctForm));
             this.lvAccounts = new System.Windows.Forms.ListView();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnReset = new System.Windows.Forms.Button();
@@ -348,6 +349,7 @@
             this.Controls.Add(this.lvAccounts);
             this.DoubleBuffered = true;
             this.Font = new System.Drawing.Font("微软雅黑", 8.830189F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "ManageAcctForm";
             this.Text = "账号管理";

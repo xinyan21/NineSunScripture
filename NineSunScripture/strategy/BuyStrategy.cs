@@ -144,14 +144,18 @@ namespace NineSunScripture.strategy
                     positionRatioCtrl = quotes.PositionCtrl;
                     Logger.log("【" + quotes.Name + "】设置仓位控制为" + positionRatioCtrl);
                 }
-                //这里取消撤单后，后面要重新查询资金，否则白撤
-                CancelOrdersCanCancel(accounts, quotes, callback);
                 Funds funds = AccountHelper.QueryTotalFunds(accounts);
                 //所有账户总可用金额小于每个账号一手的金额或者小于1万，直接退出
                 if (funds.AvailableAmt < 10000 || funds.AvailableAmt < highLimit * 100 * accounts.Count)
                 {
                     Logger.log("【" + quotes.Name + "】触发买点，结束于总金额不够一万或总账户每户一手");
                     return;
+                }
+                //可用金额不够用，撤销所有可撤单
+                if (funds.AvailableAmt < positionRatioCtrl * funds.TotalAsset)
+                {
+                    //这里取消撤单后，后面要重新查询资金，否则白撤
+                    CancelOrdersCanCancel(accounts, quotes, callback);
                 }
                 Order order = new Order();
                 order.Code = code;
