@@ -203,34 +203,27 @@ namespace NineSunScripture.strategy
         {
             if (DateTime.Now.Hour < 9 || DateTime.Now.Hour > 14)
             {
-                if (SleepIntervalOfNonTrade != sleepInterval)
-                {
-                    sleepInterval = SleepIntervalOfNonTrade;
-                }
+                SetSleepIntervalOfNonTrade();
                 return false;
             }
             if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 29)
             {
-                if (SleepIntervalOfNonTrade != sleepInterval)
-                {
-                    sleepInterval = SleepIntervalOfNonTrade;
-                }
+                SetSleepIntervalOfNonTrade();
                 return false;
             }
             if (DateTime.Now.Hour == 12 && DateTime.Now.Minute < 59)
             {
-                if (SleepIntervalOfNonTrade != sleepInterval)
-                {
-                    sleepInterval = SleepIntervalOfNonTrade;
-                }
+                SetSleepIntervalOfNonTrade();
                 return false;
             }
             if (DateTime.Now.Hour == 11 && DateTime.Now.Minute >= 30)
             {
-                if (SleepIntervalOfNonTrade != sleepInterval)
-                {
-                    sleepInterval = SleepIntervalOfNonTrade;
-                }
+                SetSleepIntervalOfNonTrade();
+                return false;
+            }
+            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute >= 57)
+            {
+                SetSleepIntervalOfNonTrade();
                 return false;
             }
             if (SleepIntervalOfTrade != sleepInterval)
@@ -238,6 +231,14 @@ namespace NineSunScripture.strategy
                 sleepInterval = SleepIntervalOfTrade;
             }
             return true;
+        }
+
+        private void SetSleepIntervalOfNonTrade()
+        {
+            if (SleepIntervalOfNonTrade != sleepInterval)
+            {
+                sleepInterval = SleepIntervalOfNonTrade;
+            }
         }
 
         public void SellAll(ITrade callBack)
