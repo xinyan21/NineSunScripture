@@ -64,8 +64,16 @@ namespace NineSunScripture.forms
         {
             if (tbCode.TextLength == 6)
             {
-                quotes = TradeAPI.QueryQuotes(accounts[0].SessionId, tbCode.Text);
-                if (quotes.Name.Length > 0)
+                try
+                {
+                    quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
+                }
+                catch (Exception exce)
+                {
+
+                    MessageBox.Show(exce.Message);
+                }
+                if (null != quotes.Name && quotes.Name.Length > 0)
                 {
                     tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
                 }

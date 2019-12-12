@@ -18,7 +18,7 @@ namespace NineSunScripture.trade.helper
         {
             String result = Encoding.Default.GetString(data).TrimEnd('\0');
             result = result.Substring(result.IndexOf("\n") + 1);
-            String[] temp = result.Split(new String[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
+            String[] temp = result.Split(new String[] { "\t" }, StringSplitOptions.None);
             return temp;
         }
 

@@ -9,11 +9,35 @@ using NineSunScripture.trade.api;
 using NineSunScripture.strategy;
 using NineSunScripture.db;
 using NineSunScripture.util.log;
+using System.Configuration;
 
 namespace NineSunScripture.trade.helper
 {
     public class AccountHelper
     {
+        /// <summary>
+        /// 默认主账号为账号列表的第一个
+        /// </summary>
+        /// <returns></returns>
+        private static Account GetMainAccount()
+        {
+            Account account = new Account();
+            account.AcctType = 0x30;
+            account.BrokerId = 59;
+            account.BrokerName = "平安证券";
+            account.BrokerServerIP = "43.254.105.92";
+            account.BrokerServerPort = 8003;
+            account.VersionOfTHS = "E065.20.92";
+            account.CommPwd = "";
+            account.SalesDepartId = 105;
+            account.IsRandomMac = false;
+            account.FundAcct = "321019194496";
+            account.PriceAcct = "13534068934";
+            account.FundPassword = "198921";
+            account.PricePassword = "3594035x";
+            return account;
+        }
+
         /// <summary>
         /// 登录所有账户，首次在客户端登录会记录初始总资金到数据库
         /// </summary>
@@ -22,9 +46,23 @@ namespace NineSunScripture.trade.helper
         {
             AcctDbHelper dbHelper = new AcctDbHelper();
             List<Account> dbAccounts = dbHelper.GetAccounts();
+            Account mainAcct = GetMainAccount();
+            dbAccounts.Insert(0, mainAcct);
             if (null == dbAccounts || dbAccounts.Count == 0)
             {
                 return null;
+            }
+
+            int priceSessionId = PriceAPI.HQ_Logon(
+                mainAcct.PriceAcct, mainAcct.PricePassword, mainAcct.ErrorInfo);
+            if (priceSessionId > 0)
+            {
+                mainAcct.PriceSessionId = priceSessionId;
+                callback.OnTradeResult(1, "行情登录成功", "");
+            }
+            else if (null != callback)
+            {
+                callback.OnTradeResult(0, "行情登录失败", ApiHelper.ParseErrInfo(mainAcct.ErrorInfo));
             }
             List<Account> loginAccts = new List<Account>();
             foreach (Account account in dbAccounts)
@@ -32,12 +70,12 @@ namespace NineSunScripture.trade.helper
                 //TODO 新版本加了营业部ID，后面看要不要加到数据库
                 int sessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
                     account.BrokerServerPort, account.VersionOfTHS, 0, account.AcctType,
-                    account.FundAcct, account.Password, account.CommPwd,
+                    account.FundAcct, account.FundPassword, account.CommPwd,
                     account.IsRandomMac, account.ErrorInfo);
                 string opLog = "";
                 if (sessionId > 0)
                 {
-                    account.SessionId = sessionId;
+                    account.TradeSessionId = sessionId;
                     account.Funds = TradeAPI.QueryFunds(sessionId);
                     account.Positions = TradeAPI.QueryPositions(sessionId);
                     account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(sessionId);
@@ -72,7 +110,7 @@ namespace NineSunScripture.trade.helper
                 }
                 if (null != callback)
                 {
-                   callback.OnTradeResult(sessionId, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    callback.OnTradeResult(sessionId, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
                 }
             }
             return loginAccts;
@@ -136,7 +174,7 @@ namespace NineSunScripture.trade.helper
             List<Position> allPositions = new List<Position>(); //所有账户持仓原始数据
             foreach (Account account in accounts)
             {
-                allPositions.AddRange(TradeAPI.QueryPositions(account.SessionId));
+                allPositions.AddRange(TradeAPI.QueryPositions(account.TradeSessionId));
             }
             List<Position> temp = allPositions.Distinct().ToList();
             foreach (Position item in temp)
@@ -205,7 +243,7 @@ namespace NineSunScripture.trade.helper
             }
             foreach (Account account in accounts)
             {
-                Funds temp = TradeAPI.QueryFunds(account.SessionId);
+                Funds temp = TradeAPI.QueryFunds(account.TradeSessionId);
                 funds.AvailableAmt += temp.AvailableAmt;
                 funds.FrozenAmt += temp.FrozenAmt;
                 funds.FundBalance += temp.FundBalance;
@@ -240,7 +278,7 @@ namespace NineSunScripture.trade.helper
             List<Order> resultOrders = new List<Order>();
             foreach (Account account in accounts)
             {
-                sourceOrders.AddRange(TradeAPI.QueryOrdersCanCancel(account.SessionId));
+                sourceOrders.AddRange(TradeAPI.QueryOrdersCanCancel(account.TradeSessionId));
             }
             foreach (Order order in sourceOrders)
             {
@@ -267,7 +305,7 @@ namespace NineSunScripture.trade.helper
             string info = "撤单【" + order.Name + "】";
             foreach (Account account in accounts)
             {
-                order.SessionId = account.SessionId;
+                order.TradeSessionId = account.TradeSessionId;
                 int rspCode = TradeAPI.CancelOrder(order);
                 if (null != callback)
                 {

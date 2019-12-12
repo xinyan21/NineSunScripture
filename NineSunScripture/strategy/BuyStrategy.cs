@@ -1,6 +1,7 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.trade.api;
 using NineSunScripture.trade.helper;
+using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
@@ -65,7 +66,7 @@ namespace NineSunScripture.strategy
             float positionRatioCtrl = 0.33f;   //买入计划仓位比例
             //记录开板时间
             bool isBoardLastTick = null != lastTickQuotes && lastTickQuotes.LatestPrice == highLimit;
-            bool isNotBoardThisTick = quotes.LatestPrice < highLimit && 0 != quotes.LatestPrice;
+            bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
                 Logger.log(quotes.Name + "开板");
@@ -162,7 +163,7 @@ namespace NineSunScripture.strategy
                 order.Price = highLimit;
                 foreach (Account account in accounts)
                 {
-                    account.Funds = TradeAPI.QueryFunds(account.SessionId);
+                    account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
                     if (funds.AvailableAmt < 5000 || funds.AvailableAmt < highLimit * 100)
                     {
                         Logger.log("【" + quotes.Name + "】触发买点，账户["
@@ -179,7 +180,7 @@ namespace NineSunScripture.strategy
                         Logger.log("【" + quotes.Name + "】触发买点，账户["
                         + account.FundAcct + "]的可用余额大于0，为" + position.AvailableBalance);
                         int sellQuantity = getTodayTransactionQuantityOf(
-                            account.SessionId, code, Order.OperationSell);
+                            account.TradeSessionId, code, Order.OperationSell);
                         //这里还需要查询当日已买，已经买了就return
                         if (open == highLimit)
                         {
@@ -189,7 +190,7 @@ namespace NineSunScripture.strategy
                         }
                         else
                         {
-                            order.Quantity = (int)(sellQuantity / 2);
+                            order.Quantity = Utils.FixQuantity(sellQuantity / 2);
                             Logger.log("【" + quotes.Name + "】触发买点，账户["
                         + account.FundAcct + "]设置买回数量为卖掉的1/2=" + order.Quantity);
                         }
@@ -220,7 +221,7 @@ namespace NineSunScripture.strategy
                             + account.FundAcct + "]经过仓位控制后可买数量为" + order.Quantity + "股");
                     }//END else 新开仓买入
                     int boughtQuantity = getTodayTransactionQuantityOf(
-                           account.SessionId, code, Order.OperationBuy);
+                           account.TradeSessionId, code, Order.OperationBuy);
                     if (order.Quantity <= boughtQuantity)
                     {
                         Logger.log("【" + quotes.Name + "】触发买点，账户["
@@ -233,7 +234,7 @@ namespace NineSunScripture.strategy
                     }
                     //检查委托，如果已经委托，但是没成交，要减去已经委托数量
                     List<Order> orders =
-                        AccountHelper.GetOrdersCanCancelOf(account.SessionId, code);
+                        AccountHelper.GetOrdersCanCancelOf(account.TradeSessionId, code);
                     int orderedQauntity = 0;
                     if (orders.Count > 0)
                     {
@@ -266,7 +267,7 @@ namespace NineSunScripture.strategy
                         Logger.log("【" + quotes.Name + "】触发买点，账户["
                             + account.FundAcct + "]可用金额不够，数量改为" + order.Quantity);
                     }
-                    order.SessionId = account.SessionId;
+                    order.TradeSessionId = account.TradeSessionId;
                     ApiHelper.SetShareholderAcct(account, quotes, order);
                     int rspCode = TradeAPI.Buy(order);
                     string opLog = "资金账号【" + account.FundAcct + "】" + "策略买入【"
@@ -288,7 +289,7 @@ namespace NineSunScripture.strategy
         /// <returns>仓位比例</returns>
         private float getNewPositionRatio(Account account)
         {
-            account.Funds = TradeAPI.QueryFunds(account.SessionId);
+            account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
             double totalProfitPct = account.Funds.TotalAsset / account.InitTotalAsset;
             if (totalProfitPct < 1.1)
             {
@@ -341,7 +342,7 @@ namespace NineSunScripture.strategy
         {
             foreach (Account account in accounts)
             {
-                List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.SessionId);
+                List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
                 if (null == orders || orders.Count == 0)
                 {
                     return;
@@ -350,7 +351,7 @@ namespace NineSunScripture.strategy
                 {
                     if (order.Code != quotes.Code && order.Operation.Contains(Order.OperationBuy))
                     {
-                        order.SessionId = account.SessionId;
+                        order.TradeSessionId = account.TradeSessionId;
                         int rspCode = TradeAPI.CancelOrder(order);
                         string opLog = "资金账号【" + account.FundAcct + "】" + "撤销【"
                             + quotes.Name + "】委托->"
@@ -405,11 +406,11 @@ namespace NineSunScripture.strategy
             }
             Order order = new Order();
             order.Code = "131810";
-            Quotes quotes = TradeAPI.QueryQuotes(mainAcct.SessionId, order.Code);
+            Quotes quotes = TradeAPI.QueryQuotes(mainAcct.TradeSessionId, order.Code);
             order.Price = quotes.Buy1;
             foreach (Account account in accounts)
             {
-                order.SessionId = account.SessionId;
+                order.TradeSessionId = account.TradeSessionId;
                 ApiHelper.SetShareholderAcct(account, quotes, order);
                 double availableCash = account.Funds.AvailableAmt;
                 order.Quantity = (int)(availableCash / 1000 * 10);

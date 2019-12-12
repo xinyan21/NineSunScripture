@@ -37,7 +37,7 @@ namespace NineSunScripture.db
                new SQLiteParameter("@acctType",account.AcctType),
                new SQLiteParameter("@commPwd",account.CommPwd),
                new SQLiteParameter("@fundAcct",account.FundAcct),
-               new SQLiteParameter("@password",account.Password)};
+               new SQLiteParameter("@password",account.FundPassword)};
             int cnt = SQLiteHelper.ExecuteNonQuery(sql, parameters);
             return cnt == 1 ? true : false;
         }
@@ -63,7 +63,7 @@ namespace NineSunScripture.db
                new SQLiteParameter("@versionOfTHS",account.VersionOfTHS),
                new SQLiteParameter("@acctType",account.AcctType),
                new SQLiteParameter("@commPwd",account.CommPwd),
-               new SQLiteParameter("@password",account.Password),
+               new SQLiteParameter("@password",account.FundPassword),
                 new SQLiteParameter("@fundAcct",account.FundAcct)};
             int cnt = SQLiteHelper.ExecuteNonQuery(sql, parameters);
             return cnt == 1 ? true : false;
@@ -167,7 +167,7 @@ namespace NineSunScripture.db
                 }
                 if (null != row["password"])
                 {
-                    acct.Password = row["password"].ToString();
+                    acct.FundPassword = row["password"].ToString();
                 }
             }
             return acct;

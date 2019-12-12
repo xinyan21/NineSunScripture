@@ -228,15 +228,15 @@ namespace NineSunScripture.trade.api
         }
 
         /// <summary>
-        ///  查询券商自带行情
+        ///  查询券商交易自带行情
         /// </summary>
-        /// <param name="sessionId">客户端id</param>
+        /// <param name="tradeSessionId">交易会话id</param>
         /// <param name="code">股票代码</param>
         /// <returns></returns>
-        public static Quotes QueryQuotes(int sessionId, String code)
+        public static Quotes QueryQuotes(int tradeSessionId, String code)
         {
             Quotes quotes = new Quotes();
-            int rspCode = QueryHQ(sessionId, code, quotes.Result, quotes.ErrorInfo);
+            int rspCode = QueryHQ(tradeSessionId, code, quotes.Result, quotes.ErrorInfo);
             if (rspCode > 0)
             {
                 try
@@ -252,7 +252,10 @@ namespace NineSunScripture.trade.api
                     quotes.Low = float.Parse(temp[7]);
                     quotes.Money = double.Parse(temp[8]);
                     quotes.Volume = int.Parse(temp[9]);
-                    quotes.Open = float.Parse(temp[10]);
+                    if (!string.IsNullOrEmpty(temp[10]))
+                    {
+                        quotes.Open = float.Parse(temp[10]);
+                    }
                     quotes.Sell1 = float.Parse(temp[11]);
                     quotes.Sell2 = float.Parse(temp[12]);
                     quotes.Sell3 = float.Parse(temp[13]);
@@ -278,7 +281,6 @@ namespace NineSunScripture.trade.api
                 {
                     Logger.log("QueryQuotes解析异常：" + ApiHelper.ParseErrInfo(quotes.Result));
                     Logger.exception(e, ApiHelper.ParseErrInfo(quotes.Result));
-                    throw e;
                 }
             }
             else
@@ -295,7 +297,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Buy(Order order)
         {
-            int rspId = SendOrder(order.SessionId, Order.CategoryBuy, order.ShareholderAcct,
+            int rspId = SendOrder(order.TradeSessionId, Order.CategoryBuy, order.ShareholderAcct,
                 order.Code, order.Price, order.Quantity, order.Result, order.ErrorInfo);
             return rspId;
         }
@@ -307,7 +309,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Sell(Order order)
         {
-            int rspId = SendOrder(order.SessionId, Order.CategorySell, order.ShareholderAcct,
+            int rspId = SendOrder(order.TradeSessionId, Order.CategorySell, order.ShareholderAcct,
                 order.Code, order.Price, order.Quantity, order.Result, order.ErrorInfo);
             return rspId;
         }
@@ -319,7 +321,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int CancelOrder(Order order)
         {
-            return CancelOrder(order.SessionId, order.ShareholderAcct,
+            return CancelOrder(order.TradeSessionId, order.ShareholderAcct,
                 order.OrderId, order.Result, order.ErrorInfo);
         }
     }

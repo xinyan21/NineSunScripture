@@ -29,11 +29,18 @@ namespace NineSunScripture.model
         public short AcctType;
         public String CommPwd;
         public bool IsRandomMac = false;
+        public short SalesDepartId;
         public String FundAcct;//资金账号
-        public String Password;
+        public String PriceAcct;//行情账号
+        public String FundPassword;
+        public String PricePassword;
         public String ShShareholderAcct;//上海股东账号
         public String SzShareholderAcct;//深圳股东账户
         public int InitTotalAsset;    //初始总资金，作为单股开仓仓位依据
+        /// <summary>
+        /// 行情会话id
+        /// </summary>
+        public int PriceSessionId;
 
         public Funds Funds;
         public List<Position> Positions;
@@ -41,6 +48,17 @@ namespace NineSunScripture.model
         /// <summary>
         /// 撤单
         /// </summary>
-        public List<Order> CancelOrders;    
+        public List<Order> CancelOrders;
+
+        public bool Equals(Account other)
+        {
+            return this.FundAcct == other.FundAcct;
+        }
+
+        //重写Equals和GetHashCode方法可以在List里面使用Contains方法
+        public override int GetHashCode()
+        {
+            return this.FundAcct.GetHashCode();
+        }
     }
 }

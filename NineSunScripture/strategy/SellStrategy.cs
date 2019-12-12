@@ -144,7 +144,7 @@ namespace NineSunScripture.strategy
         {
             foreach (Account account in accounts)
             {
-                List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(account.SessionId);
+                List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
                 bool isSoldToday = false;
                 if (todayTransactions.Count > 0)
                 {
@@ -200,10 +200,10 @@ namespace NineSunScripture.strategy
             }
             if (quotes.Buy2 == 0)
             {
-                quotes = TradeAPI.QueryQuotes(account.SessionId, position.Code);
+                quotes = TradeAPI.QueryQuotes(account.TradeSessionId, position.Code);
             }
             Order order = new Order();
-            order.SessionId = account.SessionId;
+            order.TradeSessionId = account.TradeSessionId;
             order.Code = quotes.Code;
             order.Price = quotes.Buy2;
             order.Quantity = position.AvailableBalance;
@@ -247,14 +247,14 @@ namespace NineSunScripture.strategy
             Quotes quotes = new Quotes();
             foreach (Account account in accounts)
             {
-                positions = TradeAPI.QueryPositions(account.SessionId);
+                positions = TradeAPI.QueryPositions(account.TradeSessionId);
                 if (null == positions || positions.Count == 0)
                 {
                     continue;
                 }
                 foreach (Position position in positions)
                 {
-                    quotes = TradeAPI.QueryQuotes(account.SessionId, position.Code);
+                    quotes = TradeAPI.QueryQuotes(account.TradeSessionId, position.Code);
                     quotes.Buy2 = quotes.LatestPrice * 0.95f;
                     if (quotes.Buy2 < quotes.LowLimit)
                     {

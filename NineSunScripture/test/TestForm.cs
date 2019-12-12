@@ -35,7 +35,7 @@ namespace NineSunScripture.util.test
 
         private void button2_Click(object sender, EventArgs e)
         {
-            List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(accounts[0].SessionId);
+            List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(accounts[0].TradeSessionId);
         }
     }
 }

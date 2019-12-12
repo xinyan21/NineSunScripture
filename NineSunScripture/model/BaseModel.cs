@@ -11,7 +11,7 @@ namespace NineSunScripture.model
     /// </summary>
     public class BaseModel
     {
-        public int SessionId;
+        public int TradeSessionId;
         public byte[] Result = new byte[1024 * 1024];
         public byte[] ErrorInfo = new byte[256];
     }

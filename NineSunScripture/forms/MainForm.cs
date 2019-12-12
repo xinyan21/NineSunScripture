@@ -226,6 +226,8 @@ namespace NineSunScripture
         public void AddStock(Quotes quotes)
         {
             stockDbHelper.AddStock(quotes);
+            runtimeInfo = "新增股票"+quotes.Name;
+            InvokeAddRunInfo();
             refreshStocksListView();
             RebootStrategy();
         }
@@ -283,7 +285,7 @@ namespace NineSunScripture
         {
             if (isStrategyStarted)
             {
-                runtimeInfo = "股票池变更，重启策略中...";
+                runtimeInfo = "重启策略中...";
                 InvokeAddRunInfo();
                 //Stop
                 tsmiSwitch_Click(null, null);
@@ -368,6 +370,8 @@ namespace NineSunScripture
                 stocks.Clear();
                 lvStocks.Clear();
 
+                runtimeInfo = "清空股票池";
+                InvokeAddRunInfo();
                 InitLvStocks();
                 refreshStocksListView();
                 RebootStrategy();
@@ -404,6 +408,8 @@ namespace NineSunScripture
             }
             stockDbHelper.DelStockBy(category, quotes.Code);
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
+            runtimeInfo = "删除股票" + quotes.Name;
+            InvokeAddRunInfo();
             refreshStocksListView();
             RebootStrategy();
         }

@@ -79,8 +79,8 @@ namespace NineSunScripture.forms
             BuyStrategy.CancelOrdersCanCancel(accounts, quotes, null);
             foreach (Account account in accounts)
             {
-                order.SessionId = account.SessionId;
-                account.Funds = TradeAPI.QueryFunds(account.SessionId);
+                order.TradeSessionId = account.TradeSessionId;
+                account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
                 ApiHelper.SetShareholderAcct(account, quotes, order);
                 //数量是整百整百的
                 double money = account.Funds.AvailableAmt * positionRatio;
@@ -107,7 +107,7 @@ namespace NineSunScripture.forms
         {
             if (tbCode.TextLength == 6)
             {
-                quotes = TradeAPI.QueryQuotes(accounts[0].SessionId, tbCode.Text);
+                quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
                 if (quotes.Name.Length > 0)
                 {
                     tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";

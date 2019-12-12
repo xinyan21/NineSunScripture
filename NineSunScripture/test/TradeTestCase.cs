@@ -16,7 +16,7 @@ namespace NineSunScripture.util.test
         public void TestBuy(List<Account> accounts)
         {
             Order order = new Order();
-            order.SessionId = accounts[0].SessionId;
+            order.TradeSessionId = accounts[0].TradeSessionId;
             order.Category = Order.CategoryBuy;
             order.Code = "300341";
             order.Price = 13.95f;

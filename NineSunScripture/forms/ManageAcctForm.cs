@@ -67,7 +67,7 @@ namespace NineSunScripture.forms
             account.BrokerServerPort = short.Parse(tbPort.Text);
             account.VersionOfTHS = tbTHSVersion.Text;
             account.FundAcct = tbAccout.Text;
-            account.Password = tbPassword.Text;
+            account.FundPassword = tbPassword.Text;
             account.CommPwd = tbCommPwd.Text;
 
             bool result = dbHelper.AddAccount(account);
@@ -98,7 +98,7 @@ namespace NineSunScripture.forms
             account.BrokerServerPort = short.Parse(tbPort.Text);
             account.VersionOfTHS = tbTHSVersion.Text;
             account.FundAcct = tbAccout.Text;
-            account.Password = tbPassword.Text;
+            account.FundPassword = tbPassword.Text;
             account.CommPwd = tbCommPwd.Text;
 
             bool result = dbHelper.EditAccount(account);
@@ -156,7 +156,7 @@ namespace NineSunScripture.forms
             tbBrokerName.Text = acct.BrokerName;
             tbCommPwd.Text = acct.CommPwd;
             tbIP.Text = acct.BrokerServerIP;
-            tbPassword.Text = acct.Password;
+            tbPassword.Text = acct.FundPassword;
             tbPort.Text = acct.BrokerServerPort + "";
             tbTHSVersion.Text = acct.VersionOfTHS;
         }

@@ -75,5 +75,10 @@ namespace NineSunScripture.util
             }
             Logger.log(quotes.ToString(), LogType.Quotes);
         }
+
+        public static int FixQuantity(int quantity)
+        {
+            return (quantity / 100) * 100;
+        }
     }
 }

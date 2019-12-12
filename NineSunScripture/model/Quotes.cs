@@ -9,7 +9,7 @@ namespace NineSunScripture.model
     /// <summary>
     /// 行情实体类
     /// </summary>
-    public class Quotes : BaseModel, IEquatable<Quotes>
+    public class Quotes :BaseModel, IEquatable<Quotes>
     {
         /// <summary>
         /// 常驻股票池中的股票
@@ -92,14 +92,14 @@ namespace NineSunScripture.model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(">Code: ").Append(Code);
-            sb.Append(">Name: ").Append(Name);
-            sb.Append(">LatestPrice: ").Append(LatestPrice);
-            sb.Append(">Money: ").Append(Money);
-            sb.Append(">Sell1: ").Append(Sell1);
-            sb.Append(">Buy1: ").Append(Buy1);
-            sb.Append(">Sell1Vol: ").Append(Sell1Vol);
-            sb.Append(">Buy1Vol: ").Append(Buy1Vol);
+            sb.Append("#Code= ").Append(Code);
+            sb.Append("#Name= ").Append(Name);
+            sb.Append("#LatestPrice= ").Append(LatestPrice);
+            sb.Append("#Money=").Append(Money);
+            sb.Append("#Sell1=").Append(Sell1);
+            sb.Append("#Buy1=").Append(Buy1);
+            sb.Append("#Sell1Vol=").Append(Sell1Vol);
+            sb.Append("#Buy1Vol=").Append(Buy1Vol);
             return sb.ToString();
         }
     }

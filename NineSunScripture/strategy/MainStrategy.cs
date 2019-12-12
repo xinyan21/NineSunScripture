@@ -24,7 +24,7 @@ namespace NineSunScripture.strategy
         public const bool IsTest = false;
         private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
-        private const int SleepIntervalOfTrade = 1000;
+        private const int SleepIntervalOfTrade = 200;
 
         private int sleepInterval = SleepIntervalOfTrade;
         private int tryLoginCnt = 0;
@@ -65,7 +65,6 @@ namespace NineSunScripture.strategy
             }
             List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
             stocks.AddRange(positionStocks);
-            //TODO 买了行情协议的时候主账户直接写死在程序里好点
             mainAcct = accounts[0];
             bool isWorkingRight = true;
             while (true)
@@ -85,12 +84,12 @@ namespace NineSunScripture.strategy
                     continue;
                 }
                 Quotes quotes;
-                //TODO 暂时没有level控制下频率，每秒刷新一下，300Ms频率用来旋转太极图
                 for (int i = 0; i < stocks.Count; i++)
                 {
                     try
                     {
-                        quotes = TradeAPI.QueryQuotes(mainAcct.SessionId, stocks[i].Code);
+                        quotes = PriceAPI.QueryTenthGearPrice(
+                            mainAcct.PriceSessionId, mainAcct.TradeSessionId, stocks[i].Code);
                         Utils.SamplingLogQuotes(quotes);
                         if (quotes.LatestPrice == 0)
                         {
@@ -148,9 +147,10 @@ namespace NineSunScripture.strategy
             mainThread.Abort();
             if (null != accounts && accounts.Count > 0)
             {
+                PriceAPI.HQ_Logoff(accounts[0].PriceSessionId);
                 foreach (Account account in accounts)
                 {
-                    TradeAPI.Logoff(account.SessionId);
+                    TradeAPI.Logoff(account.TradeSessionId);
                 }
                 accounts.Clear();
             }
