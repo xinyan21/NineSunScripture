@@ -67,13 +67,13 @@ namespace NineSunScripture.util
         {
             if (DateTime.Now.Hour == 9 && DateTime.Now.Minute <= 30)
             {
-                Logger.log(quotes.ToString(), LogType.Quotes);
+                Logger.Log(quotes.ToString(), LogType.Quotes);
             }
             if (DateTime.Now.Second != 0 || null == quotes)
             {
                 return;
             }
-            Logger.log(quotes.ToString(), LogType.Quotes);
+            Logger.Log(quotes.ToString(), LogType.Quotes);
         }
 
         public static int FixQuantity(int quantity)

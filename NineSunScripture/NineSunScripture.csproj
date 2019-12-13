@@ -191,6 +191,7 @@
       <DependentUpon>TestForm.cs</DependentUpon>
     </Compile>
     <Compile Include="test\TradeTestCase.cs" />
+    <Compile Include="util\log\MultiThreadLogger.cs" />
     <Compile Include="util\Utils.cs" />
     <EmbeddedResource Include="forms\AddStockForm.resx">
       <DependentUpon>AddStockForm.cs</DependentUpon>

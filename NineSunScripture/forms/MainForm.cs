@@ -313,7 +313,7 @@ namespace NineSunScripture
                 InvokeAddRunInfo();
                 InvokeRebootStrategy();
             }
-            Logger.log(runtimeInfo);
+            Logger.Log(runtimeInfo);
         }
 
         /// <summary>
@@ -346,7 +346,7 @@ namespace NineSunScripture
         /// </summary>
         private void AddRuntimeInfo()
         {
-            Logger.log(runtimeInfo);
+            Logger.Log(runtimeInfo);
             tbRuntimeInfo.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + runtimeInfo + "\r\n");
             tbRuntimeInfo.ScrollToCaret();
         }
@@ -452,7 +452,7 @@ namespace NineSunScripture
             {
                 runtimeInfo = "策略开始停止";
                 InvokeAddRunInfo();
-                Logger.log(runtimeInfo);
+                Logger.Log(runtimeInfo);
                 mainStrategy.Stop();
                 tsmiSwitch.Text = "启动";
                 isStrategyStarted = false;
@@ -462,7 +462,7 @@ namespace NineSunScripture
             }
             runtimeInfo = "策略开始启动";
             InvokeAddRunInfo();
-            Logger.log(runtimeInfo);
+            Logger.Log(runtimeInfo);
             PutStocksTogether();
             mainStrategy.UpdateStocks(stocks);
             bool isStarted = mainStrategy.Start();
@@ -471,7 +471,7 @@ namespace NineSunScripture
                 string log = "策略启动失败";
                 runtimeInfo = log;
                 InvokeAddRunInfo();
-                Logger.log(log);
+                Logger.Log(log);
                 return;
             }
             tsmiSwitch.Text = "停止";

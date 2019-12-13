@@ -77,6 +77,10 @@ namespace NineSunScripture.model
         /// 股票类型：常驻0、龙头1、最新2
         /// </summary>
         public short StockCategory;
+        /// <summary>
+        /// 是否是持仓股，默认不是，此属性用来解决新增账户后持仓不一致导致的开仓问题
+        /// </summary>        
+        public bool InPosition = false;
 
         public bool Equals(Quotes other)
         {

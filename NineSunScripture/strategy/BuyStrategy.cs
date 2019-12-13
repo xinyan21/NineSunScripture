@@ -69,14 +69,14 @@ namespace NineSunScripture.strategy
             bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
-                Logger.log(quotes.Name + "开板");
+                Logger.Log(quotes.Name + "开板");
                 openBoardTime.Add(code, DateTime.Now);
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
             bool isBoardThisTick = quotes.LatestPrice == highLimit;
             if (!isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
-                Logger.log(quotes.Name + "回封");
+                Logger.Log(quotes.Name + "回封");
                 openBoardTime.Remove(code);
             }
             //成交额小于7000万过滤
@@ -114,42 +114,34 @@ namespace NineSunScripture.strategy
                 int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
                 if (openBoardInterval < 30)
                 {
+                    Logger.Log("openBoardInterval->" + openBoardInterval);
+                    return;
+                }
+            }
+            else
+            {
+                //涨停开盘，没开板，过滤
+                if (open == highLimit)
+                {
                     return;
                 }
             }
             //买一是涨停价、卖一或者卖二是涨停价符合买点
             if (quotes.Buy1 == highLimit || quotes.Sell1 == highLimit || quotes.Sell2 == highLimit)
             {
-                //T字板
-                if (open == highLimit)
-                {
-                    //没开板，过滤
-                    if (!openBoardTime.ContainsKey(code))
-                    {
-                        return;
-                    }
-                    int openBoardInterval
-                        = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
-                    //涨停开盘，开板时间小于30秒，过滤
-                    if (openBoardInterval < 30)
-                    {
-                        Logger.log("openBoardInterval->" + openBoardInterval);
-                        return;
-                    }
-                }
-                Logger.log("【" + quotes.Name + "】触发买点");
+                Logger.Log("【" + quotes.Name + "】触发买点");
                 //###############以上都是买点判断########################
                 //###############下面是买入策略########################
                 if (quotes.PositionCtrl > 0)
                 {
                     positionRatioCtrl = quotes.PositionCtrl;
-                    Logger.log("【" + quotes.Name + "】设置仓位控制为" + positionRatioCtrl);
+                    Logger.Log("【" + quotes.Name + "】设置仓位控制为" + positionRatioCtrl);
                 }
                 Funds funds = AccountHelper.QueryTotalFunds(accounts);
                 //所有账户总可用金额小于每个账号一手的金额或者小于1万，直接退出
                 if (funds.AvailableAmt < 10000 || funds.AvailableAmt < highLimit * 100 * accounts.Count)
                 {
-                    Logger.log("【" + quotes.Name + "】触发买点，结束于总金额不够一万或总账户每户一手");
+                    Logger.Log("【" + quotes.Name + "】触发买点，结束于总金额不够一万或总账户每户一手");
                     return;
                 }
                 //可用金额不够用，撤销所有可撤单
@@ -166,18 +158,19 @@ namespace NineSunScripture.strategy
                     account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
                     if (funds.AvailableAmt < 5000 || funds.AvailableAmt < highLimit * 100)
                     {
-                        Logger.log("【" + quotes.Name + "】触发买点，账户["
+                        Logger.Log("【" + quotes.Name + "】触发买点，账户["
                             + account.FundAcct + "]结束于可用金额不够");
                         continue;
                     }
+                    account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
                     Position position = AccountHelper.GetPositionOf(account.Positions, code);
                     //################计算买入数量BEGIN#######################
                     if (null != position)
                     {
-                        Logger.log("【" + quotes.Name + "】触发买点，账户["
-                            + account.FundAcct + "]已经持有");
+                        Logger.Log(
+                            "【" + quotes.Name + "】触发买点，账户[" + account.FundAcct + "]已经持有");
                         //查询已卖数量得到买入数量（可用大于0说明今天之前买的，这种情况只回补仓位）
-                        Logger.log("【" + quotes.Name + "】触发买点，账户["
+                        Logger.Log("【" + quotes.Name + "】触发买点，账户["
                         + account.FundAcct + "]的可用余额大于0，为" + position.AvailableBalance);
                         int sellQuantity = getTodayTransactionQuantityOf(
                             account.TradeSessionId, code, Order.OperationSell);
@@ -185,19 +178,26 @@ namespace NineSunScripture.strategy
                         if (open == highLimit)
                         {
                             order.Quantity = sellQuantity;
-                            Logger.log("【" + quotes.Name + "】触发买点，账户["
+                            Logger.Log("【" + quotes.Name + "】触发买点，账户["
                         + account.FundAcct + "]设置买回数量为卖掉的全部" + order.Quantity);
                         }
                         else
                         {
                             order.Quantity = Utils.FixQuantity(sellQuantity / 2);
-                            Logger.log("【" + quotes.Name + "】触发买点，账户["
+                            Logger.Log("【" + quotes.Name + "】触发买点，账户["
                         + account.FundAcct + "]设置买回数量为卖掉的1/2=" + order.Quantity);
                         }
                     }   //END  if (null != position)
                     else    //新开仓买入
                     {
-                        Logger.log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
+                        //新增账户后之前账户已经持仓的股，新增账户不买（交了很多学费解决的bug）
+                        if (quotes.InPosition)
+                        {
+                            Logger.Log("【" + quotes.Name + "】触发买点，但由于是持仓股且账户[" + account.FundAcct
+                            + "]是新增账户，不买");
+                            return;
+                        }
+                        Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
                             + "]将新开仓买入");
                         //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
                         //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
@@ -206,25 +206,25 @@ namespace NineSunScripture.strategy
                         if (acctPositionCtrl <= positionRatioCtrl)
                         {
                             positionRatioCtrl = acctPositionCtrl;
-                            Logger.log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
+                            Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
                                 + "]的仓位控制为账户级风险控制，仓位为" + acctPositionCtrl);
                         }
                         if (availableCash > account.Funds.TotalAsset * positionRatioCtrl)
                         {
                             availableCash = account.Funds.TotalAsset * positionRatioCtrl;
-                            Logger.log("【" + quotes.Name + "】触发买点，账户["
+                            Logger.Log("【" + quotes.Name + "】触发买点，账户["
                            + account.FundAcct + "]的买入金额设置为仓位控制后的" + availableCash + "元");
                         }
                         //数量是整百整百的
                         order.Quantity = ((int)(availableCash / (highLimit * 100))) * 100;
-                        Logger.log("【" + quotes.Name + "】触发买点，账户["
+                        Logger.Log("【" + quotes.Name + "】触发买点，账户["
                             + account.FundAcct + "]经过仓位控制后可买数量为" + order.Quantity + "股");
                     }//END else 新开仓买入
                     int boughtQuantity = getTodayTransactionQuantityOf(
                            account.TradeSessionId, code, Order.OperationBuy);
                     if (order.Quantity <= boughtQuantity)
                     {
-                        Logger.log("【" + quotes.Name + "】触发买点，账户["
+                        Logger.Log("【" + quotes.Name + "】触发买点，账户["
                            + account.FundAcct + "]结束于计划买入数量>=今天已买数量");
                         return;
                     }
@@ -250,12 +250,12 @@ namespace NineSunScripture.strategy
                     {
                         //买入数量要减去已经委托数量
                         order.Quantity = order.Quantity - orderedQauntity;
-                        Logger.log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
+                        Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
                             + "]已下单数量为" + orderedQauntity + "，减去后为" + order.Quantity);
                     }
                     if (order.Quantity <= 0)
                     {
-                        Logger.log("【" + quotes.Name + "】触发买点，账户["
+                        Logger.Log("【" + quotes.Name + "】触发买点，账户["
                             + account.FundAcct + "]结束于出去委托数量后可买数量为0");
                         return;
                     }
@@ -264,7 +264,7 @@ namespace NineSunScripture.strategy
                     if (account.Funds.AvailableAmt < order.Quantity * highLimit)
                     {
                         order.Quantity = ((int)(account.Funds.AvailableAmt / (highLimit * 100))) * 100;
-                        Logger.log("【" + quotes.Name + "】触发买点，账户["
+                        Logger.Log("【" + quotes.Name + "】触发买点，账户["
                             + account.FundAcct + "]可用金额不够，数量改为" + order.Quantity);
                     }
                     order.TradeSessionId = account.TradeSessionId;
@@ -273,7 +273,7 @@ namespace NineSunScripture.strategy
                     string opLog = "资金账号【" + account.FundAcct + "】" + "策略买入【"
                         + quotes.Name + "】"
                         + (order.Quantity * order.Price).ToString("0.00####") + "万元";
-                    Logger.log(opLog);
+                    Logger.Log(opLog);
                     if (null != callback)
                     {
                         callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
@@ -345,7 +345,7 @@ namespace NineSunScripture.strategy
                 List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
                 if (null == orders || orders.Count == 0)
                 {
-                    return;
+                    continue;
                 }
                 foreach (Order order in orders)
                 {
@@ -356,7 +356,7 @@ namespace NineSunScripture.strategy
                         string opLog = "资金账号【" + account.FundAcct + "】" + "撤销【"
                             + quotes.Name + "】委托->"
                             + (order.Quantity * order.Price).ToString("0.00####") + "万元";
-                        Logger.log(opLog);
+                        Logger.Log(opLog);
                         if (null != callback)
                         {
                             callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
@@ -418,7 +418,7 @@ namespace NineSunScripture.strategy
                 string opLog
                     = "资金账号【" + account.FundAcct + "】" + "逆回购"
                     + (int)(availableCash / 1000) * 1000;
-                Logger.log(opLog);
+                Logger.Log(opLog);
                 if (null != callback)
                 {
                     callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));

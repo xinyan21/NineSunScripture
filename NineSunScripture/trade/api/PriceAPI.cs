@@ -77,14 +77,14 @@ namespace NineSunScripture.trade.api
                 }
                 catch (Exception e)
                 {
-                    Logger.log("QueryTenthGear：" + ApiHelper.ParseErrInfo(quotes.Result));
-                    Logger.exception(e, ApiHelper.ParseErrInfo(quotes.Result));
+                    Logger.Log("QueryTenthGear：" + ApiHelper.ParseErrInfo(quotes.Result));
+                    Logger.Exception(e, ApiHelper.ParseErrInfo(quotes.Result));
                     throw e;
                 }
             }
             else
             {
-                Logger.log("QueryQuotes：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
+                Logger.Log("QueryQuotes：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
             }
             return quotes;
         }

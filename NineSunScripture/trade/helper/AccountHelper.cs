@@ -100,13 +100,13 @@ namespace NineSunScripture.trade.helper
                     }
                     loginAccts.Add(account);
                     opLog = "资金账号【" + account.FundAcct + "】登录成功，ID为" + sessionId;
-                    Logger.log(opLog);
+                    Logger.Log(opLog);
                 }
                 else
                 {
                     opLog = "资金账号【" + account.FundAcct + "】登录失败，信息："
                         + ApiHelper.ParseErrInfo(account.ErrorInfo);
-                    Logger.log(opLog);
+                    Logger.Log(opLog);
                 }
                 if (null != callback)
                 {
@@ -193,10 +193,24 @@ namespace NineSunScripture.trade.helper
                     if (item.Code == item2.Code)
                     {
                         item2.AvailableBalance += item.AvailableBalance;
-                        item2.AvgCost += item.AvgCost;
+                        if (item.AvgCost == 0)
+                        {
+                            item2.AvgCost = item.AvgCost;
+                        }
+                        else
+                        {
+                            item2.AvgCost = (item2.AvgCost + item.AvgCost) / 2;
+                        }
                         item2.FrozenQuantity += item.FrozenQuantity;
                         item2.ProfitAndLoss += item.ProfitAndLoss;
-                        item2.ProfitAndLossPct += item.ProfitAndLossPct;
+                        if (item.ProfitAndLossPct == 0)
+                        {
+                            item2.ProfitAndLossPct = item.ProfitAndLossPct;
+                        }
+                        else
+                        {
+                            item2.ProfitAndLossPct = (item2.ProfitAndLossPct + item.ProfitAndLossPct) / 2;
+                        }
                         item2.StockBalance += item.StockBalance;
                     }
                 }
@@ -288,7 +302,7 @@ namespace NineSunScripture.trade.helper
                      && temp.Operation == order.Operation);
                     item.Quantity += order.Quantity;
                     item.Price = (item.Price + order.Price) / 2;
-                    item.TransactionPrice += order.TransactionPrice;
+                    item.TransactionPrice = (item.TransactionPrice + order.TransactionPrice) / 2;
                     item.TransactionQuantity += order.TransactionQuantity;
                     item.CanceledQuantity += order.CanceledQuantity;
                 }
@@ -300,17 +314,31 @@ namespace NineSunScripture.trade.helper
             return resultOrders;
         }
 
+        /// <summary>
+        /// 撤order里股票的单
+        /// </summary>
+        /// <param name="accounts"></param>
+        /// <param name="order"></param>
+        /// <param name="callback"></param>
         public static void CancelTotalOrders(List<Account> accounts, Order order, ITrade callback)
         {
             string info = "撤单【" + order.Name + "】";
             foreach (Account account in accounts)
             {
-                order.TradeSessionId = account.TradeSessionId;
-                int rspCode = TradeAPI.CancelOrder(order);
-                if (null != callback)
+                List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
+                foreach (Order item in orders)
                 {
-                    info = "资金账号【" + account.FundAcct + "】" + info;
-                    callback.OnTradeResult(rspCode, info, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                    if (!item.Name.Equals(order.Name))
+                    {
+                        continue;
+                    }
+                    item.TradeSessionId = account.TradeSessionId;
+                    int rspCode = TradeAPI.CancelOrder(item);
+                    if (null != callback)
+                    {
+                        info = "资金账号【" + account.FundAcct + "】" + info;
+                        callback.OnTradeResult(rspCode, info, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                    }
                 }
             }
         }

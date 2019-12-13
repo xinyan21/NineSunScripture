@@ -64,7 +64,15 @@ namespace NineSunScripture.strategy
                 return;
             }
             List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
-            stocks.AddRange(positionStocks);
+            foreach (Quotes item in positionStocks)
+            {
+                //如果股票池里有持仓股说明可以继续做，没有就不能做InPosition要设置成true
+                if (!stocks.Contains(item))
+                {
+                    item.InPosition = true;
+                    stocks.Add(item);
+                }
+            }
             mainAcct = accounts[0];
             bool isWorkingRight = true;
             while (true)
@@ -90,10 +98,10 @@ namespace NineSunScripture.strategy
                     {
                         quotes = PriceAPI.QueryTenthGearPrice(
                             mainAcct.PriceSessionId, mainAcct.TradeSessionId, stocks[i].Code);
-                        Utils.SamplingLogQuotes(quotes);
+                        //Utils.SamplingLogQuotes(quotes);
                         if (quotes.LatestPrice == 0)
                         {
-                            Logger.log(quotes.ToString(), LogType.Quotes);
+                            Logger.Log(quotes.ToString(), LogType.Quotes);
                             isWorkingRight = false;
                             callback.OnTradeResult(0, "策略执行发生异常", "行情接口返回0");
                             return;
@@ -104,12 +112,12 @@ namespace NineSunScripture.strategy
                     }
                     catch (ThreadAbortException)
                     {
-                        Logger.log("----------策略运行线程终止------------");
+                        Logger.Log("----------策略运行线程终止------------");
                     }
                     catch (Exception e)
                     {
                         isWorkingRight = false;
-                        Logger.exception(e);
+                        Logger.Exception(e);
                         if (null != callback)
                         {
                             callback.OnTradeResult(0, "策略执行发生异常", e.Message);
@@ -174,14 +182,14 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 每隔3个心跳更新一下账户信息
+        /// 每隔15个心跳更新一下账户信息
         /// </summary>
         /// <param name="ctrlFrequency">是否控制频率</param>
         public void UpdateFundsInfo(bool ctrlFrequency)
         {
-            if (ctrlFrequency && fundUpdateCtrl++ % 3 != 0)
+            if (ctrlFrequency && fundUpdateCtrl++ % 15 != 0)
             {
-                if (fundUpdateCtrl > 3)
+                if (fundUpdateCtrl > 15)
                 {
                     fundUpdateCtrl = 0;
                 }

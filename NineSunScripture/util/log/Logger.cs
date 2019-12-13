@@ -43,9 +43,25 @@ namespace NineSunScripture.util.log
         /// </summary>
         /// <param name="logContent">Log content</param>
         /// <param name="logType">Log type</param>
-        public static void log(string logContent, LogType logType = LogType.Info)
+        public static void Log(string logContent, LogType logType = LogType.Info)
         {
-            Instance.WriteLog(logContent, logType);
+            if (LogType.Error==logType)
+            {
+                MultiThreadLogger.Error(logContent);
+            }
+            else
+            {
+                MultiThreadLogger.Info(logContent);
+            }
+        }
+
+        /// <summary>
+        /// Write exception to log file
+        /// </summary>
+        /// <param name="exception">Exception</param>
+        public static void Exception(Exception exception, string specialText = null)
+        {
+            MultiThreadLogger.Error(exception, specialText);
         }
 
         /// <summary>
@@ -87,15 +103,6 @@ namespace NineSunScripture.util.log
                 }
             }
             catch (Exception) { }
-        }
-
-        /// <summary>
-        /// Write exception to log file
-        /// </summary>
-        /// <param name="exception">Exception</param>
-        public static void exception(Exception exception, string specialText = null)
-        {
-            Instance.WriteException(exception, specialText);
         }
 
         /// <summary>

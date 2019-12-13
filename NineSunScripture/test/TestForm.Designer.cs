@@ -32,6 +32,8 @@
             this.btnTestBuy = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.lblTenthGearPrice = new System.Windows.Forms.Label();
+            this.btnTenthGearPrice = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnTestBuy
@@ -64,6 +66,24 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // lblTenthGearPrice
+            // 
+            this.lblTenthGearPrice.Location = new System.Drawing.Point(397, 249);
+            this.lblTenthGearPrice.Name = "lblTenthGearPrice";
+            this.lblTenthGearPrice.Size = new System.Drawing.Size(200, 300);
+            this.lblTenthGearPrice.TabIndex = 3;
+            this.lblTenthGearPrice.Text = "label1";
+            // 
+            // btnTenthGearPrice
+            // 
+            this.btnTenthGearPrice.Location = new System.Drawing.Point(401, 150);
+            this.btnTenthGearPrice.Name = "btnTenthGearPrice";
+            this.btnTenthGearPrice.Size = new System.Drawing.Size(155, 46);
+            this.btnTenthGearPrice.TabIndex = 4;
+            this.btnTenthGearPrice.Text = "测试十档行情";
+            this.btnTenthGearPrice.UseVisualStyleBackColor = true;
+            this.btnTenthGearPrice.Click += new System.EventHandler(this.btnTenthGearPrice_Click);
+            // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -71,6 +91,8 @@
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(778, 669);
+            this.Controls.Add(this.btnTenthGearPrice);
+            this.Controls.Add(this.lblTenthGearPrice);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnTestBuy);
@@ -89,5 +111,7 @@
         private System.Windows.Forms.Button btnTestBuy;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Label lblTenthGearPrice;
+        private System.Windows.Forms.Button btnTenthGearPrice;
     }
 }

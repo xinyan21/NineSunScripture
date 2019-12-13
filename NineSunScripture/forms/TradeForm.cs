@@ -72,6 +72,11 @@ namespace NineSunScripture.forms
 
         private void Buy()
         {
+            if (null == accounts || accounts.Count == 0)
+            {
+                MessageBox.Show("账户不能为空！");
+                return;
+            }
             Order order = new Order();
             order.Code = tbCode.Text;
             order.Price = float.Parse(tbPrice.Text);
@@ -85,11 +90,15 @@ namespace NineSunScripture.forms
                 //数量是整百整百的
                 double money = account.Funds.AvailableAmt * positionRatio;
                 order.Quantity = ((int)(money / (order.Price * 100))) * 100;
+                if (order.Quantity==0)
+                {
+                    continue;
+                }
                 int rspCode = TradeAPI.Buy(order);
                 string opLog
                     = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
                     + order.Quantity * order.Price + "元";
-                Logger.log(opLog);
+                Logger.Log(opLog);
                 if (null != callback)
                 {
                     callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));

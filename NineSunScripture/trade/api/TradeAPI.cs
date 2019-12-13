@@ -90,13 +90,13 @@ namespace NineSunScripture.trade.api
             }
             else
             {
-                Logger.log("QueryFunds：" + ApiHelper.ParseErrInfo(funds.ErrorInfo));
+                Logger.Log("QueryFunds：" + ApiHelper.ParseErrInfo(funds.ErrorInfo));
             }
             return funds;
         }
 
         /// <summary>
-        /// 查询持仓
+        /// 查询单个账户持仓
         /// </summary>
         /// <param name="sessionId">登录返回的客户Id</param>
         /// <returns></returns>
@@ -125,7 +125,7 @@ namespace NineSunScripture.trade.api
             }
             else
             {
-                Logger.log("QueryPositions：" + ApiHelper.ParseErrInfo(position.ErrorInfo));
+                Logger.Log("QueryPositions：" + ApiHelper.ParseErrInfo(position.ErrorInfo));
             }
             return positions;
         }
@@ -157,7 +157,7 @@ namespace NineSunScripture.trade.api
             }
             else
             {
-                Logger.log("QueryTodayTransaction接口调用异常：" +
+                Logger.Log("QueryTodayTransaction接口调用异常：" +
                     ApiHelper.ParseErrInfo(order.ErrorInfo));
             }
 
@@ -222,13 +222,13 @@ namespace NineSunScripture.trade.api
             }
             else
             {
-                Logger.log("QueryShareHolderAccts：" + ApiHelper.ParseErrInfo(account.ErrorInfo));
+                Logger.Log("QueryShareHolderAccts：" + ApiHelper.ParseErrInfo(account.ErrorInfo));
             }
             return accounts;
         }
 
         /// <summary>
-        ///  查询券商交易自带行情
+        ///  查询券商交易自带行情（交易行情数据问题很多，一天这个方法要崩好多次）
         /// </summary>
         /// <param name="tradeSessionId">交易会话id</param>
         /// <param name="code">股票代码</param>
@@ -279,13 +279,13 @@ namespace NineSunScripture.trade.api
                 }
                 catch (Exception e)
                 {
-                    Logger.log("QueryQuotes解析异常：" + ApiHelper.ParseErrInfo(quotes.Result));
-                    Logger.exception(e, ApiHelper.ParseErrInfo(quotes.Result));
+                    Logger.Log("QueryQuotes解析异常：" + ApiHelper.ParseErrInfo(quotes.Result));
+                    Logger.Exception(e, ApiHelper.ParseErrInfo(quotes.Result));
                 }
             }
             else
             {
-                Logger.log("QueryQuotes：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
+                Logger.Log("QueryQuotes：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
             }
             return quotes;
         }
