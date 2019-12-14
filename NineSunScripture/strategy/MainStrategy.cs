@@ -103,7 +103,7 @@ namespace NineSunScripture.strategy
                         {
                             Logger.Log(quotes.ToString(), LogType.Quotes);
                             isWorkingRight = false;
-                            callback.OnTradeResult(0, "策略执行发生异常", "行情接口返回0");
+                            callback.OnTradeResult(0, "策略执行发生异常", "行情接口返回0", true);
                             return;
                         }
                         SetBuyPlan(quotes);
@@ -120,7 +120,7 @@ namespace NineSunScripture.strategy
                         Logger.Exception(e);
                         if (null != callback)
                         {
-                            callback.OnTradeResult(0, "策略执行发生异常", e.Message);
+                            callback.OnTradeResult(0, "策略执行发生异常", e.Message, true);
                         }
                     }
                     finally
@@ -197,14 +197,16 @@ namespace NineSunScripture.strategy
             }
             if (null != fundListener && null != accounts)
             {
+                foreach (Account item in accounts)
+                {
+                    item.Positions = TradeAPI.QueryPositions(item.TradeSessionId);
+                }
                 Account account = new Account();
                 account.Funds = AccountHelper.QueryTotalFunds(accounts);
-                account.Positions = AccountHelper.QueryPositions(accounts);
+                account.Positions = AccountHelper.QueryTotalPositions(accounts);
                 account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
                 fundListener.OnAcctInfoListen(account);
             }
-            //调用接口要有时间间隔
-            Thread.Sleep(100);
         }
 
         private bool IsTradeTime()

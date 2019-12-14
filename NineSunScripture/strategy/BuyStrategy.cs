@@ -276,7 +276,8 @@ namespace NineSunScripture.strategy
                     Logger.Log(opLog);
                     if (null != callback)
                     {
-                        callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                        string errInfo = ApiHelper.ParseErrInfo(account.ErrorInfo);
+                        callback.OnTradeResult(rspCode, opLog, errInfo, false);
                     }
                 }//END FOR ACCOUNT
             }
@@ -317,7 +318,7 @@ namespace NineSunScripture.strategy
         private String getPositionStock(List<Account> accounts)
         {
             string stocks = "";
-            List<Position> positions = AccountHelper.QueryPositions(accounts);
+            List<Position> positions = AccountHelper.QueryTotalPositions(accounts);
             if (null == positions || positions.Count == 0)
             {
                 return stocks;
@@ -359,7 +360,8 @@ namespace NineSunScripture.strategy
                         Logger.Log(opLog);
                         if (null != callback)
                         {
-                            callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                            string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
+                            callback.OnTradeResult(rspCode, opLog, errInfo, false);
                         }
                     }
                 }
@@ -421,7 +423,8 @@ namespace NineSunScripture.strategy
                 Logger.Log(opLog);
                 if (null != callback)
                 {
-                    callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
+                    callback.OnTradeResult(rspCode, opLog, errInfo, false);
                 }
             }//END FOR
         }//END METHOD

@@ -90,7 +90,7 @@ namespace NineSunScripture.forms
                 //数量是整百整百的
                 double money = account.Funds.AvailableAmt * positionRatio;
                 order.Quantity = ((int)(money / (order.Price * 100))) * 100;
-                if (order.Quantity==0)
+                if (order.Quantity == 0)
                 {
                     continue;
                 }
@@ -101,7 +101,8 @@ namespace NineSunScripture.forms
                 Logger.Log(opLog);
                 if (null != callback)
                 {
-                    callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
+                    callback.OnTradeResult(rspCode, opLog, errInfo, false);
                 }
             }
         }

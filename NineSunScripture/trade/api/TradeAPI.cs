@@ -123,10 +123,6 @@ namespace NineSunScripture.trade.api
                     positions.Add(position);
                 }
             }
-            else
-            {
-                Logger.Log("QueryPositions：" + ApiHelper.ParseErrInfo(position.ErrorInfo));
-            }
             return positions;
         }
 
@@ -154,11 +150,6 @@ namespace NineSunScripture.trade.api
                     order.OrderId = temp[i, 7];
                     orders.Add(order);
                 }
-            }
-            else
-            {
-                Logger.Log("QueryTodayTransaction接口调用异常：" +
-                    ApiHelper.ParseErrInfo(order.ErrorInfo));
             }
 
             return orders;

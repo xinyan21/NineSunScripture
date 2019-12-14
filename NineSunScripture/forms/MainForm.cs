@@ -226,7 +226,7 @@ namespace NineSunScripture
         public void AddStock(Quotes quotes)
         {
             stockDbHelper.AddStock(quotes);
-            runtimeInfo = "新增股票"+quotes.Name;
+            runtimeInfo = "新增股票" + quotes.Name;
             InvokeAddRunInfo();
             refreshStocksListView();
             RebootStrategy();
@@ -299,7 +299,7 @@ namespace NineSunScripture
             }
         }
 
-        public void OnTradeResult(int rspCode, string msg, string errInfo)
+        public void OnTradeResult(int rspCode, string msg, string errInfo, bool needReboot)
         {
             if (rspCode > 0)
             {
@@ -309,9 +309,16 @@ namespace NineSunScripture
             }
             else
             {
+                if (string.IsNullOrEmpty(errInfo) && !string.IsNullOrEmpty(msg))
+                {
+                    errInfo = msg;
+                }
                 runtimeInfo = msg + ">失败，错误信息：" + errInfo;
                 InvokeAddRunInfo();
-                InvokeRebootStrategy();
+                if (needReboot)
+                {
+                    InvokeRebootStrategy();
+                }
             }
             Logger.Log(runtimeInfo);
         }

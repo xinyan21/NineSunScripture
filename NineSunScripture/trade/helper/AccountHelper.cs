@@ -58,27 +58,28 @@ namespace NineSunScripture.trade.helper
             if (priceSessionId > 0)
             {
                 mainAcct.PriceSessionId = priceSessionId;
-                callback.OnTradeResult(1, "行情登录成功", "");
+                callback.OnTradeResult(1, "行情登录成功", "", false);
             }
             else if (null != callback)
             {
-                callback.OnTradeResult(0, "行情登录失败", ApiHelper.ParseErrInfo(mainAcct.ErrorInfo));
+                string errInfo = ApiHelper.ParseErrInfo(mainAcct.ErrorInfo);
+                callback.OnTradeResult(0, "行情登录失败", errInfo, true);
             }
             List<Account> loginAccts = new List<Account>();
             foreach (Account account in dbAccounts)
             {
                 //TODO 新版本加了营业部ID，后面看要不要加到数据库
-                int sessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
+                int tradeSessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
                     account.BrokerServerPort, account.VersionOfTHS, 0, account.AcctType,
                     account.FundAcct, account.FundPassword, account.CommPwd,
                     account.IsRandomMac, account.ErrorInfo);
                 string opLog = "";
-                if (sessionId > 0)
+                if (tradeSessionId > 0)
                 {
-                    account.TradeSessionId = sessionId;
-                    account.Funds = TradeAPI.QueryFunds(sessionId);
-                    account.Positions = TradeAPI.QueryPositions(sessionId);
-                    account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(sessionId);
+                    account.TradeSessionId = tradeSessionId;
+                    account.Funds = TradeAPI.QueryFunds(tradeSessionId);
+                    account.Positions = TradeAPI.QueryPositions(tradeSessionId);
+                    account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(tradeSessionId);
                     if (account.InitTotalAsset == 0)
                     {
                         account.InitTotalAsset = (int)account.Funds.TotalAsset;
@@ -99,7 +100,7 @@ namespace NineSunScripture.trade.helper
                         }
                     }
                     loginAccts.Add(account);
-                    opLog = "资金账号【" + account.FundAcct + "】登录成功，ID为" + sessionId;
+                    opLog = "资金账号【" + account.FundAcct + "】登录成功，ID为" + tradeSessionId;
                     Logger.Log(opLog);
                 }
                 else
@@ -110,7 +111,8 @@ namespace NineSunScripture.trade.helper
                 }
                 if (null != callback)
                 {
-                    callback.OnTradeResult(sessionId, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                    string errInfo = ApiHelper.ParseErrInfo(account.ErrorInfo);
+                    callback.OnTradeResult(tradeSessionId, opLog, errInfo, false);
                 }
             }
             return loginAccts;
@@ -168,7 +170,7 @@ namespace NineSunScripture.trade.helper
         /// </summary>
         /// <param name="accounts">账户数组</param>
         /// <returns></returns>
-        public static List<Position> QueryPositions(List<Account> accounts)
+        public static List<Position> QueryTotalPositions(List<Account> accounts)
         {
             List<Position> positions = new List<Position>();
             List<Position> allPositions = new List<Position>(); //所有账户持仓原始数据
@@ -193,7 +195,7 @@ namespace NineSunScripture.trade.helper
                     if (item.Code == item2.Code)
                     {
                         item2.AvailableBalance += item.AvailableBalance;
-                        if (item.AvgCost == 0)
+                        if (item2.AvgCost == 0)
                         {
                             item2.AvgCost = item.AvgCost;
                         }
@@ -203,7 +205,7 @@ namespace NineSunScripture.trade.helper
                         }
                         item2.FrozenQuantity += item.FrozenQuantity;
                         item2.ProfitAndLoss += item.ProfitAndLoss;
-                        if (item.ProfitAndLossPct == 0)
+                        if (item2.ProfitAndLossPct == 0)
                         {
                             item2.ProfitAndLossPct = item.ProfitAndLossPct;
                         }
@@ -227,7 +229,7 @@ namespace NineSunScripture.trade.helper
         public static List<Quotes> QueryPositionStocks(List<Account> accounts)
         {
             List<Quotes> quotes = new List<Quotes>();
-            List<Position> positions = QueryPositions(accounts);
+            List<Position> positions = QueryTotalPositions(accounts);
             Quotes quote;
             foreach (Position position in positions)
             {
@@ -337,7 +339,8 @@ namespace NineSunScripture.trade.helper
                     if (null != callback)
                     {
                         info = "资金账号【" + account.FundAcct + "】" + info;
-                        callback.OnTradeResult(rspCode, info, ApiHelper.ParseErrInfo(order.ErrorInfo));
+                        string errInfo = ApiHelper.ParseErrInfo(item.ErrorInfo);
+                        callback.OnTradeResult(rspCode, info, errInfo, false);
                     }
                 }
             }

@@ -211,7 +211,7 @@ namespace NineSunScripture.strategy
             ApiHelper.SetShareholderAcct(account, quotes, order);
             if (sellRatio > 0)
             {
-                order.Quantity = (int)(order.Quantity * sellRatio);
+                order.Quantity = Utils.FixQuantity((int)(order.Quantity * sellRatio));
             }
             if (order.Quantity == 0)
             {
@@ -223,7 +223,8 @@ namespace NineSunScripture.strategy
             Logger.Log(opLog);
             if (null != callback)
             {
-                callback.OnTradeResult(rspCode, opLog, ApiHelper.ParseErrInfo(account.ErrorInfo));
+                string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
+                callback.OnTradeResult(rspCode, opLog, errInfo, false);
             }
         }
 
@@ -259,12 +260,17 @@ namespace NineSunScripture.strategy
                 }
                 foreach (Position position in positions)
                 {
+                    if (0 == position.AvailableBalance)
+                    {
+                        continue;
+                    }
                     quotes = TradeAPI.QueryQuotes(account.TradeSessionId, position.Code);
                     quotes.Buy2 = quotes.LatestPrice * 0.95f;
                     if (quotes.Buy2 < quotes.LowLimit)
                     {
                         quotes.Buy2 = quotes.LowLimit;
                     }
+                    quotes.Buy2 = Utils.FormatTo2Digits(quotes.Buy2);
 
                     SellByAcct(quotes, account, callback, 1);
                 }

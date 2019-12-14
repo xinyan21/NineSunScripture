@@ -80,5 +80,10 @@ namespace NineSunScripture.util
         {
             return (quantity / 100) * 100;
         }
+
+        public static float FormatTo2Digits(float value)
+        {
+            return (float)Math.Round(value, 2);
+        }
     }
 }

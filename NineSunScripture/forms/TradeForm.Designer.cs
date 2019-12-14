@@ -160,6 +160,7 @@
             this.rbtnOneThird.Name = "rbtnOneThird";
             this.rbtnOneThird.Size = new System.Drawing.Size(60, 29);
             this.rbtnOneThird.TabIndex = 0;
+            this.rbtnOneThird.TabStop = true;
             this.rbtnOneThird.Text = "1/3";
             this.rbtnOneThird.UseVisualStyleBackColor = true;
             this.rbtnOneThird.CheckedChanged += new System.EventHandler(this.rbtnOneThird_CheckedChanged);
@@ -221,6 +222,7 @@
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "TradeForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "买入";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
