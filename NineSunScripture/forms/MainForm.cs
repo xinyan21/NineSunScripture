@@ -226,10 +226,17 @@ namespace NineSunScripture
         public void AddStock(Quotes quotes)
         {
             stockDbHelper.AddStock(quotes);
-            runtimeInfo = "新增股票" + quotes.Name;
+            runtimeInfo = "新增股票【" + quotes.Name+"】";
             InvokeAddRunInfo();
             refreshStocksListView();
-            RebootStrategy();
+            if (mainStrategy.IsTradeTime())
+            {
+                RebootStrategy();
+            }
+            else
+            {
+                UpdateStrategyStocks();
+            }
         }
 
         private void refreshStocksListView()
@@ -243,7 +250,7 @@ namespace NineSunScripture
         /// <summary>
         /// 汇总股票池=常驻+最新，龙头不需要加进去，因为龙头是用来指导卖点的，只有持仓里有才会设置
         /// </summary>
-        private void PutStocksTogether()
+        private void UpdateStrategyStocks()
         {
             stocks.Clear();
             if (latestStocks.Count > 0)
@@ -376,12 +383,22 @@ namespace NineSunScripture
 
                 stocks.Clear();
                 lvStocks.Clear();
+                latestStocks.Clear();
+                longTermStocks.Clear();
+                dragonLeaders.Clear();
 
                 runtimeInfo = "清空股票池";
                 InvokeAddRunInfo();
                 InitLvStocks();
                 refreshStocksListView();
-                RebootStrategy();
+                if (mainStrategy.IsTradeTime())
+                {
+                    RebootStrategy();
+                }
+                else
+                {
+                    UpdateStrategyStocks();
+                }
             }
         }
 
@@ -418,7 +435,14 @@ namespace NineSunScripture
             runtimeInfo = "删除股票" + quotes.Name;
             InvokeAddRunInfo();
             refreshStocksListView();
-            RebootStrategy();
+            if (mainStrategy.IsTradeTime())
+            {
+                RebootStrategy();
+            }
+            else
+            {
+                UpdateStrategyStocks();
+            }
         }
 
         /// <summary>
@@ -470,7 +494,7 @@ namespace NineSunScripture
             runtimeInfo = "策略开始启动";
             InvokeAddRunInfo();
             Logger.Log(runtimeInfo);
-            PutStocksTogether();
+            UpdateStrategyStocks();
             mainStrategy.UpdateStocks(stocks);
             bool isStarted = mainStrategy.Start();
             if (!isStarted)

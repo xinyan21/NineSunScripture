@@ -64,6 +64,27 @@ namespace NineSunScripture.util.log
         }
         #endregion
 
+        #region 行情日志
+        /// <summary>
+        /// 行情日志
+        /// </summary>
+        /// <param name="message">日志内容</param>
+        /// <param name="args">字符串格式化参数</param>
+        public static void Quotes(string message, params object[] args)
+        {
+            var sf = new StackTrace(true).GetFrame(1);
+            var logMessage = new LogMessage
+            {
+                Level = LogLevel.Quotes,
+                Message = string.Format(Regex.Replace(
+                    message?.Replace("{", "{{").Replace("}", "}}") ?? "", @"{{(\d+)}}", "{$1}"), args),
+                StackFrame = sf
+            };
+            _que.Enqueue(logMessage);
+            _mre.Set();
+        }
+        #endregion
+
         #region 错误日志
         /// <summary>
         /// 错误日志
@@ -145,10 +166,12 @@ namespace NineSunScripture.util.log
             //获取物理路径
             var infoDir = GetPhysicalPath(ConfigurationManager.AppSettings["logInfo"] ?? @"Logs\Info");
             var errorDir = GetPhysicalPath(ConfigurationManager.AppSettings["logError"] ?? @"Logs\Error");
+            var quotesDir = GetPhysicalPath(@"Logs\Quotes");
             //根据当天日期创建日志文件
             var fileName = $"{DateTime.Now.ToString("yyyy-MM-dd")}.log";
             var infoPath = infoDir + fileName;
             var errorPath = errorDir + fileName;
+            var quotesPath = quotesDir + fileName;
             try
             {
                 //进入写锁
@@ -159,6 +182,7 @@ namespace NineSunScripture.util.log
                 //创建StreamWriter
                 StreamWriter swInfo = null;
                 StreamWriter swError = null;
+                StreamWriter swQuotes = null;
                 if (_que?.ToList().Exists(o => o.Level == LogLevel.Info) == true)
                 {
                     swInfo = new StreamWriter(infoPath, true, Encoding.UTF8);
@@ -167,10 +191,21 @@ namespace NineSunScripture.util.log
                 {
                     swError = new StreamWriter(errorPath, true, Encoding.UTF8);
                 }
+                if (_que?.ToList().Exists(o => o.Level == LogLevel.Quotes) == true)
+                {
+                    swQuotes = new StreamWriter(quotesPath, true, Encoding.UTF8);
+                }
                 //判断日志队列中是否有内容，从列队中获取内容，并删除列队中的内容
                 while (_que?.Count > 0 && _que.TryDequeue(out LogMessage logMessage))
                 {
                     var sf = logMessage.StackFrame;
+                    //Quotes
+                    if (swQuotes != null && logMessage.Level == LogLevel.Quotes)
+                    {
+                        string msg
+                            = DateTime.Now.ToString("HH: mm: ss.ffff") + $"：{logMessage.Message}";
+                        swQuotes.WriteLine(msg);
+                    }
                     //Info
                     if (swInfo != null && logMessage.Level == LogLevel.Info)
                     {
@@ -254,7 +289,8 @@ namespace NineSunScripture.util.log
         private enum LogLevel
         {
             Info,
-            Error
+            Error,
+            Quotes
         }
 
         /// <summary>

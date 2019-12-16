@@ -58,12 +58,12 @@ namespace NineSunScripture.trade.helper
             if (priceSessionId > 0)
             {
                 mainAcct.PriceSessionId = priceSessionId;
-                callback.OnTradeResult(1, "行情登录成功", "", false);
+                callback.OnTradeResult(1, "行情登录", "", false);
             }
             else if (null != callback)
             {
                 string errInfo = ApiHelper.ParseErrInfo(mainAcct.ErrorInfo);
-                callback.OnTradeResult(0, "行情登录失败", errInfo, true);
+                callback.OnTradeResult(0, "行情登录", errInfo, true);
             }
             List<Account> loginAccts = new List<Account>();
             foreach (Account account in dbAccounts)
@@ -112,7 +112,7 @@ namespace NineSunScripture.trade.helper
                 if (null != callback)
                 {
                     string errInfo = ApiHelper.ParseErrInfo(account.ErrorInfo);
-                    callback.OnTradeResult(tradeSessionId, opLog, errInfo, false);
+                    callback.OnTradeResult(tradeSessionId, opLog, errInfo, true);
                 }
             }
             return loginAccts;

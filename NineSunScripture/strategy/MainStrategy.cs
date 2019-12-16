@@ -209,7 +209,7 @@ namespace NineSunScripture.strategy
             }
         }
 
-        private bool IsTradeTime()
+        public bool IsTradeTime()
         {
             if (DateTime.Now.Hour < 9 || DateTime.Now.Hour > 14)
             {

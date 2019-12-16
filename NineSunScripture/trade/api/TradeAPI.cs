@@ -81,6 +81,7 @@ namespace NineSunScripture.trade.api
         {
             Funds funds = new Funds();
             int code = QueryData(sessionId, 0, funds.Result, funds.ErrorInfo);
+            ApiHelper.HandleTimeOut(funds.ErrorInfo);
             if (code > 0)
             {
                 String[] temp = ApiHelper.ParseResult(funds.Result);
@@ -91,6 +92,7 @@ namespace NineSunScripture.trade.api
             }
             else
             {
+                //NO DATA
                 Logger.Log("QueryFunds：" + ApiHelper.ParseErrInfo(funds.ErrorInfo));
             }
             return funds;
@@ -104,11 +106,13 @@ namespace NineSunScripture.trade.api
         public static List<Position> QueryPositions(int sessionId)
         {
             List<Position> positions = new List<Position>();
-            Position position = new Position();
-            int code = QueryData(sessionId, 1, position.Result, position.ErrorInfo);
+            Position position = null;
+            Position resultPosition = new Position();
+            int code = QueryData(sessionId, 1, resultPosition.Result, resultPosition.ErrorInfo);
+            ApiHelper.HandleTimeOut(resultPosition.ErrorInfo);
             if (code > 0)
             {
-                String[,] temp = ApiHelper.ParseResults(position.Result);
+                String[,] temp = ApiHelper.ParseResults(resultPosition.Result);
                 for (int i = 0; i < temp.GetLength(0); i++)
                 {
                     position = new Position();
@@ -136,10 +140,12 @@ namespace NineSunScripture.trade.api
         {
             List<Order> orders = new List<Order>();
             Order order = new Order();
-            int code = QueryData(sessionId, 3, order.Result, order.ErrorInfo);
+            Order resultOrder = new Order();
+            int code = QueryData(sessionId, 3, resultOrder.Result, resultOrder.ErrorInfo);
+            ApiHelper.HandleTimeOut(resultOrder.ErrorInfo);
             if (code > 0)
             {
-                String[,] temp = ApiHelper.ParseResults(order.Result);
+                String[,] temp = ApiHelper.ParseResults(resultOrder.Result);
                 for (int i = 0; i < temp.GetLength(0); i++)
                 {
                     order = new Order();
@@ -164,11 +170,13 @@ namespace NineSunScripture.trade.api
         public static List<Order> QueryOrdersCanCancel(int sessionId)
         {
             List<Order> orders = new List<Order>();
-            Order order = new Order();
-            int code = QueryData(sessionId, 4, order.Result, order.ErrorInfo);
+            Order resultOrder = new Order();
+            Order order = null;
+            int code = QueryData(sessionId, 4, resultOrder.Result, resultOrder.ErrorInfo);
+            ApiHelper.HandleTimeOut(resultOrder.ErrorInfo);
             if (code > 0)
             {
-                String[,] temp = ApiHelper.ParseResults(order.Result);
+                String[,] temp = ApiHelper.ParseResults(resultOrder.Result);
                 for (int i = 0; i < temp.GetLength(0); i++)
                 {
                     order = new Order();
@@ -186,7 +194,6 @@ namespace NineSunScripture.trade.api
                     orders.Add(order);
                 }
             }
-
             return orders;
         }
 
@@ -216,6 +223,7 @@ namespace NineSunScripture.trade.api
             {
                 Logger.Log("QueryShareHolderAccts：" + ApiHelper.ParseErrInfo(account.ErrorInfo));
             }
+            ApiHelper.HandleTimeOut(account.ErrorInfo);
             return accounts;
         }
 
@@ -294,6 +302,7 @@ namespace NineSunScripture.trade.api
         {
             int rspId = SendOrder(order.TradeSessionId, Order.CategoryBuy, order.ShareholderAcct,
                 order.Code, order.Price, order.Quantity, order.Result, order.ErrorInfo);
+            ApiHelper.HandleTimeOut(order.ErrorInfo);
             return rspId;
         }
 
@@ -306,6 +315,7 @@ namespace NineSunScripture.trade.api
         {
             int rspId = SendOrder(order.TradeSessionId, Order.CategorySell, order.ShareholderAcct,
                 order.Code, order.Price, order.Quantity, order.Result, order.ErrorInfo);
+            ApiHelper.HandleTimeOut(order.ErrorInfo);
             return rspId;
         }
 
@@ -316,8 +326,10 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int CancelOrder(Order order)
         {
-            return CancelOrder(order.TradeSessionId, order.ShareholderAcct,
+            int rspId = CancelOrder(order.TradeSessionId, order.ShareholderAcct,
                 order.OrderId, order.Result, order.ErrorInfo);
+            ApiHelper.HandleTimeOut(order.ErrorInfo);
+            return rspId;
         }
     }
 }

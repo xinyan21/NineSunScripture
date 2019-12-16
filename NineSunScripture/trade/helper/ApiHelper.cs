@@ -41,7 +41,7 @@ namespace NineSunScripture.trade.helper
         {
             String result = Encoding.Default.GetString(data).TrimEnd('\0');
             result = result.Substring(result.IndexOf("\n") + 1);
-            String[] rows = result.Split(new String[] { "\n" }, 
+            String[] rows = result.Split(new String[] { "\n" },
                 StringSplitOptions.RemoveEmptyEntries);
             int cols = rows[0].Split(new String[] { "\t" },
                 StringSplitOptions.RemoveEmptyEntries).Length;
@@ -91,6 +91,23 @@ namespace NineSunScripture.trade.helper
             else
             {
                 order.ShareholderAcct = account.SzShareholderAcct;
+            }
+        }
+
+        /// <summary>
+        /// 处理接口超时问题，若超时抛出异常，主策略捕获后重启策略
+        /// </summary>
+        /// <param name="errInfo">错误源数据</param>
+        public static void HandleTimeOut(byte[] errInfo)
+        {
+            if (null == errInfo)
+            {
+                return;
+            }
+            string strErr = ParseErrInfo(errInfo);
+            if (!string.IsNullOrEmpty(strErr) && strErr.Contains("超时"))
+            {
+                throw new Exception(strErr);
             }
         }
     }

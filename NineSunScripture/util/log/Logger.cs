@@ -45,9 +45,13 @@ namespace NineSunScripture.util.log
         /// <param name="logType">Log type</param>
         public static void Log(string logContent, LogType logType = LogType.Info)
         {
-            if (LogType.Error==logType)
+            if (LogType.Error == logType)
             {
                 MultiThreadLogger.Error(logContent);
+            }
+            else if (LogType.Quotes == logType)
+            {
+                MultiThreadLogger.Quotes(logContent);
             }
             else
             {
