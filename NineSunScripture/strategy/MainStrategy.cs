@@ -98,7 +98,7 @@ namespace NineSunScripture.strategy
                     {
                         quotes = PriceAPI.QueryTenthGearPrice(
                             mainAcct.PriceSessionId, mainAcct.TradeSessionId, stocks[i].Code);
-                        //Utils.SamplingLogQuotes(quotes);
+                        Utils.SamplingLogQuotes(quotes);
                         if (quotes.LatestPrice == 0)
                         {
                             Logger.Log(quotes.ToString(), LogType.Quotes);

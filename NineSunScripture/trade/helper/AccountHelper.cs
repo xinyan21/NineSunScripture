@@ -157,10 +157,24 @@ namespace NineSunScripture.trade.helper
                     position = new Position();
                 }
                 position.AvailableBalance += temp.AvailableBalance;
-                position.AvgCost = (position.AvgCost + temp.AvgCost) / 2;
+                if (0 == position.AvgCost)
+                {
+                    position.AvgCost = temp.AvgCost;
+                }
+                else
+                {
+                    position.AvgCost = (position.AvgCost + temp.AvgCost) / 2;
+                }
                 position.FrozenQuantity += temp.FrozenQuantity;
                 position.ProfitAndLoss += temp.ProfitAndLoss;
-                position.ProfitAndLossPct = (position.ProfitAndLossPct + temp.ProfitAndLossPct) / 2;
+                if (0 == position.ProfitAndLossPct)
+                {
+                    position.ProfitAndLossPct = temp.ProfitAndLossPct;
+                }
+                else
+                {
+                    position.ProfitAndLossPct = (position.ProfitAndLossPct + temp.ProfitAndLossPct) / 2;
+                }
             }
             return position;
         }

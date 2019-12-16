@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using NineSunScripture.model;
 using NineSunScripture.trade.helper;
 using NineSunScripture.util.log;
+using NineSunScripture.util;
 
 namespace NineSunScripture.trade.api
 {
@@ -219,7 +220,7 @@ namespace NineSunScripture.trade.api
         }
 
         /// <summary>
-        ///  查询券商交易自带行情（交易行情数据问题很多，一天这个方法要崩好多次）
+        ///  查询券商交易自带行情（交易行情数据问题很多，这个方法一天要崩好多次）
         /// </summary>
         /// <param name="tradeSessionId">交易会话id</param>
         /// <param name="code">股票代码</param>
@@ -272,12 +273,15 @@ namespace NineSunScripture.trade.api
                 {
                     Logger.Log("QueryQuotes解析异常：" + ApiHelper.ParseErrInfo(quotes.Result));
                     Logger.Exception(e, ApiHelper.ParseErrInfo(quotes.Result));
+                    throw e;
                 }
             }
             else
             {
                 Logger.Log("QueryQuotes：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
+                throw new Exception(ApiHelper.ParseErrInfo(quotes.ErrorInfo));
             }
+            Utils.SamplingLogQuotes(quotes);
             return quotes;
         }
 
