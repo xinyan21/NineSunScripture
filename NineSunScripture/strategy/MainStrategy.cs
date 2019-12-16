@@ -5,10 +5,7 @@ using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NineSunScripture.strategy
@@ -21,20 +18,21 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public const bool IsTest = false;
+        public const bool IsTest = true;
         private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
         private const int SleepIntervalOfTrade = 200;
 
         private int sleepInterval = SleepIntervalOfTrade;
-        private int tryLoginCnt = 0;
-        private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
+        //private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
         private short fundUpdateCtrl = 0;
 
         private Account mainAcct;
         private List<Account> accounts;
-        private List<Quotes> stocks;
-        private Thread mainThread;
+        //stocks是供买入的股票池，stocksForPrice是用来查询行情的股票池（包括卖的）
+        private List<Quotes> stocksToBuy, stocksForPrice;
+        private List<Quotes> dragonLeaders;
+        private Thread strategyThread;
         private BuyStrategy buyStrategy;
         private SellStrategy sellStrategy;
         private ITrade callback;
@@ -44,7 +42,8 @@ namespace NineSunScripture.strategy
 
         public MainStrategy()
         {
-            this.stocks = new List<Quotes>();
+            this.stocksToBuy = new List<Quotes>();
+            this.stocksForPrice = new List<Quotes>();
             this.buyStrategy = new BuyStrategy();
             this.sellStrategy = new SellStrategy();
             this.isHoliday = Utils.IsHolidayByDate(DateTime.Now);
@@ -55,22 +54,28 @@ namespace NineSunScripture.strategy
             accounts = AccountHelper.Login(callback);
             if (null == accounts || accounts.Count == 0)
             {
-                MessageBox.Show("没有可操作的账户");
+                callback.OnTradeResult(0, "策略启动", "没有可操作的账户", false);
                 return;
             }
             UpdateFundsInfo(false);
             if (isHoliday && !IsTest)
             {
+                callback.OnTradeResult(0, "策略启动", "现在是假期", false);
                 return;
             }
             List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
             foreach (Quotes item in positionStocks)
             {
+                //龙头只有持仓里可能有
+                if (null != dragonLeaders && dragonLeaders.Contains(item))
+                {
+                    item.IsDragonLeader = true;
+                }
                 //如果股票池里有持仓股说明可以继续做，没有就不能做InPosition要设置成true
-                if (!stocks.Contains(item))
+                if (!stocksForPrice.Contains(item))
                 {
                     item.InPosition = true;
-                    stocks.Add(item);
+                    stocksForPrice.Add(item);
                 }
             }
             mainAcct = accounts[0];
@@ -87,28 +92,35 @@ namespace NineSunScripture.strategy
                     }
                     continue;
                 }
-                if (null == stocks || stocks.Count == 0)
+                if (null == stocksForPrice || stocksForPrice.Count == 0)
                 {
+                    Logger.Log("No stocks to Query");
                     continue;
                 }
-                Quotes quotes;
-                for (int i = 0; i < stocks.Count; i++)
+                Quotes quotes = null;
+                for (int i = 0; i < stocksForPrice.Count; i++)
                 {
                     try
                     {
                         quotes = PriceAPI.QueryTenthGearPrice(
-                            mainAcct.PriceSessionId, mainAcct.TradeSessionId, stocks[i].Code);
+                            mainAcct.PriceSessionId, mainAcct.TradeSessionId, stocksForPrice[i].Code);
                         Utils.SamplingLogQuotes(quotes);
-                        if (quotes.LatestPrice == 0)
+                        if (quotes.LatestPrice == 0 || string.IsNullOrEmpty(quotes.Name))
                         {
                             Logger.Log(quotes.ToString(), LogType.Quotes);
                             isWorkingRight = false;
-                            callback.OnTradeResult(0, "策略执行发生异常", "行情接口返回0", true);
+                            callback.OnTradeResult(0, "策略执行发生异常", "行情接口异常", true);
                             return;
                         }
-                        SetBuyPlan(quotes);
-                        buyStrategy.Buy(quotes, accounts, callback);
-                        sellStrategy.Sell(quotes, accounts, callback);
+                        SetTradeParams(quotes);
+                        if (positionStocks.Contains(quotes))
+                        {
+                            sellStrategy.Sell(quotes, accounts, callback);
+                        }
+                        if (stocksToBuy.Contains(quotes))
+                        {
+                            buyStrategy.Buy(quotes, accounts, callback);
+                        }
                     }
                     catch (ThreadAbortException)
                     {
@@ -118,10 +130,7 @@ namespace NineSunScripture.strategy
                     {
                         isWorkingRight = false;
                         Logger.Exception(e);
-                        if (null != callback)
-                        {
-                            callback.OnTradeResult(0, "策略执行发生异常", e.Message, true);
-                        }
+                        callback.OnTradeResult(0, "策略执行发生异常", e.Message, true);
                     }
                     finally
                     {
@@ -144,15 +153,15 @@ namespace NineSunScripture.strategy
 
         public bool Start()
         {
-            mainThread = new Thread(Process);
-            mainThread.Start();
+            strategyThread = new Thread(Process);
+            strategyThread.Start();
 
             return true;
         }
 
         public void Stop()
         {
-            mainThread.Abort();
+            strategyThread.Abort();
             if (null != accounts && accounts.Count > 0)
             {
                 PriceAPI.HQ_Logoff(accounts[0].PriceSessionId);
@@ -168,14 +177,16 @@ namespace NineSunScripture.strategy
         /// 设置买入计划，以便在买策略里面直接拿到仓位和成交量限制值
         /// </summary>
         /// <param name="quotes">行情对象</param>
-        private void SetBuyPlan(Quotes quotes)
+        private void SetTradeParams(Quotes quotes)
         {
-            foreach (Quotes item in stocks)
+            foreach (Quotes item in stocksToBuy)
             {
                 if (item.Code == quotes.Code)
                 {
                     quotes.PositionCtrl = item.PositionCtrl;
                     quotes.MoneyCtrl = item.MoneyCtrl;
+                    quotes.InPosition = item.InPosition;
+                    quotes.IsDragonLeader = item.IsDragonLeader;
                     break;
                 }
             }
@@ -273,8 +284,8 @@ namespace NineSunScripture.strategy
 
         public void UpdateStocks(List<Quotes> quotes)
         {
-            this.stocks.Clear();
-            this.stocks.AddRange(quotes);
+            this.stocksToBuy.Clear();
+            this.stocksToBuy.AddRange(quotes);
         }
 
         public void SetFundListener(IAcctInfoListener fundListener)
@@ -295,6 +306,11 @@ namespace NineSunScripture.strategy
         public List<Account> GetAccounts()
         {
             return accounts;
+        }
+
+        public void SetDragonLeaders(List<Quotes> dragonLeaders)
+        {
+            this.dragonLeaders = dragonLeaders;
         }
     }
 }

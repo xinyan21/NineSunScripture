@@ -6,8 +6,6 @@ using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.strategy
 {
@@ -77,6 +75,16 @@ namespace NineSunScripture.strategy
             }
             DateTime now = DateTime.Now;
             float avgCost = position.AvgCost;
+            //龙头单独卖
+            if (quotes.IsDragonLeader)
+            {
+                if (now.Minute >= 55 && curPrice < highLimit)
+                {
+                    Logger.Log("收盘不板卖" + quotes.Name);
+                    SellByRatio(quotes, accounts, callback, 1);
+                }
+                return;
+            }
             if (open != highLimit)
             {
                 StopWin(quotes, accounts, callback);
@@ -86,11 +94,13 @@ namespace NineSunScripture.strategy
                     {
                         Logger.Log("超低开拉升4%卖" + quotes.Name);
                         SellByRatio(quotes, accounts, callback, 1);
+                        return;
                     }
                     if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * TooWeakRatio)
                     {
                         Logger.Log("超低开10:10还小于-5%卖" + quotes.Name);
                         SellByRatio(quotes, accounts, callback, 1);
+                        return;
                     }
                 }
                 else
@@ -99,6 +109,7 @@ namespace NineSunScripture.strategy
                     {
                         Logger.Log("小于-8%卖" + quotes.Name);
                         SellByRatio(quotes, accounts, callback, 1);
+                        return;
                     }
                 }
             }
@@ -108,10 +119,12 @@ namespace NineSunScripture.strategy
             {
                 Logger.Log("开板卖" + quotes.Name);
                 SellByRatio(quotes, accounts, callback, 1);
+                return;
             }
             if (curPrice == highLimit)
             {
                 SellIfSealDecrease(accounts, quotes, callback);
+                return;
             }
             if (now.Hour == 14)
             {
@@ -119,16 +132,19 @@ namespace NineSunScripture.strategy
                 {
                     Logger.Log("2:00小于1%卖" + quotes.Name);
                     SellByRatio(quotes, accounts, callback, 1);
+                    return;
                 }
                 if (now.Minute >= 30 && curPrice <= preClose * GoodByeRatio)
                 {
                     Logger.Log("2:30小于5%卖" + quotes.Name);
                     SellByRatio(quotes, accounts, callback, 1);
+                    return;
                 }
                 if (now.Minute >= 55 && curPrice < highLimit)
                 {
                     Logger.Log("收盘不板卖" + quotes.Name);
                     SellByRatio(quotes, accounts, callback, 1);
+                    return;
                 }
             }
         }
@@ -145,13 +161,15 @@ namespace NineSunScripture.strategy
         {
             foreach (Account account in accounts)
             {
-                List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
+                List<Order> todayTransactions 
+                    = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
                 bool isSoldToday = false;
                 if (todayTransactions.Count > 0)
                 {
                     foreach (Order order in todayTransactions)
                     {
-                        if (order.Code == quotes.Code && order.Operation.Contains(Order.OperationSell))
+                        if (order.Code == quotes.Code 
+                            && order.Operation.Contains(Order.OperationSell))
                         {
                             isSoldToday = true;
                             break;
@@ -235,7 +253,8 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
         /// <param name="sellRatio">卖出比例</param>
-        public static void SellByRatio(Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
+        public static void SellByRatio(
+            Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
         {
             foreach (Account account in accounts)
             {

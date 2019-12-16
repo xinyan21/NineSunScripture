@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using NineSunScripture.trade.api;
-using NineSunScripture.model;
+﻿using NineSunScripture.db;
 using NineSunScripture.forms;
-using NineSunScripture.trade.helper;
+using NineSunScripture.model;
 using NineSunScripture.strategy;
-using NineSunScripture.db;
-using NineSunScripture.util.log;
-using System.Threading;
-using NineSunScripture.util.test;
+using NineSunScripture.trade.helper;
 using NineSunScripture.util;
+using NineSunScripture.util.log;
+using NineSunScripture.util.test;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace NineSunScripture
 {
@@ -28,11 +21,11 @@ namespace NineSunScripture
         private List<Quotes> longTermStocks;
         private List<Quotes> dragonLeaders;
         private List<Quotes> latestStocks;
-        private bool isStrategyStarted = false;
         private StockDbHelper stockDbHelper;
         private Account account;//用来临时保存总账户信息
-        private string runtimeInfo;
         private Image imgTaiJi;
+        private bool isStrategyStarted = false;
+        private string runtimeInfo;
         private int rotateDegree = 0;
 
         public MainForm()
@@ -47,13 +40,16 @@ namespace NineSunScripture
             mainStrategy.SetTradeCallback(this);
             mainStrategy.SetShowWorkingStatus(this);
             imgTaiJi = Properties.Resources.taiji;
-            new Thread(AutoStartStrategy).Start();
-        }
 
-        private void AutoStartStrategy()
-        {
-            Thread.Sleep(3000);
-            InvokeRebootStrategy();
+            //Start strategy
+            mainStrategy.UpdateStocks(stocks);
+            bool isStarted = mainStrategy.Start();
+            if (!isStarted)
+            {
+                return;
+            }
+            tsmiSwitch.Text = "停止";
+            isStrategyStarted = true;
         }
 
         private void InitializeListViews()
@@ -61,7 +57,6 @@ namespace NineSunScripture
             InitLvStocks();
             InitLvPositions();
             InitLvCancelOrders();
-
 
             ImageList imgList = new ImageList();
             imgList.ImageSize = new Size(1, 32);//分别是宽和高
@@ -248,7 +243,7 @@ namespace NineSunScripture
         }
 
         /// <summary>
-        /// 汇总股票池=常驻+最新，龙头不需要加进去，因为龙头是用来指导卖点的，只有持仓里有才会设置
+        /// 汇总股票池
         /// </summary>
         private void UpdateStrategyStocks()
         {
@@ -267,9 +262,13 @@ namespace NineSunScripture
                     }
                 }
             }
-            else if (longTermStocks.Count > 0)
+            if (longTermStocks.Count > 0)
             {
                 stocks.AddRange(longTermStocks);
+            }
+            if (dragonLeaders.Count>0)
+            {
+                mainStrategy.SetDragonLeaders(dragonLeaders);
             }
 
             mainStrategy.UpdateStocks(stocks);
@@ -483,7 +482,6 @@ namespace NineSunScripture
             {
                 runtimeInfo = "策略开始停止";
                 InvokeAddRunInfo();
-                Logger.Log(runtimeInfo);
                 mainStrategy.Stop();
                 tsmiSwitch.Text = "启动";
                 isStrategyStarted = false;
@@ -493,7 +491,6 @@ namespace NineSunScripture
             }
             runtimeInfo = "策略开始启动";
             InvokeAddRunInfo();
-            Logger.Log(runtimeInfo);
             UpdateStrategyStocks();
             mainStrategy.UpdateStocks(stocks);
             bool isStarted = mainStrategy.Start();
@@ -502,7 +499,6 @@ namespace NineSunScripture
                 string log = "策略启动失败";
                 runtimeInfo = log;
                 InvokeAddRunInfo();
-                Logger.Log(log);
                 return;
             }
             tsmiSwitch.Text = "停止";
