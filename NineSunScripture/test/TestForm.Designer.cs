@@ -34,6 +34,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.lblTenthGearPrice = new System.Windows.Forms.Label();
             this.btnTenthGearPrice = new System.Windows.Forms.Button();
+            this.btnTestRRB = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnTestBuy
@@ -84,6 +85,16 @@
             this.btnTenthGearPrice.UseVisualStyleBackColor = true;
             this.btnTenthGearPrice.Click += new System.EventHandler(this.btnTenthGearPrice_Click);
             // 
+            // btnTestRRB
+            // 
+            this.btnTestRRB.Location = new System.Drawing.Point(40, 262);
+            this.btnTestRRB.Name = "btnTestRRB";
+            this.btnTestRRB.Size = new System.Drawing.Size(155, 46);
+            this.btnTestRRB.TabIndex = 5;
+            this.btnTestRRB.Text = "测试逆回购";
+            this.btnTestRRB.UseVisualStyleBackColor = true;
+            this.btnTestRRB.Click += new System.EventHandler(this.btnTestRRB_Click);
+            // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -91,6 +102,7 @@
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(778, 669);
+            this.Controls.Add(this.btnTestRRB);
             this.Controls.Add(this.btnTenthGearPrice);
             this.Controls.Add(this.lblTenthGearPrice);
             this.Controls.Add(this.button2);
@@ -114,5 +126,6 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label lblTenthGearPrice;
         private System.Windows.Forms.Button btnTenthGearPrice;
+        private System.Windows.Forms.Button btnTestRRB;
     }
 }

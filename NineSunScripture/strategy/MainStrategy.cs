@@ -18,7 +18,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public const bool IsTest = true;
+        public const bool IsTest = false;
         private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
         private const int SleepIntervalOfTrade = 200;
@@ -94,7 +94,6 @@ namespace NineSunScripture.strategy
                     {
                         showWorkingSatus.RotateStatusImg(-1);
                     }
-                    ReverseRepurchaseBonds();
                     continue;
                 }
                 if (null == stocksForPrice || stocksForPrice.Count == 0)
@@ -224,14 +223,14 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 15:25逆回购
+        /// 15:25逆回购【要用专门接口，卖出接口不能逆回购】
         /// </summary>
         private void ReverseRepurchaseBonds()
         {
             if (DateTime.Now.Hour == 15 && DateTime.Now.Minute == 25
                 && !reverseRepurchaseBondsRecords.ContainsKey(DateTime.Now.Date))
             {
-                buyStrategy.AutoReverseRepurchaseBonds(accounts, callback);
+                AccountHelper.AutoReverseRepurchaseBonds(accounts, callback);
                 reverseRepurchaseBondsRecords.Add(DateTime.Now.Date, true);
             }
         }

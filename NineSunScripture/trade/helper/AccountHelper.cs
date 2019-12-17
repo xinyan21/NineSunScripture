@@ -359,5 +359,47 @@ namespace NineSunScripture.trade.helper
                 }
             }
         }
+
+        /// <summary>
+        /// 3:25可用资金自动国债逆回购，只买131810深市一天期，每股100
+        /// 【要用专门接口，卖出接口不能逆回购】
+        /// </summary>
+        /// <param name="accounts"></param>
+        public static void AutoReverseRepurchaseBonds(List<Account> accounts, ITrade callback)
+        {
+            Account mainAcct = null;
+            if (accounts.Count > 0)
+            {
+                mainAcct = accounts[0];
+            }
+            else
+            {
+                return;
+            }
+            Order order = new Order();
+            order.Code = "131810";
+            Quotes quotes = TradeAPI.QueryQuotes(mainAcct.TradeSessionId, order.Code);
+            order.Price = quotes.Buy1;
+            foreach (Account account in accounts)
+            {
+                order.TradeSessionId = account.TradeSessionId;
+                ApiHelper.SetShareholderAcct(account, quotes, order);
+                double availableCash = account.Funds.AvailableAmt;
+                order.Quantity = (int)(availableCash / 1000 * 10);
+                if (order.Quantity == 0)
+                {
+                    continue;
+                }
+                int rspCode = TradeAPI.Sell(order);
+                string opLog = "资金账号【" + account.FundAcct + "】" + "逆回购"
+                    + (int)(availableCash / 1000) * 1000 + "元";
+                Logger.Log(opLog);
+                if (null != callback)
+                {
+                    string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
+                    callback.OnTradeResult(rspCode, opLog, errInfo, false);
+                }
+            }//END FOR
+        }//END METHOD
     }
 }

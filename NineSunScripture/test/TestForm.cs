@@ -67,5 +67,10 @@ namespace NineSunScripture.util.test
             sb.Append("买三 ").Append(quotes.Buy3).Append(" ").Append(quotes.Buy3Vol).Append("\n");
             lblTenthGearPrice.Text = sb.ToString();
         }
+
+        private void btnTestRRB_Click(object sender, EventArgs e)
+        {
+            AccountHelper.AutoReverseRepurchaseBonds(accounts, null);
+        }
     }
 }
