@@ -28,6 +28,10 @@ namespace NineSunScripture.strategy
         /// 最大买一额限制默认是1500万
         /// </summary>
         private const int MaxBuy1MoneyCtrl = 1500;
+        /// <summary>
+        /// 单账户最小可用金额默认为5000
+        /// </summary>
+        private const int MinTotalAvailableAmt = 5000;
         private Dictionary<string, DateTime> openBoardTime = new Dictionary<string, DateTime>();
         private Dictionary<string, Queue<Quotes>> historyTicks
             = new Dictionary<string, Queue<Quotes>>();
@@ -63,7 +67,7 @@ namespace NineSunScripture.strategy
             {
                 lastTickQuotes = ticks[ticks.Length - 2];
             }
-            float positionRatioCtrl = 0.33f;   //买入计划仓位比例
+            float positionRatioCtrl = 0;   //买入计划仓位比例
             //记录开板时间
             bool isBoardLastTick = null != lastTickQuotes && lastTickQuotes.LatestPrice == highLimit;
             bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
@@ -139,7 +143,8 @@ namespace NineSunScripture.strategy
                 }
                 Funds funds = AccountHelper.QueryTotalFunds(accounts);
                 //所有账户总可用金额小于每个账号一手的金额或者小于1万，直接退出
-                if (funds.AvailableAmt < 10000 || funds.AvailableAmt < highLimit * 100 * accounts.Count)
+                if (funds.AvailableAmt < MinTotalAvailableAmt * accounts.Count
+                    || funds.AvailableAmt < highLimit * 100 * accounts.Count)
                 {
                     Logger.Log("【" + quotes.Name + "】触发买点，结束于总金额不够一万或总账户每户一手");
                     return;
@@ -156,7 +161,8 @@ namespace NineSunScripture.strategy
                 foreach (Account account in accounts)
                 {
                     account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
-                    if (funds.AvailableAmt < 5000 || funds.AvailableAmt < highLimit * 100)
+                    if (funds.AvailableAmt < MinTotalAvailableAmt
+                        || funds.AvailableAmt < highLimit * 100)
                     {
                         Logger.Log("【" + quotes.Name + "】触发买点，账户["
                             + account.FundAcct + "]结束于可用金额不够");
@@ -213,7 +219,8 @@ namespace NineSunScripture.strategy
                         {
                             availableCash = account.Funds.TotalAsset * positionRatioCtrl;
                             Logger.Log("【" + quotes.Name + "】触发买点，账户["
-                           + account.FundAcct + "]的买入金额设置为仓位控制后的" + availableCash + "元");
+                           + account.FundAcct + "]的买入金额设置为仓位控制后的"
+                           + availableCash.ToString("0.00####") + "元");
                         }
                         //数量是整百整百的
                         order.Quantity = ((int)(availableCash / (highLimit * 100))) * 100;
@@ -399,12 +406,16 @@ namespace NineSunScripture.strategy
         /// 3:25可用资金自动国债逆回购，只买131810深市一天期，每股100
         /// </summary>
         /// <param name="accounts"></param>
-        private void AutoReverseRepurchaseBonds(List<Account> accounts, ITrade callback)
+        public void AutoReverseRepurchaseBonds(List<Account> accounts, ITrade callback)
         {
             Account mainAcct = null;
             if (accounts.Count > 0)
             {
                 mainAcct = accounts[0];
+            }
+            else
+            {
+                return;
             }
             Order order = new Order();
             order.Code = "131810";
@@ -416,10 +427,13 @@ namespace NineSunScripture.strategy
                 ApiHelper.SetShareholderAcct(account, quotes, order);
                 double availableCash = account.Funds.AvailableAmt;
                 order.Quantity = (int)(availableCash / 1000 * 10);
+                if (order.Quantity == 0)
+                {
+                    continue;
+                }
                 int rspCode = TradeAPI.Buy(order);
-                string opLog
-                    = "资金账号【" + account.FundAcct + "】" + "逆回购"
-                    + (int)(availableCash / 1000) * 1000;
+                string opLog = "资金账号【" + account.FundAcct + "】" + "逆回购"
+                    + (int)(availableCash / 1000) * 1000 + "元";
                 Logger.Log(opLog);
                 if (null != callback)
                 {

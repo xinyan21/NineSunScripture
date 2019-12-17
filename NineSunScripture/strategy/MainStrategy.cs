@@ -24,7 +24,6 @@ namespace NineSunScripture.strategy
         private const int SleepIntervalOfTrade = 200;
 
         private int sleepInterval = SleepIntervalOfTrade;
-        //private bool hasReverseRepurchaseBonds = false; //是否已经逆回购
         private short fundUpdateCtrl = 0;
 
         private Account mainAcct;
@@ -38,7 +37,10 @@ namespace NineSunScripture.strategy
         private ITrade callback;
         private IAcctInfoListener fundListener;
         private IShowWorkingSatus showWorkingSatus;
+        //逆回购记录，使用日期记录以支持不关策略长时间运行
+        private Dictionary<DateTime, bool> reverseRepurchaseBondsRecords;
         private bool isHoliday;
+
 
         public MainStrategy()
         {
@@ -47,6 +49,7 @@ namespace NineSunScripture.strategy
             this.buyStrategy = new BuyStrategy();
             this.sellStrategy = new SellStrategy();
             this.isHoliday = Utils.IsHolidayByDate(DateTime.Now);
+            this.reverseRepurchaseBondsRecords = new Dictionary<DateTime, bool>();
         }
 
         private void Process()
@@ -63,6 +66,7 @@ namespace NineSunScripture.strategy
                 callback.OnTradeResult(0, "策略启动", "现在是假期", false);
                 return;
             }
+            stocksForPrice.AddRange(stocksToBuy);
             List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
             foreach (Quotes item in positionStocks)
             {
@@ -90,6 +94,7 @@ namespace NineSunScripture.strategy
                     {
                         showWorkingSatus.RotateStatusImg(-1);
                     }
+                    ReverseRepurchaseBonds();
                     continue;
                 }
                 if (null == stocksForPrice || stocksForPrice.Count == 0)
@@ -174,22 +179,20 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 设置买入计划，以便在买策略里面直接拿到仓位和成交量限制值
+        /// 设置交易计划，以便在策略里面直接拿到龙头、仓位和成交量限制值
         /// </summary>
         /// <param name="quotes">行情对象</param>
         private void SetTradeParams(Quotes quotes)
         {
-            foreach (Quotes item in stocksToBuy)
+            Quotes source = stocksForPrice.Find(item => item.Code == quotes.Code);
+            if (null == source)
             {
-                if (item.Code == quotes.Code)
-                {
-                    quotes.PositionCtrl = item.PositionCtrl;
-                    quotes.MoneyCtrl = item.MoneyCtrl;
-                    quotes.InPosition = item.InPosition;
-                    quotes.IsDragonLeader = item.IsDragonLeader;
-                    break;
-                }
+                return;
             }
+            quotes.PositionCtrl = source.PositionCtrl;
+            quotes.MoneyCtrl = source.MoneyCtrl;
+            quotes.InPosition = source.InPosition;
+            quotes.IsDragonLeader = source.IsDragonLeader;
         }
 
         /// <summary>
@@ -217,6 +220,19 @@ namespace NineSunScripture.strategy
                 account.Positions = AccountHelper.QueryTotalPositions(accounts);
                 account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
                 fundListener.OnAcctInfoListen(account);
+            }
+        }
+
+        /// <summary>
+        /// 15:25逆回购
+        /// </summary>
+        private void ReverseRepurchaseBonds()
+        {
+            if (DateTime.Now.Hour == 15 && DateTime.Now.Minute == 25
+                && !reverseRepurchaseBondsRecords.ContainsKey(DateTime.Now.Date))
+            {
+                buyStrategy.AutoReverseRepurchaseBonds(accounts, callback);
+                reverseRepurchaseBondsRecords.Add(DateTime.Now.Date, true);
             }
         }
 

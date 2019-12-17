@@ -97,8 +97,8 @@ namespace NineSunScripture.model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("#Code= ").Append(Code);
-            sb.Append("#Name= ").Append(Name);
+            sb.Append("#Code=").Append(Code);
+            sb.Append("#Name=").Append(Name);
             sb.Append("#LatestPrice= ").Append(LatestPrice);
             sb.Append("#Money=").Append(Money);
             sb.Append("#Sell1=").Append(Sell1);

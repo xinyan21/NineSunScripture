@@ -42,7 +42,7 @@ namespace NineSunScripture
             imgTaiJi = Properties.Resources.taiji;
 
             //Start strategy
-            mainStrategy.UpdateStocks(stocks);
+            UpdateStrategyStocks();
             bool isStarted = mainStrategy.Start();
             if (!isStarted)
             {
@@ -221,7 +221,7 @@ namespace NineSunScripture
         public void AddStock(Quotes quotes)
         {
             stockDbHelper.AddStock(quotes);
-            runtimeInfo = "新增股票【" + quotes.Name+"】";
+            runtimeInfo = "新增股票【" + quotes.Name + "】";
             InvokeAddRunInfo();
             refreshStocksListView();
             if (mainStrategy.IsTradeTime())
@@ -262,11 +262,11 @@ namespace NineSunScripture
                     }
                 }
             }
-            if (longTermStocks.Count > 0)
+            else if (longTermStocks.Count > 0)
             {
                 stocks.AddRange(longTermStocks);
             }
-            if (dragonLeaders.Count>0)
+            if (dragonLeaders.Count > 0)
             {
                 mainStrategy.SetDragonLeaders(dragonLeaders);
             }
@@ -326,7 +326,6 @@ namespace NineSunScripture
                     InvokeRebootStrategy();
                 }
             }
-            Logger.Log(runtimeInfo);
         }
 
         /// <summary>
@@ -431,7 +430,7 @@ namespace NineSunScripture
             }
             stockDbHelper.DelStockBy(category, quotes.Code);
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
-            runtimeInfo = "删除股票" + quotes.Name;
+            runtimeInfo = "删除股票【" + quotes.Name+"】";
             InvokeAddRunInfo();
             refreshStocksListView();
             if (mainStrategy.IsTradeTime())

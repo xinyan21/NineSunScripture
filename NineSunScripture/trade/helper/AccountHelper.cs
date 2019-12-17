@@ -100,7 +100,7 @@ namespace NineSunScripture.trade.helper
                         }
                     }
                     loginAccts.Add(account);
-                    opLog = "资金账号【" + account.FundAcct + "】登录成功，ID为" + tradeSessionId;
+                    opLog = "资金账号【" + account.FundAcct + "】登录成功，会话ID为" + tradeSessionId;
                     Logger.Log(opLog);
                 }
                 else

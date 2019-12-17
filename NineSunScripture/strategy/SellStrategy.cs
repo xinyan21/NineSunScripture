@@ -43,6 +43,18 @@ namespace NineSunScripture.strategy
         /// </summary>
         private const float GoodByeRatio = 1.05f;
         /// <summary>
+        /// 封单减少到1500万就开始卖
+        /// </summary>
+        private const int MaxSealMoneyToSell = 1500;
+        /// <summary>
+        /// 封单减少到1000万就清
+        /// </summary>
+        private const int MinSealMoneyToSell = 1000;
+        /// <summary>
+        ///封单开始减少前的金额
+        /// </summary>
+        private const int SealMoneyBeginToDecrease = 3000;
+        /// <summary>
         /// 队列的大小由查询频率控制，保存一分钟的tick数据，主要是供SellIfSealDecrease使用
         /// </summary>
         private Dictionary<string, Queue<Quotes>> historyTicks
@@ -161,14 +173,14 @@ namespace NineSunScripture.strategy
         {
             foreach (Account account in accounts)
             {
-                List<Order> todayTransactions 
+                List<Order> todayTransactions
                     = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
                 bool isSoldToday = false;
                 if (todayTransactions.Count > 0)
                 {
                     foreach (Order order in todayTransactions)
                     {
-                        if (order.Code == quotes.Code 
+                        if (order.Code == quotes.Code
                             && order.Operation.Contains(Order.OperationSell))
                         {
                             isSoldToday = true;
@@ -298,7 +310,7 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 封单减少到2000万卖1/2
+        /// 封单快速减少到1500万卖1/2
         /// </summary>
         /// <param name="accounts">账户列表</param>
         /// <param name="quotes">股票对象</param>
@@ -310,17 +322,18 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            if (ticks.First().Buy1Vol * quotes.HighLimit > 3000 * 10000
-                && ticks.Last().Buy1Vol * quotes.HighLimit < 2000 * 10000)
-            {
-                Logger.Log("封单减少到2000万以下卖1/2" + quotes.Name);
-                SellByRatio(quotes, accounts, callback, 0.5f);
-            }
-            if (ticks.First().Buy1Vol * quotes.HighLimit > 3000 * 10000
-               && ticks.Last().Buy1Vol * quotes.HighLimit < 1000 * 10000)
+            if (ticks.First().Buy1Vol * quotes.HighLimit > SealMoneyBeginToDecrease * 10000
+               && ticks.Last().Buy1Vol * quotes.HighLimit < MinSealMoneyToSell * 10000)
             {
                 Logger.Log("封单减少到1000万以下清" + quotes.Name);
                 SellByRatio(quotes, accounts, callback, 1);
+                return;
+            }
+            if (ticks.First().Buy1Vol * quotes.HighLimit > SealMoneyBeginToDecrease * 10000
+                && ticks.Last().Buy1Vol * quotes.HighLimit < MaxSealMoneyToSell * 10000)
+            {
+                Logger.Log("封单减少到1500万以下卖1/2" + quotes.Name);
+                SellByRatio(quotes, accounts, callback, 0.5f);
             }
         }
     }

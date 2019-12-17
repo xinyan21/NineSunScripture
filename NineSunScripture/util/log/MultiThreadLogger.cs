@@ -179,6 +179,7 @@ namespace NineSunScripture.util.log
                 //判断目录是否存在，不存在则重新创建
                 if (!Directory.Exists(infoDir)) Directory.CreateDirectory(infoDir);
                 if (!Directory.Exists(errorDir)) Directory.CreateDirectory(errorDir);
+                if (!Directory.Exists(quotesDir)) Directory.CreateDirectory(quotesDir);
                 //创建StreamWriter
                 StreamWriter swInfo = null;
                 StreamWriter swError = null;
@@ -251,6 +252,11 @@ namespace NineSunScripture.util.log
                 {
                     swError.Close();
                     swError.Dispose();
+                }
+                if (swQuotes != null)
+                {
+                    swQuotes.Close();
+                    swQuotes.Dispose();
                 }
             }
             finally
