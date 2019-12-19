@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NineSunScripture.trade.helper
 {
-    public class ApiHelper
+    public static class ApiHelper
     {
         /// <summary>
         /// 解析接口结果字符串
@@ -66,7 +66,7 @@ namespace NineSunScripture.trade.helper
         /// <param name="acct">账号对象</param>
         /// <param name="code">股票代码</param>
         /// <returns>股东账号</returns>
-        public static String getShareholderByStockCode(Account acct, String code)
+        public static String GetShareholderByStockCode(Account acct, String code)
         {
             if (code.StartsWith("6"))
             {

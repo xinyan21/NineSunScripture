@@ -178,7 +178,7 @@ namespace NineSunScripture.strategy
                         //查询已卖数量得到买入数量（可用大于0说明今天之前买的，这种情况只回补仓位）
                         Logger.Log("【" + quotes.Name + "】触发买点，账户["
                         + account.FundAcct + "]的可用余额大于0，为" + position.AvailableBalance);
-                        int sellQuantity = getTodayTransactionQuantityOf(
+                        int sellQuantity = GetTodayTransactionQuantityOf(
                             account.TradeSessionId, code, Order.OperationSell);
                         //这里还需要查询当日已买，已经买了就return
                         if (open == highLimit)
@@ -207,7 +207,7 @@ namespace NineSunScripture.strategy
                             + "]将新开仓买入");
                         //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
                         //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
-                        float acctPositionCtrl = getNewPositionRatio(account);
+                        float acctPositionCtrl = GetNewPositionRatio(account);
                         double availableCash = account.Funds.AvailableAmt;
                         if (acctPositionCtrl <= positionRatioCtrl)
                         {
@@ -227,7 +227,7 @@ namespace NineSunScripture.strategy
                         Logger.Log("【" + quotes.Name + "】触发买点，账户["
                             + account.FundAcct + "]经过仓位控制后可买数量为" + order.Quantity + "股");
                     }//END else 新开仓买入
-                    int boughtQuantity = getTodayTransactionQuantityOf(
+                    int boughtQuantity = GetTodayTransactionQuantityOf(
                            account.TradeSessionId, code, Order.OperationBuy);
                     if (order.Quantity <= boughtQuantity)
                     {
@@ -295,7 +295,7 @@ namespace NineSunScripture.strategy
         /// </summary>
         /// <param name="fundAcct">资金账号</param>
         /// <returns>仓位比例</returns>
-        private float getNewPositionRatio(Account account)
+        private float GetNewPositionRatio(Account account)
         {
             account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
             double totalProfitPct = account.Funds.TotalAsset / account.InitTotalAsset;
@@ -322,7 +322,7 @@ namespace NineSunScripture.strategy
         /// </summary>
         /// <param name="accounts">已登录账户</param>
         /// <returns></returns>
-        private String getPositionStock(List<Account> accounts)
+        private String GetPositionStock(List<Account> accounts)
         {
             string stocks = "";
             List<Position> positions = AccountHelper.QueryTotalPositions(accounts);
@@ -381,7 +381,7 @@ namespace NineSunScripture.strategy
         /// <param name="sessionId">登录账号的ID</param>
         /// <param name="code">股票代码</param>
         /// <returns></returns>
-        private int getTodayTransactionQuantityOf(int sessionId, string code, string op)
+        private int GetTodayTransactionQuantityOf(int sessionId, string code, string op)
         {
             int quantity = 0;
             List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(sessionId);

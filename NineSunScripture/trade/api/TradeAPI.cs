@@ -14,7 +14,7 @@ namespace NineSunScripture.trade.api
     /// <summary>
     /// 交易API，附带五档行情API
     /// </summary>
-    public class TradeAPI
+    public static class TradeAPI
     {
         //dll必须放在程序同一目录下面，否则调用会报错
         private const string dllPath = "ths.dll";

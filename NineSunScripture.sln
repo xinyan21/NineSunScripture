@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NineSunScripture", "NineSunScripture\NineSunScripture.csproj", "{0D7E3884-D4D9-4773-B821-D1316F350C3F}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "九阳真经", "九阳真经\九阳真经.vdproj", "{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,16 @@ Global
 		{0D7E3884-D4D9-4773-B821-D1316F350C3F}.Release|x64.ActiveCfg = Debug|Any CPU
 		{0D7E3884-D4D9-4773-B821-D1316F350C3F}.Release|x64.Build.0 = Debug|Any CPU
 		{0D7E3884-D4D9-4773-B821-D1316F350C3F}.Release|x86.ActiveCfg = Debug|Any CPU
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Debug|Any CPU.ActiveCfg = Debug
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Debug|ARM.ActiveCfg = Debug
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Debug|ARM64.ActiveCfg = Debug
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Debug|x64.ActiveCfg = Debug
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Debug|x86.ActiveCfg = Debug
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Release|Any CPU.ActiveCfg = Release
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Release|ARM.ActiveCfg = Release
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Release|ARM64.ActiveCfg = Release
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Release|x64.ActiveCfg = Release
+		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

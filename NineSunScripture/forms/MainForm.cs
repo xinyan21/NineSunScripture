@@ -229,7 +229,7 @@ namespace NineSunScripture
             stockDbHelper.AddStock(quotes);
             runtimeInfo = "新增股票【" + quotes.Name + "】";
             InvokeAddRunInfo();
-            refreshStocksListView();
+            RefreshStocksListView();
             if (mainStrategy.IsTradeTime())
             {
                 RebootStrategy();
@@ -240,7 +240,7 @@ namespace NineSunScripture
             }
         }
 
-        private void refreshStocksListView()
+        private void RefreshStocksListView()
         {
             lvStocks.BeginUpdate();
             lvStocks.Items.Clear();
@@ -300,14 +300,14 @@ namespace NineSunScripture
                 runtimeInfo = "重启策略中...";
                 InvokeAddRunInfo();
                 //Stop
-                tsmiSwitch_Click(null, null);
+                TsmiSwitch_Click(null, null);
                 Thread.Sleep(1000);
                 //Start
-                tsmiSwitch_Click(null, null);
+                TsmiSwitch_Click(null, null);
             }
             else
             {
-                tsmiSwitch_Click(null, null);
+                TsmiSwitch_Click(null, null);
             }
         }
 
@@ -374,7 +374,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmClearStocks_Click(object sender, EventArgs e)
+        private void TsmClearStocks_Click(object sender, EventArgs e)
         {
             DialogResult dr = MessageBox.Show("确认要清空股票池吗？", "警告",
                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
@@ -394,7 +394,7 @@ namespace NineSunScripture
                 runtimeInfo = "清空股票池";
                 InvokeAddRunInfo();
                 InitLvStocks();
-                refreshStocksListView();
+                RefreshStocksListView();
                 if (mainStrategy.IsTradeTime())
                 {
                     RebootStrategy();
@@ -411,7 +411,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmDelStock_Click(object sender, EventArgs e)
+        private void TsmDelStock_Click(object sender, EventArgs e)
         {
             if (lvStocks.SelectedItems.Count <= 0)
             {
@@ -438,7 +438,7 @@ namespace NineSunScripture
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
             runtimeInfo = "删除股票【" + quotes.Name + "】";
             InvokeAddRunInfo();
-            refreshStocksListView();
+            RefreshStocksListView();
             if (mainStrategy.IsTradeTime())
             {
                 RebootStrategy();
@@ -454,7 +454,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmAddStock_Click(object sender, EventArgs e)
+        private void TsmAddStock_Click(object sender, EventArgs e)
         {
             new AddStockForm(mainStrategy.GetAccounts(), this).Show();
         }
@@ -471,7 +471,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmiManageAcct_Click(object sender, EventArgs e)
+        private void TsmiManageAcct_Click(object sender, EventArgs e)
         {
             new ManageAcctForm().Show();
         }
@@ -481,7 +481,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmiSwitch_Click(object sender, EventArgs e)
+        private void TsmiSwitch_Click(object sender, EventArgs e)
         {
             if (isStrategyStarted)
             {
@@ -517,7 +517,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmiClearPositions_Click(object sender, EventArgs e)
+        private void TsmiClearPositions_Click(object sender, EventArgs e)
         {
             DialogResult dr = MessageBox.Show("确认要清仓吗？", "警告",
                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
@@ -532,7 +532,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmiBuyStock_Click(object sender, EventArgs e)
+        private void TsmiBuyStock_Click(object sender, EventArgs e)
         {
             new TradeForm(mainStrategy.GetAccounts(), this).Show();
         }
@@ -542,7 +542,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmiBuy_Click(object sender, EventArgs e)
+        private void TsmiBuy_Click(object sender, EventArgs e)
         {
             if (lvStocks.SelectedItems.Count <= 0)
             {
@@ -558,7 +558,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmiSell_Click(object sender, EventArgs e)
+        private void TsmiSell_Click(object sender, EventArgs e)
         {
             if (lvPositions.SelectedItems.Count <= 0)
             {
@@ -582,7 +582,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void tsmiSellInForm_Click(object sender, EventArgs e)
+        private void TsmiSellInForm_Click(object sender, EventArgs e)
         {
             if (lvPositions.SelectedItems.Count <= 0)
             {
@@ -596,7 +596,7 @@ namespace NineSunScripture
             new TradeForm(mainStrategy.GetAccounts(), quotes, this, Order.CategorySell).Show();
         }
 
-        private void tsmiTest_Click(object sender, EventArgs e)
+        private void TsmiTest_Click(object sender, EventArgs e)
         {
             new TestForm(mainStrategy.GetAccounts()).Show();
         }
@@ -611,7 +611,7 @@ namespace NineSunScripture
             }
         }
 
-        private void tspExit_Click(object sender, EventArgs e)
+        private void TspExit_Click(object sender, EventArgs e)
         {
             MainForm_Closing(null, null);
         }
@@ -635,7 +635,7 @@ namespace NineSunScripture
             }
         }
 
-        private void tsmiCancel_Click(object sender, EventArgs e)
+        private void TsmiCancel_Click(object sender, EventArgs e)
         {
             if (lvCancelOrders.SelectedItems.Count <= 0)
             {
@@ -646,13 +646,13 @@ namespace NineSunScripture
             mainStrategy.UpdateFundsInfo(false);
         }
 
-        private void btnSwtichPositions_Click(object sender, EventArgs e)
+        private void BtnSwtichPositions_Click(object sender, EventArgs e)
         {
             lvCancelOrders.Visible = false;
             lvPositions.Visible = true;
         }
 
-        private void btnSwitchCancelOrders_Click(object sender, EventArgs e)
+        private void BtnSwitchCancelOrders_Click(object sender, EventArgs e)
         {
             lvCancelOrders.Visible = true;
             lvPositions.Visible = false;

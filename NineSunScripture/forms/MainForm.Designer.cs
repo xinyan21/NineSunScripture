@@ -137,7 +137,7 @@
             this.tsmAddTomorrowStock.Name = "tsmAddTomorrowStock";
             this.tsmAddTomorrowStock.Size = new System.Drawing.Size(192, 30);
             this.tsmAddTomorrowStock.Text = "添加股票";
-            this.tsmAddTomorrowStock.Click += new System.EventHandler(this.tsmAddStock_Click);
+            this.tsmAddTomorrowStock.Click += new System.EventHandler(this.TsmAddStock_Click);
             // 
             // tsmiBuy
             // 
@@ -146,7 +146,7 @@
             this.tsmiBuy.Name = "tsmiBuy";
             this.tsmiBuy.Size = new System.Drawing.Size(192, 30);
             this.tsmiBuy.Text = "买入";
-            this.tsmiBuy.Click += new System.EventHandler(this.tsmiBuy_Click);
+            this.tsmiBuy.Click += new System.EventHandler(this.TsmiBuy_Click);
             // 
             // tsmDelTomorrowStock
             // 
@@ -155,7 +155,7 @@
             this.tsmDelTomorrowStock.Name = "tsmDelTomorrowStock";
             this.tsmDelTomorrowStock.Size = new System.Drawing.Size(192, 30);
             this.tsmDelTomorrowStock.Text = "删除";
-            this.tsmDelTomorrowStock.Click += new System.EventHandler(this.tsmDelStock_Click);
+            this.tsmDelTomorrowStock.Click += new System.EventHandler(this.TsmDelStock_Click);
             // 
             // tsmClearTomorrowStocks
             // 
@@ -164,7 +164,7 @@
             this.tsmClearTomorrowStocks.Name = "tsmClearTomorrowStocks";
             this.tsmClearTomorrowStocks.Size = new System.Drawing.Size(192, 30);
             this.tsmClearTomorrowStocks.Text = "清空";
-            this.tsmClearTomorrowStocks.Click += new System.EventHandler(this.tsmClearStocks_Click);
+            this.tsmClearTomorrowStocks.Click += new System.EventHandler(this.TsmClearStocks_Click);
             // 
             // lblTotalAsset
             // 
@@ -221,7 +221,7 @@
             this.btnSwitchCancelOrders.TabIndex = 19;
             this.btnSwitchCancelOrders.Text = "撤单";
             this.btnSwitchCancelOrders.UseVisualStyleBackColor = false;
-            this.btnSwitchCancelOrders.Click += new System.EventHandler(this.btnSwitchCancelOrders_Click);
+            this.btnSwitchCancelOrders.Click += new System.EventHandler(this.BtnSwitchCancelOrders_Click);
             // 
             // btnSwtichPositions
             // 
@@ -236,7 +236,7 @@
             this.btnSwtichPositions.TabIndex = 18;
             this.btnSwtichPositions.Text = "持仓";
             this.btnSwtichPositions.UseVisualStyleBackColor = false;
-            this.btnSwtichPositions.Click += new System.EventHandler(this.btnSwtichPositions_Click);
+            this.btnSwtichPositions.Click += new System.EventHandler(this.BtnSwtichPositions_Click);
             // 
             // lvCancelOrders
             // 
@@ -274,7 +274,7 @@
             this.tsmiCancel.Name = "tsmiCancel";
             this.tsmiCancel.Size = new System.Drawing.Size(214, 35);
             this.tsmiCancel.Text = "撤单";
-            this.tsmiCancel.Click += new System.EventHandler(this.tsmiCancel_Click);
+            this.tsmiCancel.Click += new System.EventHandler(this.TsmiCancel_Click);
             // 
             // lvPositions
             // 
@@ -312,7 +312,7 @@
             this.tsmiSell.Name = "tsmiSell";
             this.tsmiSell.Size = new System.Drawing.Size(214, 40);
             this.tsmiSell.Text = "一键卖出";
-            this.tsmiSell.Click += new System.EventHandler(this.tsmiSell_Click);
+            this.tsmiSell.Click += new System.EventHandler(this.TsmiSell_Click);
             // 
             // tsmiSellInForm
             // 
@@ -321,7 +321,7 @@
             this.tsmiSellInForm.Name = "tsmiSellInForm";
             this.tsmiSellInForm.Size = new System.Drawing.Size(192, 40);
             this.tsmiSellInForm.Text = "窗口卖出";
-            this.tsmiSellInForm.Click += new System.EventHandler(this.tsmiSellInForm_Click);
+            this.tsmiSellInForm.Click += new System.EventHandler(this.TsmiSellInForm_Click);
             // 
             // pbWorkStatus
             // 
@@ -400,7 +400,7 @@
             this.tsmiSwitch.Padding = new System.Windows.Forms.Padding(0, 10, 0, 1);
             this.tsmiSwitch.Size = new System.Drawing.Size(150, 40);
             this.tsmiSwitch.Text = "启动";
-            this.tsmiSwitch.Click += new System.EventHandler(this.tsmiSwitch_Click);
+            this.tsmiSwitch.Click += new System.EventHandler(this.TsmiSwitch_Click);
             // 
             // tsmiBuyStock
             // 
@@ -408,7 +408,7 @@
             this.tsmiBuyStock.Name = "tsmiBuyStock";
             this.tsmiBuyStock.Size = new System.Drawing.Size(198, 40);
             this.tsmiBuyStock.Text = "买入";
-            this.tsmiBuyStock.Click += new System.EventHandler(this.tsmiBuyStock_Click);
+            this.tsmiBuyStock.Click += new System.EventHandler(this.TsmiBuyStock_Click);
             // 
             // tsmiManageAcct
             // 
@@ -416,7 +416,7 @@
             this.tsmiManageAcct.Name = "tsmiManageAcct";
             this.tsmiManageAcct.Size = new System.Drawing.Size(150, 40);
             this.tsmiManageAcct.Text = "账号管理";
-            this.tsmiManageAcct.Click += new System.EventHandler(this.tsmiManageAcct_Click);
+            this.tsmiManageAcct.Click += new System.EventHandler(this.TsmiManageAcct_Click);
             // 
             // tsmiClearPositions
             // 
@@ -424,7 +424,7 @@
             this.tsmiClearPositions.Name = "tsmiClearPositions";
             this.tsmiClearPositions.Size = new System.Drawing.Size(150, 40);
             this.tsmiClearPositions.Text = "一键清仓";
-            this.tsmiClearPositions.Click += new System.EventHandler(this.tsmiClearPositions_Click);
+            this.tsmiClearPositions.Click += new System.EventHandler(this.TsmiClearPositions_Click);
             // 
             // tsmiTest
             // 
@@ -432,7 +432,7 @@
             this.tsmiTest.Name = "tsmiTest";
             this.tsmiTest.Size = new System.Drawing.Size(198, 40);
             this.tsmiTest.Text = "测试";
-            this.tsmiTest.Click += new System.EventHandler(this.tsmiTest_Click);
+            this.tsmiTest.Click += new System.EventHandler(this.TsmiTest_Click);
             // 
             // tspExit
             // 
@@ -440,7 +440,7 @@
             this.tspExit.Name = "tspExit";
             this.tspExit.Size = new System.Drawing.Size(150, 40);
             this.tspExit.Text = "退出";
-            this.tspExit.Click += new System.EventHandler(this.tspExit_Click);
+            this.tspExit.Click += new System.EventHandler(this.TspExit_Click);
             // 
             // tbRuntimeInfo
             // 
