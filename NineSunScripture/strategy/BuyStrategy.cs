@@ -32,6 +32,10 @@ namespace NineSunScripture.strategy
         /// 单账户最小可用金额默认为5000
         /// </summary>
         private const int MinTotalAvailableAmt = 5000;
+        /// <summary>
+        /// 最大卖一额限制默认是1500万
+        /// </summary>
+        private const int MaxSell1MoneyCtrl = 1500;
         private Dictionary<string, DateTime> openBoardTime = new Dictionary<string, DateTime>();
         private Dictionary<string, Queue<Quotes>> historyTicks
             = new Dictionary<string, Queue<Quotes>>();
@@ -112,13 +116,19 @@ namespace NineSunScripture.strategy
                     }
                 }
             }
+            if (quotes.Sell1 == highLimit 
+                && quotes.Sell1Vol * highLimit > MaxSell1MoneyCtrl * 10000)
+            {
+                Logger.Log("【" + quotes.Name + "】卖一额太大，过滤");
+                return;
+            }
             //开板时间小于30秒，过滤
             if (openBoardTime.ContainsKey(code))
             {
                 int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
                 if (openBoardInterval < 30)
                 {
-                    Logger.Log("openBoardInterval->" + openBoardInterval);
+                    Logger.Log("【" + quotes.Name + "】开板时间->" + openBoardInterval+"s");
                     return;
                 }
             }
