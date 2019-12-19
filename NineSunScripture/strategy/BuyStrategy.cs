@@ -35,7 +35,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 最大卖一额限制默认是1500万
         /// </summary>
-        private const int MaxSell1MoneyCtrl = 1500;
+        private const int MaxSellMoneyCtrl = 1500;
         private Dictionary<string, DateTime> openBoardTime = new Dictionary<string, DateTime>();
         private Dictionary<string, Queue<Quotes>> historyTicks
             = new Dictionary<string, Queue<Quotes>>();
@@ -117,9 +117,15 @@ namespace NineSunScripture.strategy
                 }
             }
             if (quotes.Sell1 == highLimit 
-                && quotes.Sell1Vol * highLimit > MaxSell1MoneyCtrl * 10000)
+                && quotes.Sell1Vol * highLimit > MaxSellMoneyCtrl * 10000)
             {
-                Logger.Log("【" + quotes.Name + "】卖一额太大，过滤");
+                Logger.Log("【" + quotes.Name + "】板上货太多，过滤");
+                return;
+            }
+            if (quotes.Sell2 == highLimit
+                && quotes.Sell2Vol * highLimit > MaxSellMoneyCtrl * 10000)
+            {
+                Logger.Log("【" + quotes.Name + "】板上货太多，过滤");
                 return;
             }
             //开板时间小于30秒，过滤
