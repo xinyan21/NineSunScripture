@@ -3,9 +3,11 @@ using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace NineSunScripture.util
 {
@@ -73,7 +75,7 @@ namespace NineSunScripture.util
             {
                 return;
             }
-            Logger.Log(quotes.ToString(), LogType.Quotes);
+            Logger.Log("Sampling->" + quotes.ToString(), LogType.Quotes);
         }
 
         public static int FixQuantity(int quantity)
@@ -84,6 +86,17 @@ namespace NineSunScripture.util
         public static float FormatTo2Digits(float value)
         {
             return (float)Math.Round(value, 2);
+        }
+
+        /// <summary>
+        /// 检测dll是否存在
+        /// </summary>
+        /// <returns></returns>
+        public static bool DetectTHSDll()
+        {
+            string path = System.Environment.CurrentDirectory + @"\ths.dll";
+            bool isExist = File.Exists(path);
+            return isExist;
         }
     }
 }

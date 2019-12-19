@@ -18,13 +18,14 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public const bool IsTest = false;
+        public static bool IsTest = false;
         private const int SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
         private const int SleepIntervalOfTrade = 200;
 
         private int sleepInterval = SleepIntervalOfTrade;
         private short fundUpdateCtrl = 0;
+        private short queryPriceErrorCnt = 0;
 
         private Account mainAcct;
         private List<Account> accounts;
@@ -37,10 +38,7 @@ namespace NineSunScripture.strategy
         private ITrade callback;
         private IAcctInfoListener fundListener;
         private IShowWorkingSatus showWorkingSatus;
-        //逆回购记录，使用日期记录以支持不关策略长时间运行
-        private Dictionary<DateTime, bool> reverseRepurchaseBondsRecords;
         private bool isHoliday;
-
 
         public MainStrategy()
         {
@@ -49,7 +47,6 @@ namespace NineSunScripture.strategy
             this.buyStrategy = new BuyStrategy();
             this.sellStrategy = new SellStrategy();
             this.isHoliday = Utils.IsHolidayByDate(DateTime.Now);
-            this.reverseRepurchaseBondsRecords = new Dictionary<DateTime, bool>();
         }
 
         private void Process()
@@ -84,6 +81,7 @@ namespace NineSunScripture.strategy
             }
             mainAcct = accounts[0];
             bool isWorkingRight = true;
+            queryPriceErrorCnt = 0;
             while (true)
             {
                 Thread.Sleep(sleepInterval);
@@ -94,6 +92,7 @@ namespace NineSunScripture.strategy
                     {
                         showWorkingSatus.RotateStatusImg(-1);
                     }
+                    Logger.Log("Not trade time, pass");
                     continue;
                 }
                 if (null == stocksForPrice || stocksForPrice.Count == 0)
@@ -108,23 +107,35 @@ namespace NineSunScripture.strategy
                     {
                         quotes = PriceAPI.QueryTenthGearPrice(
                             mainAcct.PriceSessionId, mainAcct.TradeSessionId, stocksForPrice[i].Code);
-                        Utils.SamplingLogQuotes(quotes);
-                        if (quotes.LatestPrice == 0 || string.IsNullOrEmpty(quotes.Name))
+                        if (null == quotes || quotes.LatestPrice == 0 || string.IsNullOrEmpty(quotes.Name))
                         {
-                            Logger.Log(quotes.ToString(), LogType.Quotes);
+                            queryPriceErrorCnt++;
+                            Logger.Log("QueryTenthGearPrice error " + queryPriceErrorCnt);
+                            if (queryPriceErrorCnt < 3)
+                            {
+                                continue;
+                            }
+                        }
+                        if (queryPriceErrorCnt > 2)
+                        {
+                            Logger.Log("QueryTenthGearPrice error has been occured 3 times, need to reboot");
+                            if (null != quotes)
+                            {
+                                Logger.Log(quotes.ToString(), LogType.Quotes);
+                            }
                             isWorkingRight = false;
-                            callback.OnTradeResult(0, "策略执行发生异常", "行情接口异常", true);
+                            callback.OnTradeResult(0, "调用行情接口", "行情接口异常", true);
                             return;
                         }
+                        queryPriceErrorCnt = 0;
+                        Utils.SamplingLogQuotes(quotes);
                         SetTradeParams(quotes);
                         if (positionStocks.Contains(quotes))
                         {
                             sellStrategy.Sell(quotes, accounts, callback);
                         }
-                        if (stocksToBuy.Contains(quotes))
-                        {
-                            buyStrategy.Buy(quotes, accounts, callback);
-                        }
+                        //持仓股回封要买回，所以全部股票都在买的范围
+                        buyStrategy.Buy(quotes, accounts, callback);
                     }
                     catch (ThreadAbortException)
                     {
@@ -157,6 +168,13 @@ namespace NineSunScripture.strategy
 
         public bool Start()
         {
+
+            if (!Utils.DetectTHSDll())
+            {
+                MessageBox.Show("dll不存在，不能启动策略->" + System.Environment.CurrentDirectory);
+                return false;
+            }
+
             strategyThread = new Thread(Process);
             strategyThread.Start();
 
@@ -212,6 +230,7 @@ namespace NineSunScripture.strategy
             {
                 foreach (Account item in accounts)
                 {
+                    //更新已登录账户的持仓，供交易查询用
                     item.Positions = TradeAPI.QueryPositions(item.TradeSessionId);
                 }
                 Account account = new Account();
@@ -219,19 +238,6 @@ namespace NineSunScripture.strategy
                 account.Positions = AccountHelper.QueryTotalPositions(accounts);
                 account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
                 fundListener.OnAcctInfoListen(account);
-            }
-        }
-
-        /// <summary>
-        /// 15:25逆回购【要用专门接口，卖出接口不能逆回购】
-        /// </summary>
-        private void ReverseRepurchaseBonds()
-        {
-            if (DateTime.Now.Hour == 15 && DateTime.Now.Minute == 25
-                && !reverseRepurchaseBondsRecords.ContainsKey(DateTime.Now.Date))
-            {
-                AccountHelper.AutoReverseRepurchaseBonds(accounts, callback);
-                reverseRepurchaseBondsRecords.Add(DateTime.Now.Date, true);
             }
         }
 
@@ -257,7 +263,7 @@ namespace NineSunScripture.strategy
                 SetSleepIntervalOfNonTrade();
                 return false;
             }
-            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute >= 57)
+            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute >= 56)
             {
                 SetSleepIntervalOfNonTrade();
                 return false;

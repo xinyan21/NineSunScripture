@@ -236,7 +236,13 @@ namespace NineSunScripture.util.log
                         }
                         if (logMessage.Exception != null)
                         {
-                            swError.WriteLine($"[异常：{logMessage.Exception.ToString()}]");
+                            string text = "";
+                            Type exceptionType = logMessage.Exception.GetType();
+                            text = "Exception: " + exceptionType.Name + Environment.NewLine;
+                            text += "               " + "Message: " + logMessage.Exception.Message + Environment.NewLine;
+                            text += "               " + "Source: " + logMessage.Exception.Source + Environment.NewLine;
+                            text += "               " + "StackTrace: " + logMessage.Exception.StackTrace + Environment.NewLine;
+                            swError.WriteLine($"[异常：{text}]");
                         }
                         swError.WriteLine("------------------------------------------------------------------------------------------");
                         //swError.WriteLine(string.Empty);

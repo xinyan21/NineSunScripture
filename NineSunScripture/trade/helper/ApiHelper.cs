@@ -1,4 +1,5 @@
 ﻿using NineSunScripture.model;
+using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace NineSunScripture.trade.helper
         public static String[] ParseResult(byte[] data)
         {
             String result = Encoding.Default.GetString(data).TrimEnd('\0');
+            Logger.Log(result, LogType.Quotes);
             result = result.Substring(result.IndexOf("\n") + 1);
             String[] temp = result.Split(new String[] { "\t" }, StringSplitOptions.None);
             return temp;
@@ -42,14 +44,14 @@ namespace NineSunScripture.trade.helper
             String result = Encoding.Default.GetString(data).TrimEnd('\0');
             result = result.Substring(result.IndexOf("\n") + 1);
             String[] rows = result.Split(new String[] { "\n" },
-                StringSplitOptions.RemoveEmptyEntries);
+                StringSplitOptions.None);
             int cols = rows[0].Split(new String[] { "\t" },
-                StringSplitOptions.RemoveEmptyEntries).Length;
+                StringSplitOptions.None).Length;
             string[,] temp = new string[rows.Length, cols];
             for (int i = 0; i < rows.Length; i++)
             {
                 string[] items = rows[i].Split(new String[] { "\t" },
-                    StringSplitOptions.RemoveEmptyEntries);
+                    StringSplitOptions.None);
                 for (int j = 0; j < items.Length; j++)
                 {
                     temp[i, j] = items[j];

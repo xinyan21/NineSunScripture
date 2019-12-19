@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using NineSunScripture.model;
 using NineSunScripture.util.log;
 using NineSunScripture.trade.helper;
+using NineSunScripture.strategy;
 
 namespace NineSunScripture.trade.api
 {
@@ -46,10 +47,15 @@ namespace NineSunScripture.trade.api
         /// <returns></returns>
         public static Quotes QueryTenthGearPrice(int priceSessionId, int tradeSessionId, string code)
         {
-            Quotes quotes = new Quotes();
+            Quotes quotes = null;
             //由于股票名称在十档里没有，所以先查五档，之后用十档的数据覆盖
             quotes = TradeAPI.QueryQuotes(tradeSessionId, code);
+            if (null == quotes)
+            {
+                return null;
+            }
             int rspCode = HQ_QueryData(priceSessionId, 0, code, "", quotes.Result, quotes.ErrorInfo);
+            ApiHelper.HandleTimeOut(quotes.ErrorInfo);
             if (rspCode > 0)
             {
                 try
@@ -58,6 +64,11 @@ namespace NineSunScripture.trade.api
                     //\t买六\t买六量\t卖六\t卖六量\t买七\t买七量\t卖七\t卖七量\t买八\t买八量\t卖八\t卖八量\t买九\t买九量\t卖九\t卖九量
                     //\t买十\t买十量\t卖十\t卖十量\t买四\t买四量\t卖四\t卖四量\t买五\t买五量\t卖五\t卖五量\t昨收
                     String[] temp = ApiHelper.ParseResult(quotes.Result);
+                    if (temp.Length < 47)
+                    {
+                        Logger.Log("【重要】HQ_QueryData returns wrong data, start using trade price!");
+                        return quotes;
+                    }
                     quotes.Code = temp[0];
                     quotes.Open = float.Parse(temp[1]);
                     quotes.LatestPrice = float.Parse(temp[2]);
@@ -80,15 +91,15 @@ namespace NineSunScripture.trade.api
                 }
                 catch (Exception e)
                 {
-                    Logger.Log("QueryTenthGearPrice：" + ApiHelper.ParseErrInfo(quotes.Result));
+                    Logger.Log("QueryTenthGearPrice exception：" + ApiHelper.ParseErrInfo(quotes.Result));
                     Logger.Exception(e, ApiHelper.ParseErrInfo(quotes.Result));
                     throw e;
                 }
             }
             else
             {
-                Logger.Log("QueryTenthGearPrice：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
-                throw new Exception(ApiHelper.ParseErrInfo(quotes.ErrorInfo));
+                Logger.Log("QueryTenthGearPrice error：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
+                return null;
             }
             return quotes;
         }

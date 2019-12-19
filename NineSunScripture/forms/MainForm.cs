@@ -31,6 +31,12 @@ namespace NineSunScripture
         public MainForm()
         {
             InitializeComponent();
+            if (!Utils.DetectTHSDll())
+            {
+                MessageBox.Show("dll不存在，不能启动策略->" + System.Environment.CurrentDirectory);
+                return;
+            }
+
             stockDbHelper = new StockDbHelper();
             stocks = new List<Quotes>();
             mainStrategy = new MainStrategy();
@@ -430,7 +436,7 @@ namespace NineSunScripture
             }
             stockDbHelper.DelStockBy(category, quotes.Code);
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
-            runtimeInfo = "删除股票【" + quotes.Name+"】";
+            runtimeInfo = "删除股票【" + quotes.Name + "】";
             InvokeAddRunInfo();
             refreshStocksListView();
             if (mainStrategy.IsTradeTime())

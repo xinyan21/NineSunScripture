@@ -237,11 +237,17 @@ namespace NineSunScripture.trade.api
         {
             Quotes quotes = new Quotes();
             int rspCode = QueryHQ(tradeSessionId, code, quotes.Result, quotes.ErrorInfo);
+            ApiHelper.HandleTimeOut(quotes.ErrorInfo);
             if (rspCode > 0)
             {
                 try
                 {
                     String[] temp = ApiHelper.ParseResult(quotes.Result);
+                    if (temp.Length < 31)
+                    {
+                        Logger.Log("QueryHQ returns wrong data");
+                        return null;
+                    }
                     quotes.Code = temp[0];
                     quotes.Name = temp[1];
                     quotes.PreClose = float.Parse(temp[2]);
@@ -287,7 +293,7 @@ namespace NineSunScripture.trade.api
             else
             {
                 Logger.Log("QueryQuotes：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
-                throw new Exception(ApiHelper.ParseErrInfo(quotes.ErrorInfo));
+                return null;
             }
             Utils.SamplingLogQuotes(quotes);
             return quotes;
