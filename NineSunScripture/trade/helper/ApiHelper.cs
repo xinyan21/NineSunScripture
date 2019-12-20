@@ -11,6 +11,11 @@ namespace NineSunScripture.trade.helper
     public static class ApiHelper
     {
         /// <summary>
+        /// 调用API超时次数，超过3次重启策略
+        /// </summary>
+        private static int callApiTimeOutCnt = 0;
+
+        /// <summary>
         /// 解析接口结果字符串
         /// </summary>
         /// <param name="data">接口返回的字节流</param>
@@ -109,7 +114,14 @@ namespace NineSunScripture.trade.helper
             string strErr = ParseErrInfo(errInfo);
             if (!string.IsNullOrEmpty(strErr) && strErr.Contains("超时"))
             {
-                throw new Exception(strErr);
+                if (callApiTimeOutCnt++ > 3)
+                {
+                    throw new Exception(strErr);
+                }
+            }
+            else
+            {
+                callApiTimeOutCnt = 0;
             }
         }
     }

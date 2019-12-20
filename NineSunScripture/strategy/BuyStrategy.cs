@@ -77,15 +77,40 @@ namespace NineSunScripture.strategy
             bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
-                Logger.Log(quotes.Name + "开板");
+                Logger.Log("【" + quotes.Name + "】开板");
                 openBoardTime.Add(code, DateTime.Now);
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
             bool isBoardThisTick = quotes.LatestPrice == highLimit;
             if (!isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
-                Logger.Log(quotes.Name + "回封");
+                int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
+                Logger.Log("【" + quotes.Name + "】回封");
                 openBoardTime.Remove(code);
+                //重置后因为触发了买点需要判断下开板时间是否足够
+                if (openBoardInterval < 30)
+                {
+                    Logger.Log("【" + quotes.Name + "】开板时间（已回封）->" + openBoardInterval + "s");
+                    return;
+                }
+            }
+            //开板时间小于30秒，过滤。如果没触发卖2买点，直接回封，这里的判断是没用的，因为上面回封后会重置开板时间
+            if (openBoardTime.ContainsKey(code))
+            {
+                int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
+                if (openBoardInterval < 30)
+                {
+                    Logger.Log("【" + quotes.Name + "】开板时间->" + openBoardInterval + "s");
+                    return;
+                }
+            }
+            else
+            {
+                //涨停开盘，没开板，过滤
+                if (open == highLimit)
+                {
+                    return;
+                }
             }
             //成交额小于7000万过滤
             //买入计划里设置了成交额（单位为万）限制，这里就要判断
@@ -127,24 +152,6 @@ namespace NineSunScripture.strategy
             {
                 Logger.Log("【" + quotes.Name + "】板上货太多，过滤");
                 return;
-            }
-            //开板时间小于30秒，过滤
-            if (openBoardTime.ContainsKey(code))
-            {
-                int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
-                if (openBoardInterval < 30)
-                {
-                    Logger.Log("【" + quotes.Name + "】开板时间->" + openBoardInterval+"s");
-                    return;
-                }
-            }
-            else
-            {
-                //涨停开盘，没开板，过滤
-                if (open == highLimit)
-                {
-                    return;
-                }
             }
             //买一是涨停价、卖一或者卖二是涨停价符合买点
             if (quotes.Buy1 == highLimit || quotes.Sell1 == highLimit || quotes.Sell2 == highLimit)
