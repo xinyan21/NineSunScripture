@@ -315,7 +315,7 @@ namespace NineSunScripture
         {
             if (rspCode > 0)
             {
-                mainStrategy.UpdateFundsInfo(false);
+                mainStrategy.UpdateTotalAccountInfo(false);
                 runtimeInfo = msg + ">成功";
                 InvokeAddRunInfo();
             }
@@ -573,7 +573,7 @@ namespace NineSunScripture
             if (dr == DialogResult.OK)
             {
                 mainStrategy.SellStock(quotes, this);
-                mainStrategy.UpdateFundsInfo(false);
+                mainStrategy.UpdateTotalAccountInfo(false);
             }
         }
 
@@ -643,7 +643,7 @@ namespace NineSunScripture
             }
             Order order = (Order)lvCancelOrders.SelectedItems[0].Tag;
             AccountHelper.CancelTotalOrders(mainStrategy.GetAccounts(), order, this);
-            mainStrategy.UpdateFundsInfo(false);
+            mainStrategy.UpdateTotalAccountInfo(false);
         }
 
         private void BtnSwtichPositions_Click(object sender, EventArgs e)

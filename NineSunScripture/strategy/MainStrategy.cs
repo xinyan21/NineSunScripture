@@ -57,7 +57,7 @@ namespace NineSunScripture.strategy
                 callback.OnTradeResult(0, "策略启动", "没有可操作的账户", false);
                 return;
             }
-            UpdateFundsInfo(false);
+            UpdateTotalAccountInfo(false);
             if (isHoliday && !IsTest)
             {
                 callback.OnTradeResult(0, "策略启动", "现在是假期", false);
@@ -85,7 +85,6 @@ namespace NineSunScripture.strategy
             while (true)
             {
                 Thread.Sleep(sleepInterval);
-                UpdateFundsInfo(true);
                 if (!IsTest && !IsTradeTime())
                 {
                     if (null != showWorkingSatus)
@@ -100,6 +99,7 @@ namespace NineSunScripture.strategy
                     Logger.Log("No stocks to Query");
                     continue;
                 }
+                UpdateTotalAccountInfo(true);
                 Quotes quotes = null;
                 for (int i = 0; i < stocksForPrice.Count; i++)
                 {
@@ -213,10 +213,10 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 每隔15个心跳更新一下账户信息
+        /// 每隔15个心跳更新一下总账户信息
         /// </summary>
         /// <param name="ctrlFrequency">是否控制频率</param>
-        public void UpdateFundsInfo(bool ctrlFrequency)
+        public void UpdateTotalAccountInfo(bool ctrlFrequency)
         {
             if (ctrlFrequency && fundUpdateCtrl++ % 15 != 0)
             {

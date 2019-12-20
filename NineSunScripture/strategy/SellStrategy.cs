@@ -6,6 +6,7 @@ using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace NineSunScripture.strategy
 {
@@ -60,6 +61,7 @@ namespace NineSunScripture.strategy
         private Dictionary<string, Queue<Quotes>> historyTicks
             = new Dictionary<string, Queue<Quotes>>();
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             float highLimit = quotes.HighLimit;

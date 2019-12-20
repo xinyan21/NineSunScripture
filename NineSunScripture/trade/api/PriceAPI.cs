@@ -8,6 +8,7 @@ using NineSunScripture.model;
 using NineSunScripture.util.log;
 using NineSunScripture.trade.helper;
 using NineSunScripture.strategy;
+using System.Runtime.CompilerServices;
 
 namespace NineSunScripture.trade.api
 {
@@ -39,12 +40,13 @@ namespace NineSunScripture.trade.api
             string name, byte[] Result, byte[] errInfo);
 
         /// <summary>
-        /// 十档行情
+        /// 【同步方法】十档行情，支持level2高速行情
         /// </summary>
         /// <param name="priceSessionId">行情会话Id</param>
         ///   /// <param name="tradeSessionId">交易会话Id</param>
         /// <param name="code">股票代码</param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public static Quotes QueryTenthGearPrice(int priceSessionId, int tradeSessionId, string code)
         {
             Quotes quotes = null;
