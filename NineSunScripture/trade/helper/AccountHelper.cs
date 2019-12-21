@@ -112,7 +112,13 @@ namespace NineSunScripture.trade.helper
                 if (null != callback)
                 {
                     string errInfo = ApiHelper.ParseErrInfo(account.ErrorInfo);
-                    callback.OnTradeResult(tradeSessionId, opLog, errInfo, true);
+                    bool needReboot = false;
+                    if (account == mainAcct || !errInfo.Contains("密码"))
+                    {
+                        //主账号登录失败或者是其它账户不是因为密码错误都重启策略
+                        needReboot = true;
+                    }
+                    callback.OnTradeResult(tradeSessionId, opLog, errInfo, needReboot);
                 }
             }
             return loginAccts;
