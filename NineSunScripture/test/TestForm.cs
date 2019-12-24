@@ -25,9 +25,14 @@ namespace NineSunScripture.util.test
             this.accounts = accounts;
         }
 
+        private void TestBuyStrategy()
+        {
+            testTrade.TestBuyStrategy(accounts);
+        }
+
         private void btnTestBuy_Click(object sender, EventArgs e)
         {
-            testTrade.TestBuyStrategy(accounts );
+            new Thread(TestBuyStrategy).Start();
         }
 
         private void button1_Click(object sender, EventArgs e)

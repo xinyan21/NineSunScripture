@@ -180,44 +180,53 @@ namespace NineSunScripture.strategy
         {
             foreach (Account account in accounts)
             {
-                List<Order> todayTransactions
-                    = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
-                bool isSoldToday = false;
-                if (todayTransactions.Count > 0)
-                {
-                    foreach (Order order in todayTransactions)
-                    {
-                        if (order.Code == quotes.Code
-                            && order.Operation.Contains(Order.OperationSell))
-                        {
-                            isSoldToday = true;
-                            break;
-                        }
-                    }
-                    if (isSoldToday)
-                    {
-                        continue;
-                    }
-                }
                 Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
                 if (null == position)
                 {
                     continue;
                 }
+                if (position.ProfitAndLossPct < FirstClassStopWin)
+                {
+                    continue;
+                }
+                float stopWinPosition = 0;  //止盈仓位
                 if (position.ProfitAndLossPct > ThirdClassStopWin)
                 {
+                    stopWinPosition = ThirdStopWinPosition;
                     Logger.Log("40%止盈1/2卖" + quotes.Name);
-                    SellByAcct(quotes, account, callback, ThirdStopWinPosition);
                 }
                 else if (position.ProfitAndLossPct > SecondClassStopWin)
                 {
+                    stopWinPosition = SecondStopWinPosition;
                     Logger.Log("30%止盈1/2卖" + quotes.Name);
-                    SellByAcct(quotes, account, callback, SecondStopWinPosition);
                 }
                 else if (position.ProfitAndLossPct > FirstClassStopWin)
                 {
+                    stopWinPosition = FirstStopWinPosition;
                     Logger.Log("20%止盈3成卖" + quotes.Name);
-                    SellByAcct(quotes, account, callback, FirstStopWinPosition);
+                }
+                if (stopWinPosition > 0)
+                {
+                    List<Order> todayTransactions
+                = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
+                    bool isSoldToday = false;
+                    if (todayTransactions.Count > 0)
+                    {
+                        foreach (Order order in todayTransactions)
+                        {
+                            if (order.Code == quotes.Code
+                                && order.Operation.Contains(Order.OperationSell))
+                            {
+                                isSoldToday = true;
+                                break;
+                            }
+                        }
+                        if (isSoldToday)
+                        {
+                            continue;
+                        }
+                    }
+                    SellByAcct(quotes, account, callback, stopWinPosition);
                 }
             }
         }

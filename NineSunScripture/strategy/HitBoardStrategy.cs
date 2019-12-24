@@ -310,11 +310,11 @@ namespace NineSunScripture.strategy
                     int rspCode = TradeAPI.Buy(order);
                     string opLog = "资金账号【" + account.FundAcct + "】" + "策略买入【"
                         + quotes.Name + "】"
-                        + (order.Quantity * order.Price).ToString("0.00####") + "万元";
+                        + (order.Quantity * order.Price/10000).ToString("0.00####") + "万元";
                     Logger.Log(opLog);
                     if (null != callback)
                     {
-                        string errInfo = ApiHelper.ParseErrInfo(account.ErrorInfo);
+                        string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
                         callback.OnTradeResult(rspCode, opLog, errInfo, false);
                     }
                 }//END FOR ACCOUNT

@@ -50,7 +50,7 @@ namespace NineSunScripture.util.test
             HitBoardStrategy buyStrategy = new HitBoardStrategy();
             Quotes quotes = new Quotes();
             //卖一等于涨停价买点
-            /* quotes.Code = "002713";
+             quotes.Code = "002713";
              quotes.Name = "新易日升";
              quotes.PreClose = 7.12f;
              quotes.LatestPrice = 7.76f;
@@ -62,7 +62,7 @@ namespace NineSunScripture.util.test
              quotes.MoneyCtrl = 4000;
              quotes.PositionCtrl = 0.1f;
 
-             buyStrategy.Buy(quotes, accounts, null);*/
+             buyStrategy.Buy(quotes, accounts, null);
             Thread.Sleep(3000);
             //买一量小于1500万买点
             quotes = new Quotes();
@@ -98,7 +98,7 @@ namespace NineSunScripture.util.test
             buyStrategy.Buy(quotes, accounts, null);
             Thread.Sleep(3000);
             //封死涨停
-            while (cnt++ < 10)
+            while (cnt++ < 12)
             {
                 quotes = new Quotes();
                 quotes.Code = "002713";

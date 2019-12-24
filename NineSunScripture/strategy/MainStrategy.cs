@@ -18,14 +18,14 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = true;
+        public static bool IsTest = false;
         private const short SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
         private const short SleepIntervalOfTrade = 200;
         //更新成交额间隔，单位秒
         private const short UpdateMoneyInterval = 2;
         //更新资金、持仓信息间隔，单位秒
-        private const short UpdateFundInterval = 3;
+        private const short UpdateFundInterval = 5;
 
         private short sleepInterval = SleepIntervalOfTrade;
         private short queryPriceErrorCnt = 0;
@@ -98,8 +98,11 @@ namespace NineSunScripture.strategy
             queryPriceErrorCnt = 0;
             while (true)
             {
-                Logger.Log("Cycle begin---------- last cycle cost "
+                if (IsTest)
+                {
+                    Logger.Log("Cycle begin---------- last cycle cost "
                     + DateTime.Now.Subtract(lastCycleBeginTime).TotalMilliseconds + "ms");
+                }
                 //处理时间超过一半的睡眠时间就不睡了，否则实际频率会降低很大
                 if (DateTime.Now.Subtract(lastCycleBeginTime).TotalMilliseconds < sleepInterval * 0.5)
                 {
@@ -156,9 +159,11 @@ namespace NineSunScripture.strategy
                             }
                             Logger.Log("QueryBasicStockInfo---- ");
                         }
-
-                        Logger.Log("Query price time: "
+                        if (IsTest)
+                        {
+                            Logger.Log("Query price time: "
                             + DateTime.Now.Subtract(startTime).TotalMilliseconds + "ms");
+                        }
                         if (null == quotes || quotes.LatestPrice == 0)
                         {
                             queryPriceErrorCnt++;
@@ -198,8 +203,11 @@ namespace NineSunScripture.strategy
                             //持仓股回封要买回，所以全部股票都在买的范围
                             hitBoardStrategy.Buy(quotes, accounts, callback);
                         }
-                        Logger.Log("Single stock process time: "
+                        if (IsTest)
+                        {
+                            Logger.Log("【" + quotes.Name + "】process time: "
                             + DateTime.Now.Subtract(startTime).TotalMilliseconds + "ms");
+                        }
                     }
                     catch (ThreadAbortException)
                     {
