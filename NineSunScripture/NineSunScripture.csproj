@@ -180,8 +180,9 @@
     </Compile>
     <Compile Include="strategy\ITrade.cs" />
     <Compile Include="strategy\SellStrategy.cs" />
-    <Compile Include="strategy\BuyStrategy.cs" />
+    <Compile Include="strategy\HitBoardStrategy.cs" />
     <Compile Include="strategy\MainStrategy.cs" />
+    <Compile Include="strategy\WeakTurnStrongStrategy.cs" />
     <Compile Include="trade\api\PriceAPI.cs" />
     <Compile Include="trade\api\TradeAPI.cs" />
     <Compile Include="trade\helper\AccountHelper.cs" />

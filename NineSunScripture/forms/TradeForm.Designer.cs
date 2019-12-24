@@ -72,7 +72,7 @@
             this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label3.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label3.Location = new System.Drawing.Point(95, 195);
+            this.label3.Location = new System.Drawing.Point(95, 237);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(69, 25);
             this.label3.TabIndex = 3;
@@ -84,7 +84,7 @@
             this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label4.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label4.Location = new System.Drawing.Point(425, 195);
+            this.label4.Location = new System.Drawing.Point(414, 234);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(69, 25);
             this.label4.TabIndex = 4;
@@ -93,7 +93,7 @@
             // tbPrice
             // 
             this.tbPrice.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbPrice.Location = new System.Drawing.Point(188, 189);
+            this.tbPrice.Location = new System.Drawing.Point(188, 234);
             this.tbPrice.Name = "tbPrice";
             this.tbPrice.Size = new System.Drawing.Size(167, 31);
             this.tbPrice.TabIndex = 6;
@@ -105,7 +105,7 @@
             this.groupBox1.Controls.Add(this.rbtnAllIn);
             this.groupBox1.Controls.Add(this.rbtnOneSecond);
             this.groupBox1.Controls.Add(this.rbtnOneThird);
-            this.groupBox1.Location = new System.Drawing.Point(500, 177);
+            this.groupBox1.Location = new System.Drawing.Point(506, 204);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(295, 61);
             this.groupBox1.TabIndex = 7;
@@ -174,7 +174,7 @@
             this.btnBuy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBuy.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnBuy.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnBuy.Location = new System.Drawing.Point(263, 392);
+            this.btnBuy.Location = new System.Drawing.Point(272, 383);
             this.btnBuy.Name = "btnBuy";
             this.btnBuy.Size = new System.Drawing.Size(294, 72);
             this.btnBuy.TabIndex = 8;

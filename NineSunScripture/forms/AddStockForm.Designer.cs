@@ -43,7 +43,12 @@
             this.rbtnTomorrow = new System.Windows.Forms.RadioButton();
             this.rbtnLongTerm = new System.Windows.Forms.RadioButton();
             this.rbtnDragonLeader = new System.Windows.Forms.RadioButton();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.rbHitBoard = new System.Windows.Forms.RadioButton();
+            this.rbWeakTurnStrong = new System.Windows.Forms.RadioButton();
+            this.label6 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnAddStcok
@@ -62,7 +67,7 @@
             this.btnAddStcok.TabIndex = 5;
             this.btnAddStcok.Text = "添  加";
             this.btnAddStcok.UseVisualStyleBackColor = false;
-            this.btnAddStcok.Click += new System.EventHandler(this.btnAddStcok_Click);
+            this.btnAddStcok.Click += new System.EventHandler(this.BtnAddStcok_Click);
             // 
             // label1
             // 
@@ -86,7 +91,7 @@
             this.tbCode.Name = "tbCode";
             this.tbCode.Size = new System.Drawing.Size(147, 31);
             this.tbCode.TabIndex = 1;
-            this.tbCode.TextChanged += new System.EventHandler(this.tbCode_TextChanged);
+            this.tbCode.TextChanged += new System.EventHandler(this.TbCode_TextChanged);
             // 
             // label2
             // 
@@ -94,7 +99,7 @@
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label2.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label2.Location = new System.Drawing.Point(475, 221);
+            this.label2.Location = new System.Drawing.Point(469, 190);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(88, 25);
@@ -107,7 +112,7 @@
             this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label3.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label3.Location = new System.Drawing.Point(91, 221);
+            this.label3.Location = new System.Drawing.Point(90, 187);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(69, 25);
@@ -130,7 +135,7 @@
             // tbMoney
             // 
             this.tbMoney.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbMoney.Location = new System.Drawing.Point(565, 215);
+            this.tbMoney.Location = new System.Drawing.Point(565, 190);
             this.tbMoney.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbMoney.MaxLength = 5;
             this.tbMoney.Name = "tbMoney";
@@ -151,7 +156,7 @@
             // tbPosition
             // 
             this.tbPosition.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbPosition.Location = new System.Drawing.Point(172, 215);
+            this.tbPosition.Location = new System.Drawing.Point(172, 187);
             this.tbPosition.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbPosition.MaxLength = 4;
             this.tbPosition.Name = "tbPosition";
@@ -164,7 +169,7 @@
             this.label5.BackColor = System.Drawing.Color.Transparent;
             this.label5.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label5.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label5.Location = new System.Drawing.Point(91, 342);
+            this.label5.Location = new System.Drawing.Point(90, 279);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(69, 25);
@@ -177,11 +182,11 @@
             this.groupBox1.Controls.Add(this.rbtnTomorrow);
             this.groupBox1.Controls.Add(this.rbtnLongTerm);
             this.groupBox1.Controls.Add(this.rbtnDragonLeader);
-            this.groupBox1.Location = new System.Drawing.Point(172, 306);
+            this.groupBox1.Location = new System.Drawing.Point(172, 248);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox1.Size = new System.Drawing.Size(541, 86);
+            this.groupBox1.Size = new System.Drawing.Size(391, 70);
             this.groupBox1.TabIndex = 13;
             this.groupBox1.TabStop = false;
             // 
@@ -191,7 +196,7 @@
             this.rbtnTomorrow.Checked = true;
             this.rbtnTomorrow.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnTomorrow.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnTomorrow.Location = new System.Drawing.Point(24, 32);
+            this.rbtnTomorrow.Location = new System.Drawing.Point(22, 26);
             this.rbtnTomorrow.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnTomorrow.Name = "rbtnTomorrow";
             this.rbtnTomorrow.Size = new System.Drawing.Size(68, 29);
@@ -199,35 +204,86 @@
             this.rbtnTomorrow.TabStop = true;
             this.rbtnTomorrow.Text = "最新";
             this.rbtnTomorrow.UseVisualStyleBackColor = true;
-            this.rbtnTomorrow.CheckedChanged += new System.EventHandler(this.rbtnTomorrow_CheckedChanged);
+            this.rbtnTomorrow.CheckedChanged += new System.EventHandler(this.RbtnTomorrow_CheckedChanged);
             // 
             // rbtnLongTerm
             // 
             this.rbtnLongTerm.AutoSize = true;
             this.rbtnLongTerm.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnLongTerm.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnLongTerm.Location = new System.Drawing.Point(136, 34);
+            this.rbtnLongTerm.Location = new System.Drawing.Point(147, 26);
             this.rbtnLongTerm.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnLongTerm.Name = "rbtnLongTerm";
             this.rbtnLongTerm.Size = new System.Drawing.Size(68, 29);
             this.rbtnLongTerm.TabIndex = 1;
             this.rbtnLongTerm.Text = "常驻";
             this.rbtnLongTerm.UseVisualStyleBackColor = true;
-            this.rbtnLongTerm.CheckedChanged += new System.EventHandler(this.rbtnLongTerm_CheckedChanged);
+            this.rbtnLongTerm.CheckedChanged += new System.EventHandler(this.RbtnLongTerm_CheckedChanged);
             // 
             // rbtnDragonLeader
             // 
             this.rbtnDragonLeader.AutoSize = true;
             this.rbtnDragonLeader.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnDragonLeader.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnDragonLeader.Location = new System.Drawing.Point(264, 36);
+            this.rbtnDragonLeader.Location = new System.Drawing.Point(266, 28);
             this.rbtnDragonLeader.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnDragonLeader.Name = "rbtnDragonLeader";
             this.rbtnDragonLeader.Size = new System.Drawing.Size(68, 29);
             this.rbtnDragonLeader.TabIndex = 0;
             this.rbtnDragonLeader.Text = "龙头";
             this.rbtnDragonLeader.UseVisualStyleBackColor = true;
-            this.rbtnDragonLeader.CheckedChanged += new System.EventHandler(this.rbtnDragonLeader_CheckedChanged);
+            this.rbtnDragonLeader.CheckedChanged += new System.EventHandler(this.RbtnDragonLeader_CheckedChanged);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox2.Controls.Add(this.rbHitBoard);
+            this.groupBox2.Controls.Add(this.rbWeakTurnStrong);
+            this.groupBox2.Location = new System.Drawing.Point(172, 335);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(295, 71);
+            this.groupBox2.TabIndex = 14;
+            this.groupBox2.TabStop = false;
+            // 
+            // rbHitBoard
+            // 
+            this.rbHitBoard.AutoSize = true;
+            this.rbHitBoard.Checked = true;
+            this.rbHitBoard.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.rbHitBoard.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.rbHitBoard.Location = new System.Drawing.Point(22, 24);
+            this.rbHitBoard.Name = "rbHitBoard";
+            this.rbHitBoard.Size = new System.Drawing.Size(68, 29);
+            this.rbHitBoard.TabIndex = 4;
+            this.rbHitBoard.TabStop = true;
+            this.rbHitBoard.Text = "打板";
+            this.rbHitBoard.UseVisualStyleBackColor = true;
+            this.rbHitBoard.CheckedChanged += new System.EventHandler(this.RbHitBoard_CheckedChanged);
+            // 
+            // rbWeakTurnStrong
+            // 
+            this.rbWeakTurnStrong.AutoSize = true;
+            this.rbWeakTurnStrong.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.rbWeakTurnStrong.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.rbWeakTurnStrong.Location = new System.Drawing.Point(128, 24);
+            this.rbWeakTurnStrong.Name = "rbWeakTurnStrong";
+            this.rbWeakTurnStrong.Size = new System.Drawing.Size(87, 29);
+            this.rbWeakTurnStrong.TabIndex = 0;
+            this.rbWeakTurnStrong.Text = "弱转强";
+            this.rbWeakTurnStrong.UseVisualStyleBackColor = true;
+            this.rbWeakTurnStrong.CheckedChanged += new System.EventHandler(this.RbWeakTurnStrong_CheckedChanged);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.BackColor = System.Drawing.Color.Transparent;
+            this.label6.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label6.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.label6.Location = new System.Drawing.Point(90, 361);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(69, 25);
+            this.label6.TabIndex = 15;
+            this.label6.Text = "策略：";
             // 
             // AddStockForm
             // 
@@ -236,6 +292,8 @@
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(793, 613);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.tbPosition);
@@ -256,6 +314,8 @@
             this.Text = "AddStockForm";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -277,5 +337,9 @@
         private System.Windows.Forms.RadioButton rbtnDragonLeader;
         private System.Windows.Forms.RadioButton rbtnTomorrow;
         private System.Windows.Forms.RadioButton rbtnLongTerm;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.RadioButton rbHitBoard;
+        private System.Windows.Forms.RadioButton rbWeakTurnStrong;
+        private System.Windows.Forms.Label label6;
     }
 }

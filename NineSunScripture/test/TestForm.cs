@@ -47,10 +47,9 @@ namespace NineSunScripture.util.test
 
         private void Work()
         {
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
-                quotes = PriceAPI.QueryTenthGearPrice(
-                   accounts[0].PriceSessionId, accounts[0].TradeSessionId, "002071");
+                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002071");
                 Invoke(new MethodInvoker(UpdatePrice));
                 Thread.Sleep(200);
             }
@@ -70,7 +69,7 @@ namespace NineSunScripture.util.test
 
         private void btnTestRRB_Click(object sender, EventArgs e)
         {
-            AccountHelper.AutoReverseRepurchaseBonds(accounts, null);
+            testTrade.TestSell(accounts);
         }
     }
 }

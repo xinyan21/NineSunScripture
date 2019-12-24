@@ -1,10 +1,6 @@
 ﻿using NineSunScripture.model;
-using NineSunScripture.util.log;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.trade.helper
 {
@@ -22,8 +18,11 @@ namespace NineSunScripture.trade.helper
         /// <returns>结果分割后的字符数组</returns>
         public static String[] ParseResult(byte[] data)
         {
+            if (null == data)
+            {
+                return null;
+            }
             String result = Encoding.Default.GetString(data).TrimEnd('\0');
-            Logger.Log(result, LogType.Quotes);
             result = result.Substring(result.IndexOf("\n") + 1);
             String[] temp = result.Split(new String[] { "\t" }, StringSplitOptions.None);
             return temp;
@@ -36,6 +35,10 @@ namespace NineSunScripture.trade.helper
         /// <returns></returns>
         public static String ParseErrInfo(byte[] data)
         {
+            if (null == data)
+            {
+                return "";
+            }
             return Encoding.Default.GetString(data).TrimEnd('\0');
         }
 
@@ -46,17 +49,19 @@ namespace NineSunScripture.trade.helper
         /// <returns>结果分割后的二维字符数组</returns>
         public static String[,] ParseResults(byte[] data)
         {
+            if (null == data)
+            {
+                return null;
+            }
             String result = Encoding.Default.GetString(data).TrimEnd('\0');
             result = result.Substring(result.IndexOf("\n") + 1);
-            String[] rows = result.Split(new String[] { "\n" },
-                StringSplitOptions.None);
+            String[] rows = result.Split(new String[] { "\n" }, StringSplitOptions.None);
             int cols = rows[0].Split(new String[] { "\t" },
                 StringSplitOptions.None).Length;
             string[,] temp = new string[rows.Length, cols];
             for (int i = 0; i < rows.Length; i++)
             {
-                string[] items = rows[i].Split(new String[] { "\t" },
-                    StringSplitOptions.None);
+                string[] items = rows[i].Split(new String[] { "\t" }, StringSplitOptions.None);
                 for (int j = 0; j < items.Length; j++)
                 {
                     temp[i, j] = items[j];

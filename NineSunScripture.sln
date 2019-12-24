@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NineSunScripture", "NineSun
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "九阳真经", "九阳真经\九阳真经.vdproj", "{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{36E66645-8520-4AE0-AB3D-E30CF3BDA438}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,26 @@ Global
 		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Release|ARM64.ActiveCfg = Release
 		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Release|x64.ActiveCfg = Release
 		{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}.Release|x86.ActiveCfg = Release
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|ARM.Build.0 = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|x64.Build.0 = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Debug|x86.Build.0 = Debug|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|ARM.ActiveCfg = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|ARM.Build.0 = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|ARM64.Build.0 = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|x64.ActiveCfg = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|x64.Build.0 = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|x86.ActiveCfg = Release|Any CPU
+		{36E66645-8520-4AE0-AB3D-E30CF3BDA438}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

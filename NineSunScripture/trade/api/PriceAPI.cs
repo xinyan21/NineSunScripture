@@ -40,24 +40,20 @@ namespace NineSunScripture.trade.api
             string name, byte[] Result, byte[] errInfo);
 
         /// <summary>
-        /// 【同步方法】十档行情，支持level2高速行情
+        /// 【同步方法】十档行情，支持level2高速行情（没有成交额）
         /// </summary>
         /// <param name="priceSessionId">行情会话Id</param>
-        ///   /// <param name="tradeSessionId">交易会话Id</param>
         /// <param name="code">股票代码</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static Quotes QueryTenthGearPrice(int priceSessionId, int tradeSessionId, string code)
+        public static Quotes QueryTenthGearPrice(int priceSessionId, string code)
         {
-            Quotes quotes = null;
-            //由于股票名称在十档里没有，所以先查五档，之后用十档的数据覆盖
-            quotes = TradeAPI.QueryQuotes(tradeSessionId, code);
-            if (null == quotes)
-            {
-                return null;
-            }
-            int rspCode = HQ_QueryData(priceSessionId, 0, code, "", quotes.Result, quotes.ErrorInfo);
-            ApiHelper.HandleTimeOut(quotes.ErrorInfo);
+            Quotes quotes = new Quotes();
+            byte[] result = new byte[1024 * 1024];
+            byte[] errorInfo = new byte[256];
+
+            int rspCode = HQ_QueryData(priceSessionId, 0, code, "", result, errorInfo);
+            ApiHelper.HandleTimeOut(errorInfo);
             if (rspCode > 0)
             {
                 try
@@ -65,11 +61,11 @@ namespace NineSunScripture.trade.api
                     //代码\t开盘\t最新\t总量\t买价\t买量\t买二\t买二量\t买三\t买三量\t卖价\t卖量\t卖二\t卖二量\t卖三\t卖三量\t涨停\t跌停
                     //\t买六\t买六量\t卖六\t卖六量\t买七\t买七量\t卖七\t卖七量\t买八\t买八量\t卖八\t卖八量\t买九\t买九量\t卖九\t卖九量
                     //\t买十\t买十量\t卖十\t卖十量\t买四\t买四量\t卖四\t卖四量\t买五\t买五量\t卖五\t卖五量\t昨收
-                    String[] temp = ApiHelper.ParseResult(quotes.Result);
+                    String[] temp = ApiHelper.ParseResult(result);
                     if (temp.Length < 47)
                     {
                         Logger.Log("【重要】HQ_QueryData returns wrong data, start using trade price!");
-                        return quotes;
+                        return null;
                     }
                     quotes.Code = temp[0];
                     quotes.Open = float.Parse(temp[1]);
@@ -93,14 +89,54 @@ namespace NineSunScripture.trade.api
                 }
                 catch (Exception e)
                 {
-                    Logger.Log("QueryTenthGearPrice exception：" + ApiHelper.ParseErrInfo(quotes.Result));
-                    Logger.Exception(e, ApiHelper.ParseErrInfo(quotes.Result));
+                    Logger.Log("QueryTenthGearPrice exception：" + ApiHelper.ParseErrInfo(result));
+                    Logger.Exception(e, ApiHelper.ParseErrInfo(result));
                     throw e;
                 }
             }
             else
             {
-                Logger.Log("QueryTenthGearPrice error：" + ApiHelper.ParseErrInfo(quotes.ErrorInfo));
+                Logger.Log("QueryTenthGearPrice error：" + ApiHelper.ParseErrInfo(errorInfo));
+                return null;
+            }
+
+            return quotes;
+        }
+
+        public static Quotes QueryBasicStockInfo(int priceSessionId, string code)
+        {
+            Quotes quotes = new Quotes();
+            byte[] result = new byte[1024 * 1024];
+            byte[] errorInfo = new byte[256];
+
+            int rspCode = HQ_QueryData(priceSessionId, 4, code, "", result, errorInfo);
+            ApiHelper.HandleTimeOut(errorInfo);
+            if (rspCode > 0)
+            {
+                try
+                {
+                    //代码\t涨跌\t涨幅\t换手\t振幅\t外盘\t内盘\t流通值\t最新\t开盘\t最高\t最低\t总量\t成交额
+                    //\t涨停\t跌停\t量比\t静态市盈率\tTTM市盈率\t总市值
+                    String[] temp = ApiHelper.ParseResult(result);
+                    if (temp.Length < 20)
+                    {
+                        Logger.Log("【重要】HQ_QueryData returns wrong data, start using trade price!");
+                        return null;
+                    }
+                    quotes.High = float.Parse(temp[10]);
+                    quotes.Low = float.Parse(temp[11]);
+                    quotes.Money = float.Parse(temp[13]);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log("QueryBasicStockInfo exception：" + ApiHelper.ParseErrInfo(result));
+                    Logger.Exception(e, ApiHelper.ParseErrInfo(result));
+                    throw e;
+                }
+            }
+            else
+            {
+                Logger.Log("QueryBasicStockInfo error：" + ApiHelper.ParseErrInfo(errorInfo));
                 return null;
             }
             return quotes;

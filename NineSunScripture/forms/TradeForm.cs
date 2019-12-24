@@ -81,7 +81,7 @@ namespace NineSunScripture.forms
             order.Code = tbCode.Text;
             order.Price = float.Parse(tbPrice.Text);
 
-            BuyStrategy.CancelOrdersCanCancel(accounts, quotes, null);
+            HitBoardStrategy.CancelOrdersCanCancel(accounts, quotes, null);
             foreach (Account account in accounts)
             {
                 order.TradeSessionId = account.TradeSessionId;

@@ -18,14 +18,18 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = false;
-        private const int SleepIntervalOfNonTrade = 25000;
+        public static bool IsTest = true;
+        private const short SleepIntervalOfNonTrade = 25000;
         //没有level2没必要设置太低
-        private const int SleepIntervalOfTrade = 200;
+        private const short SleepIntervalOfTrade = 200;
+        //更新成交额间隔，单位秒
+        private const short UpdateMoneyInterval = 2;
+        //更新资金、持仓信息间隔，单位秒
+        private const short UpdateFundInterval = 3;
 
-        private int sleepInterval = SleepIntervalOfTrade;
-        private short fundUpdateCtrl = 0;
+        private short sleepInterval = SleepIntervalOfTrade;
         private short queryPriceErrorCnt = 0;
+        private bool isHoliday;
 
         private Account mainAcct;
         private List<Account> accounts;
@@ -33,20 +37,30 @@ namespace NineSunScripture.strategy
         private List<Quotes> stocksToBuy, stocksForPrice;
         private List<Quotes> dragonLeaders;
         private Thread strategyThread;
-        private BuyStrategy buyStrategy;
+        private HitBoardStrategy hitBoardStrategy;
+        private WeakTurnStrongStrategy weakTurnStrongStrategy;
         private SellStrategy sellStrategy;
         private ITrade callback;
         private IAcctInfoListener fundListener;
         private IShowWorkingSatus showWorkingSatus;
-        private bool isHoliday;
+        private DateTime lastCycleBeginTime;
+        private DateTime lastUpdateFundTime;
+        private DateTime lastUpdateMoneyTime;
+        //逆回购记录，使用日期记录以支持不关策略长时间运行
+        private Dictionary<DateTime, bool> reverseRepurchaseBondsRecords;
 
         public MainStrategy()
         {
             this.stocksToBuy = new List<Quotes>();
             this.stocksForPrice = new List<Quotes>();
-            this.buyStrategy = new BuyStrategy();
+            this.hitBoardStrategy = new HitBoardStrategy();
             this.sellStrategy = new SellStrategy();
+            this.weakTurnStrongStrategy = new WeakTurnStrongStrategy();
             this.isHoliday = Utils.IsHolidayByDate(DateTime.Now);
+            this.reverseRepurchaseBondsRecords = new Dictionary<DateTime, bool>();
+            this.lastUpdateMoneyTime = DateTime.Now;
+            this.lastUpdateFundTime = DateTime.Now;
+            this.lastCycleBeginTime = DateTime.Now;
         }
 
         private void Process()
@@ -84,7 +98,15 @@ namespace NineSunScripture.strategy
             queryPriceErrorCnt = 0;
             while (true)
             {
-                Thread.Sleep(sleepInterval);
+                Logger.Log("Cycle begin---------- last cycle cost "
+                    + DateTime.Now.Subtract(lastCycleBeginTime).TotalMilliseconds + "ms");
+                //处理时间超过一半的睡眠时间就不睡了，否则实际频率会降低很大
+                if (DateTime.Now.Subtract(lastCycleBeginTime).TotalMilliseconds < sleepInterval * 0.5)
+                {
+                    Thread.Sleep(sleepInterval);
+                    Logger.Log("Sleep " + sleepInterval + "ms");
+                }
+                lastCycleBeginTime = DateTime.Now;
                 if (!IsTest && !IsTradeTime())
                 {
                     if (null != showWorkingSatus)
@@ -92,6 +114,7 @@ namespace NineSunScripture.strategy
                         showWorkingSatus.RotateStatusImg(-1);
                     }
                     Logger.Log("Not trade time, pass");
+                    ReverseRepurchaseBonds();
                     continue;
                 }
                 if (null == stocksForPrice || stocksForPrice.Count == 0)
@@ -99,15 +122,44 @@ namespace NineSunScripture.strategy
                     Logger.Log("No stocks to Query");
                     continue;
                 }
+                bool needUpdateMoney = false;
+                if (DateTime.Now.Subtract(lastUpdateMoneyTime).TotalSeconds > UpdateMoneyInterval)
+                {
+                    Logger.Log("Need QueryBasicStockInfo---- ");
+                    needUpdateMoney = true;
+                }
                 UpdateTotalAccountInfo(true);
                 Quotes quotes = null;
                 for (int i = 0; i < stocksForPrice.Count; i++)
                 {
                     try
                     {
-                        quotes = PriceAPI.QueryTenthGearPrice(
-                            mainAcct.PriceSessionId, mainAcct.TradeSessionId, stocksForPrice[i].Code);
-                        if (null == quotes || quotes.LatestPrice == 0 || string.IsNullOrEmpty(quotes.Name))
+                        Quotes stock = stocksForPrice[i];
+                        DateTime startTime = DateTime.Now;
+                        quotes = PriceAPI.QueryTenthGearPrice(mainAcct.PriceSessionId, stock.Code);
+                        //2s更新一次成交额，可大幅提升策略性能
+                        if (needUpdateMoney)
+                        {
+                            Quotes basicInfo
+                                = PriceAPI.QueryBasicStockInfo(mainAcct.PriceSessionId, stock.Code);
+                            if (null != basicInfo)
+                            {
+                                stock.Money = basicInfo.Money;
+                            }
+                            else
+                            {
+                                queryPriceErrorCnt++;
+                                if (queryPriceErrorCnt < 3)
+                                {
+                                    continue;
+                                }
+                            }
+                            Logger.Log("QueryBasicStockInfo---- ");
+                        }
+
+                        Logger.Log("Query price time: "
+                            + DateTime.Now.Subtract(startTime).TotalMilliseconds + "ms");
+                        if (null == quotes || quotes.LatestPrice == 0)
                         {
                             queryPriceErrorCnt++;
                             Logger.Log("QueryTenthGearPrice error " + queryPriceErrorCnt);
@@ -127,15 +179,27 @@ namespace NineSunScripture.strategy
                             callback.OnTradeResult(0, "调用行情接口", "行情接口异常", true);
                             return;
                         }
+                        quotes.Name = stock.Name;
+                        quotes.Money = stock.Money;
                         queryPriceErrorCnt = 0;
                         Utils.SamplingLogQuotes(quotes);
-                        SetTradeParams(quotes);
+                        SetTradeParams(stock, quotes);
                         if (positionStocks.Contains(quotes))
                         {
                             sellStrategy.Sell(quotes, accounts, callback);
                         }
-                        //持仓股回封要买回，所以全部股票都在买的范围
-                        buyStrategy.Buy(quotes, accounts, callback);
+                        if (quotes.TradeStrategy == Strategy.WeakTurnStrong)
+                        {
+                            weakTurnStrongStrategy.Buy(quotes, accounts, callback);
+                        }
+                        else
+                        {
+                            //暂时除了弱转强，其余都是打板
+                            //持仓股回封要买回，所以全部股票都在买的范围
+                            hitBoardStrategy.Buy(quotes, accounts, callback);
+                        }
+                        Logger.Log("Single stock process time: "
+                            + DateTime.Now.Subtract(startTime).TotalMilliseconds + "ms");
                     }
                     catch (ThreadAbortException)
                     {
@@ -147,11 +211,11 @@ namespace NineSunScripture.strategy
                         Logger.Exception(e);
                         callback.OnTradeResult(0, "策略执行发生异常", e.Message, true);
                     }
-                    finally
-                    {
-                        quotes = null;
-                    }
                 }//END FOR
+                if (needUpdateMoney)
+                {
+                    lastUpdateMoneyTime = DateTime.Now;
+                }
                 if (null != showWorkingSatus)
                 {
                     if (isWorkingRight)
@@ -168,23 +232,19 @@ namespace NineSunScripture.strategy
 
         public bool Start()
         {
-
-            if (!Utils.DetectTHSDll())
-            {
-                MessageBox.Show("dll不存在，不能启动策略->" + System.Environment.CurrentDirectory);
-                return false;
-            }
-
             strategyThread = new Thread(Process);
             strategyThread.Start();
 
             return true;
         }
 
+        /// <summary>
+        /// 策略停止后不注销，依然可以人工操作
+        /// </summary>
         public void Stop()
         {
             strategyThread.Abort();
-            if (null != accounts && accounts.Count > 0)
+            /*if (null != accounts && accounts.Count > 0)
             {
                 PriceAPI.HQ_Logoff(accounts[0].PriceSessionId);
                 foreach (Account account in accounts)
@@ -192,38 +252,31 @@ namespace NineSunScripture.strategy
                     TradeAPI.Logoff(account.TradeSessionId);
                 }
                 accounts.Clear();
-            }
+            }*/
         }
 
         /// <summary>
         /// 设置交易计划，以便在策略里面直接拿到龙头、仓位和成交量限制值
         /// </summary>
         /// <param name="quotes">行情对象</param>
-        private void SetTradeParams(Quotes quotes)
+        private void SetTradeParams(Quotes source, Quotes quotes)
         {
-            Quotes source = stocksForPrice.Find(item => item.Code == quotes.Code);
-            if (null == source)
-            {
-                return;
-            }
             quotes.PositionCtrl = source.PositionCtrl;
             quotes.MoneyCtrl = source.MoneyCtrl;
             quotes.InPosition = source.InPosition;
             quotes.IsDragonLeader = source.IsDragonLeader;
+            quotes.TradeStrategy = source.TradeStrategy;
         }
 
         /// <summary>
-        /// 每隔15个心跳更新一下总账户信息
+        /// 每隔UpdateFundInterval更新一下总账户信息
         /// </summary>
         /// <param name="ctrlFrequency">是否控制频率</param>
         public void UpdateTotalAccountInfo(bool ctrlFrequency)
         {
-            if (ctrlFrequency && fundUpdateCtrl++ % 15 != 0)
+            if (ctrlFrequency &&
+                DateTime.Now.Subtract(lastUpdateFundTime).TotalSeconds < UpdateFundInterval)
             {
-                if (fundUpdateCtrl > 15)
-                {
-                    fundUpdateCtrl = 0;
-                }
                 return;
             }
             if (null != fundListener && null != accounts)
@@ -239,6 +292,8 @@ namespace NineSunScripture.strategy
                 account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
                 fundListener.OnAcctInfoListen(account);
             }
+            Logger.Log("UpdateTotalAccountInfo---- ");
+            lastUpdateFundTime = DateTime.Now;
         }
 
         public bool IsTradeTime()
@@ -248,7 +303,7 @@ namespace NineSunScripture.strategy
                 SetSleepIntervalOfNonTrade();
                 return false;
             }
-            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 29)
+            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 24)
             {
                 SetSleepIntervalOfNonTrade();
                 return false;
@@ -273,6 +328,19 @@ namespace NineSunScripture.strategy
                 sleepInterval = SleepIntervalOfTrade;
             }
             return true;
+        }
+
+        /// <summary>
+        /// 15:25逆回购
+        /// </summary>
+        private void ReverseRepurchaseBonds()
+        {
+            if (DateTime.Now.Hour == 15 && DateTime.Now.Minute == 20
+                && !reverseRepurchaseBondsRecords.ContainsKey(DateTime.Now.Date))
+            {
+                AccountHelper.AutoReverseRepurchaseBonds(accounts, callback);
+                reverseRepurchaseBondsRecords.Add(DateTime.Now.Date, true);
+            }
         }
 
         private void SetSleepIntervalOfNonTrade()

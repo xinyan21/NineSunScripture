@@ -8,16 +8,35 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace NineSunScripture.util.test
 {
     class TradeTestCase
     {
+        public void TestSell(List<Account> accounts)
+        {
+            Order order = new Order();
+            order.TradeSessionId = accounts[0].TradeSessionId;
+            order.Code = "131810";
+            order.Price = 2.3f;
+            order.Quantity = 10;
+            order.ShareholderAcct = accounts[0].SzShareholderAcct;
+            int rspId=TradeAPI.Sell(order);
+            if (rspId>0)
+            {
+                MessageBox.Show("sell success");
+            }
+            else
+            {
+                MessageBox.Show("sell failed, " +ApiHelper.ParseErrInfo(order.ErrorInfo));
+            }
+        }
+
         public void TestBuy(List<Account> accounts)
         {
             Order order = new Order();
             order.TradeSessionId = accounts[0].TradeSessionId;
-            order.Category = Order.CategoryBuy;
             order.Code = "300341";
             order.Price = 13.95f;
             order.Quantity = 200;
@@ -28,7 +47,7 @@ namespace NineSunScripture.util.test
         public void TestBuyStrategy(List<Account> accounts)
         {
             int cnt = 0;
-            BuyStrategy buyStrategy = new BuyStrategy();
+            HitBoardStrategy buyStrategy = new HitBoardStrategy();
             Quotes quotes = new Quotes();
             //卖一等于涨停价买点
             /* quotes.Code = "002713";
@@ -185,19 +204,19 @@ namespace NineSunScripture.util.test
         public void TestSellStrategy(List<Account> accounts)
         {
             Quotes quotes = new Quotes();
-            quotes.Code = "002907";
-            quotes.Name = "华森制药";
-            quotes.PreClose = 17.22f;
-            quotes.Buy1 = 18f;
+            quotes.Code = "300518";
+            quotes.Name = "盛迅达";
+            quotes.PreClose = 27.44f;
+            quotes.Buy1 = 27f;
             quotes.Buy1Vol = 10000;
-            quotes.Sell1 = 0f;
-            quotes.HighLimit = 18.94f;
+            quotes.Sell1 = 27.1f;
+            quotes.HighLimit = 30f;
             quotes.Money = 5000 * 10000;
             quotes.MoneyCtrl = 1000;
             quotes.PositionCtrl = 0.1f;
-            quotes.LatestPrice = 18;
-            quotes.Open = 18.2f;
-            quotes.LowLimit = 15.5f;
+            quotes.LatestPrice = 27;
+            quotes.Open = 27;
+            quotes.LowLimit = 24.7f;
 
             new SellStrategy().Sell(quotes, accounts, null);
         }

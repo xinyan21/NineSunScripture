@@ -52,9 +52,9 @@ namespace NineSunScripture.trade.helper
             {
                 return null;
             }
-
+            byte[] byteArrErrorInfo = new byte[256];
             int priceSessionId = PriceAPI.HQ_Logon(
-                mainAcct.PriceAcct, mainAcct.PricePassword, mainAcct.ErrorInfo);
+                mainAcct.PriceAcct, mainAcct.PricePassword, byteArrErrorInfo);
             if (priceSessionId > 0)
             {
                 mainAcct.PriceSessionId = priceSessionId;
@@ -62,17 +62,17 @@ namespace NineSunScripture.trade.helper
             }
             else if (null != callback)
             {
-                string errInfo = ApiHelper.ParseErrInfo(mainAcct.ErrorInfo);
+                string errInfo = ApiHelper.ParseErrInfo(byteArrErrorInfo);
                 callback.OnTradeResult(0, "行情登录", errInfo, true);
             }
             List<Account> loginAccts = new List<Account>();
             foreach (Account account in dbAccounts)
             {
-                //TODO 新版本加了营业部ID，后面看要不要加到数据库
+                //TODO 新版本加了营业部ID，后面看要不要加到数据库，后面接口改成字符串了，以后看需求升级
                 int tradeSessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
-                    account.BrokerServerPort, account.VersionOfTHS, 0, account.AcctType,
+                    account.BrokerServerPort, account.VersionOfTHS, "0", account.AcctType,
                     account.FundAcct, account.FundPassword, account.CommPwd,
-                    account.IsRandomMac, account.ErrorInfo);
+                    account.IsRandomMac, byteArrErrorInfo);
                 string opLog = "";
                 if (tradeSessionId > 0)
                 {
@@ -106,12 +106,12 @@ namespace NineSunScripture.trade.helper
                 else
                 {
                     opLog = "资金账号【" + account.FundAcct + "】登录失败，信息："
-                        + ApiHelper.ParseErrInfo(account.ErrorInfo);
+                        + ApiHelper.ParseErrInfo(byteArrErrorInfo);
                     Logger.Log(opLog);
                 }
                 if (null != callback)
                 {
-                    string errInfo = ApiHelper.ParseErrInfo(account.ErrorInfo);
+                    string errInfo = ApiHelper.ParseErrInfo(byteArrErrorInfo);
                     bool needReboot = false;
                     if (account == mainAcct || !errInfo.Contains("密码"))
                     {
@@ -363,7 +363,7 @@ namespace NineSunScripture.trade.helper
                         callback.OnTradeResult(rspCode, info, errInfo, false);
                     }
                 }
-            }
+            } 
         }
 
         /// <summary>
@@ -385,20 +385,21 @@ namespace NineSunScripture.trade.helper
             Order order = new Order();
             order.Code = "131810";
             Quotes quotes = TradeAPI.QueryQuotes(mainAcct.TradeSessionId, order.Code);
-            order.Price = quotes.Buy1;
+            order.Price = quotes.Buy3;
             foreach (Account account in accounts)
             {
                 order.TradeSessionId = account.TradeSessionId;
                 ApiHelper.SetShareholderAcct(account, quotes, order);
                 double availableCash = account.Funds.AvailableAmt;
-                order.Quantity = (int)(availableCash / 1000 * 10);
+                order.Quantity = (int)(availableCash / 1000) * 10;
                 if (order.Quantity == 0)
                 {
+                    Logger.Log("资金账号【" + account.FundAcct + "】可用金额不够逆回购");
                     continue;
                 }
                 int rspCode = TradeAPI.Sell(order);
-                string opLog = "资金账号【" + account.FundAcct + "】" + "逆回购"
-                    + (int)(availableCash / 1000) * 1000 + "元";
+                string opLog
+                    = "资金账号【" + account.FundAcct + "】" + "逆回购" + order.Quantity * 100 + "元";
                 Logger.Log(opLog);
                 if (null != callback)
                 {

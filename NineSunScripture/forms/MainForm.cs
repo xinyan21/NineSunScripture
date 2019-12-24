@@ -31,11 +31,11 @@ namespace NineSunScripture
         public MainForm()
         {
             InitializeComponent();
-            if (!Utils.DetectTHSDll())
-            {
-                MessageBox.Show("dll不存在，不能启动策略->" + System.Environment.CurrentDirectory);
-                return;
-            }
+            /* if (!Utils.DetectTHSDll())
+             {
+                 MessageBox.Show("dll不存在，不能启动策略->" + System.Environment.CurrentDirectory);
+                 return;
+             }*/
 
             stockDbHelper = new StockDbHelper();
             stocks = new List<Quotes>();
@@ -176,6 +176,7 @@ namespace NineSunScripture
             {
                 return;
             }
+            float totalProfit = 0;
             lvPositions.BeginUpdate();
             lvPositions.Items.Clear();
             foreach (Position position in account.Positions)
@@ -190,10 +191,12 @@ namespace NineSunScripture
                     / account.Funds.TotalAsset * 100);
                 lvi.SubItems.Add(positionRatio + "%");
                 lvi.Tag = position;
+                totalProfit += position.ProfitAndLoss;
 
                 lvPositions.Items.Add(lvi);
             }
             lvPositions.EndUpdate();
+            lblTotalProfit.Text = "总盈亏\n" + ((int)totalProfit).ToString();
         }
 
         private void BindCancelOrdersData()
@@ -339,8 +342,8 @@ namespace NineSunScripture
         /// </summary>
         private void UpdateAcctInfo()
         {
-            lblTotalAsset.Text = "总资产：\n" + account.Funds.TotalAsset;
-            lblMoneyAvailable.Text = "可用金额：\n" + account.Funds.AvailableAmt;
+            lblTotalAsset.Text = "总资产\n" + account.Funds.TotalAsset;
+            lblMoneyAvailable.Text = "可用金额\n" + account.Funds.AvailableAmt;
             if (account.Positions.Count > 0)
             {
                 BindPositionsData();
@@ -650,12 +653,30 @@ namespace NineSunScripture
         {
             lvCancelOrders.Visible = false;
             lvPositions.Visible = true;
+            mainStrategy.UpdateTotalAccountInfo(false);
         }
 
         private void BtnSwitchCancelOrders_Click(object sender, EventArgs e)
         {
             lvCancelOrders.Visible = true;
             lvPositions.Visible = false;
+            mainStrategy.UpdateTotalAccountInfo(false);
+        }
+
+        private void TspiPrivacyMode_Click(object sender, EventArgs e)
+        {
+            if (tspiPrivacyMode.Text.Equals("隐私模式"))
+            {
+                tspiPrivacyMode.Text = "隐私模式【开】";
+                flpStockPool.Visible = false;
+                panelFundInfo.Visible = false;
+            }
+            else
+            {
+                tspiPrivacyMode.Text = "隐私模式";
+                flpStockPool.Visible = true;
+                panelFundInfo.Visible = true;
+            }
         }
     }
 

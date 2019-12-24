@@ -82,6 +82,7 @@ namespace NineSunScripture.model
         /// </summary>        
         public bool InPosition = false;
         public bool IsDragonLeader = false;
+        public Strategy TradeStrategy = Strategy.HitBoard;
 
         public bool Equals(Quotes other)
         {
@@ -107,5 +108,10 @@ namespace NineSunScripture.model
             sb.Append("#Buy1Vol=").Append(Buy1Vol);
             return sb.ToString();
         }
+    }
+    public enum Strategy
+    {
+        HitBoard,
+        WeakTurnStrong
     }
 }

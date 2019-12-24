@@ -12,7 +12,16 @@ namespace NineSunScripture.model
     public class BaseModel
     {
         public int TradeSessionId;
-        public byte[] Result = new byte[1024 * 1024];
-        public byte[] ErrorInfo = new byte[256];
+        public byte[] Result;
+        public byte[] ErrorInfo;
+
+        /// <summary>
+        /// 给Result和ErrorInfo分配内存
+        /// </summary>
+        public void AllocateResultMem()
+        {
+            Result = new byte[500 * 1024];
+            ErrorInfo = new byte[256];
+        }
     }
 }

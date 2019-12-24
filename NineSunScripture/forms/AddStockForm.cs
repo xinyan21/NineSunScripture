@@ -26,7 +26,7 @@ namespace NineSunScripture.forms
             this.accounts = accounts;
         }
 
-        private void btnAddStcok_Click(object sender, EventArgs e)
+        private void BtnAddStcok_Click(object sender, EventArgs e)
         {
             if (tbMoney.Text.Contains("."))
             {
@@ -45,22 +45,22 @@ namespace NineSunScripture.forms
             Close();
         }
 
-        private void rbtnDragonLeader_CheckedChanged(object sender, EventArgs e)
+        private void RbtnDragonLeader_CheckedChanged(object sender, EventArgs e)
         {
             this.category = Quotes.CategoryDragonLeader;
         }
 
-        private void rbtnLongTerm_CheckedChanged(object sender, EventArgs e)
+        private void RbtnLongTerm_CheckedChanged(object sender, EventArgs e)
         {
             this.category = Quotes.CategoryLongTerm;
         }
 
-        private void rbtnTomorrow_CheckedChanged(object sender, EventArgs e)
+        private void RbtnTomorrow_CheckedChanged(object sender, EventArgs e)
         {
             this.category = Quotes.CategoryLatest;
         }
 
-        private void tbCode_TextChanged(object sender, EventArgs e)
+        private void TbCode_TextChanged(object sender, EventArgs e)
         {
             if (tbCode.TextLength == 6)
             {
@@ -78,6 +78,16 @@ namespace NineSunScripture.forms
                     tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
                 }
             }
+        }
+
+        private void RbHitBoard_CheckedChanged(object sender, EventArgs e)
+        {
+            this.quotes.TradeStrategy = Strategy.HitBoard;
+        }
+
+        private void RbWeakTurnStrong_CheckedChanged(object sender, EventArgs e)
+        {
+            this.quotes.TradeStrategy = Strategy.WeakTurnStrong;
         }
     }
 }

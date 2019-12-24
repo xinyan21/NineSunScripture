@@ -64,6 +64,11 @@ namespace NineSunScripture.strategy
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
+            //9:30之前不卖
+            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30)
+            {
+                return;
+            }
             float highLimit = quotes.HighLimit;
             float lowLimit = quotes.LowLimit;
             float curPrice = quotes.LatestPrice;

@@ -31,7 +31,7 @@ namespace NineSunScripture.trade.api
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串
         [DllImport(@dllPath, EntryPoint = "Logon", CallingConvention = CallingConvention.Winapi)]
         public extern static int Logon(int qsid, string host, short port, string version,
-            short salesDepartId, short accountType,
+            string salesDepartId, short accountType,
             string account, string password, string commPassword, bool dommac, byte[] errInfo);
         //功能：查询各种交易数据
         //sessionId,//客户端 ID
@@ -80,6 +80,7 @@ namespace NineSunScripture.trade.api
         public static Funds QueryFunds(int sessionId)
         {
             Funds funds = new Funds();
+            funds.AllocateResultMem();
             int code = QueryData(sessionId, 0, funds.Result, funds.ErrorInfo);
             ApiHelper.HandleTimeOut(funds.ErrorInfo);
             if (code > 0)
@@ -108,6 +109,7 @@ namespace NineSunScripture.trade.api
             List<Position> positions = new List<Position>();
             Position position = null;
             Position resultPosition = new Position();
+            resultPosition.AllocateResultMem();
             int code = QueryData(sessionId, 1, resultPosition.Result, resultPosition.ErrorInfo);
             ApiHelper.HandleTimeOut(resultPosition.ErrorInfo);
             if (code > 0)
@@ -141,6 +143,7 @@ namespace NineSunScripture.trade.api
             List<Order> orders = new List<Order>();
             Order order = new Order();
             Order resultOrder = new Order();
+            resultOrder.AllocateResultMem();
             int code = QueryData(sessionId, 3, resultOrder.Result, resultOrder.ErrorInfo);
             ApiHelper.HandleTimeOut(resultOrder.ErrorInfo);
             if (code > 0)
@@ -170,8 +173,9 @@ namespace NineSunScripture.trade.api
         public static List<Order> QueryOrdersCanCancel(int sessionId)
         {
             List<Order> orders = new List<Order>();
-            Order resultOrder = new Order();
             Order order = null;
+            Order resultOrder = new Order();
+            resultOrder.AllocateResultMem();
             int code = QueryData(sessionId, 4, resultOrder.Result, resultOrder.ErrorInfo);
             ApiHelper.HandleTimeOut(resultOrder.ErrorInfo);
             if (code > 0)
@@ -206,7 +210,9 @@ namespace NineSunScripture.trade.api
         {
             List<ShareHolderAcct> accounts = new List<ShareHolderAcct>();
             ShareHolderAcct account = new ShareHolderAcct();
+            account.AllocateResultMem();
             int code = QueryData(sessionId, 5, account.Result, account.ErrorInfo);
+            ApiHelper.HandleTimeOut(account.ErrorInfo);
             if (code > 0)
             {
                 String[,] temp = ApiHelper.ParseResults(account.Result);
@@ -223,7 +229,6 @@ namespace NineSunScripture.trade.api
             {
                 Logger.Log("QueryShareHolderAccts：" + ApiHelper.ParseErrInfo(account.ErrorInfo));
             }
-            ApiHelper.HandleTimeOut(account.ErrorInfo);
             return accounts;
         }
 
@@ -236,6 +241,7 @@ namespace NineSunScripture.trade.api
         public static Quotes QueryQuotes(int tradeSessionId, String code)
         {
             Quotes quotes = new Quotes();
+            quotes.AllocateResultMem();
             int rspCode = QueryHQ(tradeSessionId, code, quotes.Result, quotes.ErrorInfo);
             ApiHelper.HandleTimeOut(quotes.ErrorInfo);
             if (rspCode > 0)
@@ -306,6 +312,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Buy(Order order)
         {
+            order.AllocateResultMem();
             int rspId = SendOrder(order.TradeSessionId, Order.CategoryBuy, order.ShareholderAcct,
                 order.Code, order.Price, order.Quantity, order.Result, order.ErrorInfo);
             ApiHelper.HandleTimeOut(order.ErrorInfo);
@@ -319,6 +326,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int Sell(Order order)
         {
+            order.AllocateResultMem();
             int rspId = SendOrder(order.TradeSessionId, Order.CategorySell, order.ShareholderAcct,
                 order.Code, order.Price, order.Quantity, order.Result, order.ErrorInfo);
             ApiHelper.HandleTimeOut(order.ErrorInfo);
@@ -332,6 +340,7 @@ namespace NineSunScripture.trade.api
         /// <returns>响应码</returns>
         public static int CancelOrder(Order order)
         {
+            order.AllocateResultMem();
             int rspId = CancelOrder(order.TradeSessionId, order.ShareholderAcct,
                 order.OrderId, order.Result, order.ErrorInfo);
             ApiHelper.HandleTimeOut(order.ErrorInfo);

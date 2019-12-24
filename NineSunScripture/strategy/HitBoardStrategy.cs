@@ -5,16 +5,13 @@ using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.strategy
 {
     /// <summary>
     /// 买策略
     /// </summary>
-    class BuyStrategy
+    class HitBoardStrategy
     {
         /// <summary>
         /// 默认成交额限制是7000万，低于的过滤
@@ -42,6 +39,12 @@ namespace NineSunScripture.strategy
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
+            //9:30之前不打板
+            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30)
+            {
+                return;
+            }
+
             float highLimit = quotes.HighLimit;
             float open = quotes.Open;
             string code = quotes.Code;
@@ -73,7 +76,8 @@ namespace NineSunScripture.strategy
             }
             float positionRatioCtrl = 0;   //买入计划仓位比例
             //记录开板时间
-            bool isBoardLastTick = null != lastTickQuotes && lastTickQuotes.LatestPrice == highLimit;
+            bool isBoardLastTick
+                = null != lastTickQuotes && lastTickQuotes.LatestPrice == highLimit;
             bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
@@ -84,20 +88,23 @@ namespace NineSunScripture.strategy
             bool isBoardThisTick = quotes.LatestPrice == highLimit;
             if (!isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
-                int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
+                int openBoardInterval
+                    = (int)DateTime.Now.Subtract(openBoardTime[code]).TotalSeconds;
                 Logger.Log("【" + quotes.Name + "】回封");
                 openBoardTime.Remove(code);
                 //重置后因为触发了买点需要判断下开板时间是否足够
                 if (openBoardInterval < 30)
                 {
-                    Logger.Log("【" + quotes.Name + "】开板时间（已回封）->" + openBoardInterval + "s");
+                    Logger.Log(
+                        "【" + quotes.Name + "】开板时间（已回封）->" + openBoardInterval + "s");
                     return;
                 }
             }
             //开板时间小于30秒，过滤。如果没触发卖2买点，直接回封，这里的判断是没用的，因为上面回封后会重置开板时间
             if (openBoardTime.ContainsKey(code))
             {
-                int openBoardInterval = (int)(DateTime.Now - openBoardTime[code]).TotalSeconds;
+                int openBoardInterval
+                    = (int)DateTime.Now.Subtract(openBoardTime[code]).TotalSeconds;
                 if (openBoardInterval < 30)
                 {
                     Logger.Log("【" + quotes.Name + "】开板时间->" + openBoardInterval + "s");
@@ -114,10 +121,10 @@ namespace NineSunScripture.strategy
             }
             //成交额小于7000万过滤
             //买入计划里设置了成交额（单位为万）限制，这里就要判断
-            bool isMoneyNotQuolified = quotes.MoneyCtrl > 0
-                && quotes.Money < quotes.MoneyCtrl * 10000;
-            //买入计划的成交额限制与7000万限制只要满足一个即可买入
-            if (isMoneyNotQuolified && quotes.Money < DefaultMoneyCtrl * 10000)
+            bool isMoneyQuolified = quotes.MoneyCtrl > 0
+                && quotes.Money > quotes.MoneyCtrl * 10000;
+            //买入计划的成交额限制与默认的7000万限制都不和要求就过滤
+            if (!isMoneyQuolified && quotes.Money < DefaultMoneyCtrl * 10000)
             {
                 return;
             }
@@ -135,13 +142,14 @@ namespace NineSunScripture.strategy
                 }
                 else
                 {
-                    if (null != lastTickQuotes && lastTickQuotes.Buy1 == highLimit)
+                    //涨停开盘或者上一个tick已经涨停，过滤
+                    if (null == lastTickQuotes || lastTickQuotes.Buy1 == highLimit)
                     {
                         return;
                     }
                 }
             }
-            if (quotes.Sell1 == highLimit 
+            if (quotes.Sell1 == highLimit
                 && quotes.Sell1Vol * highLimit > MaxSellMoneyCtrl * 10000)
             {
                 Logger.Log("【" + quotes.Name + "】板上货太多，过滤");
@@ -318,7 +326,7 @@ namespace NineSunScripture.strategy
         /// </summary>
         /// <param name="fundAcct">资金账号</param>
         /// <returns>仓位比例</returns>
-        private float GetNewPositionRatio(Account account)
+        public static float GetNewPositionRatio(Account account)
         {
             account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
             double totalProfitPct = account.Funds.TotalAsset / account.InitTotalAsset;
@@ -404,7 +412,7 @@ namespace NineSunScripture.strategy
         /// <param name="sessionId">登录账号的ID</param>
         /// <param name="code">股票代码</param>
         /// <returns></returns>
-        private int GetTodayTransactionQuantityOf(int sessionId, string code, string op)
+        public static int GetTodayTransactionQuantityOf(int sessionId, string code, string op)
         {
             int quantity = 0;
             List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(sessionId);
