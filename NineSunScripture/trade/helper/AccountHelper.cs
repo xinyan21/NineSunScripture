@@ -388,6 +388,8 @@ namespace NineSunScripture.trade.helper
             order.Price = quotes.Buy3;
             foreach (Account account in accounts)
             {
+                //要查最新资金
+                account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
                 order.TradeSessionId = account.TradeSessionId;
                 ApiHelper.SetShareholderAcct(account, quotes, order);
                 double availableCash = account.Funds.AvailableAmt;

@@ -75,17 +75,18 @@ namespace NineSunScripture.strategy
                 lastTickQuotes = ticks[ticks.Length - 2];
             }
             float positionRatioCtrl = 0;   //买入计划仓位比例
-            //记录开板时间
+            //记录开板时间，这里得用买1来判断封板和开板，即使涨停，但是买1不是涨停价也不算板
+            //注意买一和最新价的区别，最新价即使涨停，但是买一不是涨停就没有封住，板就是封住
             bool isBoardLastTick
-                = null != lastTickQuotes && lastTickQuotes.LatestPrice == highLimit;
+                = null != lastTickQuotes && lastTickQuotes.Buy1 == highLimit;
             bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
-                Logger.Log("【" + quotes.Name + "】开板");
                 openBoardTime.Add(code, DateTime.Now);
+                Logger.Log("【" + quotes.Name + "】开板");
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
-            bool isBoardThisTick = quotes.LatestPrice == highLimit;
+            bool isBoardThisTick = quotes.Buy1 == highLimit;
             if (!isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
                 int openBoardInterval
@@ -96,11 +97,12 @@ namespace NineSunScripture.strategy
                 if (openBoardInterval < 30)
                 {
                     Logger.Log(
-                        "【" + quotes.Name + "】开板时间（已回封）->" + openBoardInterval + "s");
+                        "【" + quotes.Name + "】开板时间（已回封），此次开板时间为" + openBoardInterval + "s");
                     return;
                 }
             }
             //开板时间小于30秒，过滤。如果没触发卖2买点，直接回封，这里的判断是没用的，因为上面回封后会重置开板时间
+            //所以上面加上了30s的判断
             if (openBoardTime.ContainsKey(code))
             {
                 int openBoardInterval

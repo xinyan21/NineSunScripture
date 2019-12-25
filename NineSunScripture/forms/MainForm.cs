@@ -233,7 +233,7 @@ namespace NineSunScripture
             runtimeInfo = "新增股票【" + quotes.Name + "】";
             InvokeAddRunInfo();
             RefreshStocksListView();
-            if (mainStrategy.IsTradeTime())
+            if (isStrategyStarted && mainStrategy.IsTradeTime())
             {
                 RebootStrategy();
             }

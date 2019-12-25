@@ -157,12 +157,6 @@ namespace NineSunScripture.strategy
                                     continue;
                                 }
                             }
-                            Logger.Log("QueryBasicStockInfo---- ");
-                        }
-                        if (IsTest)
-                        {
-                            Logger.Log("Query price time: "
-                            + DateTime.Now.Subtract(startTime).TotalMilliseconds + "ms");
                         }
                         if (null == quotes || quotes.LatestPrice == 0)
                         {
@@ -202,11 +196,6 @@ namespace NineSunScripture.strategy
                             //暂时除了弱转强，其余都是打板
                             //持仓股回封要买回，所以全部股票都在买的范围
                             hitBoardStrategy.Buy(quotes, accounts, callback);
-                        }
-                        if (IsTest)
-                        {
-                            Logger.Log("【" + quotes.Name + "】process time: "
-                            + DateTime.Now.Subtract(startTime).TotalMilliseconds + "ms");
                         }
                     }
                     catch (ThreadAbortException)
