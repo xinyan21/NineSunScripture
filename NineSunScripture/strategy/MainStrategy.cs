@@ -25,7 +25,7 @@ namespace NineSunScripture.strategy
         //更新成交额间隔，单位秒
         private const short UpdateMoneyInterval = 2;
         //更新资金、持仓信息间隔，单位秒
-        private const short UpdateFundInterval = 5;
+        private const short UpdateFundInterval = 10;
 
         private short sleepInterval = SleepIntervalOfTrade;
         private short queryPriceErrorCnt = 0;
@@ -87,7 +87,7 @@ namespace NineSunScripture.strategy
                     item.IsDragonLeader = true;
                 }
                 //如果股票池里有持仓股说明可以继续做，没有就不能做InPosition要设置成true
-                if (!stocksForPrice.Contains(item))
+                if (!stocksToBuy.Contains(item))
                 {
                     item.InPosition = true;
                     stocksForPrice.Add(item);
@@ -128,7 +128,6 @@ namespace NineSunScripture.strategy
                 bool needUpdateMoney = false;
                 if (DateTime.Now.Subtract(lastUpdateMoneyTime).TotalSeconds > UpdateMoneyInterval)
                 {
-                    Logger.Log("Need QueryBasicStockInfo---- ");
                     needUpdateMoney = true;
                 }
                 UpdateTotalAccountInfo(true);
@@ -289,7 +288,6 @@ namespace NineSunScripture.strategy
                 account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
                 fundListener.OnAcctInfoListen(account);
             }
-            Logger.Log("UpdateTotalAccountInfo---- ");
             lastUpdateFundTime = DateTime.Now;
         }
 
@@ -328,7 +326,7 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 15:25逆回购
+        /// 15:20逆回购
         /// </summary>
         private void ReverseRepurchaseBonds()
         {

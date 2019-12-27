@@ -4,9 +4,6 @@ using NineSunScripture.trade.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.strategy
 {
@@ -27,13 +24,14 @@ namespace NineSunScripture.strategy
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             bool isTradeTime = DateTime.Now.Hour == 9
-                && DateTime.Now.Minute == 24 && DateTime.Now.Second == 57;
+                && DateTime.Now.Minute == 24 && DateTime.Now.Second == 55;
             if (!isTradeTime)
             {
                 return;
             }
             float changeRatio = quotes.Buy1 / quotes.PreClose;
-            bool canBuy = changeRatio > 1.02 && changeRatio < 1.055;
+            bool canBuy = changeRatio > 1.02 && changeRatio < 1.055
+                && quotes.Buy1 * quotes.Buy1Vol > MinBuy1MoneyCtrl;
             if (!canBuy)
             {
                 return;
@@ -59,7 +57,7 @@ namespace NineSunScripture.strategy
             if (funds.AvailableAmt < positionRatioCtrl * funds.TotalAsset)
             {
                 //这里取消撤单后，后面要重新查询资金，否则白撤
-                HitBoardStrategy.CancelOrdersCanCancel(accounts, quotes, callback);
+                AccountHelper.CancelOrdersCanCancel(accounts, quotes, callback);
             }
             Order order = new Order();
             order.Code = quotes.Code;
@@ -172,7 +170,7 @@ namespace NineSunScripture.strategy
                 Logger.Log(opLog);
                 if (null != callback)
                 {
-                    string errInfo = ApiHelper.ParseErrInfo(account.ErrorInfo);
+                    string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
                     callback.OnTradeResult(rspCode, opLog, errInfo, false);
                 }
             }//END FOR

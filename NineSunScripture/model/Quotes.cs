@@ -79,6 +79,7 @@ namespace NineSunScripture.model
         public short StockCategory;
         /// <summary>
         /// 是否是持仓股，默认不是，此属性用来解决新增账户后持仓不一致导致的开仓问题
+        /// 值为true的时候不能新开仓
         /// </summary>        
         public bool InPosition = false;
         public bool IsDragonLeader = false;

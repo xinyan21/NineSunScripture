@@ -64,7 +64,8 @@ namespace NineSunScripture.trade.api
                     String[] temp = ApiHelper.ParseResult(result);
                     if (temp.Length < 47)
                     {
-                        Logger.Log("【重要】HQ_QueryData returns wrong data, start using trade price!");
+                        Logger.Log("【重要】QueryTenthGearPrice returns wrong data! = "
+                            + ApiHelper.ParseErrInfo(result));
                         return null;
                     }
                     quotes.Code = temp[0];
@@ -106,7 +107,7 @@ namespace NineSunScripture.trade.api
         public static Quotes QueryBasicStockInfo(int priceSessionId, string code)
         {
             Quotes quotes = new Quotes();
-            byte[] result = new byte[1024 * 1024];
+            byte[] result = new byte[188 * 1024];
             byte[] errorInfo = new byte[256];
 
             int rspCode = HQ_QueryData(priceSessionId, 4, code, "", result, errorInfo);
@@ -118,9 +119,17 @@ namespace NineSunScripture.trade.api
                     //代码\t涨跌\t涨幅\t换手\t振幅\t外盘\t内盘\t流通值\t最新\t开盘\t最高\t最低\t总量\t成交额
                     //\t涨停\t跌停\t量比\t静态市盈率\tTTM市盈率\t总市值
                     String[] temp = ApiHelper.ParseResult(result);
+                    DateTime now = DateTime.Now;
+                    bool isBidingTime = now.Hour == 9 && now.Minute < 30;
+                    //集合竞价只返回17个数据，反正这个时候也不用成交额，就返回0吧
+                    if (isBidingTime)
+                    {
+                        return quotes;
+                    }
                     if (temp.Length < 20)
                     {
-                        Logger.Log("【重要】HQ_QueryData returns wrong data, start using trade price!");
+                        Logger.Log("【重要】QueryBasicStockInfo returns wrong data! = "
+                            + ApiHelper.ParseErrInfo(result));
                         return null;
                     }
                     quotes.High = float.Parse(temp[10]);

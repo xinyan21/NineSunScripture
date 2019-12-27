@@ -19,15 +19,17 @@ namespace NineSunScripture.util.test
         private TradeTestCase testTrade = new TradeTestCase();
         private List<Account> accounts;
         Quotes quotes;
-        public TestForm(List<Account> accounts )
+        private MainForm mainForm;
+        public TestForm(MainForm main, List<Account> accounts )
         {
             InitializeComponent();
             this.accounts = accounts;
+            this.mainForm = main;
         }
 
         private void TestBuyStrategy()
         {
-            testTrade.TestBuyStrategy(accounts);
+            testTrade.TestBuyStrategy(accounts, mainForm);
         }
 
         private void btnTestBuy_Click(object sender, EventArgs e)

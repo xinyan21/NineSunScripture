@@ -81,14 +81,24 @@ namespace NineSunScripture.forms
             order.Code = tbCode.Text;
             order.Price = float.Parse(tbPrice.Text);
 
-            HitBoardStrategy.CancelOrdersCanCancel(accounts, quotes, null);
+            Funds funds = AccountHelper.QueryTotalFunds(accounts);
+            //可用金额不够用，撤销所有可撤单
+            if (funds.AvailableAmt < positionRatio * funds.TotalAsset)
+            {
+                //这里取消撤单后，后面要重新查询资金，否则白撤
+                AccountHelper.CancelOrdersCanCancel(accounts, quotes, callback);
+            }
             foreach (Account account in accounts)
             {
                 order.TradeSessionId = account.TradeSessionId;
                 account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
                 ApiHelper.SetShareholderAcct(account, quotes, order);
                 //数量是整百整百的
-                double money = account.Funds.AvailableAmt * positionRatio;
+                double money = account.Funds.TotalAsset * positionRatio;
+                if (money > account.Funds.AvailableAmt)
+                {
+                    money = account.Funds.AvailableAmt;
+                }
                 order.Quantity = ((int)(money / (order.Price * 100))) * 100;
                 if (order.Quantity == 0)
                 {
@@ -97,7 +107,7 @@ namespace NineSunScripture.forms
                 int rspCode = TradeAPI.Buy(order);
                 string opLog
                     = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
-                    + order.Quantity * order.Price + "元";
+                    + Math.Round(order.Quantity * order.Price / 10000, 2) + "万元";
                 Logger.Log(opLog);
                 if (null != callback)
                 {

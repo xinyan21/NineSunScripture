@@ -363,7 +363,53 @@ namespace NineSunScripture.trade.helper
                         callback.OnTradeResult(rspCode, info, errInfo, false);
                     }
                 }
-            } 
+            }
+        }
+
+        /// <summary>
+        /// 撤销不是quotes的买单以便回笼资金开新仓
+        /// </summary>
+        /// <param name="accounts">账户对象数组</param>
+        /// <param name="quotes">股票对象</param>
+        public static void CancelOrdersCanCancel(
+            List<Account> accounts, Quotes quotes, ITrade callback)
+        {
+            foreach (Account account in accounts)
+            {
+                CancelOrdersCanCancel(account, quotes, callback);
+            }
+        }
+
+        /// <summary>
+        /// 撤销不是quotes的买单以便回笼资金开新仓
+        /// </summary>
+        /// <param name="account">账户对象</param>
+        /// <param name="quotes">股票对象</param>
+        public static void CancelOrdersCanCancel(
+            Account account, Quotes quotes, ITrade callback)
+        {
+            List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
+            if (null == orders || orders.Count == 0)
+            {
+                return;
+            }
+            foreach (Order order in orders)
+            {
+                if (order.Code != quotes.Code && order.Operation.Contains(Order.OperationBuy))
+                {
+                    order.TradeSessionId = account.TradeSessionId;
+                    int rspCode = TradeAPI.CancelOrder(order);
+                    string opLog = "资金账号【" + account.FundAcct + "】" + "撤销【"
+                        + quotes.Name + "】委托->"
+                        + (order.Quantity * order.Price).ToString("0.00####") + "万元";
+                    Logger.Log(opLog);
+                    if (null != callback)
+                    {
+                        string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
+                        callback.OnTradeResult(rspCode, opLog, errInfo, false);
+                    }
+                }
+            }
         }
 
         /// <summary>

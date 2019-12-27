@@ -601,7 +601,7 @@ namespace NineSunScripture
 
         private void TsmiTest_Click(object sender, EventArgs e)
         {
-            new TestForm(mainStrategy.GetAccounts()).Show();
+            new TestForm(this, mainStrategy.GetAccounts()).Show();
         }
 
         private void MainForm_Closing(object sender, FormClosingEventArgs e)

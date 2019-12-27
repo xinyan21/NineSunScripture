@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NineSunScripture", "NineSun
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "九阳真经", "九阳真经\九阳真经.vdproj", "{DA5A45C1-6544-44C3-8D2A-4C43A0452ADC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{36E66645-8520-4AE0-AB3D-E30CF3BDA438}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WatchDog", "Test\WatchDog.csproj", "{36E66645-8520-4AE0-AB3D-E30CF3BDA438}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

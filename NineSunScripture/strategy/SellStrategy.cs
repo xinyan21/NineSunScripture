@@ -65,7 +65,7 @@ namespace NineSunScripture.strategy
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             //9:30之前不卖
-            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30)
+            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30 && !MainStrategy.IsTest)
             {
                 return;
             }

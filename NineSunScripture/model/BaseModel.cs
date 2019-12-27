@@ -20,7 +20,7 @@ namespace NineSunScripture.model
         /// </summary>
         public void AllocateResultMem()
         {
-            Result = new byte[500 * 1024];
+            Result = new byte[1024 * 1024];
             ErrorInfo = new byte[256];
         }
     }

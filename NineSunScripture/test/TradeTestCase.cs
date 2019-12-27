@@ -22,14 +22,14 @@ namespace NineSunScripture.util.test
             order.Price = 2.3f;
             order.Quantity = 10;
             order.ShareholderAcct = accounts[0].SzShareholderAcct;
-            int rspId=TradeAPI.Sell(order);
-            if (rspId>0)
+            int rspId = TradeAPI.Sell(order);
+            if (rspId > 0)
             {
                 MessageBox.Show("sell success");
             }
             else
             {
-                MessageBox.Show("sell failed, " +ApiHelper.ParseErrInfo(order.ErrorInfo));
+                MessageBox.Show("sell failed, " + ApiHelper.ParseErrInfo(order.ErrorInfo));
             }
         }
 
@@ -44,161 +44,50 @@ namespace NineSunScripture.util.test
             TradeAPI.Buy(order);
         }
 
-        public void TestBuyStrategy(List<Account> accounts)
+        public void TestBuyStrategy(List<Account> accounts, ITrade callback)
         {
             int cnt = 0;
             HitBoardStrategy buyStrategy = new HitBoardStrategy();
+            Quotes LatestPrice = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, "300278");
+            //进入视野
             Quotes quotes = new Quotes();
-            //卖一等于涨停价买点
-             quotes.Code = "002713";
-             quotes.Name = "新易日升";
-             quotes.PreClose = 7.12f;
-             quotes.LatestPrice = 7.76f;
-             quotes.Buy1 = 7.80f;
-             quotes.Buy1Vol = 10000;
-             quotes.Sell1 = 7.83f;
-             quotes.HighLimit = 7.83f;
-             quotes.Money = 5000 * 10000;
-             quotes.MoneyCtrl = 4000;
-             quotes.PositionCtrl = 0.1f;
-
-             buyStrategy.Buy(quotes, accounts, null);
-            Thread.Sleep(3000);
-            //买一量小于1500万买点
-            quotes = new Quotes();
-            quotes.Code = "002713";
-            quotes.Name = "新易日升";
-            quotes.PreClose = 7.12f;
-            quotes.LatestPrice = 7.83f;
-            quotes.Buy1 = 7.83f;
-            quotes.Buy1Vol = 390000;
-            quotes.Sell1 = 0f;
-            quotes.HighLimit = 7.83f;
-            quotes.Money = 5000 * 10000;
-            quotes.MoneyCtrl = 4000;
+            quotes.Name = LatestPrice.Name;
+            quotes.Code = LatestPrice.Code;
+            quotes.Buy1 = (float)Math.Round(LatestPrice.PreClose * 1.09f, 2);
+            quotes.Buy1Vol = 10000;
+            quotes.Money = 20000 * 10000;
+            quotes.Sell1 = (float)Math.Round(LatestPrice.PreClose * 1.091f, 2);
+            quotes.Sell1Vol = 200000;
+            quotes.Open = (float)Math.Round(LatestPrice.PreClose * 1.03f, 2);
+            quotes.HighLimit = (float)Math.Round(LatestPrice.PreClose * 1.1f, 2);
             quotes.PositionCtrl = 0.1f;
-
-            buyStrategy.Buy(quotes, accounts, null);
-            Thread.Sleep(3000);
-
-            //封死涨停
+            buyStrategy.Buy(quotes, accounts, callback);
+            //触发买点
             quotes = new Quotes();
-            quotes.Code = "002713";
-            quotes.Name = "新易日升";
-            quotes.PreClose = 7.12f;
-            quotes.LatestPrice = 7.83f;
-            quotes.Buy1 = 7.83f;
-            quotes.Buy1Vol = 4917000;
-            quotes.Sell1 = 0f;
-            quotes.HighLimit = 7.83f;
-            quotes.Money = 5000 * 10000;
-            quotes.MoneyCtrl = 4000;
+            quotes.Name = LatestPrice.Name;
+            quotes.Code = LatestPrice.Code;
+            quotes.Buy1 = (float)Math.Round(LatestPrice.PreClose * 1.099f, 2);
+            quotes.Buy1Vol = 10000;
+            quotes.Money = 20000 * 10000;
+            quotes.Sell1 = (float)Math.Round(LatestPrice.PreClose * 1.1f, 2);
+            quotes.Sell1Vol = 200000;
+            quotes.Open = (float)Math.Round(LatestPrice.PreClose * 1.03f, 2);
+            quotes.HighLimit = (float)Math.Round(LatestPrice.PreClose * 1.1f, 2);
             quotes.PositionCtrl = 0.1f;
-
-            buyStrategy.Buy(quotes, accounts, null);
-            Thread.Sleep(3000);
-            //封死涨停
-            while (cnt++ < 12)
-            {
-                quotes = new Quotes();
-                quotes.Code = "002713";
-                quotes.Name = "新易日升";
-                quotes.PreClose = 7.12f;
-                quotes.LatestPrice = 7.83f;
-                quotes.Buy1 = 7.83f;
-                quotes.Buy1Vol = 14917000;
-                quotes.Sell1 = 0f;
-                quotes.HighLimit = 7.83f;
-                quotes.Money = 5000 * 10000;
-                quotes.MoneyCtrl = 4000;
-                quotes.PositionCtrl = 0.1f;
-
-                buyStrategy.Buy(quotes, accounts, null);
-                Thread.Sleep(3000);
-            }
-            //封单大幅减少，即将开板
+            buyStrategy.Buy(quotes, accounts, callback);
+            //封死
             quotes = new Quotes();
-            quotes.Code = "002713";
-            quotes.Name = "新易日升";
-            quotes.PreClose = 7.12f;
-            quotes.LatestPrice = 7.83f;
-            quotes.Buy1 = 7.83f;
-            quotes.Buy1Vol = 17000;
-            quotes.Sell1 = 0f;
-            quotes.HighLimit = 7.83f;
-            quotes.Money = 5000 * 10000;
-            quotes.MoneyCtrl = 4000;
+            quotes.Name = LatestPrice.Name;
+            quotes.Code = LatestPrice.Code;
+            quotes.Buy1 = (float)Math.Round(LatestPrice.PreClose * 1.1f, 2);
+            quotes.Buy1Vol = 10000000;
+            quotes.Money = 20000 * 10000;
+            quotes.Sell1 = 0;
+            quotes.Sell1Vol = 0;
+            quotes.Open = (float)Math.Round(LatestPrice.PreClose * 1.03f, 2);
+            quotes.HighLimit = (float)Math.Round(LatestPrice.PreClose * 1.1f, 2);
             quotes.PositionCtrl = 0.1f;
-
-            buyStrategy.Buy(quotes, accounts, null);
-            Thread.Sleep(3000);
-            //开板
-            quotes = new Quotes();
-            quotes.Code = "002713";
-            quotes.Name = "新易日升";
-            quotes.PreClose = 7.12f;
-            quotes.LatestPrice = 7.82f;
-            quotes.Buy1 = 7.82f;
-            quotes.Buy1Vol = 7000;
-            quotes.Sell1 = 7.83f;
-            quotes.HighLimit = 7.83f;
-            quotes.Money = 5000 * 10000;
-            quotes.MoneyCtrl = 4000;
-            quotes.PositionCtrl = 0.1f;
-
-            buyStrategy.Buy(quotes, accounts, null);
-            Thread.Sleep(3000);
-            cnt = 0;
-            //模拟开板下跌
-            while (cnt++ < 10)
-            {
-                quotes = new Quotes();
-                quotes.Code = "002713";
-                quotes.Name = "新易日升";
-                quotes.PreClose = 7.12f;
-                quotes.LatestPrice = (float)(7.82 - cnt / 10);
-                quotes.Buy1 = quotes.LatestPrice;
-                quotes.Buy1Vol = 17000;
-                quotes.Sell1 = (float)(quotes.LatestPrice + 0.1);
-                quotes.HighLimit = 7.83f;
-                quotes.Money = 5000 * 10000;
-                quotes.MoneyCtrl = 4000;
-                quotes.PositionCtrl = 0.1f;
-
-                buyStrategy.Buy(quotes, accounts, null);
-                Thread.Sleep(3000);
-            }
-            //开板回封
-            quotes = new Quotes();
-            quotes.Code = "002713";
-            quotes.Name = "新易日升";
-            quotes.PreClose = 7.12f;
-            quotes.LatestPrice = 7.82f;
-            quotes.Buy1 = 7.82f;
-            quotes.Buy1Vol = 7000;
-            quotes.Sell1 = 7.83f;
-            quotes.HighLimit = 7.83f;
-            quotes.Money = 5000 * 10000;
-            quotes.MoneyCtrl = 4000;
-            quotes.PositionCtrl = 0.1f;
-            //小量回封
-            buyStrategy.Buy(quotes, accounts, null);
-            Thread.Sleep(3000);
-            quotes = new Quotes();
-            quotes.Code = "002713";
-            quotes.Name = "新易日升";
-            quotes.PreClose = 7.12f;
-            quotes.LatestPrice = 7.83f;
-            quotes.Buy1 = 7.83f;
-            quotes.Buy1Vol = 17000;
-            quotes.Sell1 = 0f;
-            quotes.HighLimit = 7.83f;
-            quotes.Money = 5000 * 10000;
-            quotes.MoneyCtrl = 4000;
-            quotes.PositionCtrl = 0.1f;
-
-            buyStrategy.Buy(quotes, accounts, null);
-            Thread.Sleep(3000);
+            buyStrategy.Buy(quotes, accounts, callback);
         }
 
         public void TestSellStrategy(List<Account> accounts)
