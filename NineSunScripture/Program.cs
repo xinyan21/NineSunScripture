@@ -37,7 +37,7 @@ namespace NineSunScripture
             Logger.Log(e.ExceptionObject.ToString(), LogType.Error);
             Logger.Log("已经记录未捕获的异常，即将重启程序");
             //放到捕获事件的处理代码后，重启程序，需要时加上重启的参数
-            CmdStartCTIProc(Application.ExecutablePath, "cmd params");
+            //CmdStartCTIProc(Application.ExecutablePath, "cmd params");
         }
 
         static void ApplicationThreadException(
@@ -47,7 +47,7 @@ namespace NineSunScripture
             Logger.Exception(e.Exception);
             Logger.Log("已经记录未处理异常，即将重启程序", LogType.Error);
             //放到捕获事件的处理代码后，重启程序，需要时加上重启的参数
-            CmdStartCTIProc(Application.ExecutablePath, "cmd params");
+            //CmdStartCTIProc(Application.ExecutablePath, "cmd params");
         }
 
         /// <summary>

@@ -41,6 +41,7 @@
             this.lblTotalAsset = new System.Windows.Forms.Label();
             this.lblMoneyAvailable = new System.Windows.Forms.Label();
             this.panelFundInfo = new System.Windows.Forms.Panel();
+            this.lblTotalPositionRatio = new System.Windows.Forms.Label();
             this.lblTotalProfit = new System.Windows.Forms.Label();
             this.btnSwitchCancelOrders = new System.Windows.Forms.Button();
             this.btnSwtichPositions = new System.Windows.Forms.Button();
@@ -58,22 +59,23 @@
             this.MenuMain = new System.Windows.Forms.MenuStrip();
             this.管理菜单ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiSwitch = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiBuyStock = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiManageAcct = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiClearPositions = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tspiPrivacyMode = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiTest = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.tspExit = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.tbRuntimeInfo = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flpStockPool.SuspendLayout();
             this.cmsStocks.SuspendLayout();
             this.panelFundInfo.SuspendLayout();
@@ -82,6 +84,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pbWorkStatus)).BeginInit();
             this.MenuMain.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // flpStockPool
@@ -180,26 +183,28 @@
             this.lblTotalAsset.BackColor = System.Drawing.Color.Transparent;
             this.lblTotalAsset.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblTotalAsset.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.lblTotalAsset.Location = new System.Drawing.Point(2, 0);
-            this.lblTotalAsset.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblTotalAsset.Location = new System.Drawing.Point(0, 0);
+            this.lblTotalAsset.Margin = new System.Windows.Forms.Padding(0);
             this.lblTotalAsset.Name = "lblTotalAsset";
-            this.lblTotalAsset.Padding = new System.Windows.Forms.Padding(10, 2, 0, 0);
-            this.lblTotalAsset.Size = new System.Drawing.Size(148, 42);
+            this.lblTotalAsset.Padding = new System.Windows.Forms.Padding(5, 2, 0, 0);
+            this.lblTotalAsset.Size = new System.Drawing.Size(151, 42);
             this.lblTotalAsset.TabIndex = 0;
-            this.lblTotalAsset.Text = "总资产：";
+            this.lblTotalAsset.Text = "总资产";
+            this.lblTotalAsset.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblMoneyAvailable
             // 
             this.lblMoneyAvailable.BackColor = System.Drawing.Color.Transparent;
             this.lblMoneyAvailable.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblMoneyAvailable.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.lblMoneyAvailable.Location = new System.Drawing.Point(0, 44);
-            this.lblMoneyAvailable.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblMoneyAvailable.Location = new System.Drawing.Point(0, 42);
+            this.lblMoneyAvailable.Margin = new System.Windows.Forms.Padding(0);
             this.lblMoneyAvailable.Name = "lblMoneyAvailable";
-            this.lblMoneyAvailable.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-            this.lblMoneyAvailable.Size = new System.Drawing.Size(150, 41);
+            this.lblMoneyAvailable.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.lblMoneyAvailable.Size = new System.Drawing.Size(151, 42);
             this.lblMoneyAvailable.TabIndex = 1;
-            this.lblMoneyAvailable.Text = "可用金额：";
+            this.lblMoneyAvailable.Text = "可用";
+            this.lblMoneyAvailable.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panelFundInfo
             // 
@@ -207,31 +212,44 @@
             this.panelFundInfo.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.panelFundInfo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panelFundInfo.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panelFundInfo.Controls.Add(this.lblTotalProfit);
+            this.panelFundInfo.Controls.Add(this.flowLayoutPanel1);
             this.panelFundInfo.Controls.Add(this.btnSwitchCancelOrders);
             this.panelFundInfo.Controls.Add(this.btnSwtichPositions);
             this.panelFundInfo.Controls.Add(this.lvCancelOrders);
             this.panelFundInfo.Controls.Add(this.lvPositions);
-            this.panelFundInfo.Controls.Add(this.lblTotalAsset);
-            this.panelFundInfo.Controls.Add(this.lblMoneyAvailable);
-            this.panelFundInfo.Location = new System.Drawing.Point(112, 1010);
+            this.panelFundInfo.Location = new System.Drawing.Point(115, 993);
             this.panelFundInfo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panelFundInfo.Name = "panelFundInfo";
-            this.panelFundInfo.Size = new System.Drawing.Size(986, 133);
+            this.panelFundInfo.Size = new System.Drawing.Size(986, 178);
             this.panelFundInfo.TabIndex = 8;
+            // 
+            // lblTotalPositionRatio
+            // 
+            this.lblTotalPositionRatio.BackColor = System.Drawing.Color.Transparent;
+            this.lblTotalPositionRatio.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblTotalPositionRatio.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.lblTotalPositionRatio.Location = new System.Drawing.Point(0, 126);
+            this.lblTotalPositionRatio.Margin = new System.Windows.Forms.Padding(0);
+            this.lblTotalPositionRatio.Name = "lblTotalPositionRatio";
+            this.lblTotalPositionRatio.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.lblTotalPositionRatio.Size = new System.Drawing.Size(155, 42);
+            this.lblTotalPositionRatio.TabIndex = 21;
+            this.lblTotalPositionRatio.Text = "总仓位";
+            this.lblTotalPositionRatio.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblTotalProfit
             // 
             this.lblTotalProfit.BackColor = System.Drawing.Color.Transparent;
             this.lblTotalProfit.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.lblTotalProfit.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.lblTotalProfit.Location = new System.Drawing.Point(0, 88);
-            this.lblTotalProfit.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblTotalProfit.Location = new System.Drawing.Point(0, 84);
+            this.lblTotalProfit.Margin = new System.Windows.Forms.Padding(0);
             this.lblTotalProfit.Name = "lblTotalProfit";
-            this.lblTotalProfit.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-            this.lblTotalProfit.Size = new System.Drawing.Size(150, 41);
+            this.lblTotalProfit.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.lblTotalProfit.Size = new System.Drawing.Size(155, 42);
             this.lblTotalProfit.TabIndex = 20;
-            this.lblTotalProfit.Text = "总盈亏：";
+            this.lblTotalProfit.Text = "总盈亏";
+            this.lblTotalProfit.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btnSwitchCancelOrders
             // 
@@ -240,7 +258,7 @@
             this.btnSwitchCancelOrders.FlatAppearance.BorderSize = 2;
             this.btnSwitchCancelOrders.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSwitchCancelOrders.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.btnSwitchCancelOrders.Location = new System.Drawing.Point(159, 63);
+            this.btnSwitchCancelOrders.Location = new System.Drawing.Point(159, 106);
             this.btnSwitchCancelOrders.Name = "btnSwitchCancelOrders";
             this.btnSwitchCancelOrders.Size = new System.Drawing.Size(126, 42);
             this.btnSwitchCancelOrders.TabIndex = 19;
@@ -255,7 +273,7 @@
             this.btnSwtichPositions.FlatAppearance.BorderSize = 2;
             this.btnSwtichPositions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSwtichPositions.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.btnSwtichPositions.Location = new System.Drawing.Point(159, 21);
+            this.btnSwtichPositions.Location = new System.Drawing.Point(159, 26);
             this.btnSwtichPositions.Name = "btnSwtichPositions";
             this.btnSwtichPositions.Size = new System.Drawing.Size(126, 42);
             this.btnSwtichPositions.TabIndex = 18;
@@ -275,7 +293,7 @@
             this.lvCancelOrders.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.lvCancelOrders.MultiSelect = false;
             this.lvCancelOrders.Name = "lvCancelOrders";
-            this.lvCancelOrders.Size = new System.Drawing.Size(701, 133);
+            this.lvCancelOrders.Size = new System.Drawing.Size(701, 178);
             this.lvCancelOrders.TabIndex = 3;
             this.lvCancelOrders.UseCompatibleStateImageBehavior = false;
             this.lvCancelOrders.View = System.Windows.Forms.View.Details;
@@ -313,7 +331,7 @@
             this.lvPositions.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.lvPositions.MultiSelect = false;
             this.lvPositions.Name = "lvPositions";
-            this.lvPositions.Size = new System.Drawing.Size(701, 136);
+            this.lvPositions.Size = new System.Drawing.Size(701, 178);
             this.lvPositions.TabIndex = 2;
             this.lvPositions.UseCompatibleStateImageBehavior = false;
             this.lvPositions.View = System.Windows.Forms.View.Details;
@@ -421,6 +439,7 @@
             this.管理菜单ToolStripMenuItem.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.管理菜单ToolStripMenuItem.ForeColor = System.Drawing.Color.DarkGreen;
             this.管理菜单ToolStripMenuItem.Name = "管理菜单ToolStripMenuItem";
+            this.管理菜单ToolStripMenuItem.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
             this.管理菜单ToolStripMenuItem.Size = new System.Drawing.Size(134, 36);
             this.管理菜单ToolStripMenuItem.Text = "管理菜单";
             // 
@@ -435,6 +454,11 @@
             this.tsmiSwitch.Text = "启动";
             this.tsmiSwitch.Click += new System.EventHandler(this.TsmiSwitch_Click);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(147, 6);
+            // 
             // tsmiBuyStock
             // 
             this.tsmiBuyStock.AutoSize = false;
@@ -443,6 +467,11 @@
             this.tsmiBuyStock.Size = new System.Drawing.Size(198, 30);
             this.tsmiBuyStock.Text = "买入";
             this.tsmiBuyStock.Click += new System.EventHandler(this.TsmiBuyStock_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(147, 6);
             // 
             // tsmiManageAcct
             // 
@@ -453,6 +482,11 @@
             this.tsmiManageAcct.Text = "账号管理";
             this.tsmiManageAcct.Click += new System.EventHandler(this.TsmiManageAcct_Click);
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(147, 6);
+            // 
             // tsmiClearPositions
             // 
             this.tsmiClearPositions.AutoSize = false;
@@ -462,6 +496,11 @@
             this.tsmiClearPositions.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.tsmiClearPositions.Click += new System.EventHandler(this.TsmiClearPositions_Click);
             // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(147, 6);
+            // 
             // tspiPrivacyMode
             // 
             this.tspiPrivacyMode.AutoSize = false;
@@ -469,6 +508,11 @@
             this.tspiPrivacyMode.Size = new System.Drawing.Size(150, 30);
             this.tspiPrivacyMode.Text = "隐私模式";
             this.tspiPrivacyMode.Click += new System.EventHandler(this.TspiPrivacyMode_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(147, 6);
             // 
             // tsmiTest
             // 
@@ -478,6 +522,11 @@
             this.tsmiTest.Text = "测试";
             this.tsmiTest.Click += new System.EventHandler(this.TsmiTest_Click);
             // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(147, 6);
+            // 
             // tspExit
             // 
             this.tspExit.AutoSize = false;
@@ -485,6 +534,11 @@
             this.tspExit.Size = new System.Drawing.Size(150, 30);
             this.tspExit.Text = "退出";
             this.tspExit.Click += new System.EventHandler(this.TspExit_Click);
+            // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(147, 6);
             // 
             // tbRuntimeInfo
             // 
@@ -524,40 +578,17 @@
             this.panel2.Size = new System.Drawing.Size(306, 757);
             this.panel2.TabIndex = 16;
             // 
-            // toolStripSeparator1
+            // flowLayoutPanel1
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(195, 6);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(195, 6);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(195, 6);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(195, 6);
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(195, 6);
-            // 
-            // toolStripSeparator6
-            // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(195, 6);
-            // 
-            // toolStripSeparator7
-            // 
-            this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(195, 6);
+            this.flowLayoutPanel1.BackColor = System.Drawing.Color.Transparent;
+            this.flowLayoutPanel1.Controls.Add(this.lblTotalAsset);
+            this.flowLayoutPanel1.Controls.Add(this.lblMoneyAvailable);
+            this.flowLayoutPanel1.Controls.Add(this.lblTotalProfit);
+            this.flowLayoutPanel1.Controls.Add(this.lblTotalPositionRatio);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(-2, 3);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(155, 168);
+            this.flowLayoutPanel1.TabIndex = 22;
             // 
             // MainForm
             // 
@@ -592,6 +623,7 @@
             this.MenuMain.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            this.flowLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -642,6 +674,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.Label lblTotalPositionRatio;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
     }
 }
 

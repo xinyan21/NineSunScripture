@@ -9,6 +9,7 @@ using NineSunScripture.util.test;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -21,6 +22,8 @@ namespace NineSunScripture
         private List<Quotes> longTermStocks;
         private List<Quotes> dragonLeaders;
         private List<Quotes> latestStocks;
+        private List<Quotes> weakTurnStrongStocks;
+        private List<Quotes> bandStocks;
         private StockDbHelper stockDbHelper;
         private Account account;//用来临时保存总账户信息
         private Image imgTaiJi;
@@ -31,12 +34,6 @@ namespace NineSunScripture
         public MainForm()
         {
             InitializeComponent();
-            /* if (!Utils.DetectTHSDll())
-             {
-                 MessageBox.Show("dll不存在，不能启动策略->" + System.Environment.CurrentDirectory);
-                 return;
-             }*/
-
             stockDbHelper = new StockDbHelper();
             stocks = new List<Quotes>();
             mainStrategy = new MainStrategy();
@@ -56,6 +53,10 @@ namespace NineSunScripture
             }
             tsmiSwitch.Text = "停止";
             isStrategyStarted = true;
+            //默认开启隐私模式
+            tspiPrivacyMode.Text = "隐私模式【开】";
+            flpStockPool.Visible = false;
+            panelFundInfo.Visible = false;
         }
 
         private void InitializeListViews()
@@ -64,8 +65,10 @@ namespace NineSunScripture
             InitLvPositions();
             InitLvCancelOrders();
 
-            ImageList imgList = new ImageList();
-            imgList.ImageSize = new Size(1, 32);//分别是宽和高
+            ImageList imgList = new ImageList
+            {
+                ImageSize = new Size(1, 32)//分别是宽和高
+            };
             lvStocks.SmallImageList = imgList;
             lvPositions.SmallImageList = imgList;
             lvCancelOrders.SmallImageList = imgList;
@@ -106,7 +109,7 @@ namespace NineSunScripture
         }
 
         /// <summary>
-        /// 可撤单和持仓公用一个ListView
+        /// 可撤单
         /// </summary>
         private void InitLvCancelOrders()
         {
@@ -127,9 +130,13 @@ namespace NineSunScripture
             ListViewGroup lvgDragonLeader = new ListViewGroup("龙头");
             ListViewGroup lvgLongTerm = new ListViewGroup("常驻");
             ListViewGroup lvgTomorrow = new ListViewGroup("最新");
+            ListViewGroup lvgWeakTurnStrong = new ListViewGroup("弱转强");
+            ListViewGroup lvgBand = new ListViewGroup("波段");
             lvStocks.Groups.Add(lvgDragonLeader);
             lvStocks.Groups.Add(lvgLongTerm);
             lvStocks.Groups.Add(lvgTomorrow);
+            lvStocks.Groups.Add(lvgWeakTurnStrong);
+            lvStocks.Groups.Add(lvgBand);
             ListViewItem lvi;
             List<Quotes> quotes = stockDbHelper.GetStocksBy(Quotes.CategoryDragonLeader);
             dragonLeaders = quotes;
@@ -150,6 +157,31 @@ namespace NineSunScripture
                 foreach (Quotes item in quotes)
                 {
                     lvi = new ListViewItem(item.Name, lvgLongTerm);
+                    lvi.SubItems.Add(item.PositionCtrl + "");
+                    lvi.SubItems.Add(item.MoneyCtrl + "");
+                    lvi.Tag = item;
+                    lvStocks.Items.Add(lvi);
+                }
+            }
+            bandStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryBand);
+            if (quotes.Count > 0)
+            {
+                foreach (Quotes item in quotes)
+                {
+                    lvi = new ListViewItem(item.Name, lvgBand);
+                    lvi.SubItems.Add(item.PositionCtrl + "");
+                    lvi.SubItems.Add(item.MoneyCtrl + "");
+                    lvi.Tag = item;
+                    lvStocks.Items.Add(lvi);
+                }
+            }
+            weakTurnStrongStocks =
+                quotes = stockDbHelper.GetStocksBy(Quotes.CategoryWeakTurnStrong);
+            if (quotes.Count > 0)
+            {
+                foreach (Quotes item in quotes)
+                {
+                    lvi = new ListViewItem(item.Name, lvgWeakTurnStrong);
                     lvi.SubItems.Add(item.PositionCtrl + "");
                     lvi.SubItems.Add(item.MoneyCtrl + "");
                     lvi.Tag = item;
@@ -179,6 +211,7 @@ namespace NineSunScripture
             float totalProfit = 0;
             lvPositions.BeginUpdate();
             lvPositions.Items.Clear();
+            int totalPositionRatio = 0;
             foreach (Position position in account.Positions)
             {
                 ListViewItem lvi = new ListViewItem(position.Name);
@@ -187,16 +220,17 @@ namespace NineSunScripture
                 lvi.SubItems.Add(position.ProfitAndLoss + "");
                 lvi.SubItems.Add(position.ProfitAndLossPct + "%");
                 lvi.SubItems.Add(position.StockBalance * position.Price + "");
-                int positionRatio = (int)(position.StockBalance * position.Price
-                    / account.Funds.TotalAsset * 100);
+                int positionRatio = (int)(position.MarketValue / account.Funds.TotalAsset * 100);
                 lvi.SubItems.Add(positionRatio + "%");
                 lvi.Tag = position;
                 totalProfit += position.ProfitAndLoss;
+                totalPositionRatio += positionRatio;
 
                 lvPositions.Items.Add(lvi);
             }
             lvPositions.EndUpdate();
-            lblTotalProfit.Text = "总盈亏\n" + ((int)totalProfit).ToString();
+            lblTotalProfit.Text = "总盈亏：" + Math.Round(totalProfit / 10000, 2) + "万";
+            lblTotalPositionRatio.Text = "总仓位：" + totalPositionRatio + "%";
         }
 
         private void BindCancelOrdersData()
@@ -280,7 +314,7 @@ namespace NineSunScripture
                 mainStrategy.SetDragonLeaders(dragonLeaders);
             }
 
-            mainStrategy.UpdateStocks(stocks);
+            mainStrategy.UpdateStocks(stocks, weakTurnStrongStocks, bandStocks);
         }
 
         private void InvokeAddRunInfo()
@@ -314,6 +348,14 @@ namespace NineSunScripture
             }
         }
 
+        /// <summary>
+        /// 交易结果回调（这里调用了成员变量，要加锁或者改成同步方法）
+        /// </summary>
+        /// <param name="rspCode">接口返回响应码</param>
+        /// <param name="msg">正确消息</param>
+        /// <param name="errInfo">错误消息</param>
+        /// <param name="needReboot">是否需要重启策略</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void OnTradeResult(int rspCode, string msg, string errInfo, bool needReboot)
         {
             if (rspCode > 0)
@@ -342,8 +384,9 @@ namespace NineSunScripture
         /// </summary>
         private void UpdateAcctInfo()
         {
-            lblTotalAsset.Text = "总资产\n" + account.Funds.TotalAsset;
-            lblMoneyAvailable.Text = "可用金额\n" + account.Funds.AvailableAmt;
+            lblTotalAsset.Text = "总资产：" + Math.Round(account.Funds.TotalAsset / 10000, 2) + "万";
+            lblMoneyAvailable.Text
+                = "可  用：" + Math.Round(account.Funds.AvailableAmt / 10000, 2) + "万";
             if (account.Positions.Count > 0)
             {
                 BindPositionsData();
@@ -398,7 +441,7 @@ namespace NineSunScripture
                 InvokeAddRunInfo();
                 InitLvStocks();
                 RefreshStocksListView();
-                if (mainStrategy.IsTradeTime())
+                if (isStrategyStarted && mainStrategy.IsTradeTime())
                 {
                     RebootStrategy();
                 }
@@ -442,7 +485,7 @@ namespace NineSunScripture
             runtimeInfo = "删除股票【" + quotes.Name + "】";
             InvokeAddRunInfo();
             RefreshStocksListView();
-            if (mainStrategy.IsTradeTime())
+            if (isStrategyStarted && mainStrategy.IsTradeTime())
             {
                 RebootStrategy();
             }
@@ -462,6 +505,7 @@ namespace NineSunScripture
             new AddStockForm(mainStrategy.GetAccounts(), this).Show();
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void OnAcctInfoListen(Account account)
         {
             this.account = account;
@@ -500,7 +544,7 @@ namespace NineSunScripture
             runtimeInfo = "策略开始启动";
             InvokeAddRunInfo();
             UpdateStrategyStocks();
-            mainStrategy.UpdateStocks(stocks);
+            mainStrategy.UpdateStocks(stocks, weakTurnStrongStocks, bandStocks);
             bool isStarted = mainStrategy.Start();
             if (!isStarted)
             {
@@ -552,7 +596,6 @@ namespace NineSunScripture
                 return;
             }
             Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
-            string code = quotes.Code;
             new TradeForm(mainStrategy.GetAccounts(), quotes, this).Show();
         }
 
@@ -568,9 +611,11 @@ namespace NineSunScripture
                 return;
             }
             Position position = (Position)lvPositions.SelectedItems[0].Tag;
-            Quotes quotes = new Quotes();
-            quotes.Code = position.Code;
-            quotes.Name = position.Name;
+            Quotes quotes = new Quotes
+            {
+                Code = position.Code,
+                Name = position.Name
+            };
             DialogResult dr = MessageBox.Show("确认要全部卖出【" + quotes.Name + "】吗？", "警告",
                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (dr == DialogResult.OK)
@@ -592,10 +637,11 @@ namespace NineSunScripture
                 return;
             }
             Position position = (Position)lvPositions.SelectedItems[0].Tag;
-            Quotes quotes = new Quotes();
-            quotes.Code = position.Code;
-            quotes.Name = position.Name;
-            string code = quotes.Code;
+            Quotes quotes = new Quotes
+            {
+                Code = position.Code,
+                Name = position.Name
+            };
             new TradeForm(mainStrategy.GetAccounts(), quotes, this, Order.CategorySell).Show();
         }
 
@@ -682,6 +728,7 @@ namespace NineSunScripture
 
     public interface IAcctInfoListener
     {
+        [MethodImpl(MethodImplOptions.Synchronized)]
         void OnAcctInfoListen(Account account);
     }
 

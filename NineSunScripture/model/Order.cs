@@ -65,5 +65,19 @@ namespace NineSunScripture.model
         {
             return this.Code.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("#Code=").Append(Code);
+            sb.Append("#Name=").Append(Name);
+            sb.Append("#Operation= ").Append(Operation);
+            sb.Append("#Price=").Append(Price);
+            sb.Append("#Quantity=").Append(Quantity);
+            sb.Append("#TransactionQuantity=").Append(TransactionQuantity);
+            sb.Append("#TransactionPrice=").Append(TransactionPrice);
+            sb.Append("#CanceledQuantity=").Append(CanceledQuantity);
+            return sb.ToString();
+        }
     }
 }

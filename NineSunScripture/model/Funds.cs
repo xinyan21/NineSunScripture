@@ -19,5 +19,15 @@ namespace NineSunScripture.model
         public double FrozenAmt;
         //可用金额
         public double AvailableAmt;
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("#TotalAsset=").Append(TotalAsset);
+            sb.Append("#FundBalance=").Append(FundBalance);
+            sb.Append("#FrozenAmt= ").Append(FrozenAmt);
+            sb.Append("#AvailableAmt=").Append(AvailableAmt);
+            return sb.ToString();
+        }
     }
 }

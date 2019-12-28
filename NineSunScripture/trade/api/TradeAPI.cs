@@ -127,6 +127,7 @@ namespace NineSunScripture.trade.api
                     position.AvgCost = float.Parse(temp[i, 6]);
                     position.ProfitAndLossPct = float.Parse(temp[i, 7]);
                     position.Price = float.Parse(temp[i, 8]);
+                    position.MarketValue = float.Parse(temp[i, 9]);
                     positions.Add(position);
                 }
             }

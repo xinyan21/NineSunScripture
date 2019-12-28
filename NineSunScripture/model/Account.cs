@@ -60,5 +60,15 @@ namespace NineSunScripture.model
         {
             return this.FundAcct.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("#FundAcct=").Append(FundAcct);
+            sb.Append("#BrokerName=").Append(BrokerName);
+            sb.Append("#BrokerServerIP= ").Append(BrokerServerIP);
+            sb.Append("#InitTotalAsset=").Append(InitTotalAsset);
+            return sb.ToString();
+        }
     }
 }

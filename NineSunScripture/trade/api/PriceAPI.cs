@@ -40,18 +40,19 @@ namespace NineSunScripture.trade.api
             string name, byte[] Result, byte[] errInfo);
 
         /// <summary>
-        /// 【同步方法】十档行情，支持level2高速行情（没有成交额）
+        /// 十档行情，支持level2高速行情（没有成交额）
         /// </summary>
         /// <param name="priceSessionId">行情会话Id</param>
         /// <param name="code">股票代码</param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public static Quotes QueryTenthGearPrice(int priceSessionId, string code)
         {
-            Quotes quotes = new Quotes();
+            Quotes quotes;
             byte[] result = new byte[1024 * 1024];
             byte[] errorInfo = new byte[256];
 
+            //使用Task后，2个接口100ms不是问题，一起调用就行
+            quotes = QueryBasicStockInfo(priceSessionId, code);
             int rspCode = HQ_QueryData(priceSessionId, 0, code, "", result, errorInfo);
             ApiHelper.HandleTimeOut(errorInfo);
             if (rspCode > 0)

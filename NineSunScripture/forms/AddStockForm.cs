@@ -2,12 +2,6 @@
 using NineSunScripture.trade.api;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NineSunScripture.forms
@@ -24,6 +18,7 @@ namespace NineSunScripture.forms
             InitializeComponent();
             this.mainForm = mainForm;
             this.accounts = accounts;
+            panelBandParam.Visible = false;
         }
 
         private void BtnAddStcok_Click(object sender, EventArgs e)
@@ -41,6 +36,17 @@ namespace NineSunScripture.forms
                 quotes.MoneyCtrl = int.Parse(tbMoney.Text);
             }
             quotes.StockCategory = category;
+            if (category == Quotes.CategoryBand)
+            {
+                if (tbStopLossPrice.Text.Length > 0)
+                {
+                    quotes.StopLossPrice = float.Parse(tbStopLossPrice.Text);
+                }
+                if (tbStopWinPrice.Text.Length > 0)
+                {
+                    quotes.StopWinPrice = float.Parse(tbStopWinPrice.Text);
+                }
+            }
             mainForm.AddStock(quotes);
             Close();
         }
@@ -48,18 +54,32 @@ namespace NineSunScripture.forms
         private void RbtnDragonLeader_CheckedChanged(object sender, EventArgs e)
         {
             this.category = Quotes.CategoryDragonLeader;
+            panelBandParam.Visible = false;
         }
 
         private void RbtnLongTerm_CheckedChanged(object sender, EventArgs e)
         {
             this.category = Quotes.CategoryLongTerm;
+            panelBandParam.Visible = false;
         }
 
-        private void RbtnTomorrow_CheckedChanged(object sender, EventArgs e)
+        private void RbtnLatest_CheckedChanged(object sender, EventArgs e)
         {
             this.category = Quotes.CategoryLatest;
+            panelBandParam.Visible = false;
         }
 
+        private void RbWeakTurnStrong_CheckedChanged(object sender, EventArgs e)
+        {
+            this.quotes.StockCategory = Quotes.CategoryWeakTurnStrong;
+            panelBandParam.Visible = false;
+        }
+
+        private void RbtnBand_CheckedChanged(object sender, EventArgs e)
+        {
+            this.quotes.StockCategory = Quotes.CategoryBand;
+            panelBandParam.Visible = true;
+        }
         private void TbCode_TextChanged(object sender, EventArgs e)
         {
             if (tbCode.TextLength == 6)
@@ -78,16 +98,6 @@ namespace NineSunScripture.forms
                     tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
                 }
             }
-        }
-
-        private void RbHitBoard_CheckedChanged(object sender, EventArgs e)
-        {
-            this.quotes.TradeStrategy = Strategy.HitBoard;
-        }
-
-        private void RbWeakTurnStrong_CheckedChanged(object sender, EventArgs e)
-        {
-            this.quotes.TradeStrategy = Strategy.WeakTurnStrong;
         }
     }
 }

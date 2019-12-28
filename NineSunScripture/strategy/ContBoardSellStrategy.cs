@@ -1,4 +1,5 @@
 ﻿using NineSunScripture.model;
+using NineSunScripture.strategy;
 using NineSunScripture.trade.api;
 using NineSunScripture.trade.helper;
 using NineSunScripture.util;
@@ -8,12 +9,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace NineSunScripture.strategy
+namespace NineSunScripture
 {
     /// <summary>
-    /// 卖策略
+    /// 连板股卖策略
     /// </summary>
-    public class SellStrategy
+    public class ContBoardSellStrategy:Strategy
     {
         /// <summary>
         /// 三档止盈比例为20%、30%、40%
@@ -55,13 +56,7 @@ namespace NineSunScripture.strategy
         ///封单开始减少前的金额
         /// </summary>
         private const int SealMoneyBeginToDecrease = 3000;
-        /// <summary>
-        /// 队列的大小由查询频率控制，保存一分钟的tick数据，主要是供SellIfSealDecrease使用
-        /// </summary>
-        private Dictionary<string, Queue<Quotes>> historyTicks
-            = new Dictionary<string, Queue<Quotes>>();
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             //9:30之前不卖
@@ -77,9 +72,9 @@ namespace NineSunScripture.strategy
             string code = quotes.Code;
             if (!historyTicks.ContainsKey(code))
             {
-                historyTicks.Add(code, new Queue<Quotes>(60));
+                historyTicks.Add(code, new Queue<Quotes>(DefaultHistoryTickCnt));
             }
-            if (historyTicks[code].Count == 60)
+            if (historyTicks[code].Count == DefaultHistoryTickCnt)
             {
                 historyTicks[code].Dequeue();
             }

@@ -23,6 +23,14 @@ namespace NineSunScripture.model
         /// 最新股票池中的股票
         /// </summary>
         public const short CategoryLatest = 2;
+        /// <summary>
+        /// 弱转强股票池中的股票
+        /// </summary>
+        public const short CategoryWeakTurnStrong = 3;
+        /// <summary>
+        /// 波段股票池中的股票，用作卖点监控
+        /// </summary>
+        public const short CategoryBand = 4;
 
         public String Code;
         public String Name;
@@ -74,7 +82,7 @@ namespace NineSunScripture.model
         /// </summary>
         public int MoneyCtrl;
         /// <summary>
-        /// 股票类型：常驻0、龙头1、最新2
+        /// 股票类型：打板（常驻0、龙头1、最新2），弱转强（3），波段（4）
         /// </summary>
         public short StockCategory;
         /// <summary>
@@ -83,7 +91,22 @@ namespace NineSunScripture.model
         /// </summary>        
         public bool InPosition = false;
         public bool IsDragonLeader = false;
-        public Strategy TradeStrategy = Strategy.HitBoard;
+        /// <summary>
+        /// 止盈比例
+        /// </summary>
+        public float StopWinPct;
+        /// <summary>
+        /// 止盈价格
+        /// </summary>
+        public float StopWinPrice;
+        /// <summary>
+        /// 止损比例
+        /// </summary>
+        public float StopLossPct;
+        /// <summary>
+        /// 止损价格
+        /// </summary>
+        public float StopLossPrice;
 
         public bool Equals(Quotes other)
         {
@@ -109,10 +132,5 @@ namespace NineSunScripture.model
             sb.Append("#Buy1Vol=").Append(Buy1Vol);
             return sb.ToString();
         }
-    }
-    public enum Strategy
-    {
-        HitBoard,
-        WeakTurnStrong
     }
 }

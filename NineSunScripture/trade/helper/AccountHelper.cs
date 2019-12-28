@@ -181,6 +181,7 @@ namespace NineSunScripture.trade.helper
                 {
                     position.ProfitAndLossPct = (position.ProfitAndLossPct + temp.ProfitAndLossPct) / 2;
                 }
+                position.MarketValue += temp.MarketValue;
             }
             return position;
         }
@@ -196,7 +197,8 @@ namespace NineSunScripture.trade.helper
             List<Position> allPositions = new List<Position>(); //所有账户持仓原始数据
             foreach (Account account in accounts)
             {
-                allPositions.AddRange(TradeAPI.QueryPositions(account.TradeSessionId));
+                account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
+                allPositions.AddRange(account.Positions);
             }
             List<Position> temp = allPositions.Distinct().ToList();
             foreach (Position item in temp)
@@ -234,6 +236,7 @@ namespace NineSunScripture.trade.helper
                             item2.ProfitAndLossPct = (item2.ProfitAndLossPct + item.ProfitAndLossPct) / 2;
                         }
                         item2.StockBalance += item.StockBalance;
+                        item2.MarketValue += item.MarketValue;
                     }
                 }
             }
@@ -318,10 +321,10 @@ namespace NineSunScripture.trade.helper
             }
             foreach (Order order in sourceOrders)
             {
-                if (resultOrders.Contains(order))
-                {
-                    Order item = resultOrders.Find(temp => temp.Code == order.Code
+                Order item = resultOrders.Find(temp => temp.Code == order.Code
                      && temp.Operation == order.Operation);
+                if (null != item)
+                {
                     item.Quantity += order.Quantity;
                     item.Price = (item.Price + order.Price) / 2;
                     item.TransactionPrice = (item.TransactionPrice + order.TransactionPrice) / 2;
@@ -350,7 +353,7 @@ namespace NineSunScripture.trade.helper
                 List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
                 foreach (Order item in orders)
                 {
-                    if (!item.Name.Equals(order.Name))
+                    if (!(item.Name.Equals(order.Name) && item.Operation == order.Operation))
                     {
                         continue;
                     }

@@ -107,7 +107,7 @@ namespace NineSunScripture.util.test
             quotes.Open = 27;
             quotes.LowLimit = 24.7f;
 
-            new SellStrategy().Sell(quotes, accounts, null);
+            new ContBoardSellStrategy().Sell(quotes, accounts, null);
         }
     }
 }

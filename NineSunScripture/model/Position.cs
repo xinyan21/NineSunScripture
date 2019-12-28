@@ -37,6 +37,13 @@ namespace NineSunScripture.model
         /// </summary>
         public float ProfitAndLossPct;
         public float Price;
+        /// <summary>
+        /// 市值
+        /// </summary>
+        public float MarketValue;
+        /// <summary>
+        /// 市场
+        /// </summary>
         public String Market;
         public String ShareholderAcct;
 
@@ -49,6 +56,20 @@ namespace NineSunScripture.model
         public override int GetHashCode()
         {
             return this.Code.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("#Code=").Append(Code);
+            sb.Append("#Name=").Append(Name);
+            sb.Append("#MarketValue= ").Append(MarketValue);
+            sb.Append("#ProfitAndLoss=").Append(ProfitAndLoss);
+            sb.Append("#StockBalance=").Append(StockBalance);
+            sb.Append("#AvailableBalance=").Append(AvailableBalance);
+            sb.Append("#ProfitAndLossPct=").Append(ProfitAndLossPct);
+            sb.Append("#AvgCost=").Append(AvgCost);
+            return sb.ToString();
         }
     }
 }

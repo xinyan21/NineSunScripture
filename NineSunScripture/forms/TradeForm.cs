@@ -120,7 +120,7 @@ namespace NineSunScripture.forms
         private void Sell()
         {
             quotes.Buy2 = float.Parse(tbPrice.Text);
-            SellStrategy.SellByRatio(quotes, accounts, callback, positionRatio);
+            ContBoardSellStrategy.SellByRatio(quotes, accounts, callback, positionRatio);
         }
 
         private void tbCode_TextChanged(object sender, EventArgs e)
