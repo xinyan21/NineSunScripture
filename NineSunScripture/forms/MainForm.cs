@@ -53,10 +53,6 @@ namespace NineSunScripture
             }
             tsmiSwitch.Text = "停止";
             isStrategyStarted = true;
-            //默认开启隐私模式
-            tspiPrivacyMode.Text = "隐私模式【开】";
-            flpStockPool.Visible = false;
-            panelFundInfo.Visible = false;
         }
 
         private void InitializeListViews()
@@ -119,7 +115,7 @@ namespace NineSunScripture
             lvCancelOrders.Columns.Add("成交数量", 100, HorizontalAlignment.Center);
             lvCancelOrders.Columns.Add("委托价格", 100, HorizontalAlignment.Center);
             lvCancelOrders.Columns.Add("成交均价", 100, HorizontalAlignment.Center);
-            lvCancelOrders.Columns.Add("撤销数量", 100, HorizontalAlignment.Center);
+            lvCancelOrders.Columns.Add("撤单数量", 100, HorizontalAlignment.Center);
         }
 
         /// <summary>
@@ -386,7 +382,7 @@ namespace NineSunScripture
         {
             lblTotalAsset.Text = "总资产：" + Math.Round(account.Funds.TotalAsset / 10000, 2) + "万";
             lblMoneyAvailable.Text
-                = "可  用：" + Math.Round(account.Funds.AvailableAmt / 10000, 2) + "万";
+                = "可   用：" + Math.Round(account.Funds.AvailableAmt / 10000, 2) + "万";
             if (account.Positions.Count > 0)
             {
                 BindPositionsData();
@@ -505,7 +501,6 @@ namespace NineSunScripture
             new AddStockForm(mainStrategy.GetAccounts(), this).Show();
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void OnAcctInfoListen(Account account)
         {
             this.account = account;
@@ -667,20 +662,28 @@ namespace NineSunScripture
 
         public void RotateStatusImg(int degree)
         {
-            Image image = pbWorkStatus.Image;
-            if (degree > 0)
+            try
             {
-                rotateDegree += degree;
-                pbWorkStatus.Image = Utils.RotateImage(imgTaiJi, rotateDegree);
+                Image image = pbWorkStatus.Image;
+                if (degree > 0)
+                {
+                    rotateDegree += degree;
+                    //RotateImage会发生异常
+                    pbWorkStatus.Image = Utils.RotateImage(imgTaiJi, rotateDegree);
+                }
+                else
+                {
+                    pbWorkStatus.Image = imgTaiJi;
+                }
+                //imgTaiJi是原图，而且会不停地赋值给控件，不能dispose
+                if (null != image && image != imgTaiJi)
+                {
+                    image.Dispose();
+                }
             }
-            else
+            catch (Exception e)
             {
-                pbWorkStatus.Image = imgTaiJi;
-            }
-            //imgTaiJi是原图，而且会不停地赋值给控件，不能dispose
-            if (null != image && image != imgTaiJi)
-            {
-                image.Dispose();
+                Logger.Exception(e);
             }
         }
 
@@ -728,7 +731,6 @@ namespace NineSunScripture
 
     public interface IAcctInfoListener
     {
-        [MethodImpl(MethodImplOptions.Synchronized)]
         void OnAcctInfoListen(Account account);
     }
 

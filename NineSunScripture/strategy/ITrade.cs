@@ -16,7 +16,6 @@ namespace NineSunScripture.strategy
         /// <param name="msg">成功消息</param>
         /// <param name="errInfo">错误消息</param>
         /// <param name="needReboot">如果调用失败是否重启策略</param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        void OnTradeResult(int rspCode, String msg, String errInfo, bool needReboot);
+        void OnTradeResult(int rspCode, string msg, string errInfo, bool needReboot);
     }
 }

@@ -84,7 +84,7 @@ namespace NineSunScripture.model
         /// <summary>
         /// 股票类型：打板（常驻0、龙头1、最新2），弱转强（3），波段（4）
         /// </summary>
-        public short StockCategory;
+        public short StockCategory = 2;
         /// <summary>
         /// 是否是持仓股，默认不是，此属性用来解决新增账户后持仓不一致导致的开仓问题
         /// 值为true的时候不能新开仓
@@ -127,9 +127,14 @@ namespace NineSunScripture.model
             sb.Append("#LatestPrice= ").Append(LatestPrice);
             sb.Append("#Money=").Append(Money);
             sb.Append("#Sell1=").Append(Sell1);
-            sb.Append("#Buy1=").Append(Buy1);
             sb.Append("#Sell1Vol=").Append(Sell1Vol);
+            sb.Append("#Buy1=").Append(Buy1);
             sb.Append("#Buy1Vol=").Append(Buy1Vol);
+            sb.Append("#PositionCtrl=").Append(PositionCtrl);
+            sb.Append("#MoneyCtrl=").Append(MoneyCtrl);
+            sb.Append("#StockCategory=").Append(StockCategory);
+            sb.Append("#InPosition=").Append(InPosition);
+            sb.Append("#IsDragonLeader=").Append(IsDragonLeader);
             return sb.ToString();
         }
     }

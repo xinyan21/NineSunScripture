@@ -14,6 +14,21 @@ namespace NineSunScripture.util.test
 {
     class TradeTestCase
     {
+        /// <summary>
+        /// 通过修改行情数据来构建买点测试数据
+        /// </summary>
+        /// <param name="accounts"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public static Quotes ConstructHitBoardData(Quotes quotes)
+        {
+            quotes.Buy1 = (float)Math.Round(quotes.PreClose * 1.099, 2);
+            quotes.Buy1Vol = 10000;
+            quotes.Sell1 = (float)Math.Round(quotes.PreClose * 1.1, 2);
+            quotes.Sell1Vol = 200000;
+            return quotes;
+        }
+
         public void TestSell(List<Account> accounts)
         {
             Order order = new Order();

@@ -18,7 +18,7 @@ namespace NineSunScripture.model
         public const string OperationBuy = "买入";
         public const string OperationSell = "卖出";
 
-        public String OrderId;
+        public string OrderId;
         /// <summary>
         /// 委托种类 0买入 1卖出
         /// </summary>
@@ -27,21 +27,21 @@ namespace NineSunScripture.model
         ///股东账号；交易上海股票填上海的股东账号，交易深圳的股票填入深圳的股东账号。
         ///正常情况下留空（留空自动判断），撤销委托的时候必带
         /// </summary>
-        public String ShareholderAcct = "";
+        public string ShareholderAcct = "";
         public float Price;
         /// <summary>
         /// 委托、持仓数量
         /// </summary>
         public int Quantity;
-        public String Code;
+        public string Code;
 
         //冗余字段：用于最新成交、撤单等查询
-        public String Name;
-        public String Time;
+        public string Name;
+        public string Time;
         /// <summary>
         /// 操作：证券买入|证券卖出
         /// </summary>
-        public String Operation;
+        public string Operation;
         /// <summary>
         /// 成交数量
         /// </summary>

@@ -301,7 +301,8 @@ namespace NineSunScripture.trade.helper
         public static List<Order> GetOrdersCanCancelOf(int sessionId, string code)
         {
             List<Order> orders = TradeAPI.QueryOrdersCanCancel(sessionId);
-            orders = orders.FindAll(order => order.Code == code);
+            orders = orders.FindAll(
+                order => order.Code == code && order.CanceledQuantity==0);
 
             return orders;
         }

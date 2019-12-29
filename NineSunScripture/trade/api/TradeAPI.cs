@@ -85,11 +85,12 @@ namespace NineSunScripture.trade.api
             ApiHelper.HandleTimeOut(funds.ErrorInfo);
             if (code > 0)
             {
-                String[] temp = ApiHelper.ParseResult(funds.Result);
-                funds.TotalAsset = Double.Parse(temp[0]);
-                funds.FundBalance = Double.Parse(temp[1]);
-                funds.FrozenAmt = Double.Parse(temp[2]);
-                funds.AvailableAmt = Double.Parse(temp[4]);
+                string[] temp = ApiHelper.ParseResult(funds.Result);
+                funds.TotalAsset = double.Parse(temp[0]);
+                funds.FundBalance = double.Parse(temp[1]);
+                funds.FrozenAmt = double.Parse(temp[2]);
+                funds.AvailableAmt = double.Parse(temp[4]);
+                Logger.Log(funds.ToString());
             }
             else
             {
@@ -114,7 +115,7 @@ namespace NineSunScripture.trade.api
             ApiHelper.HandleTimeOut(resultPosition.ErrorInfo);
             if (code > 0)
             {
-                String[,] temp = ApiHelper.ParseResults(resultPosition.Result);
+                string[,] temp = ApiHelper.ParseResults(resultPosition.Result);
                 for (int i = 0; i < temp.GetLength(0); i++)
                 {
                     position = new Position();
@@ -142,14 +143,14 @@ namespace NineSunScripture.trade.api
         public static List<Order> QueryTodayTransaction(int sessionId)
         {
             List<Order> orders = new List<Order>();
-            Order order = new Order();
+            Order order;
             Order resultOrder = new Order();
             resultOrder.AllocateResultMem();
             int code = QueryData(sessionId, 3, resultOrder.Result, resultOrder.ErrorInfo);
             ApiHelper.HandleTimeOut(resultOrder.ErrorInfo);
             if (code > 0)
             {
-                String[,] temp = ApiHelper.ParseResults(resultOrder.Result);
+                string[,] temp = ApiHelper.ParseResults(resultOrder.Result);
                 for (int i = 0; i < temp.GetLength(0); i++)
                 {
                     order = new Order();
@@ -181,7 +182,9 @@ namespace NineSunScripture.trade.api
             ApiHelper.HandleTimeOut(resultOrder.ErrorInfo);
             if (code > 0)
             {
-                String[,] temp = ApiHelper.ParseResults(resultOrder.Result);
+                //委托时间\t证券代码\t证券名称\t操作\t备注\t委托数量\t成交数量\t撤单数量
+                //\t委托价格\t成交均价\t合同编号\t交易市场\t股东账户
+                string[,] temp = ApiHelper.ParseResults(resultOrder.Result);
                 for (int i = 0; i < temp.GetLength(0); i++)
                 {
                     order = new Order();
@@ -216,7 +219,7 @@ namespace NineSunScripture.trade.api
             ApiHelper.HandleTimeOut(account.ErrorInfo);
             if (code > 0)
             {
-                String[,] temp = ApiHelper.ParseResults(account.Result);
+                string[,] temp = ApiHelper.ParseResults(account.Result);
                 for (int i = 0; i < temp.GetLength(0); i++)
                 {
                     account = new ShareHolderAcct();
@@ -239,7 +242,7 @@ namespace NineSunScripture.trade.api
         /// <param name="tradeSessionId">交易会话id</param>
         /// <param name="code">股票代码</param>
         /// <returns></returns>
-        public static Quotes QueryQuotes(int tradeSessionId, String code)
+        public static Quotes QueryQuotes(int tradeSessionId, string code)
         {
             Quotes quotes = new Quotes();
             quotes.AllocateResultMem();
@@ -249,7 +252,7 @@ namespace NineSunScripture.trade.api
             {
                 try
                 {
-                    String[] temp = ApiHelper.ParseResult(quotes.Result);
+                    string[] temp = ApiHelper.ParseResult(quotes.Result);
                     if (temp.Length < 31)
                     {
                         Logger.Log("QueryHQ returns wrong data");
