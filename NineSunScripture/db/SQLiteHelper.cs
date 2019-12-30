@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.db
 {
@@ -14,7 +10,7 @@ namespace NineSunScripture.db
         //创建数据库文件
         public static void CreateDBFile(string fileName)
         {
-            string path = System.Environment.CurrentDirectory + @"/data/";
+            string path = Environment.CurrentDirectory + @"/data/";
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -30,7 +26,7 @@ namespace NineSunScripture.db
         private static string CreateConnectionString()
         {
             SQLiteConnectionStringBuilder connectionString = new SQLiteConnectionStringBuilder();
-            connectionString.DataSource = System.Environment.CurrentDirectory
+            connectionString.DataSource = Environment.CurrentDirectory
                 + @"/data/NineSunScripture.db";
 
             string conStr = connectionString.ToString();

@@ -1,15 +1,10 @@
-﻿using NineSunScripture.model;
-using System;
+﻿using NineSunScripture.db;
+using NineSunScripture.model;
+using NineSunScripture.strategy;
+using NineSunScripture.trade.api;
+using NineSunScripture.util.log;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.SQLite;
-using NineSunScripture.trade.api;
-using NineSunScripture.strategy;
-using NineSunScripture.db;
-using NineSunScripture.util.log;
-using System.Configuration;
 
 namespace NineSunScripture.trade.helper
 {
@@ -35,6 +30,8 @@ namespace NineSunScripture.trade.helper
             account.PriceAcct = "13534068934";
             account.FundPassword = "198921";
             account.PricePassword = "3594035x";
+            //没指定初始资产，差点又被大坑
+            account.InitTotalAsset = 60000;
             return account;
         }
 

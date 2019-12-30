@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.db
 {
@@ -17,7 +14,7 @@ namespace NineSunScripture.db
             "UNIQUE, brokerId integer,  brokerName varchar(10), brokerServerIp varchar(20), brokerServerPort varchar(6), " +
             "versionOfTHS varchar(10), acctType varchar(6), commPwd varchar(10), fundAcct varchar(10)," +
             "password varchar(6), shShareholderAcct varchar(10), szShareholderAcct varchar(10)," +
-            "initTotalAsset inteter)";
+            "initTotalAsset integer)";
         public AcctDbHelper()
         {
             SQLiteHelper.ExecuteNonQuery(CreateAcctTable);

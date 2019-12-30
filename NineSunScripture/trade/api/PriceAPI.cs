@@ -52,8 +52,6 @@ namespace NineSunScripture.trade.api
             byte[] result = new byte[1024 * 1024];
             byte[] errorInfo = new byte[256];
 
-            //使用Task后，2个接口100ms不是问题，一起调用就行
-            quotes = QueryBasicStockInfo(priceSessionId, code);
             int rspCode = HQ_QueryData(priceSessionId, 0, code, "", result, errorInfo);
             ApiHelper.HandleTimeOut(errorInfo);
             if (rspCode > 0)
@@ -70,6 +68,7 @@ namespace NineSunScripture.trade.api
                             + ApiHelper.ParseErrInfo(result));
                         return null;
                     }
+                    quotes = new Quotes();
                     quotes.Code = temp[0];
                     quotes.Open = float.Parse(temp[1]);
                     quotes.LatestPrice = float.Parse(temp[2]);
@@ -121,6 +120,14 @@ namespace NineSunScripture.trade.api
         public static Quotes QueryBasicStockInfo(int priceSessionId, string code)
         {
             Quotes quotes = new Quotes();
+            DateTime now = DateTime.Now;
+            bool isBidingTime = now.Hour == 9 && now.Minute < 30;
+            //集合竞价只返回17个数据，反正这个时候也不用成交额，就返回0吧
+            if (isBidingTime)
+            {
+                return quotes;
+            }
+
             byte[] result = new byte[188 * 1024];
             byte[] errorInfo = new byte[256];
 
@@ -133,13 +140,6 @@ namespace NineSunScripture.trade.api
                     //代码\t涨跌\t涨幅\t换手\t振幅\t外盘\t内盘\t流通值\t最新\t开盘\t最高\t最低\t总量\t成交额
                     //\t涨停\t跌停\t量比\t静态市盈率\tTTM市盈率\t总市值
                     string[] temp = ApiHelper.ParseResult(result);
-                    DateTime now = DateTime.Now;
-                    bool isBidingTime = now.Hour == 9 && now.Minute < 30;
-                    //集合竞价只返回17个数据，反正这个时候也不用成交额，就返回0吧
-                    if (isBidingTime)
-                    {
-                        return quotes;
-                    }
                     if (temp.Length < 20)
                     {
                         Logger.Log("【重要】QueryBasicStockInfo returns wrong data! = "
@@ -163,6 +163,15 @@ namespace NineSunScripture.trade.api
                 return null;
             }
             return quotes;
+        }
+
+        public static Quotes QueryBasicStockInfo(List<Account> accounts, string code)
+        {
+            if (null == accounts)
+            {
+                return null;
+            }
+            return QueryBasicStockInfo(accounts[0].PriceSessionId, code);
         }
     }
 }

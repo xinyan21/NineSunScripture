@@ -77,7 +77,6 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            Logger.Log("【" + quotes.Name + "】enter buy method 2");
             RWLockSlim.EnterReadLock();
             Quotes[] ticks = historyTicks[code].ToArray();
             RWLockSlim.ExitReadLock();
@@ -105,7 +104,6 @@ namespace NineSunScripture.strategy
                 }
                 Logger.Log("【" + quotes.Name + "】开板");
             }
-            Logger.Log("【" + quotes.Name + "】enter buy method 3");
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
             bool isBoardThisTick = quotes.Buy1 == highLimit;
             if (!isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
@@ -147,29 +145,11 @@ namespace NineSunScripture.strategy
                     return;
                 }
             }
-            Logger.Log("【" + quotes.Name + "】enter buy method 4");
-            //成交额小于7000万过滤
-            //买入计划里设置了成交额（单位为万）限制，这里就要判断
-            bool isMoneyQuolified = quotes.MoneyCtrl > 0 ?
-                quotes.Money > quotes.MoneyCtrl * 10000 : true;
-          /*  Logger.Log("【" + quotes.Name + "】enter buy method isMoneyQuolified =" + isMoneyQuolified);
-            Logger.Log(quotes.ToString());
-            Logger.Log("【" + quotes.Name + "】enter buy method  quotes.Money =" + quotes.Money);
-            Logger.Log("【" + quotes.Name + "】enter buy method DefaultMoneyCtrl * 10000 =" + DefaultMoneyCtrl * 10000);
-            Logger.Log("【" + quotes.Name + "】enter buy method quotes.Money < DefaultMoneyCtrl * 10000 ="
-                + (quotes.Money < DefaultMoneyCtrl * 10000));*/
-            //买入计划的成交额限制与默认的7000万限制都不和要求就过滤
-            if (!isMoneyQuolified && quotes.Money < DefaultMoneyCtrl * 10000)
-            {
-                return;
-            }
-            Logger.Log("【" + quotes.Name + "】enter buy method 5");
             //买一小于MinBuy1Ratio的直线拉板，过滤
             if (quotes.Buy1 < quotes.PreClose * MinBuy1Ratio)
             {
                 return;
             }
-            Logger.Log("【" + quotes.Name + "】enter buy method 6");
             //已经涨停且封单大于MaxBuy1MoneyCtrl，过滤
             if (quotes.Buy1 == highLimit)
             {
@@ -186,7 +166,6 @@ namespace NineSunScripture.strategy
                     }
                 }
             }
-            Logger.Log("【" + quotes.Name + "】enter buy method 7");
             if (quotes.Sell1 == highLimit
                 && quotes.Sell1Vol * highLimit > MaxSellMoneyCtrl * 10000)
             {
@@ -197,6 +176,21 @@ namespace NineSunScripture.strategy
                 && quotes.Sell2Vol * highLimit > MaxSellMoneyCtrl * 10000)
             {
                 Logger.Log("【" + quotes.Name + "】板上货太多，过滤");
+                return;
+            }
+            //成交量要调接口，放到最后面判断
+            Quotes forMoney = PriceAPI.QueryBasicStockInfo(accounts, code);
+            if (null != forMoney)
+            {
+                quotes.Money = forMoney.Money;
+            }
+            //成交额小于7000万过滤
+            //买入计划里设置了成交额（单位为万）限制，这里就要判断
+            bool isMoneyQuolified = quotes.MoneyCtrl > 0 ?
+                quotes.Money > quotes.MoneyCtrl * 10000 : true;
+            //买入计划的成交额限制与默认的7000万限制都不和要求就过滤
+            if (!isMoneyQuolified && quotes.Money < DefaultMoneyCtrl * 10000)
+            {
                 return;
             }
             //买一是涨停价、卖一或者卖二是涨停价符合买点
@@ -215,7 +209,8 @@ namespace NineSunScripture.strategy
                 if (funds.AvailableAmt <= MinTotalAvailableAmt * accounts.Count
                     || funds.AvailableAmt <= highLimit * 100 * accounts.Count)
                 {
-                    Logger.Log("【" + quotes.Name + "】触发买点，结束于总金额不够一万或总账户每户一手");
+                    Logger.Log("【" + quotes.Name 
+                        + "】触发买点，结束于总金额不够一万或总账户每户一手");
                     return;
                 }
                 //可用金额不够用，撤销所有可撤单
@@ -374,7 +369,6 @@ namespace NineSunScripture.strategy
         /// <returns>仓位比例</returns>
         public static float GetNewPositionRatio(Account account)
         {
-            account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
             double totalProfitPct = account.Funds.TotalAsset / account.InitTotalAsset;
             if (totalProfitPct < 1.1)
             {

@@ -35,6 +35,7 @@
             this.lblTenthGearPrice = new System.Windows.Forms.Label();
             this.btnTenthGearPrice = new System.Windows.Forms.Button();
             this.btnTestRRB = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnTestBuy
@@ -49,7 +50,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(40, 150);
+            this.button1.Location = new System.Drawing.Point(40, 135);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(155, 46);
             this.button1.TabIndex = 1;
@@ -87,13 +88,23 @@
             // 
             // btnTestRRB
             // 
-            this.btnTestRRB.Location = new System.Drawing.Point(40, 262);
+            this.btnTestRRB.Location = new System.Drawing.Point(40, 224);
             this.btnTestRRB.Name = "btnTestRRB";
             this.btnTestRRB.Size = new System.Drawing.Size(155, 46);
             this.btnTestRRB.TabIndex = 5;
             this.btnTestRRB.Text = "测试逆回购";
             this.btnTestRRB.UseVisualStyleBackColor = true;
             this.btnTestRRB.Click += new System.EventHandler(this.btnTestRRB_Click);
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(40, 319);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(155, 46);
+            this.button3.TabIndex = 6;
+            this.button3.Text = "测试重启";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // TestForm
             // 
@@ -102,6 +113,7 @@
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(778, 669);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.btnTestRRB);
             this.Controls.Add(this.btnTenthGearPrice);
             this.Controls.Add(this.lblTenthGearPrice);
@@ -127,5 +139,6 @@
         private System.Windows.Forms.Label lblTenthGearPrice;
         private System.Windows.Forms.Button btnTenthGearPrice;
         private System.Windows.Forms.Button btnTestRRB;
+        private System.Windows.Forms.Button button3;
     }
 }

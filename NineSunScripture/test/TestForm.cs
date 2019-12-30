@@ -78,5 +78,30 @@ namespace NineSunScripture.util.test
         {
             testTrade.TestSell(accounts);
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Task.Run(() => {
+                Thread.Sleep(3000);
+                mainForm.OnTradeResult(0, "Test reboot1", "Test reboot", true);
+            });
+            Task.Run(() => {
+                Thread.Sleep(3000);
+                mainForm.OnTradeResult(0, "Test reboot2", "Test reboot", false);
+            });
+            Task.Run(() => {
+                Thread.Sleep(3000);
+                mainForm.OnTradeResult(0, "Test reboot3", "Test reboot", false);
+            });
+            Task.Run(() => {
+                Thread.Sleep(3000);
+                mainForm.OnTradeResult(0, "Test reboot4", "Test reboot", false);
+            });
+            Task.Run(() => {
+                Thread.Sleep(3000);
+                mainForm.OnTradeResult(0, "Test reboot5", "Test reboot", false);
+            });
+            Thread.Sleep(2000);
+        }
     }
 }

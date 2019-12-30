@@ -28,8 +28,9 @@ namespace NineSunScripture
         private Account account;//用来临时保存总账户信息
         private Image imgTaiJi;
         private bool isStrategyStarted = false;
-        private string runtimeInfo;
         private int rotateDegree = 0;
+
+        delegate void SetTextCallback(string text);
 
         public MainForm()
         {
@@ -260,8 +261,8 @@ namespace NineSunScripture
         public void AddStock(Quotes quotes)
         {
             stockDbHelper.AddStock(quotes);
-            runtimeInfo = "新增股票【" + quotes.Name + "】";
-            InvokeAddRunInfo();
+            string runtimeInfo = "新增股票【" + quotes.Name + "】";
+            AddRuntimeInfo(runtimeInfo);
             RefreshStocksListView();
             if (isStrategyStarted && mainStrategy.IsTradeTime())
             {
@@ -313,10 +314,10 @@ namespace NineSunScripture
             mainStrategy.UpdateStocks(stocks, weakTurnStrongStocks, bandStocks);
         }
 
-        private void InvokeAddRunInfo()
+        /*private void InvokeAddRunInfo()
         {
             Invoke(new MethodInvoker(AddRuntimeInfo));
-        }
+        }*/
 
         private void InvokeRebootStrategy()
         {
@@ -330,8 +331,8 @@ namespace NineSunScripture
         {
             if (isStrategyStarted)
             {
-                runtimeInfo = "重启策略中...";
-                InvokeAddRunInfo();
+                string runtimeInfo = "重启策略中...";
+                AddRuntimeInfo(runtimeInfo);
                 //Stop
                 TsmiSwitch_Click(null, null);
                 Thread.Sleep(1000);
@@ -351,14 +352,13 @@ namespace NineSunScripture
         /// <param name="msg">正确消息</param>
         /// <param name="errInfo">错误消息</param>
         /// <param name="needReboot">是否需要重启策略</param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void OnTradeResult(int rspCode, string msg, string errInfo, bool needReboot)
         {
             if (rspCode > 0)
             {
                 mainStrategy.UpdateTotalAccountInfo(false);
-                runtimeInfo = msg + ">成功";
-                InvokeAddRunInfo();
+                string runtimeInfo = msg + ">成功";
+                AddRuntimeInfo(runtimeInfo);
             }
             else
             {
@@ -366,8 +366,8 @@ namespace NineSunScripture
                 {
                     errInfo = msg;
                 }
-                runtimeInfo = msg + ">失败，错误信息：" + errInfo;
-                InvokeAddRunInfo();
+                string runtimeInfo = msg + ">失败，错误信息：" + errInfo;
+                AddRuntimeInfo(runtimeInfo);
                 if (needReboot)
                 {
                     InvokeRebootStrategy();
@@ -380,7 +380,8 @@ namespace NineSunScripture
         /// </summary>
         private void UpdateAcctInfo()
         {
-            lblTotalAsset.Text = "总资产：" + Math.Round(account.Funds.TotalAsset / 10000, 2) + "万";
+            lblTotalAsset.Text
+                = "总资产：" + Math.Round(account.Funds.TotalAsset / 10000, 2) + "万";
             lblMoneyAvailable.Text
                 = "可   用：" + Math.Round(account.Funds.AvailableAmt / 10000, 2) + "万";
             if (account.Positions.Count > 0)
@@ -404,11 +405,26 @@ namespace NineSunScripture
         /// <summary>
         /// 添加运行时信息
         /// </summary>
-        private void AddRuntimeInfo()
+        private void AddRuntimeInfo(string text)
         {
-            Logger.Log(runtimeInfo);
-            tbRuntimeInfo.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + runtimeInfo + "\r\n");
-            tbRuntimeInfo.ScrollToCaret();
+            if (tbRuntimeInfo.InvokeRequired)//如果调用控件的线程和创建创建控件的线程不是同一个则为True
+            {
+                while (!tbRuntimeInfo.IsHandleCreated)
+                {
+                    //解决窗体关闭时出现“访问已释放句柄“的异常
+                    if (tbRuntimeInfo.Disposing || tbRuntimeInfo.IsDisposed)
+                        return;
+                }
+                SetTextCallback d = new SetTextCallback(AddRuntimeInfo);
+                tbRuntimeInfo.Invoke(d, new object[] { text });
+            }
+            else
+            {
+                Logger.Log(text);
+                tbRuntimeInfo.AppendText(
+                    DateTime.Now.ToString("HH:mm:ss") + " " + text + "\r\n");
+                tbRuntimeInfo.ScrollToCaret();
+            }
         }
 
         /// <summary>
@@ -433,8 +449,8 @@ namespace NineSunScripture
                 longTermStocks.Clear();
                 dragonLeaders.Clear();
 
-                runtimeInfo = "清空股票池";
-                InvokeAddRunInfo();
+                string runtimeInfo = "清空股票池";
+                AddRuntimeInfo(runtimeInfo);
                 InitLvStocks();
                 RefreshStocksListView();
                 if (isStrategyStarted && mainStrategy.IsTradeTime())
@@ -478,8 +494,8 @@ namespace NineSunScripture
             }
             stockDbHelper.DelStockBy(category, quotes.Code);
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
-            runtimeInfo = "删除股票【" + quotes.Name + "】";
-            InvokeAddRunInfo();
+            string runtimeInfo = "删除股票【" + quotes.Name + "】";
+            AddRuntimeInfo(runtimeInfo);
             RefreshStocksListView();
             if (isStrategyStarted && mainStrategy.IsTradeTime())
             {
@@ -525,19 +541,20 @@ namespace NineSunScripture
         /// <param name="e"></param>
         private void TsmiSwitch_Click(object sender, EventArgs e)
         {
+            string runtimeInfo = "";
             if (isStrategyStarted)
             {
                 runtimeInfo = "策略开始停止";
-                InvokeAddRunInfo();
+                AddRuntimeInfo(runtimeInfo);
                 mainStrategy.Stop();
                 tsmiSwitch.Text = "启动";
                 isStrategyStarted = false;
                 runtimeInfo = "策略已停止";
-                InvokeAddRunInfo();
+                AddRuntimeInfo(runtimeInfo);
                 return;
             }
             runtimeInfo = "策略开始启动";
-            InvokeAddRunInfo();
+            AddRuntimeInfo(runtimeInfo);
             UpdateStrategyStocks();
             mainStrategy.UpdateStocks(stocks, weakTurnStrongStocks, bandStocks);
             bool isStarted = mainStrategy.Start();
@@ -545,13 +562,13 @@ namespace NineSunScripture
             {
                 string log = "策略启动失败";
                 runtimeInfo = log;
-                InvokeAddRunInfo();
+                AddRuntimeInfo(runtimeInfo);
                 return;
             }
             tsmiSwitch.Text = "停止";
             isStrategyStarted = true;
             runtimeInfo = "策略已启动";
-            InvokeAddRunInfo();
+            AddRuntimeInfo(runtimeInfo);
         }
 
         /// <summary>
