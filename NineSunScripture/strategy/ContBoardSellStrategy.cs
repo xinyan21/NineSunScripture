@@ -7,7 +7,6 @@ using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace NineSunScripture
@@ -71,6 +70,7 @@ namespace NineSunScripture
             float open = quotes.Open;
             float preClose = quotes.PreClose;
             string code = quotes.Code;
+            RWLockSlim.EnterWriteLock();
             if (!historyTicks.ContainsKey(code))
             {
                 historyTicks.Add(code, new Queue<Quotes>(DefaultHistoryTickCnt));
@@ -81,6 +81,7 @@ namespace NineSunScripture
             }
             //由于逻辑关系会return，数据必须在进来时就放进去，上一个取倒数第二就行了
             historyTicks[code].Enqueue(quotes);
+            RWLockSlim.ExitWriteLock();
 
             Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
             if (curPrice == lowLimit || null == position ||
@@ -174,9 +175,12 @@ namespace NineSunScripture
         /// <param name="callback">交易结果回调</param>
         private void StopWin(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            foreach (Account account in accounts)
+            Task[] tasks = new Task[accounts.Count];
+            for (int i = 0; i < accounts.Count; i++)
             {
-                Task.Run(() =>
+                Account account = accounts[i];
+                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
+                tasks[i] = Task.Run(() =>
                 {
                     Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
                     if (null == position)
@@ -229,16 +233,23 @@ namespace NineSunScripture
                     }
                 });
             }
+            Task.WaitAll(tasks);
         }
 
         /// <summary>
-        /// 单个账户卖出
+        /// 单个账户卖出，多线程操作，引用对象修相当于外部变量要加锁或者新建个局部变量替换
         /// </summary>
         /// <param name="quotes">行情对象</param>
         /// <param name="account">账户对象</param>
         /// <param name="sellRatio">卖出比例</param>
-        public static void SellWithAcct(Quotes quotes, Account account, ITrade callback, float sellRatio)
+        public static void SellWithAcct(
+            Quotes stock, Account account, ITrade callback, float sellRatio)
         {
+            Quotes quotes = new Quotes
+            {
+                Code = stock.Code,
+                Name = stock.Name
+            };
             //这里必须查询最新持仓，连续触发卖点信号会使得卖出失败导致策略重启
             account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
             Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
@@ -248,7 +259,10 @@ namespace NineSunScripture
             }
             if (quotes.Buy2 == 0)
             {
-                quotes = PriceAPI.QueryTenthGearPrice(account.TradeSessionId, position.Code);
+                string name = quotes.Name;
+                quotes = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, quotes.Code);
+                //这个行情接口不返回name
+                quotes.Name = name;
             }
             Order order = new Order();
             order.TradeSessionId = account.TradeSessionId;
@@ -267,12 +281,13 @@ namespace NineSunScripture
             int rspCode = TradeAPI.Sell(order);
             string opLog = "资金账号【" + account.FundAcct + "】" + "策略卖出【" + quotes.Name + "】"
                 + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
-            Logger.Log(opLog);
-            if (null != callback)
+            Logger.Log(opLog+"》"+ ApiHelper.ParseErrInfo(order.ErrorInfo));
+            //TODO 这里会导致运行日志添加崩溃，后面再解决
+          /* if (null != callback)
             {
                 string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
                 callback.OnTradeResult(rspCode, opLog, errInfo, false);
-            }
+            }*/
         }
 
         /// <summary>
@@ -284,13 +299,17 @@ namespace NineSunScripture
         public static void SellByRatio(
             Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
         {
-            foreach (Account account in accounts)
+            Task[] tasks = new Task[accounts.Count];
+            for (int i = 0; i < accounts.Count; i++)
             {
-                Task.Run(() =>
+                Account account = accounts[i];
+                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
+                tasks[i] = Task.Run(() =>
                 {
                     SellWithAcct(quotes, account, callback, sellRatio);
                 });
             }
+            Task.WaitAll(tasks);
         }
 
         /// <summary>
@@ -302,9 +321,12 @@ namespace NineSunScripture
         {
             List<Position> positions;
             Quotes quotes = new Quotes();
-            foreach (Account account in accounts)
+            Task[] tasks = new Task[accounts.Count];
+            for (int i = 0; i < accounts.Count; i++)
             {
-                Task.Run(() =>
+                Account account = accounts[i];
+                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
+                tasks[i] = Task.Run(() =>
                 {
                     positions = TradeAPI.QueryPositions(account.TradeSessionId);
                     if (null == positions || positions.Count == 0)
@@ -317,7 +339,7 @@ namespace NineSunScripture
                         {
                             continue;
                         }
-                        quotes = PriceAPI.QueryTenthGearPrice(account.TradeSessionId, position.Code);
+                        quotes = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, position.Code);
                         quotes.Buy2 = quotes.LatestPrice * 0.95f;
                         if (quotes.Buy2 < quotes.LowLimit)
                         {
@@ -329,6 +351,7 @@ namespace NineSunScripture
                     }
                 });
             }
+            Task.WaitAll(tasks);
         }
 
         /// <summary>

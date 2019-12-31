@@ -67,7 +67,7 @@ namespace NineSunScripture.strategy
             this.lastUpdateFundTime = DateTime.Now;
             this.lastCycleBeginTime = DateTime.Now;
             //ThreadPool.SetMaxThreads(100, 10);
-            ThreadPool.SetMinThreads(10, 10);
+            ThreadPool.SetMinThreads(100, 40);
         }
 
         private void Process()
@@ -283,6 +283,7 @@ namespace NineSunScripture.strategy
                     };
                     fundListener.OnAcctInfoListen(account);
                 });
+                Thread.Sleep(8);
             }
             lastUpdateFundTime = DateTime.Now;
         }

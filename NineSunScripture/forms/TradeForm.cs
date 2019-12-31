@@ -5,12 +5,6 @@ using NineSunScripture.trade.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NineSunScripture.forms
@@ -23,7 +17,8 @@ namespace NineSunScripture.forms
         private short opDirection;  //buy or sell, @Order const
         private ITrade callback;
 
-        public TradeForm(List<Account> accounts, ITrade callback, short opDirection = Order.CategoryBuy)
+        public TradeForm(
+            List<Account> accounts, ITrade callback, short opDirection = Order.CategoryBuy)
         {
             InitializeComponent();
             this.opDirection = opDirection;
@@ -81,13 +76,6 @@ namespace NineSunScripture.forms
             order.Code = tbCode.Text;
             order.Price = float.Parse(tbPrice.Text);
 
-            Funds funds = AccountHelper.QueryTotalFunds(accounts);
-            //可用金额不够用，撤销所有可撤单
-            if (funds.AvailableAmt < positionRatio * funds.TotalAsset)
-            {
-                //这里取消撤单后，后面要重新查询资金，否则白撤
-                AccountHelper.CancelOrdersCanCancel(accounts, quotes, callback);
-            }
             foreach (Account account in accounts)
             {
                 order.TradeSessionId = account.TradeSessionId;

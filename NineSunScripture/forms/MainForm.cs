@@ -314,11 +314,6 @@ namespace NineSunScripture
             mainStrategy.UpdateStocks(stocks, weakTurnStrongStocks, bandStocks);
         }
 
-        /*private void InvokeAddRunInfo()
-        {
-            Invoke(new MethodInvoker(AddRuntimeInfo));
-        }*/
-
         private void InvokeRebootStrategy()
         {
             Invoke(new MethodInvoker(RebootStrategy));
@@ -352,11 +347,13 @@ namespace NineSunScripture
         /// <param name="msg">正确消息</param>
         /// <param name="errInfo">错误消息</param>
         /// <param name="needReboot">是否需要重启策略</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void OnTradeResult(int rspCode, string msg, string errInfo, bool needReboot)
         {
+            Logger.Log(rspCode + ">" + msg);
             if (rspCode > 0)
             {
-                mainStrategy.UpdateTotalAccountInfo(false);
+                //mainStrategy.UpdateTotalAccountInfo(false);
                 string runtimeInfo = msg + ">成功";
                 AddRuntimeInfo(runtimeInfo);
             }
@@ -375,11 +372,19 @@ namespace NineSunScripture
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void OnAcctInfoListen(Account account)
+        {
+            this.account = account;
+            Invoke(new MethodInvoker(UpdateAcctInfo));
+        }
+
         /// <summary>
         /// 更新总账户信息
         /// </summary>
         private void UpdateAcctInfo()
         {
+            Logger.Log("Mainform UpdateAcctInfo");
             lblTotalAsset.Text
                 = "总资产：" + Math.Round(account.Funds.TotalAsset / 10000, 2) + "万";
             lblMoneyAvailable.Text
@@ -407,16 +412,27 @@ namespace NineSunScripture
         /// </summary>
         private void AddRuntimeInfo(string text)
         {
+            Logger.Log("AddRuntimeInfo-------" + text);
             if (tbRuntimeInfo.InvokeRequired)//如果调用控件的线程和创建创建控件的线程不是同一个则为True
             {
+                Logger.Log("AddRuntimeInfo----InvokeRequired---");
                 while (!tbRuntimeInfo.IsHandleCreated)
                 {
                     //解决窗体关闭时出现“访问已释放句柄“的异常
                     if (tbRuntimeInfo.Disposing || tbRuntimeInfo.IsDisposed)
                         return;
                 }
-                SetTextCallback d = new SetTextCallback(AddRuntimeInfo);
-                tbRuntimeInfo.Invoke(d, new object[] { text });
+                try
+                {
+                    SetTextCallback d = new SetTextCallback(AddRuntimeInfo);
+                    tbRuntimeInfo.Invoke(d, new object[] { text });
+                    Logger.Log("AddRuntimeInfo---- tbRuntimeInfo.Invoke---");
+                }
+                catch (Exception e)
+                {
+                    Logger.Log("AddRuntimeInfo---- tbRuntimeInfo.Invoke--Exception-" + e.Message);
+                    Logger.Exception(e);
+                }
             }
             else
             {
@@ -516,13 +532,6 @@ namespace NineSunScripture
         {
             new AddStockForm(mainStrategy.GetAccounts(), this).Show();
         }
-
-        public void OnAcctInfoListen(Account account)
-        {
-            this.account = account;
-            Invoke(new MethodInvoker(UpdateAcctInfo));
-        }
-
 
         /// <summary>
         /// 账号管理
@@ -633,7 +642,7 @@ namespace NineSunScripture
             if (dr == DialogResult.OK)
             {
                 mainStrategy.SellStock(quotes, this);
-                mainStrategy.UpdateTotalAccountInfo(false);
+                //mainStrategy.UpdateTotalAccountInfo(false);
             }
         }
 
@@ -668,6 +677,7 @@ namespace NineSunScripture
                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (dr == DialogResult.OK)
             {
+                mainStrategy.Stop();
                 Environment.Exit(0);
             }
         }

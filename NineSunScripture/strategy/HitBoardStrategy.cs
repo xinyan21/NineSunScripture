@@ -16,9 +16,10 @@ namespace NineSunScripture.strategy
     class HitBoardStrategy : Strategy
     {
         /// <summary>
-        /// 默认成交额限制是7000万，低于的过滤
+        /// 默认成交额限制是5000万，低于的过滤（之前设置的7000万是打3板用的，在2板上不适用）
+        /// 改成5000万后，3板就要设置下成交额限制了
         /// </summary>
-        private const int DefaultMoneyCtrl = 7000;
+        private const int DefaultMoneyCtrl = 5000;
         /// <summary>
         /// 最小买一涨幅
         /// </summary>
@@ -178,18 +179,27 @@ namespace NineSunScripture.strategy
                 Logger.Log("【" + quotes.Name + "】板上货太多，过滤");
                 return;
             }
-            //成交量要调接口，放到最后面判断
+            //买入计划里设置了成交额（单位为万）限制，那么成交额就要大于限制的成交额
+            //没有设置大于默认的成交额限制即可
+            bool isMoneyQuolified = false;
             Quotes forMoney = PriceAPI.QueryBasicStockInfo(accounts, code);
             if (null != forMoney)
             {
                 quotes.Money = forMoney.Money;
             }
-            //成交额小于7000万过滤
-            //买入计划里设置了成交额（单位为万）限制，这里就要判断
-            bool isMoneyQuolified = quotes.MoneyCtrl > 0 ?
-                quotes.Money > quotes.MoneyCtrl * 10000 : true;
-            //买入计划的成交额限制与默认的7000万限制都不和要求就过滤
-            if (!isMoneyQuolified && quotes.Money < DefaultMoneyCtrl * 10000)
+            else
+            {
+                Logger.Log("QueryBasicStockInfo return null-------------");
+            }
+            if (quotes.MoneyCtrl > 0 && quotes.Money > quotes.MoneyCtrl * 10000)
+            {
+                isMoneyQuolified = true;
+            }
+            else if (quotes.MoneyCtrl == 0 && quotes.Money > DefaultMoneyCtrl * 10000)
+            {
+                isMoneyQuolified = true;
+            }
+            if (!isMoneyQuolified)
             {
                 return;
             }
@@ -209,7 +219,7 @@ namespace NineSunScripture.strategy
                 if (funds.AvailableAmt <= MinTotalAvailableAmt * accounts.Count
                     || funds.AvailableAmt <= highLimit * 100 * accounts.Count)
                 {
-                    Logger.Log("【" + quotes.Name 
+                    Logger.Log("【" + quotes.Name
                         + "】触发买点，结束于总金额不够一万或总账户每户一手");
                     return;
                 }
@@ -219,11 +229,14 @@ namespace NineSunScripture.strategy
                     //这里取消撤单后，后面要重新查询资金，否则白撤
                     AccountHelper.CancelOrdersCanCancel(accounts, quotes, callback);
                 }
-                foreach (Account account in accounts)
+                Task[] tasks = new Task[accounts.Count];
+                for (int i = 0; i < accounts.Count; i++)
                 {
+                    Account account = accounts[i];
                     //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                    Task.Run(() => BuyWithAcct(account, quotes, positionRatioCtrl, callback));
-                }//END FOR ACCOUNT
+                    tasks[i] = Task.Run(() => BuyWithAcct(account, quotes, positionRatioCtrl, callback));
+                }
+                Task.WaitAll(tasks);
             }
         }
 
@@ -358,7 +371,8 @@ namespace NineSunScripture.strategy
             sbOpLog.Append("\n\n").Append(opLog).Append(tradeResult);
             if (null != callback)
             {
-                callback.OnTradeResult(rspCode, sbOpLog.ToString(), "", false);
+                callback.OnTradeResult(
+                    rspCode, sbOpLog.ToString(), ApiHelper.ParseErrInfo(order.ErrorInfo), false);
             }
         }
 
@@ -369,6 +383,10 @@ namespace NineSunScripture.strategy
         /// <returns>仓位比例</returns>
         public static float GetNewPositionRatio(Account account)
         {
+            if (0 == account.InitTotalAsset)
+            {
+                return 1 / 3f;
+            }
             double totalProfitPct = account.Funds.TotalAsset / account.InitTotalAsset;
             if (totalProfitPct < 1.1)
             {
@@ -386,29 +404,6 @@ namespace NineSunScripture.strategy
             {
                 return 1f;
             }
-        }
-
-        /// <summary>
-        /// 获取持仓股，当天已清仓的个股也会在里面，但是可用数量为0
-        /// </summary>
-        /// <param name="accounts">已登录账户</param>
-        /// <returns></returns>
-        private String GetPositionStock(List<Account> accounts)
-        {
-            string stocks = "";
-            List<Position> positions = AccountHelper.QueryTotalPositions(accounts);
-            if (null == positions || positions.Count == 0)
-            {
-                return stocks;
-            }
-            foreach (Position item in positions)
-            {
-                if (!stocks.Contains(item.Code))
-                {
-                    stocks += item.Code;
-                }
-            }
-            return stocks;
         }
 
         /// <summary>

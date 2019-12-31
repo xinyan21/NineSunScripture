@@ -4,10 +4,6 @@ using NineSunScripture.trade.api;
 using NineSunScripture.trade.helper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace NineSunScripture.util.test
@@ -26,6 +22,7 @@ namespace NineSunScripture.util.test
             quotes.Buy1Vol = 10000;
             quotes.Sell1 = (float)Math.Round(quotes.PreClose * 1.1, 2);
             quotes.Sell1Vol = 200000;
+            quotes.HighLimit = quotes.Sell1;
             return quotes;
         }
 

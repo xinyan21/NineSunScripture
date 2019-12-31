@@ -96,6 +96,11 @@ namespace NineSunScripture.trade.helper
                             }
                         }
                     }
+                    //把行情的PriceSessionId给其它账户，就不用每次都拿主账户的PriceSessionId给其它账户
+                    if (account != mainAcct)
+                    {
+                        account.PriceSessionId = mainAcct.PriceSessionId;
+                    }
                     loginAccts.Add(account);
                     opLog = "资金账号【" + account.FundAcct + "】登录成功，会话ID为" + tradeSessionId;
                     Logger.Log(opLog);
@@ -299,7 +304,7 @@ namespace NineSunScripture.trade.helper
         {
             List<Order> orders = TradeAPI.QueryOrdersCanCancel(sessionId);
             orders = orders.FindAll(
-                order => order.Code == code && order.CanceledQuantity==0);
+                order => order.Code == code && order.CanceledQuantity == 0);
 
             return orders;
         }

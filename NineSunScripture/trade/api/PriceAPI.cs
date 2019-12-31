@@ -101,18 +101,18 @@ namespace NineSunScripture.trade.api
                 Logger.Log("QueryTenthGearPrice error：" + ApiHelper.ParseErrInfo(errorInfo));
                 return null;
             }
-            /* if (MainStrategy.IsTest
-                 && quotes.Code.Equals("300643") && DateTime.Now.Second == 30)
-             {
-                 quotes = TradeTestCase.ConstructHitBoardData(quotes);
-                 Logger.Log("ConstructHitBoardData for 300643 is ready>" + quotes.ToString());
-             }
-             if (MainStrategy.IsTest
-               && quotes.Code.Equals("002351") && DateTime.Now.Second == 0)
-             {
-                 quotes = TradeTestCase.ConstructHitBoardData(quotes);
-                 Logger.Log("ConstructHitBoardData for 300643 is ready>" + quotes.ToString());
-             }*/
+            /*if (MainStrategy.IsTest
+                   && quotes.Code.Equals("300643") && DateTime.Now.Second == 30)
+               {
+                   quotes = TradeTestCase.ConstructHitBoardData(quotes);
+                   Logger.Log("ConstructHitBoardData for 300643 is ready>" + quotes.ToString());
+               }
+               if (MainStrategy.IsTest
+              && quotes.Code.Equals("002351") && DateTime.Now.Second == 0)
+            {
+                quotes = TradeTestCase.ConstructHitBoardData(quotes);
+                Logger.Log("ConstructHitBoardData for 300643 is ready>" + quotes.ToString());
+            }*/
 
             return quotes;
         }
