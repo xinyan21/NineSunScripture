@@ -1,13 +1,10 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.util.log;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Net;
+using System.Net.Mail;
 
 namespace NineSunScripture.util
 {
@@ -97,6 +94,33 @@ namespace NineSunScripture.util
             string path = System.Environment.CurrentDirectory + @"\ths.dll";
             bool isExist = File.Exists(path);
             return isExist;
+        }
+
+        public static void SendEmail(string title, string content, string to = "xinyan621@outlook.com")
+        {
+            //实例化一个发送邮件类。
+            MailMessage mailMessage = new MailMessage();
+            //发件人邮箱地址，方法重载不同，可以根据需求自行选择。
+            mailMessage.From = new MailAddress("460313911@qq.com");
+            //收件人邮箱地址。
+            mailMessage.To.Add(new MailAddress(to));
+            //邮件标题。
+            mailMessage.Subject = title;
+            //邮件内容。
+            mailMessage.Body = content;
+
+            //实例化一个SmtpClient类。
+            SmtpClient client = new SmtpClient();
+            //在这里我使用的是qq邮箱，所以是smtp.qq.com，如果你使用的是126邮箱，那么就是smtp.126.com。
+            client.Host = "smtp.qq.com";
+            //使用安全加密连接。
+            client.EnableSsl = true;
+            //不和请求一块发送。
+            client.UseDefaultCredentials = false;
+            //验证发件人身份(发件人的邮箱，邮箱里的生成授权码);
+            client.Credentials = new NetworkCredential("460313911@qq.com", "ymegzdrsirmscaib");
+            //发送
+            client.Send(mailMessage);
         }
     }
 }

@@ -5,6 +5,7 @@ using NineSunScripture.trade.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NineSunScripture.forms
@@ -76,33 +77,39 @@ namespace NineSunScripture.forms
             order.Code = tbCode.Text;
             order.Price = float.Parse(tbPrice.Text);
 
-            foreach (Account account in accounts)
+            Task[] tasks = new Task[accounts.Count];
+            for (int i = 0; i < accounts.Count; i++)
             {
-                order.TradeSessionId = account.TradeSessionId;
-                account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
-                ApiHelper.SetShareholderAcct(account, quotes, order);
-                //数量是整百整百的
-                double money = account.Funds.TotalAsset * positionRatio;
-                if (money > account.Funds.AvailableAmt)
+                Account account = accounts[i];
+                tasks[i] = Task.Run(() =>
                 {
-                    money = account.Funds.AvailableAmt;
-                }
-                order.Quantity = ((int)(money / (order.Price * 100))) * 100;
-                if (order.Quantity == 0)
-                {
-                    continue;
-                }
-                int rspCode = TradeAPI.Buy(order);
-                string opLog
-                    = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
-                    + Math.Round(order.Quantity * order.Price / 10000, 2) + "万元";
-                Logger.Log(opLog);
-                if (null != callback)
-                {
-                    string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
-                    callback.OnTradeResult(rspCode, opLog, errInfo, false);
-                }
+                    order.TradeSessionId = account.TradeSessionId;
+                    account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
+                    ApiHelper.SetShareholderAcct(account, quotes, order);
+                    //数量是整百整百的
+                    double money = account.Funds.TotalAsset * positionRatio;
+                    if (money > account.Funds.AvailableAmt)
+                    {
+                        money = account.Funds.AvailableAmt;
+                    }
+                    order.Quantity = ((int)(money / (order.Price * 100))) * 100;
+                    if (order.Quantity == 0)
+                    {
+                        return;
+                    }
+                    int rspCode = TradeAPI.Buy(order);
+                    string opLog
+                        = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
+                        + Math.Round(order.Quantity * order.Price / 10000, 2) + "万元";
+                    Logger.Log(opLog);
+                    if (null != callback)
+                    {
+                        string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
+                        callback.OnTradeResult(rspCode, opLog, errInfo, false);
+                    }
+                });
             }
+            Task.WaitAll(tasks);
         }
 
         private void Sell()
@@ -115,8 +122,15 @@ namespace NineSunScripture.forms
         {
             if (tbCode.TextLength == 6)
             {
-                quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
-                if (quotes.Name.Length > 0)
+                try
+                {
+                    quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
+                }
+                catch
+                {
+                    return;
+                }
+                if (null != quotes && !string.IsNullOrEmpty(quotes.Name))
                 {
                     tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
                 }

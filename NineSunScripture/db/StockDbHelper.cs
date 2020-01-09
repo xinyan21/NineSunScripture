@@ -115,8 +115,7 @@ namespace NineSunScripture.db
                 }
             }
 
-
-                    return quotes;
+            return quotes;
         }
     }
 }

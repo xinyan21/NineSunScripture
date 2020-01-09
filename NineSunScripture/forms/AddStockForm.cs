@@ -11,7 +11,7 @@ namespace NineSunScripture.forms
         private MainForm mainForm;
         private List<Account> accounts;
         private short category = Quotes.CategoryLatest;
-        Quotes quotes = new Quotes();
+        private Quotes quotes = new Quotes();
 
         public AddStockForm(List<Account> accounts, MainForm mainForm)
         {
@@ -30,6 +30,10 @@ namespace NineSunScripture.forms
             }
 
             quotes.Code = tbCode.Text;
+            if (!tbName.Text.Contains("["))
+            {
+                quotes.Name = tbName.Text; 
+            }
             quotes.PositionCtrl = float.Parse(tbPosition.Text);
             if (tbMoney.Text.Length > 0)
             {
@@ -53,33 +57,34 @@ namespace NineSunScripture.forms
 
         private void RbtnDragonLeader_CheckedChanged(object sender, EventArgs e)
         {
-            this.category = Quotes.CategoryDragonLeader;
+            category = Quotes.CategoryDragonLeader;
             panelBandParam.Visible = false;
         }
 
         private void RbtnLongTerm_CheckedChanged(object sender, EventArgs e)
         {
-            this.category = Quotes.CategoryLongTerm;
+            category = Quotes.CategoryLongTerm;
             panelBandParam.Visible = false;
         }
 
         private void RbtnLatest_CheckedChanged(object sender, EventArgs e)
         {
-            this.category = Quotes.CategoryLatest;
+            category = Quotes.CategoryLatest;
             panelBandParam.Visible = false;
         }
 
         private void RbWeakTurnStrong_CheckedChanged(object sender, EventArgs e)
         {
-            this.quotes.StockCategory = Quotes.CategoryWeakTurnStrong;
+            quotes.StockCategory = Quotes.CategoryWeakTurnStrong;
             panelBandParam.Visible = false;
         }
 
         private void RbtnBand_CheckedChanged(object sender, EventArgs e)
         {
-            this.quotes.StockCategory = Quotes.CategoryBand;
+            quotes.StockCategory = Quotes.CategoryBand;
             panelBandParam.Visible = true;
         }
+
         private void TbCode_TextChanged(object sender, EventArgs e)
         {
             if (tbCode.TextLength == 6)
@@ -88,12 +93,11 @@ namespace NineSunScripture.forms
                 {
                     quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
                 }
-                catch (Exception exce)
+                catch
                 {
-
-                    MessageBox.Show(exce.Message);
+                    return;
                 }
-                if (null != quotes.Name && quotes.Name.Length > 0)
+                if (null != quotes && !string.IsNullOrEmpty(quotes.Name))
                 {
                     tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
                 }

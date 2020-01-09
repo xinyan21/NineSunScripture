@@ -6,6 +6,7 @@ using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NineSunScripture.strategy
@@ -13,34 +14,43 @@ namespace NineSunScripture.strategy
     /// <summary>
     /// 打板策略
     /// </summary>
-    class HitBoardStrategy : Strategy
+    internal class HitBoardStrategy : Strategy
     {
         /// <summary>
         /// 默认成交额限制是5000万，低于的过滤（之前设置的7000万是打3板用的，在2板上不适用）
         /// 改成5000万后，3板就要设置下成交额限制了
         /// </summary>
         private const int DefaultMoneyCtrl = 5000;
+
         /// <summary>
         /// 最小买一涨幅
         /// </summary>
         private const float MinBuy1Ratio = 1.085f;
+
         /// <summary>
         /// 最大买一额限制默认是1888万
         /// </summary>
         private const int MaxBuy1MoneyCtrl = 1888;
+
         /// <summary>
         /// 单账户最小可用金额默认为5000
         /// </summary>
         private const int MinTotalAvailableAmt = 5000;
+
         /// <summary>
         /// 最大卖一额限制默认是1888万
         /// </summary>
         private const int MaxSellMoneyCtrl = 1888;
+
+        protected ReaderWriterLockSlim RWLockSlimForHistory = new ReaderWriterLockSlim();
+        protected ReaderWriterLockSlim RWLockSlimForOpenBoard = new ReaderWriterLockSlim();
+
         //由于是每只股票一个线程，这些字典都是根据股票来区分的，所以不会出现并发问题
         /// <summary>
         /// 开板时间
         /// </summary>
         private Dictionary<string, DateTime> openBoardTime = new Dictionary<string, DateTime>();
+
         /// <summary>
         /// 开板次数
         /// </summary>
@@ -56,7 +66,7 @@ namespace NineSunScripture.strategy
             float highLimit = quotes.HighLimit;
             float open = quotes.Open;
             string code = quotes.Code;
-            RWLockSlim.EnterWriteLock();
+            RWLockSlimForHistory.EnterWriteLock();
             if (!historyTicks.ContainsKey(code))
             {
                 historyTicks.Add(code, new Queue<Quotes>(DefaultHistoryTickCnt));
@@ -67,7 +77,7 @@ namespace NineSunScripture.strategy
             }
             //由于逻辑关系会return，数据必须在进来时就放进去，上一个取倒数第二就行了
             historyTicks[code].Enqueue(quotes);
-            RWLockSlim.ExitWriteLock();
+            RWLockSlimForHistory.ExitWriteLock();
 
             if ((DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 || DateTime.Now.Hour > 14)
                 && !MainStrategy.IsTest)
@@ -78,9 +88,9 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            RWLockSlim.EnterReadLock();
+            RWLockSlimForHistory.EnterReadLock();
             Quotes[] ticks = historyTicks[code].ToArray();
-            RWLockSlim.ExitReadLock();
+            RWLockSlimForHistory.ExitReadLock();
             Quotes lastTickQuotes = null;
             if (ticks.Length >= 2)
             {
@@ -94,6 +104,7 @@ namespace NineSunScripture.strategy
             bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
+                RWLockSlimForOpenBoard.EnterWriteLock();
                 openBoardTime.Add(code, DateTime.Now);
                 if (!openBoardCnt.ContainsKey(code))
                 {
@@ -103,6 +114,7 @@ namespace NineSunScripture.strategy
                 {
                     openBoardCnt[code] += 1;
                 }
+                RWLockSlimForOpenBoard.ExitWriteLock();
                 Logger.Log("【" + quotes.Name + "】开板");
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
@@ -121,18 +133,20 @@ namespace NineSunScripture.strategy
                     return;
                 }
             }
-            if (openBoardCnt.ContainsKey(code) && openBoardCnt[code] > 2)
+            RWLockSlimForOpenBoard.EnterReadLock();
+            if (openBoardCnt.ContainsKey(code) && openBoardCnt[code] > 3)
             {
-                Logger.Log("【" + quotes.Name + "】开板次数大于2次，过滤");
+                Logger.Log("【" + quotes.Name + "】开板次数大于3次，过滤");
                 return;
             }
+            RWLockSlimForOpenBoard.ExitReadLock();
             //开板时间小于30秒，过滤。如果没触发卖2买点，直接回封，这里的判断是没用的，因为上面回封后会重置开板时间
             //所以上面加上了30s的判断
             if (openBoardTime.ContainsKey(code))
             {
                 int openBoardInterval
                     = (int)DateTime.Now.Subtract(openBoardTime[code]).TotalSeconds;
-                if (openBoardInterval < 30)
+                if (openBoardInterval < 26)
                 {
                     Logger.Log("【" + quotes.Name + "】开板时间->" + openBoardInterval + "s");
                     return;
@@ -356,7 +370,7 @@ namespace NineSunScripture.strategy
                     + account.FundAcct + "]结束于出去委托数量后可买数量为0");
                 return;
             }
-            //################计算买入数量END####################### 
+            //################计算买入数量END#######################
             //计算出来的数量不够资金买，那么把剩余资金买完
             order.TradeSessionId = account.TradeSessionId;
             ApiHelper.SetShareholderAcct(account, quotes, order);

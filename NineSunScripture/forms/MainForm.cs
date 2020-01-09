@@ -30,7 +30,7 @@ namespace NineSunScripture
         private bool isStrategyStarted = false;
         private int rotateDegree = 0;
 
-        delegate void SetTextCallback(string text);
+        private delegate void SetTextCallback(string text);
 
         public MainForm()
         {
@@ -264,14 +264,14 @@ namespace NineSunScripture
             string runtimeInfo = "新增股票【" + quotes.Name + "】";
             AddRuntimeInfo(runtimeInfo);
             RefreshStocksListView();
-            if (isStrategyStarted && mainStrategy.IsTradeTime())
-            {
-                RebootStrategy();
-            }
-            else
-            {
-                UpdateStrategyStocks();
-            }
+            /* if (isStrategyStarted && mainStrategy.IsTradeTime())
+             {
+                 RebootStrategy();
+             }
+             else
+             {
+             }*/
+            UpdateStrategyStocks();
         }
 
         private void RefreshStocksListView()

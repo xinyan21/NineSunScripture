@@ -48,9 +48,9 @@
             // tbCode
             // 
             this.tbCode.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbCode.Location = new System.Drawing.Point(188, 90);
+            this.tbCode.Location = new System.Drawing.Point(161, 83);
             this.tbCode.Name = "tbCode";
-            this.tbCode.Size = new System.Drawing.Size(167, 31);
+            this.tbCode.Size = new System.Drawing.Size(144, 29);
             this.tbCode.TabIndex = 0;
             this.tbCode.TextChanged += new System.EventHandler(this.tbCode_TextChanged);
             // 
@@ -60,9 +60,9 @@
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label1.Location = new System.Drawing.Point(95, 96);
+            this.label1.Location = new System.Drawing.Point(81, 89);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(69, 25);
+            this.label1.Size = new System.Drawing.Size(61, 23);
             this.label1.TabIndex = 1;
             this.label1.Text = "代码：";
             // 
@@ -72,9 +72,9 @@
             this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label3.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label3.Location = new System.Drawing.Point(95, 237);
+            this.label3.Location = new System.Drawing.Point(81, 219);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(69, 25);
+            this.label3.Size = new System.Drawing.Size(61, 23);
             this.label3.TabIndex = 3;
             this.label3.Text = "价格：";
             // 
@@ -84,18 +84,18 @@
             this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label4.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label4.Location = new System.Drawing.Point(414, 234);
+            this.label4.Location = new System.Drawing.Point(355, 216);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(69, 25);
+            this.label4.Size = new System.Drawing.Size(61, 23);
             this.label4.TabIndex = 4;
             this.label4.Text = "仓位：";
             // 
             // tbPrice
             // 
             this.tbPrice.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbPrice.Location = new System.Drawing.Point(188, 234);
+            this.tbPrice.Location = new System.Drawing.Point(161, 216);
             this.tbPrice.Name = "tbPrice";
-            this.tbPrice.Size = new System.Drawing.Size(167, 31);
+            this.tbPrice.Size = new System.Drawing.Size(144, 29);
             this.tbPrice.TabIndex = 6;
             // 
             // groupBox1
@@ -105,9 +105,9 @@
             this.groupBox1.Controls.Add(this.rbtnAllIn);
             this.groupBox1.Controls.Add(this.rbtnOneSecond);
             this.groupBox1.Controls.Add(this.rbtnOneThird);
-            this.groupBox1.Location = new System.Drawing.Point(506, 204);
+            this.groupBox1.Location = new System.Drawing.Point(434, 198);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(295, 61);
+            this.groupBox1.Size = new System.Drawing.Size(253, 56);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             // 
@@ -116,9 +116,9 @@
             this.rbtnOneFourth.AutoSize = true;
             this.rbtnOneFourth.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneFourth.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneFourth.Location = new System.Drawing.Point(6, 21);
+            this.rbtnOneFourth.Location = new System.Drawing.Point(5, 19);
             this.rbtnOneFourth.Name = "rbtnOneFourth";
-            this.rbtnOneFourth.Size = new System.Drawing.Size(60, 29);
+            this.rbtnOneFourth.Size = new System.Drawing.Size(55, 27);
             this.rbtnOneFourth.TabIndex = 4;
             this.rbtnOneFourth.Text = "1/4";
             this.rbtnOneFourth.UseVisualStyleBackColor = true;
@@ -129,9 +129,9 @@
             this.rbtnAllIn.AutoSize = true;
             this.rbtnAllIn.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnAllIn.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnAllIn.Location = new System.Drawing.Point(214, 21);
+            this.rbtnAllIn.Location = new System.Drawing.Point(183, 19);
             this.rbtnAllIn.Name = "rbtnAllIn";
-            this.rbtnAllIn.Size = new System.Drawing.Size(68, 29);
+            this.rbtnAllIn.Size = new System.Drawing.Size(62, 27);
             this.rbtnAllIn.TabIndex = 2;
             this.rbtnAllIn.Text = "满仓";
             this.rbtnAllIn.UseVisualStyleBackColor = true;
@@ -142,9 +142,9 @@
             this.rbtnOneSecond.AutoSize = true;
             this.rbtnOneSecond.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneSecond.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneSecond.Location = new System.Drawing.Point(148, 21);
+            this.rbtnOneSecond.Location = new System.Drawing.Point(127, 19);
             this.rbtnOneSecond.Name = "rbtnOneSecond";
-            this.rbtnOneSecond.Size = new System.Drawing.Size(60, 29);
+            this.rbtnOneSecond.Size = new System.Drawing.Size(55, 27);
             this.rbtnOneSecond.TabIndex = 1;
             this.rbtnOneSecond.Text = "1/2";
             this.rbtnOneSecond.UseVisualStyleBackColor = true;
@@ -156,9 +156,9 @@
             this.rbtnOneThird.Checked = true;
             this.rbtnOneThird.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneThird.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneThird.Location = new System.Drawing.Point(82, 21);
+            this.rbtnOneThird.Location = new System.Drawing.Point(70, 19);
             this.rbtnOneThird.Name = "rbtnOneThird";
-            this.rbtnOneThird.Size = new System.Drawing.Size(60, 29);
+            this.rbtnOneThird.Size = new System.Drawing.Size(55, 27);
             this.rbtnOneThird.TabIndex = 0;
             this.rbtnOneThird.TabStop = true;
             this.rbtnOneThird.Text = "1/3";
@@ -174,9 +174,9 @@
             this.btnBuy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBuy.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnBuy.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnBuy.Location = new System.Drawing.Point(272, 383);
+            this.btnBuy.Location = new System.Drawing.Point(233, 354);
             this.btnBuy.Name = "btnBuy";
-            this.btnBuy.Size = new System.Drawing.Size(294, 72);
+            this.btnBuy.Size = new System.Drawing.Size(252, 66);
             this.btnBuy.TabIndex = 8;
             this.btnBuy.Text = "买  入";
             this.btnBuy.UseVisualStyleBackColor = false;
@@ -188,28 +188,27 @@
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label2.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label2.Location = new System.Drawing.Point(425, 96);
+            this.label2.Location = new System.Drawing.Point(364, 89);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(69, 25);
+            this.label2.Size = new System.Drawing.Size(61, 23);
             this.label2.TabIndex = 9;
             this.label2.Text = "名称：";
             // 
             // tbName
             // 
             this.tbName.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbName.Location = new System.Drawing.Point(506, 90);
+            this.tbName.Location = new System.Drawing.Point(434, 83);
             this.tbName.Name = "tbName";
-            this.tbName.ReadOnly = true;
-            this.tbName.Size = new System.Drawing.Size(167, 31);
+            this.tbName.Size = new System.Drawing.Size(144, 29);
             this.tbName.TabIndex = 10;
             // 
             // TradeForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(831, 569);
+            this.ClientSize = new System.Drawing.Size(712, 525);
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnBuy);

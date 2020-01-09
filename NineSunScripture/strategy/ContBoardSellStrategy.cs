@@ -7,6 +7,7 @@ using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NineSunScripture
@@ -56,6 +57,8 @@ namespace NineSunScripture
         ///封单开始减少前的金额
         /// </summary>
         private const int SealMoneyBeginToDecrease = 3000;
+
+        protected static private ReaderWriterLockSlim RWLockSlim = new ReaderWriterLockSlim();
 
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
@@ -129,7 +132,9 @@ namespace NineSunScripture
                     }
                 }
             }
+            RWLockSlim.EnterReadLock();
             Quotes[] ticks = historyTicks[code].ToArray();
+            RWLockSlim.ExitReadLock();
             if (null != ticks && ticks.Length >= 2 && ticks[ticks.Length - 2].LatestPrice == highLimit
                 && quotes.Buy1 < highLimit)
             {
@@ -362,7 +367,9 @@ namespace NineSunScripture
         /// <param name="callback">交易接口回调</param>
         private void SellIfSealDecrease(List<Account> accounts, Quotes quotes, ITrade callback)
         {
+            RWLockSlim.EnterReadLock();
             Quotes[] ticks = historyTicks[quotes.Code].ToArray();
+            RWLockSlim.ExitReadLock();
             if (ticks.Length < 2)
             {
                 return;

@@ -48,8 +48,8 @@
             this.lblStopWinPrice = new System.Windows.Forms.Label();
             this.lblStopLossPrice = new System.Windows.Forms.Label();
             this.panelBandParam = new System.Windows.Forms.Panel();
-            this.tbStopWinPrice = new System.Windows.Forms.TextBox();
             this.tbStopLossPrice = new System.Windows.Forms.TextBox();
+            this.tbStopWinPrice = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.panelBandParam.SuspendLayout();
             this.SuspendLayout();
@@ -81,7 +81,7 @@
             this.label1.Location = new System.Drawing.Point(90, 107);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(69, 25);
+            this.label1.Size = new System.Drawing.Size(61, 23);
             this.label1.TabIndex = 1;
             this.label1.Text = "代码：";
             // 
@@ -92,7 +92,7 @@
             this.tbCode.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbCode.MaxLength = 6;
             this.tbCode.Name = "tbCode";
-            this.tbCode.Size = new System.Drawing.Size(147, 31);
+            this.tbCode.Size = new System.Drawing.Size(147, 29);
             this.tbCode.TabIndex = 1;
             this.tbCode.TextChanged += new System.EventHandler(this.TbCode_TextChanged);
             // 
@@ -105,7 +105,7 @@
             this.label2.Location = new System.Drawing.Point(469, 190);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(88, 25);
+            this.label2.Size = new System.Drawing.Size(78, 23);
             this.label2.TabIndex = 9;
             this.label2.Text = "成交额：";
             // 
@@ -118,7 +118,7 @@
             this.label3.Location = new System.Drawing.Point(90, 187);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(69, 25);
+            this.label3.Size = new System.Drawing.Size(61, 23);
             this.label3.TabIndex = 10;
             this.label3.Text = "仓位：";
             // 
@@ -131,7 +131,7 @@
             this.label4.Location = new System.Drawing.Point(475, 107);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(69, 25);
+            this.label4.Size = new System.Drawing.Size(61, 23);
             this.label4.TabIndex = 11;
             this.label4.Text = "名称：";
             // 
@@ -142,7 +142,7 @@
             this.tbMoney.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbMoney.MaxLength = 5;
             this.tbMoney.Name = "tbMoney";
-            this.tbMoney.Size = new System.Drawing.Size(147, 31);
+            this.tbMoney.Size = new System.Drawing.Size(147, 29);
             this.tbMoney.TabIndex = 4;
             // 
             // tbName
@@ -152,8 +152,7 @@
             this.tbName.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbName.MaxLength = 4;
             this.tbName.Name = "tbName";
-            this.tbName.ReadOnly = true;
-            this.tbName.Size = new System.Drawing.Size(147, 31);
+            this.tbName.Size = new System.Drawing.Size(147, 29);
             this.tbName.TabIndex = 11;
             // 
             // tbPosition
@@ -163,7 +162,7 @@
             this.tbPosition.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbPosition.MaxLength = 4;
             this.tbPosition.Name = "tbPosition";
-            this.tbPosition.Size = new System.Drawing.Size(147, 31);
+            this.tbPosition.Size = new System.Drawing.Size(147, 29);
             this.tbPosition.TabIndex = 2;
             // 
             // label5
@@ -175,7 +174,7 @@
             this.label5.Location = new System.Drawing.Point(90, 279);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(69, 25);
+            this.label5.Size = new System.Drawing.Size(61, 23);
             this.label5.TabIndex = 12;
             this.label5.Text = "分类：";
             // 
@@ -202,7 +201,7 @@
             this.rbtnBand.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.rbtnBand.Location = new System.Drawing.Point(97, 26);
             this.rbtnBand.Name = "rbtnBand";
-            this.rbtnBand.Size = new System.Drawing.Size(68, 29);
+            this.rbtnBand.Size = new System.Drawing.Size(62, 27);
             this.rbtnBand.TabIndex = 5;
             this.rbtnBand.Text = "波段";
             this.rbtnBand.UseVisualStyleBackColor = true;
@@ -215,7 +214,7 @@
             this.rbWeakTurnStrong.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.rbWeakTurnStrong.Location = new System.Drawing.Point(180, 26);
             this.rbWeakTurnStrong.Name = "rbWeakTurnStrong";
-            this.rbWeakTurnStrong.Size = new System.Drawing.Size(87, 29);
+            this.rbWeakTurnStrong.Size = new System.Drawing.Size(79, 27);
             this.rbWeakTurnStrong.TabIndex = 0;
             this.rbWeakTurnStrong.Text = "弱转强";
             this.rbWeakTurnStrong.UseVisualStyleBackColor = true;
@@ -230,7 +229,7 @@
             this.rbtnTomorrow.Location = new System.Drawing.Point(22, 26);
             this.rbtnTomorrow.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnTomorrow.Name = "rbtnTomorrow";
-            this.rbtnTomorrow.Size = new System.Drawing.Size(68, 29);
+            this.rbtnTomorrow.Size = new System.Drawing.Size(62, 27);
             this.rbtnTomorrow.TabIndex = 5;
             this.rbtnTomorrow.TabStop = true;
             this.rbtnTomorrow.Text = "最新";
@@ -245,7 +244,7 @@
             this.rbtnLongTerm.Location = new System.Drawing.Point(286, 26);
             this.rbtnLongTerm.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnLongTerm.Name = "rbtnLongTerm";
-            this.rbtnLongTerm.Size = new System.Drawing.Size(68, 29);
+            this.rbtnLongTerm.Size = new System.Drawing.Size(62, 27);
             this.rbtnLongTerm.TabIndex = 1;
             this.rbtnLongTerm.Text = "常驻";
             this.rbtnLongTerm.UseVisualStyleBackColor = true;
@@ -259,7 +258,7 @@
             this.rbtnDragonLeader.Location = new System.Drawing.Point(373, 26);
             this.rbtnDragonLeader.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnDragonLeader.Name = "rbtnDragonLeader";
-            this.rbtnDragonLeader.Size = new System.Drawing.Size(68, 29);
+            this.rbtnDragonLeader.Size = new System.Drawing.Size(62, 27);
             this.rbtnDragonLeader.TabIndex = 0;
             this.rbtnDragonLeader.Text = "龙头";
             this.rbtnDragonLeader.UseVisualStyleBackColor = true;
@@ -274,7 +273,7 @@
             this.lblStopWinPrice.Location = new System.Drawing.Point(4, 22);
             this.lblStopWinPrice.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblStopWinPrice.Name = "lblStopWinPrice";
-            this.lblStopWinPrice.Size = new System.Drawing.Size(88, 25);
+            this.lblStopWinPrice.Size = new System.Drawing.Size(78, 23);
             this.lblStopWinPrice.TabIndex = 14;
             this.lblStopWinPrice.Text = "止盈价：";
             // 
@@ -287,7 +286,7 @@
             this.lblStopLossPrice.Location = new System.Drawing.Point(362, 22);
             this.lblStopLossPrice.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblStopLossPrice.Name = "lblStopLossPrice";
-            this.lblStopLossPrice.Size = new System.Drawing.Size(88, 25);
+            this.lblStopLossPrice.Size = new System.Drawing.Size(78, 23);
             this.lblStopLossPrice.TabIndex = 15;
             this.lblStopLossPrice.Text = "止损价：";
             // 
@@ -303,16 +302,6 @@
             this.panelBandParam.Size = new System.Drawing.Size(617, 67);
             this.panelBandParam.TabIndex = 16;
             // 
-            // tbStopWinPrice
-            // 
-            this.tbStopWinPrice.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tbStopWinPrice.Location = new System.Drawing.Point(95, 19);
-            this.tbStopWinPrice.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tbStopWinPrice.MaxLength = 4;
-            this.tbStopWinPrice.Name = "tbStopWinPrice";
-            this.tbStopWinPrice.Size = new System.Drawing.Size(147, 31);
-            this.tbStopWinPrice.TabIndex = 17;
-            // 
             // tbStopLossPrice
             // 
             this.tbStopLossPrice.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -320,12 +309,22 @@
             this.tbStopLossPrice.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbStopLossPrice.MaxLength = 4;
             this.tbStopLossPrice.Name = "tbStopLossPrice";
-            this.tbStopLossPrice.Size = new System.Drawing.Size(147, 31);
+            this.tbStopLossPrice.Size = new System.Drawing.Size(147, 29);
             this.tbStopLossPrice.TabIndex = 18;
+            // 
+            // tbStopWinPrice
+            // 
+            this.tbStopWinPrice.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tbStopWinPrice.Location = new System.Drawing.Point(95, 19);
+            this.tbStopWinPrice.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbStopWinPrice.MaxLength = 4;
+            this.tbStopWinPrice.Name = "tbStopWinPrice";
+            this.tbStopWinPrice.Size = new System.Drawing.Size(147, 29);
+            this.tbStopWinPrice.TabIndex = 17;
             // 
             // AddStockForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;

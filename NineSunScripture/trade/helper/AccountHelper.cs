@@ -51,13 +51,13 @@ namespace NineSunScripture.trade.helper
             }
             byte[] byteArrErrorInfo = new byte[256];
             int priceSessionId = PriceAPI.HQ_Logon(
-                mainAcct.PriceAcct, mainAcct.PricePassword, byteArrErrorInfo);
+               mainAcct.PriceAcct, mainAcct.PricePassword, byteArrErrorInfo);
             if (priceSessionId > 0)
             {
                 mainAcct.PriceSessionId = priceSessionId;
                 callback.OnTradeResult(1, "行情登录", "", false);
             }
-            else if (null != callback)
+            else
             {
                 string errInfo = ApiHelper.ParseErrInfo(byteArrErrorInfo);
                 callback.OnTradeResult(0, "行情登录", errInfo, true);

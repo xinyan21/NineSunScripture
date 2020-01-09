@@ -14,7 +14,7 @@ namespace WatchDog
         /// </summary>
         public List<MyProcess> myProcessList;
         private Thread watchThread;
-        private int watchWaitingTime = 20;
+        private int watchWaitingTime = 3;
 
 
         /// <summary>
@@ -33,10 +33,10 @@ namespace WatchDog
             myProcessList = new List<MyProcess>();
             foreach (string path in processPath)
             {
-                if (System.IO.File.Exists(path))
+                if (System.IO.File.Exists(@path))
                 {
                     count++;
-                    MyProcess mp = new MyProcess(path);
+                    MyProcess mp = new MyProcess(@path);
                     myProcessList.Add(mp);
                 }
             }
