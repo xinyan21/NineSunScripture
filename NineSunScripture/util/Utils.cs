@@ -68,10 +68,10 @@ namespace NineSunScripture.util
             {
                 Logger.Log(quotes.ToString(), LogType.Quotes);
             }
-            if (DateTime.Now.Second != 0 || null == quotes)
+           /* if (DateTime.Now.Second != 0 || null == quotes)
             {
                 return;
-            }
+            }*/
             Logger.Log("Sampling->" + quotes.ToString(), LogType.Quotes);
         }
 
