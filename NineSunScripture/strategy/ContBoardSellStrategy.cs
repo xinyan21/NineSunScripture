@@ -253,7 +253,9 @@ namespace NineSunScripture
             Quotes quotes = new Quotes
             {
                 Code = stock.Code,
-                Name = stock.Name
+                Name = stock.Name,
+                //这里要把输入的价格传进来，否则就查询最新价格直接卖出了
+                Buy2 = stock.Buy2
             };
             //这里必须查询最新持仓，连续触发卖点信号会使得卖出失败导致策略重启
             account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
@@ -286,13 +288,13 @@ namespace NineSunScripture
             int rspCode = TradeAPI.Sell(order);
             string opLog = "资金账号【" + account.FundAcct + "】" + "策略卖出【" + quotes.Name + "】"
                 + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
-            Logger.Log(opLog+"》"+ ApiHelper.ParseErrInfo(order.ErrorInfo));
+            Logger.Log(opLog + "》" + ApiHelper.ParseErrInfo(order.ErrorInfo));
             //TODO 这里会导致运行日志添加崩溃，后面再解决
-          /* if (null != callback)
-            {
-                string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
-                callback.OnTradeResult(rspCode, opLog, errInfo, false);
-            }*/
+            /* if (null != callback)
+              {
+                  string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
+                  callback.OnTradeResult(rspCode, opLog, errInfo, false);
+              }*/
         }
 
         /// <summary>
