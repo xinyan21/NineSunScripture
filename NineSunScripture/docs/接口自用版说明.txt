@@ -1,0 +1,369 @@
+以下说明是C++用法
+=============================交易接口-结构体=====================================================================================================
+struct 资产结构体 {
+	double 总资产;
+	double 资金余额;
+	double 冻结金额;
+	double 可取金额;
+	double 可用金额;
+};
+struct 持仓股票结构体 {
+	char 证券代码[16];
+	char 证券名称[16];
+	char 交易市场[16];
+	char 股东账户[16];
+	double 参考盈亏;
+	double 盈亏比例;
+	double 成本价;
+	double 市价;
+	double 市值;
+	int 股票余额;
+	int 可用余额;
+	int 冻结数量;
+};
+struct 当日成交结构体 {
+	char 成交时间[16];
+	char 证券代码[16];
+	char 证券名称[16];
+	char 合同编号[16];
+	char 操作[16];
+	double 成交均价;
+	double 成交金额;
+	int 成交数量;
+};
+struct 当日委托结构体 {
+	char 委托时间[16];
+	char 证券代码[16];
+	char 证券名称[16];
+	char 合同编号[16];
+	char 交易市场[16];
+	char 股东账户[16];
+	char 操作[16];
+	char 备注[16];
+	double 委托价格;
+	double 成交均价;
+	int 委托数量;
+	int 成交数量;
+	int 撤单数量;
+};
+struct 可申购新股结构体 {
+	char 新股代码[16];
+	char 新股名称[16];
+	char 申购日期[16];
+	char 交易市场[16];
+	double 申购价格;
+	int 申购上限;
+};
+struct 新股配售额度结构体 {
+	char 资金账户[16];
+	char 股东账户[16];
+	char 股东类型[16];
+	int 可用余额;
+};
+struct 配号结构体 {
+	char 成交日期[16];
+	char 交易市场[16];
+	char 证券代码[16];
+	char 证券名称[16];
+	char 起始配号[16];
+	int 成交笔数;
+};
+struct 中签结构体 {
+	char 成交日期[16];
+	char 证券代码[16];
+	char 证券名称[16];
+	char 交易市场[16];
+	double 成交均价;
+	int 发生数量;
+};
+struct 证券行情结构体 {
+	char 证券代码[16];
+	char 证券名称[16];
+	double 开盘价;
+	double 昨日价;
+	double 最新价;
+	double 涨停价;
+	double 跌停价;
+	double 最高价;
+	double 最低价;
+	double 成交额;
+	double 卖一价;
+	double 卖二价;
+	double 卖三价;
+	double 卖四价;
+	double 卖五价;
+	double 买一价;
+	double 买二价;
+	double 买三价;
+	double 买四价;
+	double 买五价;
+	int 成交量;
+	int 卖一量;
+	int 卖二量;
+	int 卖三量;
+	int 卖四量;
+	int 卖五量;
+	int 买一量;
+	int 买二量;
+	int 买三量;
+	int 买四量;
+	int 买五量;
+};
+
+struct 历史委托结构体 {
+	char 委托日期[16];
+	char 委托时间[16];
+	char 证券代码[16];
+	char 证券名称[16];
+	char 合同编号[16];
+	char 交易市场[16];
+	char 股东账户[16];
+	char 操作[16];
+	char 备注[16];
+	double 委托价格;
+	double 成交均价;
+	int 委托数量;
+	int 成交数量;
+	int 撤单数量;
+};
+struct 历史成交结构体 {
+	char 成交日期[16];
+	char 成交时间[16];
+	char 证券代码[16];
+	char 证券名称[16];
+	char 合同编号[16];
+	char 成交编号[16];
+	char 交易市场[16];
+	char 股东账户[16];
+	char 操作[16];
+	double 成交均价;
+	double 成交金额;
+	double 发生金额;
+	double 其他杂费;
+	double 手续费;
+	double 印花税;
+	double 佣金;
+	int 股票余额;
+	int 成交数量;
+	int 撤单数量;
+};
+struct 资金流水结构体 {
+	char 成交日期[16];
+	char 证券代码[16];
+	char 证券名称[16];
+	char 交易市场[16];
+	char 股东账户[16];
+	char 货币单位[16];
+	char 操作[16];
+	double 成交均价;
+	double 成交金额;
+	double 发生金额;
+	double 本次金额;
+	int 成交数量;
+};
+struct 交割单结构体 {
+	char 成交日期[16];
+	char 成交时间[16];
+	char 证券代码[16];
+	char 证券名称[16];
+	char 成交编号[16];
+	char 合同编号[16];
+	char 股东账户[16];
+	char 交易市场[16];
+	char 操作[16];
+	double 成交均价;
+	double 成交金额;
+	double 发生金额;
+	double 本次金额;
+	double 其他杂费;
+	double 印花税;
+	double 过户费;
+	double 佣金;
+	int 成交数量;
+};
+struct 股东账户结构体 {
+	char 股东代码[16];
+	char 帐号类别[16];
+	char 股东姓名[16];
+};
+———————————————————————以下指针说明通用上面的结构体———————————————————————
+	int id = *(int*)(Result);//ID作用功能分类
+	int 结构体数组成员数 = *(int*)(Result + 4);
+	int 结构体成员数 = *(int*)(Result + 8)
+	int 结构体字节数 = *(int*)(Result + 12);//sizeof(结构体)
+	结构体 *结构体指针 = (结构体*)(Result + 32);
+
+———————————————————————————————————————————————————————————————————————————
+=============================行情接口-结构体-及使用说明===========================================================================================================
+
+struct 十档行情结构体 {
+	double 昨收;
+	double 开盘;
+	double 最新;
+	double 总量;
+	double 换手;
+	double 涨停;
+	double 跌停;
+	double 总市值; 
+	double 流通值; 
+	double 买一价;
+	double 买二价;
+	double 买三价;
+	double 买四价;
+	double 买五价;
+	double 买六价;
+	double 买七价;
+	double 买八价;
+	double 买九价;
+	double 买十价;
+	double 买一量;
+	double 买二量;
+	double 买三量;
+	double 买四量;
+	double 买五量;
+	double 买六量;
+	double 买七量;
+	double 买八量;
+	double 买九量;
+	double 买十量;
+	double 卖一价;
+	double 卖二价;
+	double 卖三价;
+	double 卖四价;
+	double 卖五价;
+	double 卖六价;
+	double 卖七价;
+	double 卖八价;
+	double 卖九价;
+	double 卖十价;
+	double 卖一量;
+	double 卖二量;
+	double 卖三量;
+	double 卖四量;
+	double 卖五量;
+	double 卖六量;
+	double 卖七量;
+	double 卖八量;
+	double 卖九量;
+	double 卖十量;
+	double 主动买入特大单量;
+	double 主动卖出特大单量;
+	double 主动买入大单量;
+	double 主动卖出大单量;
+	double 主动买入中单量;
+	double 主动卖出中单量;
+	double 主动买入小单量;
+	double 主动卖出小单量;
+	double 被动买入特大单量;
+	double 被动卖出特大单量;
+	double 被动买入大单量;
+	double 被动卖出大单量;
+	double 被动买入中单量;
+	double 被动卖出中单量;
+};
+
+	int id = *(int*)(Result);//ID作用功能分类
+	int 结构体数组成员数 = *(int*)(Result + 4);
+	int 结构体成员数 = *(int*)(Result + 8)
+	int 结构体字节数 = *(int*)(Result + 12);//sizeof(十档行情结构体)
+	char *股票代码 = (char*)(Result + 16);
+	十档行情结构体 *数据结构体 = (十档行情结构体*)(Result + 32);
+	
+	//这个数据不是数组  无需循环
+	
+	double 昨收 = 数据结构体->昨收;
+	。。。
+	
+———————————————————————————————————————————N档逐笔委托———————————————————————————————————
+//N档委托结构体 是深圳股票500档数据 6开头股票无此数据
+//同花顺全速盘口就是来自这些数据在本地解析显示
+
+struct N档委托结构体 {
+	double 委托价;
+	double 委托量;
+};
+
+	int id = *(int*)(Result);//ID作用功能分类
+	int 结构体数组成员数 = *(int*)(Result + 4);
+	int 结构体成员数 = *(int*)(Result + 8)
+	int 结构体字节数 = *(int*)(Result + 12);//sizeof(N档委托结构体)
+	char *股票代码 = (char*)(Result + 16);
+	int 委卖挡位 = *(int*)(Result + 24);
+	int 委买挡位 = *(int*)(Result + 28);
+	N档委托结构体 *数据结构体 = (N档委托结构体*)(Result + 32);
+	
+	if(委卖挡位 > 0){
+		//通常打板只需要取第一个委卖量不循环直接使用 double 委托量 = 数据结构体->委托量; //取第一个委卖量
+		for (size_t i = 0; i < 委卖挡位; i++){
+			int 挡位 = i+1;
+			double 委托价 = 数据结构体->委托价;
+			double 委托量 = 数据结构体->委托量;
+			//自己的逻辑。。。
+			数据结构体 += 结构体字节数;//指向下一个结构体数组指针
+		}
+	}else{
+		//无委托
+	}
+	if(委买挡位 > 0){
+		for (size_t i = 0; i < 委买挡位; i++){
+			int 挡位 = i+1;
+			double 委托价 = 数据结构体->委托价;
+			double 委托量 = 数据结构体->委托量;
+			//自己的逻辑。。。
+			数据结构体 += 结构体字节数;//指向下一个结构体数组指针
+		}
+	}else{
+	
+		//无委托
+	}
+
+———————————————————————————————————————成交明细———————————————————————————————————————————————————
+
+struct 成交明细结构体 {
+	int 时间; 
+	int 分类; 
+	double 价格; 
+	double 总量; 
+};
+
+	int id = *(int*)(Result);//ID作用功能分类
+	int 结构体数组成员数 = *(int*)(Result + 4);
+	int 结构体成员数 = *(int*)(Result + 8)
+	int 结构体字节数 = *(int*)(Result + 12);//sizeof(成交明细结构体)
+	char *股票代码 = (char*)(Result + 16);
+	成交明细结构体 *数据结构体 = (成交明细结构体*)(Result + 32);
+	
+	for (size_t i = 0; i < 结构体数组成员数; i++){
+	
+		int 时间 = 数据结构体->时间;
+		int 分类 = 数据结构体->分类;
+		double 价格 = 数据结构体->价格;
+		double 总量 = 数据结构体->总量;
+		//自己的逻辑。。。
+		数据结构体 += 结构体字节数;//指向下一个结构体数组指针
+	}
+
+———————————————————————————————————————买卖列队——无结构体———————————————————————————————————————————————————
+
+	int id = *(int*)(Result);//ID作用功能分类
+	int 时间 = *(int*)(Result + 4);
+	int 总量 = *(int*)(Result + 8)
+	int 列队数 = *(int*)(Result + 12);
+	char *股票代码 = (char*)(Result + 16);
+	double 均价 = *(double*)(Result + 24);
+	char *数据指针 = (char*)(Result + 32);
+
+	for (size_t i = 0; i < 列队数; i++){
+		int 列队量 ＝ *(int*)(数据指针 ＋ 4 × i);
+		if(列队量 == 0)
+			break;			
+	}
+	
+
+
+
+
+
+
+
+

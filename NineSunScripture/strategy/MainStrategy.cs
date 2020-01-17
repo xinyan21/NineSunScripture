@@ -1,6 +1,6 @@
 ﻿using NineSunScripture.model;
-using NineSunScripture.trade.api;
-using NineSunScripture.trade.helper;
+using NineSunScripture.trade.structApi.api;
+using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
@@ -25,84 +25,68 @@ namespace NineSunScripture.strategy
         //非交易时间策略执行频率，单位ms
         private const short CycleTimeOfNonTrade = 25000;
 
-        //高频策略交易周期，单位ms
-        private const short CycleTimeOfHighFreqTrade = 200;
-
-        //中频策略交易周期，单位ms
-        private const short CycleTimeOMidFreqTrade = 1000;
-
-        //低频策略交易周期，单位ms
-        private const short CycleTimeOfLowFreqTrade = 3000;
+        //策略交易周期，单位ms，由于采取了推送，这个周期只用来控制太极图的转动
+        private const short CycleTimeOfTrade = 1000;
 
         //更新资金、持仓信息间隔，单位秒
-        private const short UpdateFundInterval = 5;
+        private const short UpdateFundCycle = 5;
 
-        protected ReaderWriterLockSlim RWLockSlimForHighFreqPrice;
-        protected ReaderWriterLockSlim RWLockSlimForLowFreqPrice;
+        //回调委托声明成静态变量防止被回收
+        private static PriceAPI.PushCallback pushCallback;
+
+        protected ReaderWriterLockSlim rwLockSlimForBuy;
 
         //主策略周期时间
-        private short cycleTime = CycleTimeOfHighFreqTrade;
+        private short cycleTime = CycleTimeOfTrade;
 
         private short queryPriceErrorCnt = 0;
         private bool isHoliday;
 
         //stocks是供买入的股票池，stocksForPrice是用来查询行情的股票池（包括卖的）
-        private List<Quotes> stocksForHighFrequencyPrice;  //高速行情股票池（200ms）=最新打板
+        private List<Quotes> stocksForPrice;
 
-        //低速行情股票池（2s）=常驻+波段，当常驻涨到8.5%时移到高速股票池
-        private List<Quotes> stocksForLowFrequencyPrice;
-
-        private List<Quotes> stocksToHitBoard;
-        private List<Quotes> dragonLeaders;
-        private List<Quotes> weakTurnStrongStocks;   //弱转强股票池
-        private List<Quotes> bandStocks;    //波段股票池
+        private List<Quotes> stocksToBuy;
+        private static List<Quotes> stocksToSell;
 
         private Account mainAcct;
         private List<Account> accounts;
         private Thread mainStrategyThread;
 
-        //private Thread bandStrategyThread;
         private HitBoardStrategy hitBoardStrategy;
-
         private WeakTurnStrongStrategy weakTurnStrongStrategy;
-
-        //private BandStrategy bandStrategy;
+        private BandStrategy bandStrategy;
         private ContBoardSellStrategy contBoardSellStrategy;
 
         private ITrade callback;
         private IAcctInfoListener fundListener;
         private IShowWorkingSatus showWorkingSatus;
-        private DateTime lastCycleBeginTime;
-        private DateTime lastUpdateFundTime;
+        private DateTime lastFundUpdateTime;
 
         //逆回购记录，使用日期记录以支持不关策略长时间运行
-        private Dictionary<DateTime, bool> reverseRepurchaseBondsRecords;
+        private Dictionary<DateTime, bool> reverseRepurchaseRecords;
 
-        /// <summary>
-        /// 根据涨幅控制下一次执行策略时间，用来动态控制高频股票池的频率
-        ///使得在降低CPU使用率的同时大幅提高性能
-        /// </summary>
-        private Dictionary<string, StockFrequency> lastExeStrategyTime;
+        //行情订阅状态
+        private Dictionary<string, Dictionary<short, bool>> priceSubState;
+
+        //买入状态保护，由于逐笔委托的毫秒级高速并发，为防止误买入一只股票同时只能执行一次策略
+        private Dictionary<string, bool> buyProtection;
 
         public MainStrategy()
         {
-            stocksToHitBoard = new List<Quotes>();
-            stocksForHighFrequencyPrice = new List<Quotes>();
-            stocksForLowFrequencyPrice = new List<Quotes>();
-            weakTurnStrongStocks = new List<Quotes>();
-            bandStocks = new List<Quotes>();
+            ThreadPool.SetMinThreads(100, 40);
+            stocksToBuy = new List<Quotes>();
+            stocksForPrice = new List<Quotes>();
             hitBoardStrategy = new HitBoardStrategy();
             contBoardSellStrategy = new ContBoardSellStrategy();
             weakTurnStrongStrategy = new WeakTurnStrongStrategy();
-            //bandStrategy = new BandStrategy();
+            bandStrategy = new BandStrategy();
             isHoliday = Utils.IsHolidayByDate(DateTime.Now);
-            reverseRepurchaseBondsRecords = new Dictionary<DateTime, bool>();
-            lastExeStrategyTime = new Dictionary<string, StockFrequency>();
-            lastUpdateFundTime = DateTime.Now;
-            lastCycleBeginTime = DateTime.Now;
-            ThreadPool.SetMinThreads(100, 40);
-            RWLockSlimForHighFreqPrice = new ReaderWriterLockSlim();
-            RWLockSlimForLowFreqPrice = new ReaderWriterLockSlim();
+            reverseRepurchaseRecords = new Dictionary<DateTime, bool>();
+            lastFundUpdateTime = DateTime.Now;
+            rwLockSlimForBuy = new ReaderWriterLockSlim();
+            pushCallback = OnPushResult;
+            priceSubState = new Dictionary<string, Dictionary<short, bool>>();
+            buyProtection = new Dictionary<string, bool>();
         }
 
         private void Process()
@@ -113,49 +97,40 @@ namespace NineSunScripture.strategy
                 callback.OnTradeResult(0, "策略启动", "没有可操作的账户", false);
                 return;
             }
+            mainAcct = accounts[0];
             UpdateTotalAccountInfo(false);
             if (isHoliday && !IsTest)
             {
                 callback.OnTradeResult(0, "策略启动", "现在是假期", false);
                 return;
             }
-            stocksForHighFrequencyPrice.Clear();
-            stocksForHighFrequencyPrice.AddRange(stocksToHitBoard);
             //登录时的持仓股
-            List<Quotes> positionStocks = AccountHelper.QueryPositionStocks(accounts);
-            foreach (Quotes item in positionStocks)
+            stocksToSell = AccountHelper.QueryPositionStocks(accounts);
+            foreach (Quotes item in stocksToSell)
             {
-                //龙头只有持仓里可能有
-                if (null != dragonLeaders && dragonLeaders.Contains(item))
-                {
-                    item.IsDragonLeader = true;
-                }
                 //如果股票池里有持仓股说明可以继续做，没有就不能做InPosition要设置成true
-                if (!stocksToHitBoard.Contains(item))
+                if (!stocksToBuy.Contains(item))
                 {
                     item.InPosition = true;
-                    stocksForHighFrequencyPrice.Add(item);
+                    stocksForPrice.Add(item);
                 }
             }
-            mainAcct = accounts[0];
+            if (stocksForPrice.Count > 0)
+            {
+                for (int i = 0; i < stocksForPrice.Count; i++)
+                {
+                    // EditStockSub(stocksForPrice[i], true, PriceAPI.PushTypeTenGear);
+                    EditStockSub(stocksForPrice[i], true, PriceAPI.PushTypeOBOCommision);
+                }
+            }
+            else
+            {
+                Logger.Log("无股票可订阅");
+            }
             bool isWorkingRight = true;
-            queryPriceErrorCnt = 0;
             while (true)
             {
-                int lastCycleCostTime
-                    = (int)DateTime.Now.Subtract(lastCycleBeginTime).TotalMilliseconds;
-                if (IsTest)
-                {
-                    Logger.Log("Cycle begin---------- last cycle cost " + lastCycleCostTime + "ms");
-                }
-                //处理时间超过一半的睡眠时间就不睡了，否则实际频率会降低很大
-                int sleepTime = cycleTime - lastCycleCostTime;
-                if (sleepTime > 0)
-                {
-                    Thread.Sleep(sleepTime);
-                    Logger.Log("Sleep " + sleepTime + "ms");
-                }
-                lastCycleBeginTime = DateTime.Now;
+                Thread.Sleep(cycleTime);
                 if (!IsTest && !IsTradeTime())
                 {
                     if (null != showWorkingSatus)
@@ -166,45 +141,8 @@ namespace NineSunScripture.strategy
                     ReverseRepurchaseBonds();
                     continue;
                 }
-                if (null == stocksForHighFrequencyPrice || stocksForHighFrequencyPrice.Count == 0)
-                {
-                    Logger.Log("No stocks to Query");
-                    continue;
-                }
+
                 UpdateTotalAccountInfo(true);
-                List<Task> tasks = new List<Task>();
-                try
-                {
-                    RWLockSlimForHighFreqPrice.EnterReadLock();
-                    for (int i = 0; i < stocksForHighFrequencyPrice.Count; i++)
-                    {
-                        Quotes quotes = stocksForHighFrequencyPrice[i];
-                        //个股执行频率控制
-                        if (lastExeStrategyTime.ContainsKey(quotes.Code))
-                        {
-                            StockFrequency stockFrequency = lastExeStrategyTime[quotes.Code];
-                            if (null != stockFrequency
-                                && DateTime.Now.Subtract(stockFrequency.LastExeTime).TotalMilliseconds
-                                < stockFrequency.Frequency)
-                            {
-                                continue;
-                            }
-                        }
-                        //每只股票开一个线程去处理
-                        tasks.Add(
-                            Task.Run(() => ExeContBoardStrategyByStock(quotes, positionStocks)));
-                        Thread.Sleep(3);
-                    }//END FOR
-                }
-                catch (Exception e)
-                {
-                    Logger.Exception(e);
-                }
-                finally
-                {
-                    RWLockSlimForHighFreqPrice.ExitReadLock();
-                }
-                Task.WaitAll(tasks.ToArray());
                 if (null != showWorkingSatus)
                 {
                     if (isWorkingRight)
@@ -219,12 +157,26 @@ namespace NineSunScripture.strategy
             }
         }
 
-        private void ExeContBoardStrategyByStock(Quotes stock, List<Quotes> positionStocks)
+        public void OnPushResult(int type, IntPtr Result)
         {
-            try
+            rwLockSlimForBuy.EnterWriteLock();
+            string code = Marshal.PtrToStringAnsi(Result + 16, 6);
+            //买入保护
+            if (buyProtection.ContainsKey(code))
             {
-                DateTime startTime = DateTime.Now;
-                Quotes quotes = PriceAPI.QueryTenthGearPrice(mainAcct.PriceSessionId, stock.Code);
+                if (buyProtection[code])
+                {
+                    return;
+                }
+            }
+            else
+            {
+                buyProtection.Add(code, true);
+            }
+            rwLockSlimForBuy.ExitWriteLock();
+            if (type == 10001)//推送过来是数据是十档行情 推送中的十档无换手、总市值、流通值、涨停、跌停
+            {
+                Quotes quotes = ApiHelper.ParseStructToQuotes(Result);
                 if (null == quotes || quotes.LatestPrice == 0)
                 {
                     //这个变量不需要lock，因为大于2后必定会触发
@@ -249,38 +201,72 @@ namespace NineSunScripture.strategy
                 {
                     queryPriceErrorCnt = 0;
                 }
-                if (lastExeStrategyTime.ContainsKey(quotes.Code))
+                Logger.Log(quotes.Code + "的订阅行情：" + quotes.ToString());
+                rwLockSlimForBuy.EnterWriteLock();
+                buyProtection[code] = true;
+                rwLockSlimForBuy.ExitWriteLock();
+                ExeContBoardStrategyByStock(
+                        stocksForPrice.Find(item => item.Code.Equals(quotes.Code)),
+                        quotes, stocksToSell);
+            }
+            else if (type == 10206)//逐笔委托 推送太快注意代码优化
+            {
+                OByOCommision commision = ApiHelper.ParseStructToCommision(Result);
+                Logger.Log(code + "的逐笔委托：" + commision);
+                //逐笔委托只处理特大单，这里还要拿到涨停价
+                if (commision.Quantity < 500000 && commision.Quantity * commision.Price < 5000000)
                 {
-                    lastExeStrategyTime[quotes.Code].Frequency = GetFrequencyByQuotes(quotes);
-                    lastExeStrategyTime[quotes.Code].LastExeTime = DateTime.Now;
+                    return;
                 }
-                else
-                {
-                    StockFrequency stockFrequency = new StockFrequency
-                    {
-                        Frequency = GetFrequencyByQuotes(quotes),
-                        LastExeTime = DateTime.Now
-                    };
-                    lastExeStrategyTime.Add(quotes.Code, stockFrequency);
-                }
+                rwLockSlimForBuy.EnterWriteLock();
+                buyProtection[code] = true;
+                rwLockSlimForBuy.ExitWriteLock();
+                //执行买入，同时设置买入保护状态，防止多次买入
+            }
+            rwLockSlimForBuy.EnterWriteLock();
+            buyProtection[code] = false;
+            rwLockSlimForBuy.ExitWriteLock();
+        }
+
+
+        private void ExeContBoardStrategyByStock(Quotes stock, Quotes quotes, List<Quotes> positionStocks)
+        {
+            try
+            {
+                DateTime startTime = DateTime.Now;
                 quotes.Name = stock.Name;
                 Utils.SamplingLogQuotes(quotes);
                 SetTradeParams(stock, quotes);
                 if (quotes.StockCategory == Quotes.CategoryWeakTurnStrong)
                 {
                     weakTurnStrongStrategy.Buy(quotes, accounts, callback);
+                    if (positionStocks.Contains(quotes))
+                    {
+                        contBoardSellStrategy.Sell(quotes, accounts, callback);
+                    }
+                }
+                else if (quotes.StockCategory == Quotes.CategoryBand)
+                {
+                    bandStrategy.Process(quotes, accounts, callback);
+                }
+                else if (quotes.StockCategory == Quotes.CategoryDragonLeader)
+                {
+                    if (positionStocks.Contains(quotes))
+                    {
+                        contBoardSellStrategy.Sell(quotes, accounts, callback);
+                    }
                 }
                 else
                 {
                     //暂时除了弱转强和波段，其余都是打板
                     //持仓股回封要买回，所以全部股票都在买的范围
                     hitBoardStrategy.Buy(quotes, accounts, callback);
+                    if (positionStocks.Contains(quotes))
+                    {
+                        contBoardSellStrategy.Sell(quotes, accounts, callback);
+                    }
                 }
-                //TODO 所有持仓都用连板卖策略是不对的，后面需要完善
-                if (positionStocks.Contains(quotes))
-                {
-                    contBoardSellStrategy.Sell(quotes, accounts, callback);
-                }
+
                 if (IsTest)
                 {
                     Logger.Log("【" + quotes.Name + "】 cost time "
@@ -299,8 +285,14 @@ namespace NineSunScripture.strategy
             }
         }
 
-        public bool Start()
+        public bool Start(List<Quotes> stocks)
         {
+            if (null != stocks && stocks.Count > 0)
+            {
+                stocksForPrice.Clear();
+                stocksForPrice.AddRange(stocks);
+            }
+
             mainStrategyThread = new Thread(Process);
             mainStrategyThread.Start();
 
@@ -309,10 +301,12 @@ namespace NineSunScripture.strategy
 
         /// <summary>
         /// 策略停止后不注销，依然可以人工操作
+        /// 注销后停止更新资金信息，不能逆回购，太极图停止转动
         /// </summary>
         public void Stop()
         {
             mainStrategyThread.Abort();
+            //TODO 取消订阅行情，遍历订阅状态字典
         }
 
         /// <summary>
@@ -330,13 +324,48 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
+        /// 编辑股票行情订阅
+        /// </summary>
+        /// <param name="quotes">股票对象</param>
+        /// <param name="isSubscribe">是否订阅</param>
+        /// <param name="priceType">
+        /// 行情类型，十档：PriceAPI.PushTypeTenGear；
+        /// 逐笔：PriceAPI.PushTypeOBOCommision，默认是十档只有进入打板位置才会触发逐笔订阅</param>
+        public void EditStockSub(
+            Quotes quotes, bool isSubscribe, short priceType = PriceAPI.PushTypeTenGear)
+        {
+            if (null == quotes)
+            {
+                return;
+            }
+            int rspCode = PriceAPI.HQ_PushData(
+                mainAcct.PriceSessionId, priceType, quotes.Code, "", pushCallback, isSubscribe);
+            if (null != callback)
+            {
+                string temp = priceType == 0 ? "十档行情" : "逐笔行情";
+                callback.OnTradeResult(rspCode,
+                    "订阅【" + quotes.Name + "】" + temp, rspCode > 0 ? "成功" : "失败", false);
+            }
+            if (priceSubState.ContainsKey(quotes.Code))
+            {
+                priceSubState[quotes.Code][priceType] = isSubscribe;
+            }
+            else
+            {
+                Dictionary<short, bool> state = new Dictionary<short, bool>();
+                state.Add(priceType, isSubscribe);
+                priceSubState.Add(quotes.Code, state);
+            }
+        }
+
+        /// <summary>
         /// 每隔UpdateFundInterval更新一下总账户信息
         /// </summary>
         /// <param name="ctrlFrequency">是否控制频率</param>
         public void UpdateTotalAccountInfo(bool ctrlFrequency)
         {
             if (ctrlFrequency &&
-                DateTime.Now.Subtract(lastUpdateFundTime).TotalSeconds < UpdateFundInterval)
+                DateTime.Now.Subtract(lastFundUpdateTime).TotalSeconds < UpdateFundCycle)
             {
                 return;
             }
@@ -354,7 +383,7 @@ namespace NineSunScripture.strategy
                 });
                 Thread.Sleep(8);
             }
-            lastUpdateFundTime = DateTime.Now;
+            lastFundUpdateTime = DateTime.Now;
         }
 
         public bool IsTradeTime()
@@ -384,9 +413,9 @@ namespace NineSunScripture.strategy
                 SetSleepIntervalOfNonTrade();
                 return false;
             }
-            if (CycleTimeOfHighFreqTrade != cycleTime)
+            if (CycleTimeOfTrade != cycleTime)
             {
-                cycleTime = CycleTimeOfHighFreqTrade;
+                cycleTime = CycleTimeOfTrade;
             }
             return true;
         }
@@ -397,10 +426,10 @@ namespace NineSunScripture.strategy
         private void ReverseRepurchaseBonds()
         {
             if (DateTime.Now.Hour == 15 && DateTime.Now.Minute == 20
-                && !reverseRepurchaseBondsRecords.ContainsKey(DateTime.Now.Date))
+                && !reverseRepurchaseRecords.ContainsKey(DateTime.Now.Date))
             {
                 AccountHelper.AutoReverseRepurchaseBonds(accounts, callback);
-                reverseRepurchaseBondsRecords.Add(DateTime.Now.Date, true);
+                reverseRepurchaseRecords.Add(DateTime.Now.Date, true);
             }
         }
 
@@ -432,64 +461,6 @@ namespace NineSunScripture.strategy
             ContBoardSellStrategy.SellByRatio(quotes, accounts, callBack, 1);
         }
 
-        public void UpdateStocks(
-            List<Quotes> hitBoard, List<Quotes> weakTurnStrong, List<Quotes> band)
-        {
-            if (null != hitBoard)
-            {
-                stocksToHitBoard.Clear();
-                stocksToHitBoard.AddRange(hitBoard);
-            }
-            if (null != weakTurnStrong)
-            {
-                weakTurnStrongStocks.Clear();
-                weakTurnStrongStocks.AddRange(weakTurnStrong);
-            }
-            if (null != band)
-            {
-                bandStocks.Clear();
-                bandStocks.AddRange(band);
-            }
-        }
-
-        /// <summary>
-        /// 获取quotes股票的策略执行频率
-        /// </summary>
-        /// <param name="quotes">股票对校</param>
-        /// <returns>策略执行频率</returns>
-        private static short GetFrequencyByQuotes(Quotes quotes)
-        {
-            if (null == quotes)
-            {
-                return CycleTimeOfLowFreqTrade;
-            }
-            //涨停且封单大于1000万，低速
-            if (quotes.Buy1 == quotes.HighLimit)
-            {
-                float coverMoney = quotes.Buy1 * quotes.Buy1Vol;
-                if (coverMoney > 2000 * 10000)
-                {
-                    return CycleTimeOfLowFreqTrade;
-                }
-                else if(coverMoney > 1000 * 10000)
-                {
-                    return CycleTimeOMidFreqTrade;
-                }
-                return CycleTimeOfHighFreqTrade;
-            }
-            float upRatio = quotes.LatestPrice / quotes.PreClose;
-            if (upRatio > 1.085)
-            {
-                return CycleTimeOfHighFreqTrade;
-            }
-            else if (upRatio > 1.07)
-            {
-                return CycleTimeOMidFreqTrade;
-            }
-
-            return CycleTimeOfLowFreqTrade;
-        }
-
         public void SetFundListener(IAcctInfoListener fundListener)
         {
             this.fundListener = fundListener;
@@ -509,26 +480,5 @@ namespace NineSunScripture.strategy
         {
             return accounts;
         }
-
-        public void SetDragonLeaders(List<Quotes> dragonLeaders)
-        {
-            this.dragonLeaders = dragonLeaders;
-        }
-    }
-
-    /// <summary>
-    /// 此类专门用来控制打板的个股策略执行频率，主要是查询行情
-    /// 股票策略执行频率，不搞大锅饭，针对个股精调频实现资源利用最大化
-    /// 当涨幅小于7%时，设置frequency为低频（和波段一个频率），7-8.5%为中频，
-    /// 高于8.5%设置为高频，频率具体数值见常量定义CycleTimeOfHighFreqTrade
-    /// </summary>
-    internal class StockFrequency
-    {
-        public DateTime LastExeTime;
-
-        /// <summary>
-        /// 频率，单位ms
-        /// </summary>
-        public short Frequency;
     }
 }

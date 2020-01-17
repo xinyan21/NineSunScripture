@@ -50,8 +50,13 @@
             this.panelBandParam = new System.Windows.Forms.Panel();
             this.tbStopLossPrice = new System.Windows.Forms.TextBox();
             this.tbStopWinPrice = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.rbtnSell = new System.Windows.Forms.RadioButton();
+            this.rbtnBuy = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.panelBandParam.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnAddStcok
@@ -186,11 +191,11 @@
             this.groupBox1.Controls.Add(this.rbtnTomorrow);
             this.groupBox1.Controls.Add(this.rbtnLongTerm);
             this.groupBox1.Controls.Add(this.rbtnDragonLeader);
-            this.groupBox1.Location = new System.Drawing.Point(172, 254);
+            this.groupBox1.Location = new System.Drawing.Point(172, 268);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox1.Size = new System.Drawing.Size(540, 70);
+            this.groupBox1.Size = new System.Drawing.Size(540, 56);
             this.groupBox1.TabIndex = 13;
             this.groupBox1.TabStop = false;
             // 
@@ -199,7 +204,7 @@
             this.rbtnBand.AutoSize = true;
             this.rbtnBand.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnBand.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnBand.Location = new System.Drawing.Point(97, 26);
+            this.rbtnBand.Location = new System.Drawing.Point(97, 19);
             this.rbtnBand.Name = "rbtnBand";
             this.rbtnBand.Size = new System.Drawing.Size(62, 27);
             this.rbtnBand.TabIndex = 5;
@@ -212,7 +217,7 @@
             this.rbWeakTurnStrong.AutoSize = true;
             this.rbWeakTurnStrong.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbWeakTurnStrong.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbWeakTurnStrong.Location = new System.Drawing.Point(180, 26);
+            this.rbWeakTurnStrong.Location = new System.Drawing.Point(182, 19);
             this.rbWeakTurnStrong.Name = "rbWeakTurnStrong";
             this.rbWeakTurnStrong.Size = new System.Drawing.Size(79, 27);
             this.rbWeakTurnStrong.TabIndex = 0;
@@ -226,7 +231,7 @@
             this.rbtnTomorrow.Checked = true;
             this.rbtnTomorrow.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnTomorrow.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnTomorrow.Location = new System.Drawing.Point(22, 26);
+            this.rbtnTomorrow.Location = new System.Drawing.Point(22, 19);
             this.rbtnTomorrow.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnTomorrow.Name = "rbtnTomorrow";
             this.rbtnTomorrow.Size = new System.Drawing.Size(62, 27);
@@ -241,7 +246,7 @@
             this.rbtnLongTerm.AutoSize = true;
             this.rbtnLongTerm.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnLongTerm.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnLongTerm.Location = new System.Drawing.Point(286, 26);
+            this.rbtnLongTerm.Location = new System.Drawing.Point(280, 19);
             this.rbtnLongTerm.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnLongTerm.Name = "rbtnLongTerm";
             this.rbtnLongTerm.Size = new System.Drawing.Size(62, 27);
@@ -255,7 +260,7 @@
             this.rbtnDragonLeader.AutoSize = true;
             this.rbtnDragonLeader.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnDragonLeader.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnDragonLeader.Location = new System.Drawing.Point(373, 26);
+            this.rbtnDragonLeader.Location = new System.Drawing.Point(371, 19);
             this.rbtnDragonLeader.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.rbtnDragonLeader.Name = "rbtnDragonLeader";
             this.rbtnDragonLeader.Size = new System.Drawing.Size(62, 27);
@@ -322,6 +327,61 @@
             this.tbStopWinPrice.Size = new System.Drawing.Size(147, 29);
             this.tbStopWinPrice.TabIndex = 17;
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.BackColor = System.Drawing.Color.Transparent;
+            this.label6.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label6.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.label6.Location = new System.Drawing.Point(90, 39);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(61, 23);
+            this.label6.TabIndex = 17;
+            this.label6.Text = "操作：";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox2.Controls.Add(this.rbtnSell);
+            this.groupBox2.Controls.Add(this.rbtnBuy);
+            this.groupBox2.Location = new System.Drawing.Point(172, 23);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.groupBox2.Size = new System.Drawing.Size(220, 57);
+            this.groupBox2.TabIndex = 14;
+            this.groupBox2.TabStop = false;
+            // 
+            // rbtnSell
+            // 
+            this.rbtnSell.AutoSize = true;
+            this.rbtnSell.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.rbtnSell.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.rbtnSell.Location = new System.Drawing.Point(97, 20);
+            this.rbtnSell.Name = "rbtnSell";
+            this.rbtnSell.Size = new System.Drawing.Size(62, 27);
+            this.rbtnSell.TabIndex = 5;
+            this.rbtnSell.Text = "卖出";
+            this.rbtnSell.UseVisualStyleBackColor = true;
+            this.rbtnSell.CheckedChanged += new System.EventHandler(this.RbtnSell_CheckedChanged);
+            // 
+            // rbtnBuy
+            // 
+            this.rbtnBuy.AutoSize = true;
+            this.rbtnBuy.Checked = true;
+            this.rbtnBuy.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.rbtnBuy.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.rbtnBuy.Location = new System.Drawing.Point(22, 20);
+            this.rbtnBuy.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.rbtnBuy.Name = "rbtnBuy";
+            this.rbtnBuy.Size = new System.Drawing.Size(62, 27);
+            this.rbtnBuy.TabIndex = 5;
+            this.rbtnBuy.TabStop = true;
+            this.rbtnBuy.Text = "买入";
+            this.rbtnBuy.UseVisualStyleBackColor = true;
+            this.rbtnBuy.CheckedChanged += new System.EventHandler(this.RbtnBuy_CheckedChanged);
+            // 
             // AddStockForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -329,6 +389,8 @@
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(793, 613);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.panelBandParam);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label5);
@@ -347,11 +409,13 @@
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "AddStockForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "AddStockForm";
+            this.Text = "添加股票";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.panelBandParam.ResumeLayout(false);
             this.panelBandParam.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -380,5 +444,9 @@
         private System.Windows.Forms.Panel panelBandParam;
         private System.Windows.Forms.TextBox tbStopLossPrice;
         private System.Windows.Forms.TextBox tbStopWinPrice;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.RadioButton rbtnSell;
+        private System.Windows.Forms.RadioButton rbtnBuy;
     }
 }

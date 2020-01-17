@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CA2101: 指定对 P/Invoke 字符串参数进行封送处理
+dotnet_diagnostic.CA2101.severity = silent

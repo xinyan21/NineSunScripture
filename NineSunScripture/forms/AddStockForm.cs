@@ -1,5 +1,5 @@
 ﻿using NineSunScripture.model;
-using NineSunScripture.trade.api;
+using NineSunScripture.trade.structApi.api;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -102,6 +102,16 @@ namespace NineSunScripture.forms
                     tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
                 }
             }
+        }
+
+        private void RbtnBuy_CheckedChanged(object sender, EventArgs e)
+        {
+            quotes.Operation = Quotes.OperationBuy;
+        }
+
+        private void RbtnSell_CheckedChanged(object sender, EventArgs e)
+        {
+            quotes.Operation = Quotes.OperationSell;
         }
     }
 }

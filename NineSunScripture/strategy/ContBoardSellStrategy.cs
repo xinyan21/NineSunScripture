@@ -1,7 +1,7 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.strategy;
-using NineSunScripture.trade.api;
-using NineSunScripture.trade.helper;
+using NineSunScripture.trade.structApi.api;
+using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
@@ -21,38 +21,48 @@ namespace NineSunScripture
         /// 三档止盈比例为20%、30%、40%
         /// </summary>
         private const float FirstClassStopWin = 20;
+
         private const float SecondClassStopWin = 30;
         private const float ThirdClassStopWin = 40;
+
         /// <summary>
         /// 三档止盈仓位为30%、50%、50%
         /// </summary>
         private const float FirstStopWinPosition = 0.3f;
+
         private const float SecondStopWinPosition = 0.5f;
         private const float ThirdStopWinPosition = 0.5f;
+
         /// <summary>
         /// 止损跌幅
         /// </summary>
         private const float StopLossRatio = 0.92f;
+
         /// <summary>
         /// 太弱跌幅
         /// </summary>
         private const float TooWeakRatio = 0.95f;
+
         /// <summary>
         /// 2点不够强涨幅
         /// </summary>
         private const float NotGoodRatio = 1.01f;
+
         /// <summary>
         /// 2:30不够强卖出涨幅
         /// </summary>
         private const float GoodByeRatio = 1.05f;
+
         /// <summary>
         /// 封单减少到1500万就开始卖
         /// </summary>
         private const int MaxSealMoneyToSell = 1500;
+
         /// <summary>
         /// 封单减少到1000万就清
         /// </summary>
         private const int MinSealMoneyToSell = 1000;
+
         /// <summary>
         ///封单开始减少前的金额
         /// </summary>
@@ -288,7 +298,7 @@ namespace NineSunScripture
             int rspCode = TradeAPI.Sell(order);
             string opLog = "资金账号【" + account.FundAcct + "】" + "策略卖出【" + quotes.Name + "】"
                 + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
-            Logger.Log(opLog + "》" + ApiHelper.ParseErrInfo(order.ErrorInfo));
+            Logger.Log(opLog + "》" + order.StrErrorInfo);
             //TODO 这里会导致运行日志添加崩溃，后面再解决
             /* if (null != callback)
               {
@@ -327,7 +337,6 @@ namespace NineSunScripture
         public static void SellAll(List<Account> accounts, ITrade callback)
         {
             List<Position> positions;
-            Quotes quotes = new Quotes();
             Task[] tasks = new Task[accounts.Count];
             for (int i = 0; i < accounts.Count; i++)
             {
@@ -346,7 +355,7 @@ namespace NineSunScripture
                         {
                             continue;
                         }
-                        quotes = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, position.Code);
+                        Quotes quotes = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, position.Code);
                         quotes.Buy2 = quotes.LatestPrice * 0.95f;
                         if (quotes.Buy2 < quotes.LowLimit)
                         {

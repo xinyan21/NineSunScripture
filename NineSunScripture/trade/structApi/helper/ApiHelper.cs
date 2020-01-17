@@ -1,10 +1,12 @@
 ﻿using NineSunScripture.model;
+using NineSunScripture.strategy;
 using NineSunScripture.util.log;
 using System;
 using System.Runtime.CompilerServices;
-using System.Text;
+using System.Runtime.InteropServices;
+using static NineSunScripture.trade.structApi.ApiDataStruct;
 
-namespace NineSunScripture.trade.helper
+namespace NineSunScripture.trade.structApi.helper
 {
     public static class ApiHelper
     {
@@ -14,62 +16,17 @@ namespace NineSunScripture.trade.helper
         private static int callApiTimeOutCnt = 0;
 
         /// <summary>
-        /// 解析接口结果字符串
-        /// </summary>
-        /// <param name="data">接口返回的字节流</param>
-        /// <returns>结果分割后的字符数组</returns>
-        public static string[] ParseResult(byte[] data)
-        {
-            if (null == data)
-            {
-                return null;
-            }
-            string result = Encoding.Default.GetString(data).TrimEnd('\0');
-            result = result.Substring(result.IndexOf("\n") + 1);
-            string[] temp = result.Split(new string[] { "\t" }, StringSplitOptions.None);
-            return temp;
-        }
-
-        /// <summary>
         /// 解析错误信息
         /// </summary>
         /// <param name="data">源数据</param>
         /// <returns></returns>
-        public static string ParseErrInfo(byte[] data)
+        public static string ParseErrInfo(IntPtr data)
         {
             if (null == data)
             {
                 return "";
             }
-            return Encoding.Default.GetString(data).TrimEnd('\0');
-        }
-
-        /// <summary>
-        /// 解析接口多个结果字符串
-        /// </summary>
-        /// <param name="data">接口返回的字节流</param>
-        /// <returns>结果分割后的二维字符数组</returns>
-        public static string[,] ParseResults(byte[] data)
-        {
-            if (null == data)
-            {
-                return null;
-            }
-            string result = Encoding.Default.GetString(data).TrimEnd('\0');
-            result = result.Substring(result.IndexOf("\n") + 1);
-            string[] rows = result.Split(new string[] { "\n" }, StringSplitOptions.None);
-            int cols = rows[0].Split(new string[] { "\t" },
-                StringSplitOptions.None).Length;
-            string[,] temp = new string[rows.Length, cols];
-            for (int i = 0; i < rows.Length; i++)
-            {
-                string[] items = rows[i].Split(new string[] { "\t" }, StringSplitOptions.None);
-                for (int j = 0; j < items.Length; j++)
-                {
-                    temp[i, j] = items[j];
-                }
-            }
-            return temp;
+            return Marshal.PtrToStringAnsi(data);
         }
 
         /// <summary>
@@ -113,7 +70,7 @@ namespace NineSunScripture.trade.helper
         /// </summary>
         /// <param name="errInfo">错误源数据</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void HandleTimeOut(byte[] errInfo)
+        public static void HandleTimeOut(IntPtr errInfo)
         {
             if (null == errInfo)
             {
@@ -132,6 +89,56 @@ namespace NineSunScripture.trade.helper
             {
                 callApiTimeOutCnt = 0;
             }
+        }
+
+        public static Quotes ParseStructToQuotes(IntPtr data)
+        {
+            if (null==data)
+            {
+                return null;
+            }
+            Quotes quotes = new Quotes();
+            string code = Marshal.PtrToStringAnsi(data + 16, 6);
+            十档行情结构体 price = (十档行情结构体)
+                         Marshal.PtrToStructure(data + 32, typeof(十档行情结构体));
+            quotes.Code = code;
+            quotes.Open = (float)price.开盘;
+            quotes.LatestPrice = (float)price.卖一价;
+            quotes.Volume = (int)price.总量;
+            quotes.HighLimit = (float)price.涨停;
+            quotes.LowLimit = (float)price.跌停;
+            quotes.Sell1 = (float)price.卖一价;
+            quotes.Sell2 = (float)price.卖二价;
+            quotes.Sell3 = (float)price.卖三价;
+            quotes.Buy1 = (float)price.买一价;
+            quotes.Buy2 = (float)price.买二价;
+            quotes.Buy3 = (float)price.买三价;
+            quotes.Sell1Vol = (int)price.卖一量;
+            quotes.Sell2Vol = (int)price.卖二量;
+            quotes.Sell3Vol = (int)price.卖三量;
+            quotes.Buy1Vol = (int)price.买一量;
+            quotes.Buy2Vol = (int)price.买二量;
+            quotes.Buy3Vol = (int)price.买三量;
+            quotes.PreClose = (float)price.昨收;
+
+            return quotes;
+        }
+
+        public static OByOCommision ParseStructToCommision(IntPtr data)
+        {
+            if (null == data)
+            {
+                return null;
+            }
+            OByOCommision commision = new OByOCommision();
+            逐笔委托结构体 temp
+                   = (逐笔委托结构体)Marshal.PtrToStructure(data + 32, typeof(逐笔委托结构体));
+            commision.Time = temp.时间;
+            commision.Category = temp.类型;
+            commision.Price = temp.委托价;
+            commision.Quantity = temp.委托量;
+
+            return commision;
         }
     }
 }

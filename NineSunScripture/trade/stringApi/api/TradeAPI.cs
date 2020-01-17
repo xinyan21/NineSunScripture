@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using NineSunScripture.model;
+﻿using NineSunScripture.model;
 using NineSunScripture.trade.helper;
-using NineSunScripture.util.log;
 using NineSunScripture.util;
+using NineSunScripture.util.log;
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace NineSunScripture.trade.api
 {
     /// <summary>
     /// 交易API，附带五档行情API
     /// </summary>
-    public static class TradeAPI
+    public class TradeAPI
     {
         //dll必须放在程序同一目录下面，否则调用会报错
-        private const string dllPath = "ths.dll";
+        private const string dllPath = "StringApi.dll";
+
         //功能：登录 成功返回sessionId	失败返回0
         //Qsid,//券商id 					这个值可以在IP文件中查看
         //Host,//券商服务器IP
@@ -33,13 +31,15 @@ namespace NineSunScripture.trade.api
         public extern static int Logon(int qsid, string host, short port, string version,
             string salesDepartId, short accountType,
             string account, string password, string commPassword, bool dommac, byte[] errInfo);
+
         //功能：查询各种交易数据
         //sessionId,//客户端 ID
-        //category,//查询信息的种类 0资金	1股份 2最新委托	3最新成交 4可撤单 5股东账户 
+        //category,//查询信息的种类 0资金	1股份 2最新委托	3最新成交 4可撤单 5股东账户
         //result, //内保存了返回的查询数据, 形式为表格数据，行数据之间通过\n 字符分割，列数据之间通过\t 分隔。一般要分配 1024 * 1024 字节的空间。出错时为空字符串。
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串。
         [DllImport(@dllPath, EntryPoint = "QueryData", CallingConvention = CallingConvention.Winapi)]
         public extern static int QueryData(int sessionId, int category, byte[] result, byte[] errInfo);
+
         //功能：查行情 券商提供的行情虽然只有5档 但是速度快
         //sessionId,//客户端ID
         //zqdm,//股票代码
@@ -47,6 +47,7 @@ namespace NineSunScripture.trade.api
         //errInfo//执行返回后，如果出错，保存了错误信息说明
         [DllImport(@dllPath, EntryPoint = "QueryHQ", CallingConvention = CallingConvention.Winapi)]
         public extern static int QueryHQ(int sessionId, string gddm, byte[] result, byte[] errInfo);
+
         //功能：委托下单
         //sessionId,//客户端ID
         //category,//委托种类 0买入 1卖出
@@ -59,6 +60,7 @@ namespace NineSunScripture.trade.api
         [DllImport(@dllPath, EntryPoint = "SendOrder", CallingConvention = CallingConvention.Winapi)]
         public extern static int SendOrder(int sessionId, int category, string gddm, string zqdm,
             float price, int quantity, byte[] result, byte[] errInfo);
+
         //功能：取消订单
         //sessionId,//客户端ID
         //gddm,//股东账号 必写
@@ -67,6 +69,7 @@ namespace NineSunScripture.trade.api
         //errInfo//执行返回后，如果出错，保存了错误信息说明
         [DllImport(@dllPath, EntryPoint = "CancelOrder", CallingConvention = CallingConvention.Winapi)]
         public extern static int CancelOrder(int sessionId, string gddm, string orderID, byte[] result, byte[] errInfo);
+
         //功能：退出登录	无返回值
         //sessionId,//客户端ID
         [DllImport(@dllPath, EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]

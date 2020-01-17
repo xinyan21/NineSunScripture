@@ -1,6 +1,6 @@
 ﻿using NineSunScripture.model;
-using NineSunScripture.trade.api;
-using NineSunScripture.trade.helper;
+using NineSunScripture.trade.structApi.api;
+using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
@@ -10,12 +10,13 @@ namespace NineSunScripture.strategy
     /// <summary>
     /// 弱转强策略
     /// </summary>
-    class WeakTurnStrongStrategy
+    public class WeakTurnStrongStrategy
     {
         /// <summary>
         /// 最小买一额限制默认是2000万
         /// </summary>
         private const int MinBuy1MoneyCtrl = 2000;
+
         /// <summary>
         /// 单账户最小可用金额默认为5000
         /// </summary>
@@ -153,7 +154,7 @@ namespace NineSunScripture.strategy
                         + account.FundAcct + "]结束于出去委托数量后可买数量为0");
                     return;
                 }
-                //################计算买入数量END####################### 
+                //################计算买入数量END#######################
                 //计算出来的数量不够资金买，那么把剩余资金买完
                 if (account.Funds.AvailableAmt < order.Quantity * quotes.Sell1)
                 {
@@ -166,12 +167,11 @@ namespace NineSunScripture.strategy
                 int rspCode = TradeAPI.Buy(order);
                 string opLog = "资金账号【" + account.FundAcct + "】" + "策略买入【"
                     + quotes.Name + "】"
-                    + (order.Quantity * order.Price).ToString("0.00####") + "万元";
+                     + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
                 Logger.Log(opLog);
                 if (null != callback)
                 {
-                    string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
-                    callback.OnTradeResult(rspCode, opLog, errInfo, false);
+                    callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
                 }
             }//END FOR
         }//END BUY

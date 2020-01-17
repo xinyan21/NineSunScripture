@@ -1,12 +1,11 @@
-﻿using NineSunScripture.model;
-using NineSunScripture.trade.api;
-using NineSunScripture.trade.helper;
+﻿using Newtonsoft.Json;
+using NineSunScripture.model;
+using NineSunScripture.trade.structApi.api;
+using NineSunScripture.trade.structApi.helper;
+using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +19,7 @@ namespace NineSunScripture.util.test
         private List<Account> accounts;
         Quotes quotes;
         private MainForm mainForm;
-        public TestForm(MainForm main, List<Account> accounts )
+        public TestForm(MainForm main, List<Account> accounts)
         {
             InitializeComponent();
             this.accounts = accounts;
@@ -54,11 +53,23 @@ namespace NineSunScripture.util.test
 
         private void Work()
         {
-            for (int i = 0; i < 100; i++)
+            try
             {
+                /* for (int i = 0; i < 1; i++)
+                 {
+                     quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002071");
+                     Invoke(new MethodInvoker(UpdatePrice));
+                     Thread.Sleep(200);
+                 }*/
                 quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002071");
                 Invoke(new MethodInvoker(UpdatePrice));
-                Thread.Sleep(200);
+
+                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002071");
+                Invoke(new MethodInvoker(UpdatePrice));
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
             }
         }
 
@@ -81,27 +92,61 @@ namespace NineSunScripture.util.test
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 Thread.Sleep(3000);
                 mainForm.OnTradeResult(0, "Test reboot1", "Test reboot", true);
             });
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 Thread.Sleep(3000);
                 mainForm.OnTradeResult(0, "Test reboot2", "Test reboot", false);
             });
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 Thread.Sleep(3000);
                 mainForm.OnTradeResult(0, "Test reboot3", "Test reboot", false);
             });
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 Thread.Sleep(3000);
                 mainForm.OnTradeResult(0, "Test reboot4", "Test reboot", false);
             });
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 Thread.Sleep(3000);
                 mainForm.OnTradeResult(0, "Test reboot5", "Test reboot", false);
             });
             Thread.Sleep(2000);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            List<Account> accounts = new List<Account>();
+            accounts.Add(AccountHelper.GetTestMainAccount());
+            accounts.Add(AccountHelper.GetTestMainAccount());
+            accounts.Add(AccountHelper.GetTestMainAccount());
+            Task.Run(() =>
+            {
+                string dir = Environment.CurrentDirectory + @"\Json";
+                string filePath = dir + @"\test.json";
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                // serialize JSON directly to a file
+                using (StreamWriter file = File.CreateText(filePath))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.Serialize(file, accounts);
+                }
+                accounts= JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(filePath));
+                accounts.RemoveAt(0);
+                using (StreamWriter file = File.CreateText(filePath))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.Serialize(file, accounts);
+                }
+                MessageBox.Show(accounts.ToString());
+            });
+
         }
     }
 }

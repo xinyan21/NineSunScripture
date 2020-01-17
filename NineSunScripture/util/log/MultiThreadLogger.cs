@@ -3,17 +3,18 @@ using System.Collections.Concurrent;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 
 namespace NineSunScripture.util.log
 {
-    class MultiThreadLogger
+    internal class MultiThreadLogger
     {
         #region 私有变量
+
         /// <summary>
         /// 线程安全队列
         /// </summary>
@@ -28,9 +29,11 @@ namespace NineSunScripture.util.log
         /// 日志写锁
         /// </summary>
         private static readonly ReaderWriterLockSlim _lock;
-        #endregion
+
+        #endregion 私有变量
 
         #region 构造函数
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -41,9 +44,11 @@ namespace NineSunScripture.util.log
             _lock = new ReaderWriterLockSlim();
             Task.Run(() => Initialize());
         }
-        #endregion
+
+        #endregion 构造函数
 
         #region 信息日志
+
         /// <summary>
         /// 信息日志
         /// </summary>
@@ -62,9 +67,11 @@ namespace NineSunScripture.util.log
             _que.Enqueue(logMessage);
             _mre.Set();
         }
-        #endregion
+
+        #endregion 信息日志
 
         #region 行情日志
+
         /// <summary>
         /// 行情日志
         /// </summary>
@@ -83,9 +90,11 @@ namespace NineSunScripture.util.log
             _que.Enqueue(logMessage);
             _mre.Set();
         }
-        #endregion
+
+        #endregion 行情日志
 
         #region 错误日志
+
         /// <summary>
         /// 错误日志
         /// </summary>
@@ -135,10 +144,13 @@ namespace NineSunScripture.util.log
             _que.Enqueue(logMessage);
             _mre.Set();
         }
-        #endregion
+
+        #endregion 错误日志
 
         #region 私有方法/实体
+
         #region 日志初始化
+
         /// <summary>
         /// 日志初始化
         /// </summary>
@@ -152,12 +164,14 @@ namespace NineSunScripture.util.log
                 Write();
                 //重新设置信号
                 _mre.Reset();
-                Thread.Sleep(10);
+                Thread.Sleep(1);
             }
         }
-        #endregion
+
+        #endregion 日志初始化
 
         #region 写入日志
+
         /// <summary>
         /// 写入日志
         /// </summary>
@@ -210,7 +224,7 @@ namespace NineSunScripture.util.log
                     //Info
                     if (swInfo != null && logMessage.Level == LogLevel.Info)
                     {
-                        string msg 
+                        string msg
                             = DateTime.Now.ToString("HH: mm: ss.ffff") + $"：{logMessage.Message}";
                         swInfo.WriteLine(msg);
                         /*swInfo.WriteLine($"[级别：Info]");
@@ -271,9 +285,11 @@ namespace NineSunScripture.util.log
                 _lock.ExitWriteLock();
             }
         }
-        #endregion
+
+        #endregion 写入日志
 
         #region 获取物理路径
+
         /// <summary>
         /// 获取物理路径
         /// </summary>
@@ -281,7 +297,7 @@ namespace NineSunScripture.util.log
         /// <returns></returns>
         private static string GetPhysicalPath(string path)
         {
-            var physicalPath = System.Environment.CurrentDirectory;
+            var physicalPath = Environment.CurrentDirectory;
             if (!string.IsNullOrEmpty(path))
             {
                 path = path.Replace("~", "").Replace("/", @"\").TrimStart('\\').TrimEnd('\\');
@@ -292,9 +308,11 @@ namespace NineSunScripture.util.log
             }
             return physicalPath;
         }
-        #endregion
+
+        #endregion 获取物理路径
 
         #region 日志实体
+
         /// <summary>
         /// 日志级别
         /// </summary>
@@ -330,7 +348,9 @@ namespace NineSunScripture.util.log
             /// </summary>
             public StackFrame StackFrame { get; set; }
         }
-        #endregion
-        #endregion
+
+        #endregion 日志实体
+
+        #endregion 私有方法/实体
     }
 }

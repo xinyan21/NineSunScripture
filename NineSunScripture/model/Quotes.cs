@@ -33,6 +33,9 @@ namespace NineSunScripture.model
         /// </summary>
         public const short CategoryBand = 4;
 
+        public const short OperationBuy = 1;
+        public const short OperationSell = 2;
+
         public String Code;
         public String Name;
 
@@ -102,6 +105,16 @@ namespace NineSunScripture.model
         /// 股票类型：打板（常驻0、龙头1、最新2），弱转强（3），波段（4）
         /// </summary>
         public short StockCategory = 2;
+
+        /// <summary>
+        /// 操作方向：OperationBuy, OperationSell。于此区分买入和卖出的股票池
+        /// </summary>
+        public short Operation;
+
+        /// <summary>
+        /// 连扳数
+        /// </summary>
+        public short ContBoards;
 
         /// <summary>
         /// 是否是持仓股，默认不是，此属性用来解决新增账户后持仓不一致导致的开仓问题

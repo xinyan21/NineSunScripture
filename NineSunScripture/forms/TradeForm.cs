@@ -1,7 +1,7 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.strategy;
-using NineSunScripture.trade.api;
-using NineSunScripture.trade.helper;
+using NineSunScripture.trade.structApi.api;
+using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
@@ -73,9 +73,6 @@ namespace NineSunScripture.forms
                 MessageBox.Show("账户不能为空！");
                 return;
             }
-            Order order = new Order();
-            order.Code = tbCode.Text;
-            order.Price = float.Parse(tbPrice.Text);
 
             Task[] tasks = new Task[accounts.Count];
             for (int i = 0; i < accounts.Count; i++)
@@ -83,6 +80,9 @@ namespace NineSunScripture.forms
                 Account account = accounts[i];
                 tasks[i] = Task.Run(() =>
                 {
+                    Order order = new Order();
+                    order.Code = tbCode.Text;
+                    order.Price = float.Parse(tbPrice.Text);
                     order.TradeSessionId = account.TradeSessionId;
                     account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
                     ApiHelper.SetShareholderAcct(account, quotes, order);
@@ -100,13 +100,12 @@ namespace NineSunScripture.forms
                     int rspCode = TradeAPI.Buy(order);
                     string opLog
                         = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
-                        + Math.Round(order.Quantity * order.Price / 10000, 2) + "万元";
+                          + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
                     Logger.Log(opLog);
-                    if (null != callback)
+                   /* if (null != callback)
                     {
-                        string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
-                        callback.OnTradeResult(rspCode, opLog, errInfo, false);
-                    }
+                        callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
+                    }*/
                 });
             }
             Task.WaitAll(tasks);
@@ -126,8 +125,9 @@ namespace NineSunScripture.forms
                 {
                     quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Logger.Exception(ex);
                     return;
                 }
                 if (null != quotes && !string.IsNullOrEmpty(quotes.Name))

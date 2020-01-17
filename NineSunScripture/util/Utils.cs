@@ -8,7 +8,7 @@ using System.Net.Mail;
 
 namespace NineSunScripture.util
 {
-    class Utils
+    internal class Utils
     {
         /// <summary>
         /// 判断是不是周末/节假日
@@ -64,14 +64,18 @@ namespace NineSunScripture.util
 
         public static void SamplingLogQuotes(Quotes quotes)
         {
+            if (null == quotes)
+            {
+                return;
+            }
             if (DateTime.Now.Hour == 9 && DateTime.Now.Minute <= 30)
             {
                 Logger.Log(quotes.ToString(), LogType.Quotes);
             }
-           /* if (DateTime.Now.Second != 0 || null == quotes)
+            if (DateTime.Now.Second != 0)
             {
                 return;
-            }*/
+            }
             Logger.Log("Sampling->" + quotes.ToString(), LogType.Quotes);
         }
 
@@ -91,7 +95,7 @@ namespace NineSunScripture.util
         /// <returns></returns>
         public static bool DetectTHSDll()
         {
-            string path = System.Environment.CurrentDirectory + @"\ths.dll";
+            string path = Environment.CurrentDirectory + @"\ths.dll";
             bool isExist = File.Exists(path);
             return isExist;
         }
@@ -99,26 +103,30 @@ namespace NineSunScripture.util
         public static void SendEmail(string title, string content, string to = "xinyan621@outlook.com")
         {
             //实例化一个发送邮件类。
-            MailMessage mailMessage = new MailMessage();
-            //发件人邮箱地址，方法重载不同，可以根据需求自行选择。
-            mailMessage.From = new MailAddress("460313911@qq.com");
-            //收件人邮箱地址。
+            MailMessage mailMessage = new MailMessage
+            {
+                //发件人邮箱地址，方法重载不同，可以根据需求自行选择。
+                From = new MailAddress("460313911@qq.com"),
+                //收件人邮箱地址。
+                //邮件标题。
+                Subject = title,
+                //邮件内容。
+                Body = content
+            };
             mailMessage.To.Add(new MailAddress(to));
-            //邮件标题。
-            mailMessage.Subject = title;
-            //邮件内容。
-            mailMessage.Body = content;
 
             //实例化一个SmtpClient类。
-            SmtpClient client = new SmtpClient();
-            //在这里我使用的是qq邮箱，所以是smtp.qq.com，如果你使用的是126邮箱，那么就是smtp.126.com。
-            client.Host = "smtp.qq.com";
-            //使用安全加密连接。
-            client.EnableSsl = true;
-            //不和请求一块发送。
-            client.UseDefaultCredentials = false;
-            //验证发件人身份(发件人的邮箱，邮箱里的生成授权码);
-            client.Credentials = new NetworkCredential("460313911@qq.com", "ymegzdrsirmscaib");
+            SmtpClient client = new SmtpClient
+            {
+                //在这里我使用的是qq邮箱，所以是smtp.qq.com，如果你使用的是126邮箱，那么就是smtp.126.com。
+                Host = "smtp.qq.com",
+                //使用安全加密连接。
+                EnableSsl = true,
+                //不和请求一块发送。
+                UseDefaultCredentials = false,
+                //验证发件人身份(发件人的邮箱，邮箱里的生成授权码);
+                Credentials = new NetworkCredential("460313911@qq.com", "ymegzdrsirmscaib")
+            };
             //发送
             client.Send(mailMessage);
         }

@@ -1,6 +1,6 @@
 ﻿using NineSunScripture.model;
-using NineSunScripture.trade.api;
-using NineSunScripture.trade.helper;
+using NineSunScripture.trade.structApi.api;
+using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
@@ -14,7 +14,7 @@ namespace NineSunScripture.strategy
     /// <summary>
     /// 打板策略
     /// </summary>
-    internal class HitBoardStrategy : Strategy
+    public class HitBoardStrategy : Strategy
     {
         /// <summary>
         /// 默认成交额限制是5000万，低于的过滤（之前设置的7000万是打3板用的，在2板上不适用）
@@ -196,7 +196,7 @@ namespace NineSunScripture.strategy
             //买入计划里设置了成交额（单位为万）限制，那么成交额就要大于限制的成交额
             //没有设置大于默认的成交额限制即可
             bool isMoneyQuolified = false;
-            Quotes forMoney = PriceAPI.QueryBasicStockInfo(accounts, code);
+            Quotes forMoney = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, code);
             if (null != forMoney)
             {
                 quotes.Money = forMoney.Money;
@@ -377,16 +377,15 @@ namespace NineSunScripture.strategy
             int rspCode = TradeAPI.Buy(order);
             string opLog = "资金账号【" + account.FundAcct + "】" + "策略买入【"
                 + quotes.Name + "】"
-                + Math.Round(order.Quantity * order.Price / 10000, 2) + "万元";
+                + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
             string tradeResult
-                = rspCode > 0 ? "#成功" : "#失败：" + ApiHelper.ParseErrInfo(order.ErrorInfo);
+                = rspCode > 0 ? "#成功" : "#失败：" + order.StrErrorInfo;
             Logger.Log(opLog + tradeResult);
             StringBuilder sbOpLog = new StringBuilder();
             sbOpLog.Append("\n\n").Append(opLog).Append(tradeResult);
             if (null != callback)
             {
-                callback.OnTradeResult(
-                    rspCode, sbOpLog.ToString(), ApiHelper.ParseErrInfo(order.ErrorInfo), false);
+                callback.OnTradeResult(rspCode, sbOpLog.ToString(), order.StrErrorInfo, false);
             }
         }
 

@@ -24,7 +24,7 @@ namespace NineSunScripture.trade.helper
             account.BrokerServerPort = 8003;
             account.VersionOfTHS = "E065.20.92";
             account.CommPwd = "";
-            account.SalesDepartId = 105;
+            account.SalesDepartId = "105";
             account.IsRandomMac = false;
             account.FundAcct = "321019194496";
             account.PriceAcct = "13534068934";
@@ -365,8 +365,7 @@ namespace NineSunScripture.trade.helper
                     if (null != callback)
                     {
                         info = "资金账号【" + account.FundAcct + "】" + info;
-                        string errInfo = ApiHelper.ParseErrInfo(item.ErrorInfo);
-                        callback.OnTradeResult(rspCode, info, errInfo, false);
+                        callback.OnTradeResult(rspCode, info, item.StrErrorInfo, false);
                     }
                 }
             }
@@ -411,8 +410,7 @@ namespace NineSunScripture.trade.helper
                     Logger.Log(opLog);
                     if (null != callback)
                     {
-                        string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
-                        callback.OnTradeResult(rspCode, opLog, errInfo, false);
+                        callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
                     }
                 }
             }
@@ -457,8 +455,7 @@ namespace NineSunScripture.trade.helper
                 Logger.Log(opLog);
                 if (null != callback)
                 {
-                    string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
-                    callback.OnTradeResult(rspCode, opLog, errInfo, false);
+                    callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
                 }
             }//END FOR
         }//END METHOD

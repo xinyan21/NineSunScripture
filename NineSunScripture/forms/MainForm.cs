@@ -2,7 +2,8 @@
 using NineSunScripture.forms;
 using NineSunScripture.model;
 using NineSunScripture.strategy;
-using NineSunScripture.trade.helper;
+using NineSunScripture.trade.structApi.api;
+using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
 using NineSunScripture.util.log;
 using NineSunScripture.util.test;
@@ -46,8 +47,7 @@ namespace NineSunScripture
             imgTaiJi = Properties.Resources.taiji;
 
             //Start strategy
-            UpdateStrategyStocks();
-            bool isStarted = mainStrategy.Start();
+            bool isStarted = mainStrategy.Start(stocks);
             if (!isStarted)
             {
                 return;
@@ -197,6 +197,10 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
+            stocks.AddRange(dragonLeaders);
+            stocks.AddRange(latestStocks);
+            stocks.AddRange(weakTurnStrongStocks);
+            stocks.AddRange(bandStocks);
         }
 
         private void BindPositionsData()
@@ -260,18 +264,19 @@ namespace NineSunScripture
         /// <param name="quotes">股票对象</param>
         public void AddStock(Quotes quotes)
         {
+            if (null==quotes)
+            {
+                return;
+            }
             stockDbHelper.AddStock(quotes);
             string runtimeInfo = "新增股票【" + quotes.Name + "】";
             AddRuntimeInfo(runtimeInfo);
             RefreshStocksListView();
-            /* if (isStrategyStarted && mainStrategy.IsTradeTime())
-             {
-                 RebootStrategy();
-             }
-             else
-             {
-             }*/
-            UpdateStrategyStocks();
+            if (!stocks.Contains(quotes))
+            {
+                stocks.Add(quotes);
+            }
+            mainStrategy.EditStockSub(quotes, true);
         }
 
         private void RefreshStocksListView()
@@ -280,38 +285,6 @@ namespace NineSunScripture
             lvStocks.Items.Clear();
             BindStocksData();
             lvStocks.EndUpdate();
-        }
-
-        /// <summary>
-        /// 汇总股票池
-        /// </summary>
-        private void UpdateStrategyStocks()
-        {
-            stocks.Clear();
-            if (latestStocks.Count > 0)
-            {
-                stocks.AddRange(latestStocks);
-                if (longTermStocks.Count > 0)
-                {
-                    foreach (Quotes quotes in longTermStocks)
-                    {
-                        if (!stocks.Contains(quotes))
-                        {
-                            stocks.Add(quotes);
-                        }
-                    }
-                }
-            }
-            else if (longTermStocks.Count > 0)
-            {
-                stocks.AddRange(longTermStocks);
-            }
-            if (dragonLeaders.Count > 0)
-            {
-                mainStrategy.SetDragonLeaders(dragonLeaders);
-            }
-
-            mainStrategy.UpdateStocks(stocks, weakTurnStrongStocks, bandStocks);
         }
 
         private void InvokeRebootStrategy()
@@ -469,14 +442,6 @@ namespace NineSunScripture
                 AddRuntimeInfo(runtimeInfo);
                 InitLvStocks();
                 RefreshStocksListView();
-                if (isStrategyStarted && mainStrategy.IsTradeTime())
-                {
-                    RebootStrategy();
-                }
-                else
-                {
-                    UpdateStrategyStocks();
-                }
             }
         }
 
@@ -513,13 +478,10 @@ namespace NineSunScripture
             string runtimeInfo = "删除股票【" + quotes.Name + "】";
             AddRuntimeInfo(runtimeInfo);
             RefreshStocksListView();
-            if (isStrategyStarted && mainStrategy.IsTradeTime())
+            mainStrategy.EditStockSub(quotes, false);
+            if (stocks.Contains(quotes))
             {
-                RebootStrategy();
-            }
-            else
-            {
-                UpdateStrategyStocks();
+                stocks.Remove(quotes);
             }
         }
 
@@ -564,9 +526,7 @@ namespace NineSunScripture
             }
             runtimeInfo = "策略开始启动";
             AddRuntimeInfo(runtimeInfo);
-            UpdateStrategyStocks();
-            mainStrategy.UpdateStocks(stocks, weakTurnStrongStocks, bandStocks);
-            bool isStarted = mainStrategy.Start();
+            bool isStarted = mainStrategy.Start(stocks);
             if (!isStarted)
             {
                 string log = "策略启动失败";

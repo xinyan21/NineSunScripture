@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.model
 {
@@ -22,21 +20,23 @@ namespace NineSunScripture.model
         //comm_password,//通讯密码	可空
         //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
         public int BrokerId;
+
         public string BrokerName;
-        public String BrokerServerIP;
+        public string BrokerServerIP;
         public short BrokerServerPort;
-        public String VersionOfTHS;
+        public string VersionOfTHS;
         public short AcctType;
-        public String CommPwd;
+        public string CommPwd;
         public bool IsRandomMac = false;
-        public short SalesDepartId;
-        public String FundAcct;//资金账号
-        public String PriceAcct;//行情账号
-        public String FundPassword;
-        public String PricePassword;
-        public String ShShareholderAcct;//上海股东账号
-        public String SzShareholderAcct;//深圳股东账户
+        public string SalesDepartId;
+        public string FundAcct;//资金账号
+        public string PriceAcct;//行情账号
+        public string FundPassword;
+        public string PricePassword;
+        public string ShShareholderAcct;//上海股东账号
+        public string SzShareholderAcct;//深圳股东账户
         public int InitTotalAsset;    //初始总资金，作为单股开仓仓位依据
+
         /// <summary>
         /// 行情会话id
         /// </summary>
@@ -45,6 +45,7 @@ namespace NineSunScripture.model
         public Funds Funds;
         public List<Position> Positions;
         public List<ShareHolderAcct> ShareHolderAccts;
+
         /// <summary>
         /// 撤单
         /// </summary>

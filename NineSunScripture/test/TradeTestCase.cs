@@ -1,7 +1,6 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.strategy;
-using NineSunScripture.trade.api;
-using NineSunScripture.trade.helper;
+using NineSunScripture.trade.structApi.api;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -41,7 +40,7 @@ namespace NineSunScripture.util.test
             }
             else
             {
-                MessageBox.Show("sell failed, " + ApiHelper.ParseErrInfo(order.ErrorInfo));
+                MessageBox.Show("sell failed, " + order.StrErrorInfo);
             }
         }
 

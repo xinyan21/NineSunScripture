@@ -1,22 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.util.log
 {
     public class Logger
     {
         #region Instance
+
         private static object logLock;
         private static Logger _instance;
         private static string logFileName;
         private static string excFileName;
         private static string quotesFileName;
-        private Logger() { }
+
+        private Logger()
+        {
+        }
 
         /// <summary>
         /// Logger instance
@@ -36,7 +35,8 @@ namespace NineSunScripture.util.log
                 return _instance;
             }
         }
-        #endregion
+
+        #endregion Instance
 
         /// <summary>
         /// Write log to log file
@@ -131,6 +131,7 @@ namespace NineSunScripture.util.log
             }
         }
     }
+
     public enum LogType
     {
         All,

@@ -27,8 +27,20 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_4EFDB1D2B50041988DF8D0D8564C0715"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_5526A4593C4B4E5D8D198DA6A6D6D754"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_601A1486F207160473D15EFB41BCCF0E"
+        "OwnerKey" = "8:_B07B93EFA06A45DDBA0EC52B16AA9C20"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -105,6 +117,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_CEE93DB42FA74427BEF3BFD3F76D9ECA"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_D25833B38F4B400C90E82F915D879845"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -125,12 +143,6 @@
         {
         "MsmKey" = "8:_D2F63E51AA8CD66756C1E21786DA7FD2"
         "OwnerKey" = "8:_89280044D1E7809AF6276D80D2E9E392"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_DCF6FB5D87D54FAD9DFFC36E95B92601"
-        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -161,6 +173,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_95594A928627A1118DE44D2157E06245"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_601A1486F207160473D15EFB41BCCF0E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -238,6 +256,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
             }
         }
     }
@@ -308,6 +334,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4EFDB1D2B50041988DF8D0D8564C0715"
+            {
+            "SourcePath" = "8:..\\NineSunScripture\\bin\\Debug\\StructApi.dll"
+            "TargetName" = "8:StructApi.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_4FA973067B4D4991AF6C98EB05867266"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5526A4593C4B4E5D8D198DA6A6D6D754"
             {
             "SourcePath" = "8:..\\NineSunScripture\\NineSunScripture.csproj.user"
@@ -326,6 +372,37 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_601A1486F207160473D15EFB41BCCF0E"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_601A1486F207160473D15EFB41BCCF0E"
+                    {
+                    "Name" = "8:Newtonsoft.Json.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Newtonsoft.Json.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_4FA973067B4D4991AF6C98EB05867266"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_64E75801691D4BDA9A56119A086BE738"
@@ -552,6 +629,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CEE93DB42FA74427BEF3BFD3F76D9ECA"
+            {
+            "SourcePath" = "8:..\\NineSunScripture\\bin\\Debug\\StringApi.dll"
+            "TargetName" = "8:StringApi.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_4FA973067B4D4991AF6C98EB05867266"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D25833B38F4B400C90E82F915D879845"
             {
             "SourcePath" = "8:..\\NineSunScripture\\App.config"
@@ -601,26 +698,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DCF6FB5D87D54FAD9DFFC36E95B92601"
-            {
-            "SourcePath" = "8:..\\NineSunScripture\\bin\\Debug\\ths.dll"
-            "TargetName" = "8:ths.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4FA973067B4D4991AF6C98EB05867266"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_E8E64D64C50F52F6055D776903FA6080"
@@ -722,7 +799,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:九阳真经策略"
         "ProductCode" = "8:{AEDB5B51-CDD9-4FBC-8AB6-69F8C4583DEC}"
-        "PackageCode" = "8:{CA8886D0-E089-4824-915D-88B1B48E4A16}"
+        "PackageCode" = "8:{F5B4E4E6-A12B-40EC-A103-80232C20ADDE}"
         "UpgradeCode" = "8:{609BE177-44C5-44B0-8B55-DA3813F61066}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
