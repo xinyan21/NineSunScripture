@@ -72,6 +72,10 @@ namespace NineSunScripture
 
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
+            if (null == accounts || null == quotes)
+            {
+                return;
+            }
             //9:30之前不卖
             if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30 && !MainStrategy.IsTest)
             {
@@ -190,6 +194,10 @@ namespace NineSunScripture
         /// <param name="callback">交易结果回调</param>
         private void StopWin(Quotes quotes, List<Account> accounts, ITrade callback)
         {
+            if (null == accounts || null == quotes)
+            {
+                return;
+            }
             Task[] tasks = new Task[accounts.Count];
             for (int i = 0; i < accounts.Count; i++)
             {
@@ -260,6 +268,10 @@ namespace NineSunScripture
         public static void SellWithAcct(
             Quotes stock, Account account, ITrade callback, float sellRatio)
         {
+            if (null == stock || null == account)
+            {
+                return;
+            }
             Quotes quotes = new Quotes
             {
                 Code = stock.Code,
@@ -277,7 +289,7 @@ namespace NineSunScripture
             if (quotes.Buy2 == 0)
             {
                 string name = quotes.Name;
-                quotes = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, quotes.Code);
+                quotes = TradeAPI.QueryQuotes(account.TradeSessionId, quotes.Code);
                 //这个行情接口不返回name
                 quotes.Name = name;
             }
@@ -316,6 +328,10 @@ namespace NineSunScripture
         public static void SellByRatio(
             Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
         {
+            if (null == accounts)
+            {
+                return;
+            }
             Task[] tasks = new Task[accounts.Count];
             for (int i = 0; i < accounts.Count; i++)
             {
@@ -336,6 +352,10 @@ namespace NineSunScripture
         /// <param name="callback">交易接口回调</param>
         public static void SellAll(List<Account> accounts, ITrade callback)
         {
+            if (null == accounts)
+            {
+                return;
+            }
             List<Position> positions;
             Task[] tasks = new Task[accounts.Count];
             for (int i = 0; i < accounts.Count; i++)
@@ -355,7 +375,7 @@ namespace NineSunScripture
                         {
                             continue;
                         }
-                        Quotes quotes = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, position.Code);
+                        Quotes quotes = TradeAPI.QueryQuotes(account.TradeSessionId, position.Code);
                         quotes.Buy2 = quotes.LatestPrice * 0.95f;
                         if (quotes.Buy2 < quotes.LowLimit)
                         {

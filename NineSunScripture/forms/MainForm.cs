@@ -1,8 +1,7 @@
-﻿using NineSunScripture.db;
-using NineSunScripture.forms;
+﻿using NineSunScripture.forms;
 using NineSunScripture.model;
 using NineSunScripture.strategy;
-using NineSunScripture.trade.structApi.api;
+using NineSunScripture.trade.persistence;
 using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
 using NineSunScripture.util.log;
@@ -25,7 +24,8 @@ namespace NineSunScripture
         private List<Quotes> latestStocks;
         private List<Quotes> weakTurnStrongStocks;
         private List<Quotes> bandStocks;
-        private StockDbHelper stockDbHelper;
+        //持仓股票，这个列表是用来存放卖出计划的，不是底部的那个持仓
+        private List<Quotes> positionStocks;
         private Account account;//用来临时保存总账户信息
         private Image imgTaiJi;
         private bool isStrategyStarted = false;
@@ -36,7 +36,6 @@ namespace NineSunScripture
         public MainForm()
         {
             InitializeComponent();
-            stockDbHelper = new StockDbHelper();
             stocks = new List<Quotes>();
             mainStrategy = new MainStrategy();
             InitializeListViews();
@@ -129,13 +128,18 @@ namespace NineSunScripture
             ListViewGroup lvgTomorrow = new ListViewGroup("最新");
             ListViewGroup lvgWeakTurnStrong = new ListViewGroup("弱转强");
             ListViewGroup lvgBand = new ListViewGroup("波段");
+            ListViewGroup lvgPositions = new ListViewGroup("持仓");
+
             lvStocks.Groups.Add(lvgDragonLeader);
             lvStocks.Groups.Add(lvgLongTerm);
             lvStocks.Groups.Add(lvgTomorrow);
             lvStocks.Groups.Add(lvgWeakTurnStrong);
             lvStocks.Groups.Add(lvgBand);
+            lvStocks.Groups.Add(lvgPositions);
+
             ListViewItem lvi;
-            List<Quotes> quotes = stockDbHelper.GetStocksBy(Quotes.CategoryDragonLeader);
+            List<Quotes> quotes = JsonDataHelper.GetStocksByCatgory(
+                Quotes.OperationBuy, Quotes.CategoryDragonLeader);
             dragonLeaders = quotes;
             if (quotes.Count > 0)
             {
@@ -148,7 +152,8 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            longTermStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryLongTerm);
+            longTermStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+                Quotes.OperationBuy, Quotes.CategoryLongTerm);
             if (quotes.Count > 0)
             {
                 foreach (Quotes item in quotes)
@@ -160,7 +165,8 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            bandStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryBand);
+            bandStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+                Quotes.OperationBuy, Quotes.CategoryBand);
             if (quotes.Count > 0)
             {
                 foreach (Quotes item in quotes)
@@ -172,8 +178,8 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            weakTurnStrongStocks =
-                quotes = stockDbHelper.GetStocksBy(Quotes.CategoryWeakTurnStrong);
+            weakTurnStrongStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+                Quotes.OperationBuy, Quotes.CategoryWeakTurnStrong);
             if (quotes.Count > 0)
             {
                 foreach (Quotes item in quotes)
@@ -185,7 +191,8 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            latestStocks = quotes = stockDbHelper.GetStocksBy(Quotes.CategoryLatest);
+            latestStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+                Quotes.OperationBuy, Quotes.CategoryLatest);
             if (quotes.Count > 0)
             {
                 foreach (Quotes item in quotes)
@@ -197,10 +204,26 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
+            positionStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+               Quotes.OperationBuy, Quotes.CategoryPosition);
+            if (quotes.Count > 0)
+            {
+                foreach (Quotes item in quotes)
+                {
+                    lvi = new ListViewItem(item.Name, lvgPositions);
+                    lvi.SubItems.Add("卖策略1");
+                    lvi.SubItems.Add("卖策略2");
+                    lvi.Tag = item;
+                    lvStocks.Items.Add(lvi);
+                }
+            }
+
             stocks.AddRange(dragonLeaders);
             stocks.AddRange(latestStocks);
             stocks.AddRange(weakTurnStrongStocks);
             stocks.AddRange(bandStocks);
+            stocks.AddRange(longTermStocks);
+            stocks.AddRange(positionStocks);
         }
 
         private void BindPositionsData()
@@ -264,11 +287,11 @@ namespace NineSunScripture
         /// <param name="quotes">股票对象</param>
         public void AddStock(Quotes quotes)
         {
-            if (null==quotes)
+            if (null == quotes)
             {
                 return;
             }
-            stockDbHelper.AddStock(quotes);
+            JsonDataHelper.AddStock(quotes);
             string runtimeInfo = "新增股票【" + quotes.Name + "】";
             AddRuntimeInfo(runtimeInfo);
             RefreshStocksListView();
@@ -348,6 +371,10 @@ namespace NineSunScripture
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void OnAcctInfoListen(Account account)
         {
+            if (null == account)
+            {
+                return;
+            }
             this.account = account;
             Invoke(new MethodInvoker(UpdateAcctInfo));
         }
@@ -428,9 +455,13 @@ namespace NineSunScripture
             if (dr == DialogResult.OK)
             {
                 lvStocks.Items.Clear();
-                stockDbHelper.DelAllBy(Quotes.CategoryLatest);
-                stockDbHelper.DelAllBy(Quotes.CategoryLongTerm);
-                stockDbHelper.DelAllBy(Quotes.CategoryDragonLeader);
+                JsonDataHelper.DelStocksByCategory(Quotes.OperationBuy, Quotes.CategoryLatest);
+                JsonDataHelper.DelStocksByCategory(Quotes.OperationBuy, Quotes.CategoryLongTerm);
+                JsonDataHelper.DelStocksByCategory(Quotes.OperationBuy, Quotes.CategoryBand);
+                JsonDataHelper.DelStocksByCategory(
+                    Quotes.OperationBuy, Quotes.CategoryWeakTurnStrong);
+                JsonDataHelper.DelStocksByCategory(
+                    Quotes.OperationBuy, Quotes.CategoryDragonLeader);
 
                 stocks.Clear();
                 lvStocks.Clear();
@@ -456,24 +487,13 @@ namespace NineSunScripture
             {
                 return;
             }
-            string strCategory = lvStocks.SelectedItems[0].Group.Header;
-            short category = Quotes.CategoryLatest;
             Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
-            if (strCategory == "龙头")
-            {
-                category = Quotes.CategoryDragonLeader;
-                dragonLeaders.Remove(quotes);
-            }
-            else if (strCategory == "常驻")
-            {
-                category = Quotes.CategoryLongTerm;
-                longTermStocks.Remove(quotes);
-            }
-            else
-            {
-                latestStocks.Remove(quotes);
-            }
-            stockDbHelper.DelStockBy(category, quotes.Code);
+            latestStocks.Remove(quotes);
+            weakTurnStrongStocks.Remove(quotes);
+            bandStocks.Remove(quotes);
+            dragonLeaders.Remove(quotes);
+            longTermStocks.Remove(quotes);
+
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
             string runtimeInfo = "删除股票【" + quotes.Name + "】";
             AddRuntimeInfo(runtimeInfo);

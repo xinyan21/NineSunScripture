@@ -18,7 +18,7 @@ namespace NineSunScripture.trade.structApi.api
         /// <summary>
         /// 逐笔委托推送
         /// </summary>
-        public const short PushTypeOBOCommision = 1;
+        public const short PushTypeOByOCommision = 1;
 
         //dll必须放在程序同一目录下面，否则调用会报错
         private const string dllPath = "StructApi.dll";

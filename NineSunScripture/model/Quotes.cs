@@ -9,35 +9,40 @@ namespace NineSunScripture.model
     public class Quotes : BaseModel, IEquatable<Quotes>
     {
         /// <summary>
-        /// 常驻股票池中的股票
+        /// 【买入策略】常驻股票池中的股票
         /// </summary>
         public const short CategoryLongTerm = 0;
 
         /// <summary>
-        /// 龙头股票池中的股票
+        /// 【买入策略】 龙头股票池中的股票
         /// </summary>
         public const short CategoryDragonLeader = 1;
 
         /// <summary>
-        /// 最新股票池中的股票
+        ///  【买入策略】最新股票池中的股票
         /// </summary>
         public const short CategoryLatest = 2;
 
         /// <summary>
-        /// 弱转强股票池中的股票
+        /// 【买入策略】 弱转强股票池中的股票
         /// </summary>
         public const short CategoryWeakTurnStrong = 3;
 
         /// <summary>
-        /// 波段股票池中的股票，用作卖点监控
+        ///  【买入策略】波段股票池中的股票
         /// </summary>
         public const short CategoryBand = 4;
+
+        /// <summary>
+        /// 【卖出策略】持仓股票池中的股票，用作卖点监控
+        /// </summary>
+        public const short CategoryPosition = 5;
 
         public const short OperationBuy = 1;
         public const short OperationSell = 2;
 
-        public String Code;
-        public String Name;
+        public string Code;
+        public string Name;
 
         //昨收
         public float PreClose;
@@ -146,13 +151,17 @@ namespace NineSunScripture.model
 
         public bool Equals(Quotes other)
         {
-            return this.Code == other.Code;
+            if (null == other)
+            {
+                return false;
+            }
+            return Code == other.Code;
         }
 
         //重写Equals和GetHashCode方法可以在List里面使用Contains方法
         public override int GetHashCode()
         {
-            return this.Code.GetHashCode();
+            return Code.GetHashCode();
         }
 
         public override string ToString()
@@ -172,6 +181,31 @@ namespace NineSunScripture.model
             sb.Append("#InPosition=").Append(InPosition);
             sb.Append("#IsDragonLeader=").Append(IsDragonLeader);
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// 复制策略参数
+        /// </summary>
+        /// <param name="quotes">源股票对象，附带操作计划</param>
+        public void CloneStrategyParams(Quotes quotes)
+        {
+            if (null == quotes)
+            {
+                return;
+            }
+            quotes.HighLimit = HighLimit;
+            quotes.LowLimit = LowLimit;
+            quotes.InPosition = InPosition;
+            quotes.IsDragonLeader = IsDragonLeader;
+            quotes.PositionCtrl = PositionCtrl;
+            quotes.MoneyCtrl = MoneyCtrl;
+            quotes.ContBoards = ContBoards;
+            quotes.StockCategory = StockCategory;
+            quotes.Operation = Operation;
+            quotes.StopWinPct = StopWinPct;
+            quotes.StopWinPrice = StopWinPrice;
+            quotes.StopLossPct = StopLossPct;
+            quotes.StopLossPrice = StopLossPrice;
         }
     }
 }

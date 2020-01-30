@@ -197,7 +197,7 @@
     <Compile Include="strategy\MainStrategy.cs" />
     <Compile Include="strategy\Strategy.cs" />
     <Compile Include="strategy\WeakTurnStrongStrategy.cs" />
-    <Compile Include="trade\persistence\JsonData.cs" />
+    <Compile Include="trade\persistence\JsonDataHelper.cs" />
     <Compile Include="trade\stringApi\api\PriceAPI.cs" />
     <Compile Include="trade\stringApi\api\TradeAPI.cs" />
     <Compile Include="trade\stringApi\helper\AccountHelper.cs" />

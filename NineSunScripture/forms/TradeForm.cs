@@ -1,5 +1,6 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.strategy;
+using NineSunScripture.trade.persistence;
 using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util.log;
@@ -10,7 +11,7 @@ using System.Windows.Forms;
 
 namespace NineSunScripture.forms
 {
-    public partial class TradeForm : Form
+    public class TradeForm : Form
     {
         private float positionRatio = 1 / 3f;
         private List<Account> accounts;
@@ -48,9 +49,9 @@ namespace NineSunScripture.forms
 
         private void SetSellView()
         {
-            this.Text = "卖出";
-            this.btnBuy.BackgroundImage = Properties.Resources.btn_green;
-            this.btnBuy.Text = "卖出";
+            Text = "卖出";
+            btnBuy.BackgroundImage = Properties.Resources.btn_green;
+            btnBuy.Text = "卖出";
         }
 
         private void btnBuy_Click(object sender, EventArgs e)
@@ -102,10 +103,14 @@ namespace NineSunScripture.forms
                         = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
                           + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
                     Logger.Log(opLog);
-                   /* if (null != callback)
+                    /* if (null != callback)
+                     {
+                         callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
+                     }*/
+                    if (rspCode>0)
                     {
-                        callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
-                    }*/
+                        JsonDataHelper.AddStock(quotes);
+                    }
                 });
             }
             Task.WaitAll(tasks);

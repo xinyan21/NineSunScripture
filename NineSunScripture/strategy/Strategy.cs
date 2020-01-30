@@ -6,9 +6,9 @@ namespace NineSunScripture.strategy
     public class Strategy
     {
         /// <summary>
-        /// 默认历史数据保存数量为，由一分钟除睡眠间隔算出，也就是保留一分钟的历史数据
+        /// 默认历史数据保存数量，3s一个Tick，40根是2分钟数据
         /// </summary>
-        protected const short DefaultHistoryTickCnt = 300;
+        protected const short DefaultHistoryTickCnt = 40;
 
         /// <summary>
         /// 历史数据

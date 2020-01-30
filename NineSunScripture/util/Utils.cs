@@ -130,5 +130,23 @@ namespace NineSunScripture.util
             //发送
             client.Send(mailMessage);
         }
+
+        public static bool ifNeedToSubOByOPrice(Quotes quotes)
+        {
+            if (null == quotes)
+            {
+                return false;
+            }
+            if (quotes.Code.StartsWith("6"))
+            {
+                return false;
+            }
+            if (quotes.PreClose > 0 && quotes.LatestPrice / quotes.PreClose > 1.085)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

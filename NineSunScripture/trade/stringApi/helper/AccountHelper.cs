@@ -65,7 +65,6 @@ namespace NineSunScripture.trade.helper
             List<Account> loginAccts = new List<Account>();
             foreach (Account account in dbAccounts)
             {
-                //TODO 新版本加了营业部ID，后面看要不要加到数据库，后面接口改成字符串了，以后看需求升级
                 int tradeSessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
                     account.BrokerServerPort, account.VersionOfTHS, "0", account.AcctType,
                     account.FundAcct, account.FundPassword, account.CommPwd,

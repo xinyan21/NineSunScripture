@@ -93,17 +93,18 @@ namespace NineSunScripture.trade.structApi.helper
 
         public static Quotes ParseStructToQuotes(IntPtr data)
         {
-            if (null==data)
+            if (null == data)
             {
                 return null;
             }
             Quotes quotes = new Quotes();
             string code = Marshal.PtrToStringAnsi(data + 16, 6);
             十档行情结构体 price = (十档行情结构体)
-                         Marshal.PtrToStructure(data + 32, typeof(十档行情结构体));
+                Marshal.PtrToStructure(data + 32, typeof(十档行情结构体));
             quotes.Code = code;
             quotes.Open = (float)price.开盘;
-            quotes.LatestPrice = (float)price.卖一价;
+            //需要注意涨停后卖一是0
+            quotes.LatestPrice = (float)(price.卖一价 > 0 ? price.卖一价 : price.买一价);
             quotes.Volume = (int)price.总量;
             quotes.HighLimit = (float)price.涨停;
             quotes.LowLimit = (float)price.跌停;

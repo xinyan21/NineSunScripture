@@ -13,7 +13,7 @@ namespace NineSunScripture.trade.persistence
     /// <summary>
     /// 将账户和股票持久化到json文件，方便使用
     /// </summary>
-    public static class JsonData
+    public static class JsonDataHelper
     {
         private static string baseDir = Environment.CurrentDirectory + @"\data\";
         private static string acctsFilePath = baseDir + "accounts.json";
@@ -36,6 +36,23 @@ namespace NineSunScripture.trade.persistence
                 Logger.Exception(e);
             }
             return accounts;
+        }
+
+        public static void InitTotalAsset(Account account)
+        {
+            List<Account> accounts = GetAccounts();
+            if (null == accounts || null == account)
+            {
+                return;
+            }
+            Account temp = accounts.Find(item => account.FundAcct == item.FundAcct);
+            if (null == temp)
+            {
+                Logger.Log("Set account init total asset  failed, cannot found this account. " + account);
+                return;
+            }
+            temp.InitTotalAsset = account.InitTotalAsset;
+            SaveAccounts(accounts);
         }
 
         /// <summary>
@@ -80,6 +97,10 @@ namespace NineSunScripture.trade.persistence
             return result;
         }
 
+        /// <summary>
+        /// 增加股票quotes到股票池
+        /// </summary>
+        /// <param name="quotes">个股</param>
         public static void AddStock(Quotes quotes)
         {
             List<Quotes> stocks = GetStocks();
@@ -87,7 +108,12 @@ namespace NineSunScripture.trade.persistence
             {
                 stocks = new List<Quotes>();
             }
-            stocks.Add(quotes);
+            if (!stocks.Contains(quotes) && !stocks.Exists(temp => temp.Code == quotes.Code &&
+                 temp.Operation == quotes.Operation &&
+                 temp.StockCategory == quotes.StockCategory))
+            {
+                stocks.Add(quotes);
+            }
             SaveStocks(stocks);
         }
 
@@ -116,10 +142,33 @@ namespace NineSunScripture.trade.persistence
 
         private static void SaveStocks(List<Quotes> quotes)
         {
-            using (StreamWriter file = File.CreateText(stocksFilePath))
+            try
             {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(file, quotes);
+                using (StreamWriter file = File.CreateText(stocksFilePath))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.Serialize(file, quotes);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
+            }
+        }
+
+        private static void SaveAccounts(List<Account> accounts)
+        {
+            try
+            {
+                using (StreamWriter file = File.CreateText(acctsFilePath))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.Serialize(file, accounts);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
             }
         }
     }

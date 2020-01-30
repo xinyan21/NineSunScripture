@@ -64,7 +64,7 @@ namespace NineSunScripture.trade.structApi.helper
         /// <param name="callback">回调接口</param>
         public static List<Account> Login(ITrade callback)
         {
-            List<Account> localAccounts = JsonData.GetAccounts();
+            List<Account> localAccounts = JsonDataHelper.GetAccounts();
             Account mainAcct = MainStrategy.IsTest ? GetTestMainAccount() : GetProMainAccount();
             if (!localAccounts.Contains(mainAcct))
             {
@@ -99,7 +99,6 @@ namespace NineSunScripture.trade.structApi.helper
 
                 foreach (Account account in localAccounts)
                 {
-                    //TODO 新版本加了营业部ID，后面看要不要加到数据库，后面接口改成字符串了，以后看需求升级
                     int tradeSessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
                         account.BrokerServerPort, account.VersionOfTHS, account.SalesDepartId,
                         account.AcctType, account.FundAcct, account.FundPassword, account.CommPwd,
@@ -114,7 +113,7 @@ namespace NineSunScripture.trade.structApi.helper
                         if (account.InitTotalAsset == 0)
                         {
                             account.InitTotalAsset = (int)account.Funds.TotalAsset;
-                            dbHelper.EditInitTotalAsset(account);
+                            JsonDataHelper.InitTotalAsset(account);
                         }
                         if (account.ShareHolderAccts.Count > 0)
                         {

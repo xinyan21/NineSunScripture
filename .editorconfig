@@ -1,4 +1,4 @@
-﻿[*.cs]
+﻿[*.{cs,vb}]
 
-# CA2101: 指定对 P/Invoke 字符串参数进行封送处理
-dotnet_diagnostic.CA2101.severity = silent
+# IDE0046: 转换为条件表达式
+dotnet_style_prefer_conditional_expression_over_return = true:silent

@@ -10,8 +10,8 @@ namespace NineSunScripture.model
     /// </summary>
     public class Position : BaseModel, IEquatable<Position>
     {
-        public String Code;
-        public String Name;
+        public string Code;
+        public string Name;
 
         /// <summary>
         /// 股票余额=持有数量
@@ -50,19 +50,19 @@ namespace NineSunScripture.model
         /// <summary>
         /// 市场
         /// </summary>
-        public String Market;
+        public string Market;
 
-        public String ShareholderAcct;
+        public string ShareholderAcct;
 
         public bool Equals(Position other)
         {
-            return this.Code.Equals(other.Code);
+            return Code.Equals(other.Code);
         }
 
         //重写Equals和GetHashCode方法可以在List里面使用Contains方法
         public override int GetHashCode()
         {
-            return this.Code.GetHashCode();
+            return Code.GetHashCode();
         }
 
         public override string ToString()
