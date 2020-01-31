@@ -84,9 +84,9 @@ namespace NineSunScripture
             float highLimit = quotes.HighLimit;
             float lowLimit = quotes.LowLimit;
             float curPrice = quotes.LatestPrice;
-            float open = quotes.Open;
-            float preClose = quotes.PreClose;
             string code = quotes.Code;
+            DateTime now = DateTime.Now;
+
             RWLockSlim.EnterWriteLock();
             if (!historyTicks.ContainsKey(code))
             {
@@ -106,18 +106,28 @@ namespace NineSunScripture
             {
                 return;
             }
-            DateTime now = DateTime.Now;
             float avgCost = position.AvgCost;
             //龙头单独卖
-            if (quotes.IsDragonLeader)
+            if (quotes.IsDragonLeader && now.Minute >= 55 && curPrice < highLimit)
             {
-                if (now.Minute >= 55 && curPrice < highLimit)
-                {
-                    Logger.Log("收盘不板卖" + quotes.Name);
-                    SellByRatio(quotes, accounts, callback, 1);
-                }
+                Logger.Log("收盘不板卖" + quotes.Name);
+                SellByRatio(quotes, accounts, callback, 1);
                 return;
             }
+            //卖一和2是互斥的，return后就不能执行到后面去
+            if (!StopWinOrLoss(accounts, callback, quotes, avgCost))
+            {
+                OtherSells(accounts, callback, quotes);
+            }
+        }
+
+        private bool StopWinOrLoss(List<Account> accounts, ITrade callback, Quotes quotes, float avgCost)
+        {
+            float highLimit = quotes.HighLimit;
+            float curPrice = quotes.LatestPrice;
+            float open = quotes.Open;
+            float preClose = quotes.PreClose;
+            DateTime now = DateTime.Now;
             if (open != highLimit)
             {
                 StopWin(quotes, accounts, callback);
@@ -127,13 +137,13 @@ namespace NineSunScripture
                     {
                         Logger.Log("超低开拉升4%卖" + quotes.Name);
                         SellByRatio(quotes, accounts, callback, 1);
-                        return;
+                        return false;
                     }
                     if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * TooWeakRatio)
                     {
                         Logger.Log("超低开10:10还小于-5%卖" + quotes.Name);
                         SellByRatio(quotes, accounts, callback, 1);
-                        return;
+                        return false;
                     }
                 }
                 else
@@ -142,15 +152,26 @@ namespace NineSunScripture
                     {
                         Logger.Log("小于-8%卖" + quotes.Name);
                         SellByRatio(quotes, accounts, callback, 1);
-                        return;
+                        return false;
                     }
                 }
             }
+            return true;
+        }
+
+        private void OtherSells(List<Account> accounts, ITrade callback, Quotes quotes)
+        {
+            float highLimit = quotes.HighLimit;
+            float curPrice = quotes.LatestPrice;
+            float preClose = quotes.PreClose;
+            string code = quotes.Code;
+            DateTime now = DateTime.Now;
+
             RWLockSlim.EnterReadLock();
             Quotes[] ticks = historyTicks[code].ToArray();
             RWLockSlim.ExitReadLock();
-            if (null != ticks && ticks.Length >= 2 && ticks[ticks.Length - 2].LatestPrice == highLimit
-                && quotes.Buy1 < highLimit)
+            if (null != ticks && ticks.Length >= 2 &&
+                ticks[ticks.Length - 2].LatestPrice == highLimit && quotes.Buy1 < highLimit)
             {
                 Logger.Log("开板卖" + quotes.Name);
                 SellByRatio(quotes, accounts, callback, 1);
@@ -230,33 +251,33 @@ namespace NineSunScripture
                         stopWinPosition = FirstStopWinPosition;
                         Logger.Log("20%止盈3成卖" + quotes.Name);
                     }
-                    if (stopWinPosition > 0)
+                    if (stopWinPosition > 0 && !IsSoldToday(account, quotes))
                     {
-                        List<Order> todayTransactions
-                    = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
-                        bool isSoldToday = false;
-                        if (todayTransactions.Count > 0)
-                        {
-                            foreach (Order order in todayTransactions)
-                            {
-                                if (order.Code == quotes.Code
-                                    && order.Operation.Contains(Order.OperationSell))
-                                {
-                                    isSoldToday = true;
-                                    break;
-                                }
-                            }
-                            if (isSoldToday)
-                            {
-                                return;
-                            }
-                        }
-
                         SellWithAcct(quotes, account, callback, stopWinPosition);
                     }
                 });
             }
             Task.WaitAll(tasks);
+        }
+
+        private bool IsSoldToday(Account account, Quotes quotes)
+        {
+            List<Order> todayTransactions
+                   = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
+            bool isSoldToday = false;
+            if (todayTransactions.Count > 0)
+            {
+                foreach (Order order in todayTransactions)
+                {
+                    if (order.Code == quotes.Code
+                        && order.Operation.Contains(Order.OperationSell))
+                    {
+                        isSoldToday = true;
+                        break;
+                    }
+                }
+            }
+            return isSoldToday;
         }
 
         /// <summary>

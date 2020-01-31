@@ -91,7 +91,8 @@ namespace NineSunScripture.strategy
                 return;
             }
             //买一小于MinBuy1Ratio的直线拉板，过滤
-            if (quotes.Buy1 < quotes.PreClose * MinBuy1Ratio)
+            if (quotes.Buy1 < quotes.PreClose * MinBuy1Ratio ||
+                quotes.Buy2 < quotes.PreClose * MinBuy1Ratio)
             {
                 return;
             }
@@ -217,10 +218,6 @@ namespace NineSunScripture.strategy
             {
                 quotes.Money = forMoney.Money;
             }
-            else
-            {
-                Logger.Log("QueryBasicStockInfo return null-------------");
-            }
             if (quotes.MoneyCtrl > 0 && quotes.Money > quotes.MoneyCtrl * 10000)
             {
                 isMoneyQuolified = true;
@@ -229,11 +226,7 @@ namespace NineSunScripture.strategy
             {
                 isMoneyQuolified = true;
             }
-            if (!isMoneyQuolified)
-            {
-                return false;
-            }
-            return true;
+            return isMoneyQuolified;
         }
 
         private void TriggerBuy(List<Account> accounts,

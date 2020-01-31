@@ -246,11 +246,11 @@ namespace NineSunScripture.strategy
                 OByOCommision commision = ApiHelper.ParseStructToCommision(Result);
                 Logger.Log(code + "的逐笔委托：" + commision);
                 //逐笔委托只处理特大单，这里还要拿到涨停价
-                if (commision.Quantity < 500000 && commision.Quantity * commision.Price < 5000000)
+                if (commision.Price != stock.HighLimit)
                 {
                     return;
                 }
-                if (commision.Price != stock.HighLimit)
+                if (commision.Quantity < 500000 && commision.Quantity * commision.Price < 5000000)
                 {
                     return;
                 }
@@ -265,7 +265,6 @@ namespace NineSunScripture.strategy
                 Quotes quotes = hitBoardStrategy.GetLastHistoryQuotesBy(code);
                 quotes.Buy1 = stock.HighLimit;
                 ExeContBoardStrategyByStock(quotes);
-
             }
             
             rwLockSlimForBuy.EnterWriteLock();
