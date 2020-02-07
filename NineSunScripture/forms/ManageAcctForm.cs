@@ -1,24 +1,17 @@
-﻿using NineSunScripture.db;
-using NineSunScripture.model;
+﻿using NineSunScripture.model;
+using NineSunScripture.trade.persistence;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NineSunScripture.forms
 {
     public partial class ManageAcctForm : Form
     {
-        private AcctDbHelper dbHelper;
         private List<Account> accounts;
         public ManageAcctForm()
         {
-            dbHelper = new AcctDbHelper();
             InitializeComponent();
             InitListView();
         }
@@ -34,7 +27,7 @@ namespace NineSunScripture.forms
             lvAccounts.SmallImageList = imgList;
 
             lvAccounts.BeginUpdate();
-            accounts = dbHelper.GetAccounts();
+            accounts = JsonDataHelper.GetAccounts();
 
             ListViewItem item = null;
             foreach (Account account in accounts)
@@ -48,7 +41,7 @@ namespace NineSunScripture.forms
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if (null != dbHelper.GetAccountByFundAcct(tbAccout.Text))
+          /*  if (null != dbHelper.GetAccountByFundAcct(tbAccout.Text))
             {
                 MessageBox.Show("该资金账号已经存在，不能重复添加！");
                 return;
@@ -56,7 +49,7 @@ namespace NineSunScripture.forms
             if (!checkInput())
             {
                 return;
-            }
+            }*/
 
             Account account = new Account();
             //默认自动判断
@@ -70,7 +63,7 @@ namespace NineSunScripture.forms
             account.FundPassword = tbPassword.Text;
             account.CommPwd = tbCommPwd.Text;
 
-            bool result = dbHelper.AddAccount(account);
+          /*  bool result = dbHelper.AddAccount(account);
             if (result)
             {
                 MessageBox.Show("添加成功");
@@ -81,12 +74,12 @@ namespace NineSunScripture.forms
             else
             {
                 MessageBox.Show("添加失败");
-            }
+            }*/
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            if (null == dbHelper.GetAccountByFundAcct(tbAccout.Text))
+           /* if (null == dbHelper.GetAccountByFundAcct(tbAccout.Text))
             {
                 MessageBox.Show("不能修改资金账号，请删除该账号重新添加！");
                 return;
@@ -114,12 +107,12 @@ namespace NineSunScripture.forms
             else
             {
                 MessageBox.Show("修改失败！");
-            }
+            }*/
         }
 
         private void btnDel_Click(object sender, EventArgs e)
         {
-            bool result = dbHelper.DelAccount(tbAccout.Text);
+          /*  bool result = dbHelper.DelAccount(tbAccout.Text);
             if (result)
             {
                 MessageBox.Show("删除成功");
@@ -128,7 +121,7 @@ namespace NineSunScripture.forms
             else
             {
                 MessageBox.Show("删除失败");
-            }
+            }*/
         }
 
         private void lvAccounts_SelectedIndexChanged(object sender, EventArgs e)

@@ -1,10 +1,12 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.util.log;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
+using System.Windows.Documents;
 
 namespace NineSunScripture.util
 {
@@ -131,7 +133,7 @@ namespace NineSunScripture.util
             client.Send(mailMessage);
         }
 
-        public static bool ifNeedToSubOByOPrice(Quotes quotes)
+        public static bool IfNeedToSubOByOPrice(Quotes quotes)
         {
             if (null == quotes)
             {
@@ -147,6 +149,33 @@ namespace NineSunScripture.util
             }
 
             return false;
+        }
+
+        public static bool IsListEmpty(List<Quotes> list)
+        {
+            if (null != list && list.Count > 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool IsListEmpty(List<Position> list)
+        {
+            if (null != list && list.Count > 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool IsListEmpty(List<Order> list)
+        {
+            if (null != list && list.Count > 0)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

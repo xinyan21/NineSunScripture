@@ -10,15 +10,17 @@ namespace NineSunScripture.forms
     {
         private MainForm mainForm;
         private List<Account> accounts;
-        private short category = Quotes.CategoryLatest;
-        private Quotes quotes = new Quotes();
+        private Quotes quotes;
 
         public AddStockForm(List<Account> accounts, MainForm mainForm)
         {
             InitializeComponent();
             this.mainForm = mainForm;
             this.accounts = accounts;
-            panelBandParam.Visible = false;
+            quotes = new Quotes();
+            //默认值
+            quotes.Operation = Quotes.OperationBuy;
+            quotes.StockCategory = Quotes.CategoryLatest;
         }
 
         private void BtnAddStcok_Click(object sender, EventArgs e)
@@ -32,24 +34,42 @@ namespace NineSunScripture.forms
             quotes.Code = tbCode.Text;
             if (!tbName.Text.Contains("["))
             {
-                quotes.Name = tbName.Text; 
+                quotes.Name = tbName.Text;
             }
-            quotes.PositionCtrl = float.Parse(tbPosition.Text);
-            if (tbMoney.Text.Length > 0)
+            try
             {
-                quotes.MoneyCtrl = int.Parse(tbMoney.Text);
+                if (tbPosition.Text.Length > 0)
+                {
+                    quotes.PositionCtrl = float.Parse(tbPosition.Text);
+                }
+                if (tbMoney.Text.Length > 0)
+                {
+                    quotes.MoneyCtrl = int.Parse(tbMoney.Text);
+                }
+                if (quotes.StockCategory == Quotes.CategoryBand)
+                {
+                    if (tbStopLossPrice.Text.Length > 0)
+                    {
+                        quotes.StopLossPrice = float.Parse(tbStopLossPrice.Text);
+                    }
+                    if (tbStopWinPrice.Text.Length > 0)
+                    {
+                        quotes.StopWinPrice = float.Parse(tbStopWinPrice.Text);
+                    }
+                }
+                if (tbContBoards.Text.Length > 0)
+                {
+                    quotes.ContBoards = short.Parse(tbContBoards.Text);
+                }
+                if (tbAvgCost.Text.Length > 0)
+                {
+                    quotes.AvgCost = float.Parse(tbAvgCost.Text);
+                }
             }
-            quotes.StockCategory = category;
-            if (category == Quotes.CategoryBand)
+            catch (Exception ex)
             {
-                if (tbStopLossPrice.Text.Length > 0)
-                {
-                    quotes.StopLossPrice = float.Parse(tbStopLossPrice.Text);
-                }
-                if (tbStopWinPrice.Text.Length > 0)
-                {
-                    quotes.StopWinPrice = float.Parse(tbStopWinPrice.Text);
-                }
+                MessageBox.Show("输入格式有误，请检查后重新输入，错误信息：" + ex.Message);
+                return;
             }
             mainForm.AddStock(quotes);
             Close();
@@ -57,49 +77,46 @@ namespace NineSunScripture.forms
 
         private void RbtnDragonLeader_CheckedChanged(object sender, EventArgs e)
         {
-            category = Quotes.CategoryDragonLeader;
-            panelBandParam.Visible = false;
+            quotes.StockCategory = Quotes.CategoryDragonLeader;
         }
 
         private void RbtnLongTerm_CheckedChanged(object sender, EventArgs e)
         {
-            category = Quotes.CategoryLongTerm;
-            panelBandParam.Visible = false;
+            quotes.StockCategory = Quotes.CategoryLongTerm;
         }
 
         private void RbtnLatest_CheckedChanged(object sender, EventArgs e)
         {
-            category = Quotes.CategoryLatest;
-            panelBandParam.Visible = false;
+            quotes.StockCategory = Quotes.CategoryLatest;
         }
 
         private void RbWeakTurnStrong_CheckedChanged(object sender, EventArgs e)
         {
             quotes.StockCategory = Quotes.CategoryWeakTurnStrong;
-            panelBandParam.Visible = false;
         }
 
         private void RbtnBand_CheckedChanged(object sender, EventArgs e)
         {
             quotes.StockCategory = Quotes.CategoryBand;
-            panelBandParam.Visible = true;
         }
 
         private void TbCode_TextChanged(object sender, EventArgs e)
         {
+            Quotes stock;  //别把成员变量覆盖了
             if (tbCode.TextLength == 6)
             {
                 try
                 {
-                    quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
+                    stock = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
                 }
                 catch
                 {
                     return;
                 }
-                if (null != quotes && !string.IsNullOrEmpty(quotes.Name))
+                if (null != stock && !string.IsNullOrEmpty(stock.Name))
                 {
-                    tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
+                    tbName.Text = stock.Name + "[" + stock.LatestPrice + "]";
+                    quotes.Name = stock.Name;
                 }
             }
         }

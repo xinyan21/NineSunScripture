@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace NineSunScripture.forms
 {
-    public class TradeForm : Form
+    partial class TradeForm : Form
     {
         private float positionRatio = 1 / 3f;
         private List<Account> accounts;
@@ -109,6 +109,8 @@ namespace NineSunScripture.forms
                      }*/
                     if (rspCode>0)
                     {
+                        quotes.Operation = Quotes.OperationSell;
+                        quotes.StockCategory = Quotes.CategoryBand;
                         JsonDataHelper.AddStock(quotes);
                     }
                 });
@@ -118,8 +120,16 @@ namespace NineSunScripture.forms
 
         private void Sell()
         {
-            quotes.Buy2 = float.Parse(tbPrice.Text);
+            try
+            {
+                quotes.Buy2 = float.Parse(tbPrice.Text);
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
+            }
             ContBoardSellStrategy.SellByRatio(quotes, accounts, callback, positionRatio);
+            JsonDataHelper.DelStockByCode(quotes.Code, Quotes.OperationSell);
         }
 
         private void tbCode_TextChanged(object sender, EventArgs e)

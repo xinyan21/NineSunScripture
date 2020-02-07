@@ -33,6 +33,7 @@ namespace NineSunScripture.trade.persistence
             }
             catch (Exception e)
             {
+                Logger.Log("GetAccounts exception: " + e.Message);
                 Logger.Exception(e);
             }
             return accounts;
@@ -70,6 +71,7 @@ namespace NineSunScripture.trade.persistence
             catch (Exception e)
             {
                 Logger.Exception(e);
+                Logger.Log("GetStocks exception: " + e.Message);
             }
             return stocks;
         }
@@ -108,8 +110,8 @@ namespace NineSunScripture.trade.persistence
             {
                 stocks = new List<Quotes>();
             }
-            if (!stocks.Contains(quotes) && !stocks.Exists(temp => temp.Code == quotes.Code &&
-                 temp.Operation == quotes.Operation &&
+            if (!stocks.Exists(
+                temp => temp.Code == quotes.Code && temp.Operation == quotes.Operation &&
                  temp.StockCategory == quotes.StockCategory))
             {
                 stocks.Add(quotes);
@@ -140,10 +142,19 @@ namespace NineSunScripture.trade.persistence
             SaveStocks(stocks);
         }
 
+        public static void ClearStocks()
+        {
+            SaveStocks(new List<Quotes>());
+        }
+
         private static void SaveStocks(List<Quotes> quotes)
         {
             try
             {
+                if (!Directory.Exists(baseDir))
+                {
+                    Directory.CreateDirectory(baseDir);
+                }
                 using (StreamWriter file = File.CreateText(stocksFilePath))
                 {
                     JsonSerializer serializer = new JsonSerializer();
@@ -160,6 +171,10 @@ namespace NineSunScripture.trade.persistence
         {
             try
             {
+                if (!Directory.Exists(baseDir))
+                {
+                    Directory.CreateDirectory(baseDir);
+                }
                 using (StreamWriter file = File.CreateText(acctsFilePath))
                 {
                     JsonSerializer serializer = new JsonSerializer();

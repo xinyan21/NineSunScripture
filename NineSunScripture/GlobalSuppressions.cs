@@ -17,3 +17,4 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:指定 StringComparison", Justification = "<挂起>", Scope = "member", Target = "~M:NineSunScripture.util.Utils.ifNeedToSubOByOPrice(NineSunScripture.model.Quotes)~System.Boolean")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:不捕获常规异常类型", Justification = "<挂起>", Scope = "member", Target = "~M:NineSunScripture.strategy.MainStrategy.ExeContBoardStrategyByStock(NineSunScripture.model.Quotes)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:不要声明可见实例字段", Justification = "<挂起>", Scope = "member", Target = "~F:NineSunScripture.model.Quotes.Code")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:不捕获常规异常类型", Justification = "<挂起>", Scope = "member", Target = "~M:NineSunScripture.forms.AddStockForm.TbCode_TextChanged(System.Object,System.EventArgs)")]

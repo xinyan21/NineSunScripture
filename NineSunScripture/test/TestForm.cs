@@ -137,7 +137,7 @@ namespace NineSunScripture.util.test
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.Serialize(file, accounts);
                 }
-                accounts= JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(filePath));
+                accounts = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(filePath));
                 accounts.RemoveAt(0);
                 using (StreamWriter file = File.CreateText(filePath))
                 {
@@ -147,6 +147,16 @@ namespace NineSunScripture.util.test
                 MessageBox.Show(accounts.ToString());
             });
 
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            C_sharp演示.TestApi.Test();
+            /*Funds funds = TradeAPI.QueryFunds(accounts[0].TradeSessionId);
+            if (null != funds)
+            {
+                lblTenthGearPrice.Text = "总资产：" + funds.TotalAsset;
+            }*/
         }
     }
 }

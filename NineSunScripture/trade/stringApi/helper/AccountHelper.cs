@@ -1,7 +1,7 @@
-﻿using NineSunScripture.db;
-using NineSunScripture.model;
+﻿using NineSunScripture.model;
 using NineSunScripture.strategy;
 using NineSunScripture.trade.api;
+using NineSunScripture.trade.persistence;
 using NineSunScripture.util.log;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,8 +41,7 @@ namespace NineSunScripture.trade.helper
         /// <param name="callback">回调接口</param>
         public static List<Account> Login(ITrade callback)
         {
-            AcctDbHelper dbHelper = new AcctDbHelper();
-            List<Account> dbAccounts = dbHelper.GetAccounts();
+            List<Account> dbAccounts = JsonDataHelper.GetAccounts();
             Account mainAcct = GetMainAccount();
             dbAccounts.Insert(0, mainAcct);
             if (null == dbAccounts || dbAccounts.Count == 0)
@@ -79,7 +78,7 @@ namespace NineSunScripture.trade.helper
                     if (account.InitTotalAsset == 0)
                     {
                         account.InitTotalAsset = (int)account.Funds.TotalAsset;
-                        dbHelper.EditInitTotalAsset(account);
+                        JsonDataHelper.InitTotalAsset(account);
                     }
                     if (account.ShareHolderAccts.Count > 0)
                     {

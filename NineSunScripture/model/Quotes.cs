@@ -129,6 +129,8 @@ namespace NineSunScripture.model
 
         public bool IsDragonLeader = false;
 
+        public float AvgCost;
+
         /// <summary>
         /// 止盈比例
         /// </summary>
@@ -148,6 +150,16 @@ namespace NineSunScripture.model
         /// 止损价格
         /// </summary>
         public float StopLossPrice;
+
+        /// <summary>
+        /// 十档行情是否已经订阅
+        /// </summary>
+        public bool IsTenthGearSubscribed;
+
+        /// <summary>
+        /// 逐笔委托行情是否已经订阅
+        /// </summary>
+        public bool IsOByOComissionSubscribed;
 
         public bool Equals(Quotes other)
         {
@@ -169,6 +181,9 @@ namespace NineSunScripture.model
             StringBuilder sb = new StringBuilder();
             sb.Append("#Code=").Append(Code);
             sb.Append("#Name=").Append(Name);
+            sb.Append("#Open=").Append(Open);
+            sb.Append("#HighLimit=").Append(HighLimit);
+            sb.Append("#LowLimit=").Append(LowLimit);
             sb.Append("#LatestPrice= ").Append(LatestPrice);
             sb.Append("#Money=").Append(Money);
             sb.Append("#Sell1=").Append(Sell1);
@@ -187,25 +202,28 @@ namespace NineSunScripture.model
         /// 复制策略参数
         /// </summary>
         /// <param name="quotes">源股票对象，附带操作计划</param>
-        public void CloneStrategyParams(Quotes quotes)
+        public void CloneStrategyParamsFrom(Quotes quotes)
         {
             if (null == quotes)
             {
                 return;
             }
-            quotes.HighLimit = HighLimit;
-            quotes.LowLimit = LowLimit;
-            quotes.InPosition = InPosition;
-            quotes.IsDragonLeader = IsDragonLeader;
-            quotes.PositionCtrl = PositionCtrl;
-            quotes.MoneyCtrl = MoneyCtrl;
-            quotes.ContBoards = ContBoards;
-            quotes.StockCategory = StockCategory;
-            quotes.Operation = Operation;
-            quotes.StopWinPct = StopWinPct;
-            quotes.StopWinPrice = StopWinPrice;
-            quotes.StopLossPct = StopLossPct;
-            quotes.StopLossPrice = StopLossPrice;
+            HighLimit = quotes.HighLimit;
+            LowLimit = quotes.LowLimit;
+            InPosition = quotes.InPosition;
+            IsDragonLeader = quotes.IsDragonLeader;
+            PositionCtrl = quotes.PositionCtrl;
+            MoneyCtrl = quotes.MoneyCtrl;
+            ContBoards = quotes.ContBoards;
+            StockCategory = quotes.StockCategory;
+            Operation = quotes.Operation;
+            StopWinPct = quotes.StopWinPct;
+            StopWinPrice = quotes.StopWinPrice;
+            StopLossPct = quotes.StopLossPct;
+            StopLossPrice = quotes.StopLossPrice;
+            AvgCost = quotes.AvgCost;
+            IsOByOComissionSubscribed = quotes.IsOByOComissionSubscribed;
+            IsTenthGearSubscribed = quotes.IsTenthGearSubscribed;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace NineSunScripture.model
 {
@@ -8,6 +9,14 @@ namespace NineSunScripture.model
     /// </summary>
     public class BaseModel
     {
+        /// <summary>
+        /// 【极其重要】
+        /// 内存分配属于公共资源，并发分配内存会引发堆损坏，
+        /// 这是一直莫名崩溃且找无法定位异常的罪魁祸首，分配内存的时候要把代码块锁定
+        /// 而且这里要声明成静态的，这样所有子类都只有一个锁，不然每个子类都自己一个锁毫无意义
+        /// </summary>
+        private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim();
+
         public int TradeSessionId;
 
         //字符串版本结果接收数组
@@ -37,8 +46,10 @@ namespace NineSunScripture.model
         /// </summary>
         public void AllocCoTaskMem()
         {
+            rwls.EnterWriteLock();
             PtrResult = Marshal.AllocCoTaskMem(256);
             PtrErrorInfo = Marshal.AllocCoTaskMem(1024 * 1024);
+            rwls.ExitWriteLock();
         }
 
         /// <summary>

@@ -12,7 +12,7 @@ namespace NineSunScripture.trade.structApi.api
     /// <summary>
     /// 交易API，附带五档行情API
     /// </summary>
-    public static class TradeAPI
+    public class TradeAPI
     {
         //dll必须放在程序同一目录下面，否则调用会报错
         private const string dllPath = "StructApi.dll";
@@ -28,26 +28,26 @@ namespace NineSunScripture.trade.structApi.api
         //comm_password,//通讯密码	可空
         //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串
-        [DllImport(@dllPath, EntryPoint = "Logon", CallingConvention = CallingConvention.Winapi)]
-        public extern static int Logon(int qsid, string host, short port, string version,
-            string salesDepartId, short accountType,
-            string account, string password, string commPassword, bool dommac, IntPtr errInfo);
+        [DllImport(@"StructApi.dll", EntryPoint = "Logon", CallingConvention = CallingConvention.Winapi)]
+        public extern static int Logon(int Qsid, string Host, short Port, string Version, string YybId,
+            short AccountType, string Account, string Password, string comm_password,
+            bool dommac, IntPtr ErrInfo);
 
         //功能：查询各种交易数据
         //sessionId,//客户端 ID
         //category,//查询信息的种类 0资金	1股份 2最新委托	3最新成交 4可撤单 5股东账户
         //result, //内保存了返回的查询数据, 形式为表格数据，行数据之间通过\n 字符分割，列数据之间通过\t 分隔。一般要分配 1024 * 1024 字节的空间。出错时为空字符串。
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串。
-        [DllImport(@dllPath, EntryPoint = "QueryData", CallingConvention = CallingConvention.Winapi)]
-        public extern static int QueryData(int sessionId, int category, IntPtr result, IntPtr errInfo);
+        [DllImport(@"StructApi.dll", EntryPoint = "QueryData", CallingConvention = CallingConvention.Winapi)]
+        public extern static int QueryData(int ClientID, int Category, IntPtr Result, IntPtr ErrInfo);
 
         //功能：查行情 券商提供的行情虽然只有5档 但是速度快
         //sessionId,//客户端ID
         //zqdm,//股票代码
         //result,//内保存了返回的查询数据
         //errInfo//执行返回后，如果出错，保存了错误信息说明
-        [DllImport(@dllPath, EntryPoint = "QueryHQ", CallingConvention = CallingConvention.Winapi)]
-        public extern static int QueryHQ(int sessionId, string gddm, IntPtr result, IntPtr errInfo);
+        [DllImport(@"StructApi.dll", EntryPoint = "QueryHQ", CallingConvention = CallingConvention.Winapi)]
+        public extern static int QueryHQ(int ClientID, string Gddm, IntPtr Result, IntPtr ErrInfo);
 
         //功能：委托下单
         //sessionId,//客户端ID
@@ -58,7 +58,7 @@ namespace NineSunScripture.trade.structApi.api
         //quantity,//委托数量
         //result,//内保存了返回的查询数据, 含有委托编号数据 出错时为空字符串。
         //errInfo//如果出错，保存了错误信息说明。一般要分配 256 字节的空间
-        [DllImport(@dllPath, EntryPoint = "SendOrder", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@"StructApi.dll", EntryPoint = "SendOrder", CallingConvention = CallingConvention.Winapi)]
         public extern static int SendOrder(int sessionId, int category, string gddm, string zqdm,
             float price, int quantity, IntPtr result, IntPtr errInfo);
 
@@ -68,12 +68,12 @@ namespace NineSunScripture.trade.structApi.api
         //OrderID,//表示要撤的目标委托的编号
         //result,//内保存了返回的查询数据
         //errInfo//执行返回后，如果出错，保存了错误信息说明
-        [DllImport(@dllPath, EntryPoint = "CancelOrder", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@"StructApi.dll", EntryPoint = "CancelOrder", CallingConvention = CallingConvention.Winapi)]
         public extern static int CancelOrder(int sessionId, string gddm, string orderID, IntPtr result, IntPtr errInfo);
 
         //功能：退出登录	无返回值
         //sessionId,//客户端ID
-        [DllImport(@dllPath, EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@"StructApi.dll", EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
         public extern static void Logoff(int sessionId);
 
         /// <summary>
@@ -97,11 +97,9 @@ namespace NineSunScripture.trade.structApi.api
                     funds.FundBalance = fund.资金余额;
                     funds.FrozenAmt = fund.冻结金额;
                     funds.AvailableAmt = fund.可用金额;
-                    Logger.Log(funds.ToString());
                 }
                 else
                 {
-                    //NO DATA
                     Logger.Log("QueryFunds：" + ApiHelper.ParseErrInfo(funds.PtrErrorInfo));
                 }
             }
@@ -121,17 +119,17 @@ namespace NineSunScripture.trade.structApi.api
         {
             List<Position> positions = new List<Position>();
             Position position;
-            Position positionResult = new Position();
-            positionResult.AllocCoTaskMem();
+            BaseModel model = new BaseModel();
+            model.AllocCoTaskMem();
             try
             {
-                int code = QueryData(sessionId, 1, positionResult.PtrResult, positionResult.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(positionResult.PtrErrorInfo);
+                int code = QueryData(sessionId, 1, model.PtrResult, model.PtrErrorInfo);
+                ApiHelper.HandleTimeOut(model.PtrErrorInfo);
                 if (code > 0)
                 {
-                    int positionLength = Marshal.ReadInt32(positionResult.PtrResult + 4);
-                    int structLength = Marshal.ReadInt32(positionResult.PtrResult + 12);
-                    IntPtr dataPtr = positionResult.PtrResult + 32;
+                    int positionLength = Marshal.ReadInt32(model.PtrResult + 4);
+                    int structLength = Marshal.ReadInt32(model.PtrResult + 12);
+                    IntPtr dataPtr = model.PtrResult + 32;
 
                     for (int i = 0; i < positionLength; i++)
                     {
@@ -148,15 +146,15 @@ namespace NineSunScripture.trade.structApi.api
                         position.ProfitAndLossPct = (float)temp.盈亏比例;
                         position.Price = (float)temp.市价;
                         position.MarketValue = (float)temp.市值;
-                        positions.Add(position);
 
+                        positions.Add(position);
                         dataPtr += structLength;
                     }
                 }
             }
             finally
             {
-                positionResult.FreeCoTaskMem();
+                model.FreeCoTaskMem();
             }
             return positions;
         }
@@ -376,11 +374,18 @@ namespace NineSunScripture.trade.structApi.api
                 return -1;
             }
             order.AllocCoTaskMem();
-            int rspId = SendOrder(order.TradeSessionId, Order.CategoryBuy, order.ShareholderAcct,
-                order.Code, order.Price, order.Quantity, order.PtrResult, order.PtrErrorInfo);
-            ApiHelper.HandleTimeOut(order.PtrErrorInfo);
-            order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
-            order.FreeCoTaskMem();
+            int rspId;
+            try
+            {
+                rspId = SendOrder(order.TradeSessionId, Order.CategoryBuy, order.ShareholderAcct,
+                   order.Code, order.Price, order.Quantity, order.PtrResult, order.PtrErrorInfo);
+                ApiHelper.HandleTimeOut(order.PtrErrorInfo);
+                order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
+            }
+            finally
+            {
+                order.FreeCoTaskMem();
+            }
             return rspId;
         }
 
@@ -396,11 +401,18 @@ namespace NineSunScripture.trade.structApi.api
                 return -1;
             }
             order.AllocCoTaskMem();
-            int rspId = SendOrder(order.TradeSessionId, Order.CategorySell, order.ShareholderAcct,
-                order.Code, order.Price, order.Quantity, order.PtrResult, order.PtrErrorInfo);
-            ApiHelper.HandleTimeOut(order.PtrErrorInfo);
-            order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
-            order.FreeCoTaskMem();
+            int rspId;
+            try
+            {
+                rspId = SendOrder(order.TradeSessionId, Order.CategorySell, order.ShareholderAcct,
+                  order.Code, order.Price, order.Quantity, order.PtrResult, order.PtrErrorInfo);
+                ApiHelper.HandleTimeOut(order.PtrErrorInfo);
+                order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
+            }
+            finally
+            {
+                order.FreeCoTaskMem();
+            }
             return rspId;
         }
 
@@ -416,11 +428,18 @@ namespace NineSunScripture.trade.structApi.api
                 return -1;
             }
             order.AllocCoTaskMem();
-            int rspId = CancelOrder(order.TradeSessionId, order.ShareholderAcct,
-                order.OrderId, order.PtrResult, order.PtrErrorInfo);
-            ApiHelper.HandleTimeOut(order.PtrErrorInfo);
-            order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
-            order.FreeCoTaskMem();
+            int rspId;
+            try
+            {
+                rspId = CancelOrder(order.TradeSessionId, order.ShareholderAcct,
+                  order.OrderId, order.PtrResult, order.PtrErrorInfo);
+                ApiHelper.HandleTimeOut(order.PtrErrorInfo);
+                order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
+            }
+            finally
+            {
+                order.FreeCoTaskMem();
+            }
             return rspId;
         }
     }

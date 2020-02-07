@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NineSunScripture.trade.structApi.helper
 {
@@ -16,7 +18,7 @@ namespace NineSunScripture.trade.structApi.helper
         /// 默认主账号为账号列表的第一个
         /// </summary>
         /// <returns></returns>
-        private static Account GetProMainAccount()
+        private static Account GetPrdMainAccount()
         {
             Account account = new Account();
             account.AcctType = 0x30;
@@ -65,14 +67,14 @@ namespace NineSunScripture.trade.structApi.helper
         public static List<Account> Login(ITrade callback)
         {
             List<Account> localAccounts = JsonDataHelper.GetAccounts();
-            Account mainAcct = MainStrategy.IsTest ? GetTestMainAccount() : GetProMainAccount();
+            Account mainAcct = MainStrategy.IsTest ? GetTestMainAccount() : GetPrdMainAccount();
+            if (null == localAccounts)
+            {
+                localAccounts = new List<Account>();
+            }
             if (!localAccounts.Contains(mainAcct))
             {
                 localAccounts.Insert(0, mainAcct);
-            }
-            if (null == localAccounts || localAccounts.Count == 0)
-            {
-                return null;
             }
             List<Account> loginAccts = new List<Account>();
             IntPtr ptrErrorInfo = Marshal.AllocCoTaskMem(256);
@@ -97,65 +99,7 @@ namespace NineSunScripture.trade.structApi.helper
                     }
                 }
 
-                foreach (Account account in localAccounts)
-                {
-                    int tradeSessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
-                        account.BrokerServerPort, account.VersionOfTHS, account.SalesDepartId,
-                        account.AcctType, account.FundAcct, account.FundPassword, account.CommPwd,
-                        account.IsRandomMac, ptrErrorInfo);
-                    string opLog = "";
-                    if (tradeSessionId > 0)
-                    {
-                        account.TradeSessionId = tradeSessionId;
-                        account.Funds = TradeAPI.QueryFunds(tradeSessionId);
-                        account.Positions = TradeAPI.QueryPositions(tradeSessionId);
-                        account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(tradeSessionId);
-                        if (account.InitTotalAsset == 0)
-                        {
-                            account.InitTotalAsset = (int)account.Funds.TotalAsset;
-                            JsonDataHelper.InitTotalAsset(account);
-                        }
-                        if (account.ShareHolderAccts.Count > 0)
-                        {
-                            foreach (ShareHolderAcct shareHolderAcct in account.ShareHolderAccts)
-                            {
-                                if (shareHolderAcct.category == "上海A股")
-                                {
-                                    account.ShShareholderAcct = shareHolderAcct.code;
-                                }
-                                else
-                                {
-                                    account.SzShareholderAcct = shareHolderAcct.code;
-                                }
-                            }
-                        }
-                        //把行情的PriceSessionId给其它账户，就不用每次都拿主账户的PriceSessionId给其它账户
-                        if (account != mainAcct)
-                        {
-                            account.PriceSessionId = mainAcct.PriceSessionId;
-                        }
-                        loginAccts.Add(account);
-                        opLog = "资金账号【" + account.FundAcct + "】登录成功，会话ID为" + tradeSessionId;
-                        Logger.Log(opLog);
-                    }
-                    else
-                    {
-                        opLog = "资金账号【" + account.FundAcct + "】登录失败，信息："
-                            + ApiHelper.ParseErrInfo(ptrErrorInfo);
-                        Logger.Log(opLog);
-                    }
-                    if (null != callback)
-                    {
-                        string errInfo = ApiHelper.ParseErrInfo(ptrErrorInfo);
-                        bool needReboot = false;
-                        if (account == mainAcct || !errInfo.Contains("密码"))
-                        {
-                            //主账号登录失败或者是其它账户不是因为密码错误都重启策略
-                            needReboot = true;
-                        }
-                        callback.OnTradeResult(tradeSessionId, opLog, errInfo, needReboot);
-                    }
-                }
+                LoginTrade(localAccounts, loginAccts, mainAcct, callback);
             }
             finally
             {
@@ -164,22 +108,98 @@ namespace NineSunScripture.trade.structApi.helper
             return loginAccts;
         }
 
+        private static void LoginTrade(List<Account> localAccounts,
+            List<Account> loginAccts, Account mainAcct, ITrade callback)
+        {
+            Task[] tasks = new Task[localAccounts.Count];
+            for (int i = 0; i < localAccounts.Count; i++)
+            {
+                Account account = localAccounts[i];
+                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
+                tasks[i] = Task.Run(() =>
+                {
+                    IntPtr ptrErrorInfo = Marshal.AllocCoTaskMem(256);
+                    try
+                    {
+                        int tradeSessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
+                             account.BrokerServerPort, account.VersionOfTHS, account.SalesDepartId,
+                             account.AcctType, account.FundAcct, account.FundPassword, account.CommPwd,
+                             account.IsRandomMac, ptrErrorInfo);
+                        string opLog = "";
+                        if (tradeSessionId > 0)
+                        {
+                            account.TradeSessionId = tradeSessionId;
+                            account.Funds = TradeAPI.QueryFunds(tradeSessionId);
+                            account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(tradeSessionId);
+                            account.Positions = TradeAPI.QueryPositions(tradeSessionId);
+                            if (account.InitTotalAsset == 0)
+                            {
+                                account.InitTotalAsset = (int)account.Funds.TotalAsset;
+                                JsonDataHelper.InitTotalAsset(account);
+                            }
+                            if (null != account.ShareHolderAccts && account.ShareHolderAccts.Count > 0)
+                            {
+                                foreach (ShareHolderAcct shareHolderAcct in account.ShareHolderAccts)
+                                {
+                                    if (shareHolderAcct.category == "上海A股")
+                                    {
+                                        account.ShShareholderAcct = shareHolderAcct.code;
+                                    }
+                                    else
+                                    {
+                                        account.SzShareholderAcct = shareHolderAcct.code;
+                                    }
+                                }
+                            }
+                            //把行情的PriceSessionId给其它账户，就不用每次都拿主账户的PriceSessionId给其它账户
+                            if (account != mainAcct)
+                            {
+                                account.PriceSessionId = mainAcct.PriceSessionId;
+                            }
+                            loginAccts.Add(account);
+                            opLog = "资金账号【" + account.FundAcct + "】登录成功，会话ID为" + tradeSessionId;
+                            Logger.Log(opLog);
+                        }
+                        else
+                        {
+                            opLog = "资金账号【" + account.FundAcct + "】登录失败，错误信息："
+                                + ApiHelper.ParseErrInfo(ptrErrorInfo);
+                            Logger.Log(opLog);
+                        }
+                        if (null != callback)
+                        {
+                            string errInfo = ApiHelper.ParseErrInfo(ptrErrorInfo);
+                            bool needReboot = false;
+                            if (account == mainAcct)
+                            {
+                                //主账号登录失败或者是其它账户不是因为密码错误都重启策略
+                                needReboot = true;
+                            }
+                            callback.OnTradeResult(tradeSessionId, opLog, errInfo, needReboot);
+                        }
+                    }
+                    finally
+                    {
+                        Marshal.FreeCoTaskMem(ptrErrorInfo);
+                    }
+                });
+            }
+            Task.WaitAll(tasks);
+        }
+
         /// <summary>
         /// 获取单个账户里stock的持仓信息，一只股票只有一个持仓对象
         /// </summary>
         /// <param name="positions">账户所有持仓</param>
-        /// <param name="stock">股票代码</param>
+        /// <param name="code">股票代码</param>
         /// <returns>stock的持仓对象</returns>
-        public static Position GetPositionOf(List<Position> positions, string stock)
+        public static Position GetPositionOf(List<Position> positions, string code)
         {
-            foreach (Position position in positions)
+            if (null == positions)
             {
-                if (position.Code == stock)
-                {
-                    return position;
-                }
+                return null;
             }
-            return null;
+            return positions.Find(t => t.Code == code);
         }
 
         /// <summary>
@@ -190,17 +210,17 @@ namespace NineSunScripture.trade.structApi.helper
         /// <returns>stock的持仓对象</returns>
         public static Position GetPositionOf(List<Account> accounts, string stock)
         {
-            Position position = null;
+            if (null == accounts)
+            {
+                return null;
+            }
+            Position position = new Position();
             foreach (Account account in accounts)
             {
                 Position temp = GetPositionOf(account.Positions, stock);
                 if (null == temp)
                 {
                     continue;
-                }
-                if (null == position)
-                {
-                    position = new Position();
                 }
                 position.AvailableBalance += temp.AvailableBalance;
                 if (0 == position.AvgCost)
@@ -320,14 +340,22 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 return funds;
             }
+            List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
-                Funds temp = TradeAPI.QueryFunds(account.TradeSessionId);
-                funds.AvailableAmt += temp.AvailableAmt;
-                funds.FrozenAmt += temp.FrozenAmt;
-                funds.FundBalance += temp.FundBalance;
-                funds.TotalAsset += temp.TotalAsset;
+                tasks.Add(Task.Run(() =>
+                {
+                    Funds temp = TradeAPI.QueryFunds(account.TradeSessionId);
+                    lock (funds)
+                    {
+                        funds.AvailableAmt += temp.AvailableAmt;
+                        funds.FrozenAmt += temp.FrozenAmt;
+                        funds.FundBalance += temp.FundBalance;
+                        funds.TotalAsset += temp.TotalAsset;
+                    }
+                }));
             }
+            Task.WaitAll(tasks.ToArray());
 
             return funds;
         }
@@ -356,10 +384,19 @@ namespace NineSunScripture.trade.structApi.helper
         {
             List<Order> sourceOrders = new List<Order>();
             List<Order> resultOrders = new List<Order>();
+            List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
-                sourceOrders.AddRange(TradeAPI.QueryOrdersCanCancel(account.TradeSessionId));
+                tasks.Add(Task.Run(() =>
+                {
+                    List<Order> temp = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
+                    lock (sourceOrders)
+                    {
+                        sourceOrders.AddRange(temp);
+                    }
+                }));
             }
+            Task.WaitAll(tasks.ToArray());
             foreach (Order order in sourceOrders)
             {
                 Order item = resultOrders.Find(temp => temp.Code == order.Code
@@ -497,5 +534,35 @@ namespace NineSunScripture.trade.structApi.helper
                 }
             }//END FOR
         }//END METHOD
+
+        /// <summary>
+        ///account账户今天是否卖出过quotes股票
+        /// </summary>
+        /// <param name="account">账户对象</param>
+        /// <param name="quotes">股票对象</param>
+        /// <returns></returns>
+        public static bool IsSoldToday(Account account, Quotes quotes)
+        {
+            if (null == account || null == quotes)
+            {
+                return false;
+            }
+            List<Order> todayTransactions
+                   = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
+            bool isSoldToday = false;
+            if (todayTransactions.Count > 0)
+            {
+                foreach (Order order in todayTransactions)
+                {
+                    if (order.Code == quotes.Code
+                        && order.Operation.Contains(Order.OperationSell))
+                    {
+                        isSoldToday = true;
+                        break;
+                    }
+                }
+            }
+            return isSoldToday;
+        }
     }
 }

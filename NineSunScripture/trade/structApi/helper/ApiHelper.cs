@@ -30,24 +30,6 @@ namespace NineSunScripture.trade.structApi.helper
         }
 
         /// <summary>
-        /// 通过股票代码得到对应的股东账号
-        /// </summary>
-        /// <param name="acct">账号对象</param>
-        /// <param name="code">股票代码</param>
-        /// <returns>股东账号</returns>
-        public static string GetShareholderByStockCode(Account acct, string code)
-        {
-            if (code.StartsWith("6"))
-            {
-                return acct.ShShareholderAcct;
-            }
-            else
-            {
-                return acct.SzShareholderAcct;
-            }
-        }
-
-        /// <summary>
         /// 设置订单的股东代码
         /// </summary>
         /// <param name="account">账号对象</param>
@@ -79,11 +61,12 @@ namespace NineSunScripture.trade.structApi.helper
             string strErr = ParseErrInfo(errInfo);
             if (!string.IsNullOrEmpty(strErr) && strErr.Contains("超时"))
             {
-                if (callApiTimeOutCnt++ > 3)
+                if (callApiTimeOutCnt > 3)
                 {
-                    Logger.Log("接口超时>" + ParseErrInfo(errInfo));
-                    throw new Exception(strErr);
+                    Logger.Log("接口超时>" + strErr);
+                    throw new ApiTimeoutException(strErr);
                 }
+                callApiTimeOutCnt += 1;
             }
             else
             {

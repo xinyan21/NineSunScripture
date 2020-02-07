@@ -26,12 +26,22 @@ namespace NineSunScripture
         private const float ThirdClassStopWin = 40;
 
         /// <summary>
+        /// 1/2板的止盈比例
+        /// </summary>
+        private const float Less3BoardsStopWinRatio = 1.07f;
+
+        /// <summary>
         /// 三档止盈仓位为30%、50%、50%
         /// </summary>
         private const float FirstStopWinPosition = 0.3f;
 
         private const float SecondStopWinPosition = 0.5f;
         private const float ThirdStopWinPosition = 0.5f;
+
+        /// <summary>
+        /// 1/2板的止盈仓位
+        /// </summary>
+        private const float Less3BoardsStopWinPosition = 0.5f;
 
         /// <summary>
         /// 止损跌幅
@@ -131,6 +141,7 @@ namespace NineSunScripture
             if (open != highLimit)
             {
                 StopWin(quotes, accounts, callback);
+                StopWinForLessThan3Boards(accounts, quotes, callback);
                 if (open < quotes.PreClose * StopLossRatio)
                 {
                     if (curPrice > open * 1.04)
@@ -251,33 +262,13 @@ namespace NineSunScripture
                         stopWinPosition = FirstStopWinPosition;
                         Logger.Log("20%止盈3成卖" + quotes.Name);
                     }
-                    if (stopWinPosition > 0 && !IsSoldToday(account, quotes))
+                    if (stopWinPosition > 0 && !AccountHelper.IsSoldToday(account, quotes))
                     {
                         SellWithAcct(quotes, account, callback, stopWinPosition);
                     }
                 });
             }
             Task.WaitAll(tasks);
-        }
-
-        private bool IsSoldToday(Account account, Quotes quotes)
-        {
-            List<Order> todayTransactions
-                   = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
-            bool isSoldToday = false;
-            if (todayTransactions.Count > 0)
-            {
-                foreach (Order order in todayTransactions)
-                {
-                    if (order.Code == quotes.Code
-                        && order.Operation.Contains(Order.OperationSell))
-                    {
-                        isSoldToday = true;
-                        break;
-                    }
-                }
-            }
-            return isSoldToday;
         }
 
         /// <summary>
@@ -439,6 +430,36 @@ namespace NineSunScripture
                 Logger.Log("封单减少到1500万以下卖1/2" + quotes.Name);
                 SellByRatio(quotes, accounts, callback, 0.5f);
             }
+        }
+
+        /// <summary>
+        /// 3板一下卖点
+        /// </summary>
+        /// <param name="accounts"></param>
+        /// <param name="quotes"></param>
+        /// <param name="callback"></param>
+        private void StopWinForLessThan3Boards(List<Account> accounts, Quotes quotes, ITrade callback)
+        {
+            if (null == accounts || null == quotes ||
+                quotes.ContBoards >= 3 || quotes.Sell1 / quotes.PreClose < Less3BoardsStopWinRatio)
+            {
+                return;
+            }
+            Task[] tasks = new Task[accounts.Count];
+            for (int i = 0; i < accounts.Count; i++)
+            {
+                Account account = accounts[i];
+                if (AccountHelper.IsSoldToday(account, quotes))
+                {
+                    continue;
+                }
+                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
+                tasks[i] = Task.Run(() =>
+                {
+                    SellWithAcct(quotes, account, callback, Less3BoardsStopWinPosition);
+                });
+            }
+            Task.WaitAll(tasks);
         }
     }
 }
