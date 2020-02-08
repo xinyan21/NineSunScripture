@@ -57,8 +57,14 @@ namespace NineSunScripture.model
         /// </summary>
         public void FreeCoTaskMem()
         {
-            Marshal.FreeCoTaskMem(PtrResult);
-            Marshal.FreeCoTaskMem(PtrErrorInfo);
+            if (null != PtrResult)
+            {
+                Marshal.FreeCoTaskMem(PtrResult);
+            }
+            if (null != PtrErrorInfo)
+            {
+                Marshal.FreeCoTaskMem(PtrErrorInfo);
+            }
         }
     }
 }

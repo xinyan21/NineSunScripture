@@ -5,6 +5,7 @@ using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 using static NineSunScripture.trade.structApi.ApiDataStruct;
 
 namespace NineSunScripture.trade.structApi.api
@@ -76,6 +77,8 @@ namespace NineSunScripture.trade.structApi.api
         [DllImport(@"StructApi.dll", EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
         public extern static void Logoff(int sessionId);
 
+        private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim();
+
         /// <summary>
         /// 查询资金
         /// </summary>
@@ -119,22 +122,24 @@ namespace NineSunScripture.trade.structApi.api
         {
             List<Position> positions = new List<Position>();
             Position position;
-            BaseModel model = new BaseModel();
-            model.AllocCoTaskMem();
+            rwls.EnterWriteLock();
+            IntPtr result = Marshal.AllocCoTaskMem(1024 * 1024);
+            IntPtr errorInfo = Marshal.AllocCoTaskMem(256);
+            rwls.ExitWriteLock();
             try
             {
-                int code = QueryData(sessionId, 1, model.PtrResult, model.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(model.PtrErrorInfo);
+                int code = QueryData(sessionId, 1, result, errorInfo);
+                ApiHelper.HandleTimeOut(errorInfo);
                 if (code > 0)
                 {
-                    int positionLength = Marshal.ReadInt32(model.PtrResult + 4);
-                    int structLength = Marshal.ReadInt32(model.PtrResult + 12);
-                    IntPtr dataPtr = model.PtrResult + 32;
+                    int listLength = Marshal.ReadInt32(result + 4);
+                    int structLength = Marshal.ReadInt32(result + 12);
+                    IntPtr dataPtr = result + 32;
 
-                    for (int i = 0; i < positionLength; i++)
+                    for (int i = 0; i < listLength; i++)
                     {
                         持仓股票结构体 temp
-                            = (持仓股票结构体)Marshal.PtrToStructure(dataPtr, typeof(持仓股票结构体));
+                        = (持仓股票结构体)Marshal.PtrToStructure(dataPtr, typeof(持仓股票结构体));
                         position = new Position();
                         position.Code = temp.证券代码;
                         position.Name = temp.证券名称;
@@ -147,14 +152,22 @@ namespace NineSunScripture.trade.structApi.api
                         position.Price = (float)temp.市价;
                         position.MarketValue = (float)temp.市值;
 
+
                         positions.Add(position);
                         dataPtr += structLength;
                     }
                 }
+                else
+                {
+                    Logger.Log("QueryPositions：" + ApiHelper.ParseErrInfo(errorInfo));
+                }
             }
             finally
             {
-                model.FreeCoTaskMem();
+                rwls.EnterWriteLock();
+                Marshal.FreeCoTaskMem(result);
+                Marshal.FreeCoTaskMem(errorInfo);
+                rwls.ExitWriteLock();
             }
             return positions;
         }

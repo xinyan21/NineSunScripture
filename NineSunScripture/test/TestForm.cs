@@ -151,12 +151,11 @@ namespace NineSunScripture.util.test
 
         private void button5_Click(object sender, EventArgs e)
         {
-            C_sharp演示.TestApi.Test();
-            /*Funds funds = TradeAPI.QueryFunds(accounts[0].TradeSessionId);
-            if (null != funds)
+            List<Position> positions = TradeAPI.QueryPositions(accounts[0].TradeSessionId);
+            if (null != positions && positions.Count > 0)
             {
-                lblTenthGearPrice.Text = "总资产：" + funds.TotalAsset;
-            }*/
+                lblTenthGearPrice.Text = "总资产：" + positions[0];
+            }
         }
     }
 }

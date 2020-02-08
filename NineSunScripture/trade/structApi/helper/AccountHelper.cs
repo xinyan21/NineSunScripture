@@ -68,6 +68,8 @@ namespace NineSunScripture.trade.structApi.helper
         {
             List<Account> localAccounts = JsonDataHelper.GetAccounts();
             Account mainAcct = MainStrategy.IsTest ? GetTestMainAccount() : GetPrdMainAccount();
+            //TODO TESET CODE
+            //mainAcct = GetPrdMainAccount();
             if (null == localAccounts)
             {
                 localAccounts = new List<Account>();
@@ -253,13 +255,26 @@ namespace NineSunScripture.trade.structApi.helper
         /// <returns></returns>
         public static List<Position> QueryTotalPositions(List<Account> accounts)
         {
+            if (null == accounts)
+            {
+                return null;
+            }
             List<Position> positions = new List<Position>();
             List<Position> allPositions = new List<Position>(); //所有账户持仓原始数据
+            List<Task> tasks = new List<Task>();
+            //所有遍历账户调接口的操作都要改成这种模式，所有账户同时调
             foreach (Account account in accounts)
             {
-                account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
-                allPositions.AddRange(account.Positions);
+                tasks.Add(Task.Run(() =>
+                {
+                    account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
+                    lock (allPositions)
+                    {
+                        allPositions.AddRange(account.Positions);
+                    }
+                }));
             }
+            Task.WaitAll(tasks.ToArray());
             List<Position> temp = allPositions.Distinct().ToList();
             foreach (Position item in temp)
             {
@@ -338,7 +353,7 @@ namespace NineSunScripture.trade.structApi.helper
             Funds funds = new Funds();
             if (null == accounts)
             {
-                return funds;
+                return null;
             }
             List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
@@ -382,6 +397,10 @@ namespace NineSunScripture.trade.structApi.helper
         /// <returns></returns>
         public static List<Order> QueryTotalCancelOrders(List<Account> accounts)
         {
+            if (null == accounts)
+            {
+                return null;
+            }
             List<Order> sourceOrders = new List<Order>();
             List<Order> resultOrders = new List<Order>();
             List<Task> tasks = new List<Task>();
@@ -426,24 +445,29 @@ namespace NineSunScripture.trade.structApi.helper
         public static void CancelTotalOrders(List<Account> accounts, Order order, ITrade callback)
         {
             string info = "撤单【" + order.Name + "】";
+            List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
-                List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
-                foreach (Order item in orders)
+                tasks.Add(Task.Run(() =>
                 {
-                    if (!(item.Name.Equals(order.Name) && item.Operation == order.Operation))
+                    List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
+                    foreach (Order item in orders)
                     {
-                        continue;
+                        if (!(item.Name.Equals(order.Name) && item.Operation == order.Operation))
+                        {
+                            continue;
+                        }
+                        item.TradeSessionId = account.TradeSessionId;
+                        int rspCode = TradeAPI.CancelOrder(item);
+                        if (null != callback)
+                        {
+                            info = "资金账号【" + account.FundAcct + "】" + info;
+                            callback.OnTradeResult(rspCode, info, item.StrErrorInfo, false);
+                        }
                     }
-                    item.TradeSessionId = account.TradeSessionId;
-                    int rspCode = TradeAPI.CancelOrder(item);
-                    if (null != callback)
-                    {
-                        info = "资金账号【" + account.FundAcct + "】" + info;
-                        callback.OnTradeResult(rspCode, info, item.StrErrorInfo, false);
-                    }
-                }
+                }));
             }
+            Task.WaitAll(tasks.ToArray());
         }
 
         /// <summary>
@@ -454,10 +478,15 @@ namespace NineSunScripture.trade.structApi.helper
         public static void CancelOrdersCanCancel(
             List<Account> accounts, Quotes quotes, ITrade callback)
         {
+            List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
-                CancelOrdersCanCancel(account, quotes, callback);
+                tasks.Add(Task.Run(() =>
+                {
+                    CancelOrdersCanCancel(account, quotes, callback);
+                }));
             }
+            Task.WaitAll(tasks.ToArray());
         }
 
         /// <summary>
@@ -507,32 +536,39 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 return;
             }
-            Order order = new Order();
-            order.Code = "131810";
-            Quotes quotes = TradeAPI.QueryQuotes(mainAcct.TradeSessionId, order.Code);
-            order.Price = quotes.Buy3;
+            string code = "131810";
+            Quotes quotes = TradeAPI.QueryQuotes(mainAcct.TradeSessionId, code);
+            List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
-                //要查最新资金
-                account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
-                order.TradeSessionId = account.TradeSessionId;
-                ApiHelper.SetShareholderAcct(account, quotes, order);
-                double availableCash = account.Funds.AvailableAmt;
-                order.Quantity = (int)(availableCash / 1000) * 10;
-                if (order.Quantity == 0)
+                tasks.Add(Task.Run(() =>
                 {
-                    Logger.Log("资金账号【" + account.FundAcct + "】可用金额不够逆回购");
-                    continue;
-                }
-                int rspCode = TradeAPI.Sell(order);
-                string opLog
-                    = "资金账号【" + account.FundAcct + "】" + "逆回购" + order.Quantity * 100 + "元";
-                Logger.Log(opLog);
-                if (null != callback)
-                {
-                    callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
-                }
-            }//END FOR
+                    //为了减少并发导致的锁和阻塞问题，每个账户都new一个对象
+                    Order order = new Order();
+                    order.Code = code;
+                    order.Price = quotes.Buy3;
+                    //要查最新资金
+                    account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
+                    order.TradeSessionId = account.TradeSessionId;
+                    ApiHelper.SetShareholderAcct(account, quotes, order);
+                    double availableCash = account.Funds.AvailableAmt;
+                    order.Quantity = (int)(availableCash / 1000) * 10;
+                    if (order.Quantity == 0)
+                    {
+                        Logger.Log("资金账号【" + account.FundAcct + "】可用金额不够逆回购");
+                        return;
+                    }
+                    int rspCode = TradeAPI.Sell(order);
+                    string opLog
+                        = "资金账号【" + account.FundAcct + "】" + "逆回购" + order.Quantity * 100 + "元";
+                    Logger.Log(opLog);
+                    if (null != callback)
+                    {
+                        callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
+                    }
+                }));
+            }
+            Task.WaitAll(tasks.ToArray());
         }//END METHOD
 
         /// <summary>

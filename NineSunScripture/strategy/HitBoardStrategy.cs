@@ -267,14 +267,13 @@ namespace NineSunScripture.strategy
                     //这里取消撤单后，后面要重新查询资金，否则白撤
                     AccountHelper.CancelOrdersCanCancel(accounts, quotes, callback);
                 }
-                Task[] tasks = new Task[accounts.Count];
-                for (int i = 0; i < accounts.Count; i++)
+                List<Task> tasks = new List<Task>();
+                foreach (Account account in accounts)
                 {
-                    Account account = accounts[i];
                     //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                    tasks[i] = Task.Run(() => BuyWithAcct(account, quotes, positionRatioCtrl, callback));
+                    tasks.Add(Task.Run(() => BuyWithAcct(account, quotes, positionRatioCtrl, callback)));
                 }
-                Task.WaitAll(tasks);
+                Task.WaitAll(tasks.ToArray());
             }
         }
 

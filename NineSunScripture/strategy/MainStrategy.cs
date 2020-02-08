@@ -30,7 +30,7 @@ namespace NineSunScripture.strategy
         private const short CycleTimeOfTrade = 1000;
 
         //更新资金、持仓信息间隔，单位秒
-        private const short UpdateFundCycle = 5;
+        private const short UpdateFundCycle = 15;
 
         //回调委托声明成静态变量防止被回收
         private static PriceAPI.PushCallback pushCallback;
@@ -100,7 +100,7 @@ namespace NineSunScripture.strategy
                     return;
                 }
                 mainAcct = accounts[0];
-                //UpdateTotalAccountInfo(false);
+                UpdateTotalAccountInfo(false);
                 if (isHoliday && !IsTest)
                 {
                     callback.OnTradeResult(0, "策略启动", "现在是假期", false);
@@ -461,8 +461,8 @@ namespace NineSunScripture.strategy
                 {
                     Account account = new Account();
                     account.Funds = AccountHelper.QueryTotalFunds(accounts);
-                  //  account.Positions = AccountHelper.QueryTotalPositions(accounts);
-                   account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
+                    account.Positions = AccountHelper.QueryTotalPositions(accounts);
+                    account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
                     fundListener.OnAcctInfoListen(account);
                 }
                 catch (ApiTimeoutException e)
