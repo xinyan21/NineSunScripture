@@ -124,9 +124,9 @@ namespace C_sharp演示
                         股东账户结构体 temp
                             = (股东账户结构体)Marshal.PtrToStructure(dataPtr, typeof(股东账户结构体));
                         account = new ShareHolderAcct();
-                        account.code = temp.股东代码;
-                        account.category = temp.帐号类别;
-                        account.name = temp.股东姓名;
+                        account.Code = temp.股东代码;
+                        account.Category = temp.帐号类别;
+                        account.Name = temp.股东姓名;
                         accounts.Add(account);
 
                         dataPtr += structLength;

@@ -1,5 +1,5 @@
 ﻿using NineSunScripture.model;
-using NineSunScripture.strategy;
+using NineSunScripture.trade;
 using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NineSunScripture
+namespace NineSunScripture.strategy
 {
     /// <summary>
     /// 连板股卖策略
@@ -78,7 +78,7 @@ namespace NineSunScripture
         /// </summary>
         private const int SealMoneyBeginToDecrease = 3000;
 
-        protected static private ReaderWriterLockSlim RWLockSlim = new ReaderWriterLockSlim();
+        private static ReaderWriterLockSlim rwLockSlim = new ReaderWriterLockSlim();
 
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
@@ -93,11 +93,11 @@ namespace NineSunScripture
             }
             float highLimit = quotes.HighLimit;
             float lowLimit = quotes.LowLimit;
-            float curPrice = quotes.LatestPrice;
+            float curPrice = quotes.Buy1;
             string code = quotes.Code;
             DateTime now = DateTime.Now;
 
-            RWLockSlim.EnterWriteLock();
+            rwLockSlim.EnterWriteLock();
             if (!historyTicks.ContainsKey(code))
             {
                 historyTicks.Add(code, new Queue<Quotes>(DefaultHistoryTickCnt));
@@ -108,7 +108,7 @@ namespace NineSunScripture
             }
             //由于逻辑关系会return，数据必须在进来时就放进去，上一个取倒数第二就行了
             historyTicks[code].Enqueue(quotes);
-            RWLockSlim.ExitWriteLock();
+            rwLockSlim.ExitWriteLock();
 
             Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
             if (curPrice == lowLimit || null == position ||
@@ -117,11 +117,18 @@ namespace NineSunScripture
                 return;
             }
             float avgCost = position.AvgCost;
+            if (quotes.AvgCost > 0)
+            {
+                avgCost = quotes.AvgCost;
+            }
             //龙头单独卖
-            if (quotes.IsDragonLeader && now.Minute >= 55 && curPrice < highLimit)
+            if (quotes.IsDragonLeader)
             {
                 Logger.Log("收盘不板卖" + quotes.Name);
-                SellByRatio(quotes, accounts, callback, 1);
+                if (now.Minute >= 55 && curPrice < highLimit)
+                {
+                    SellByRatio(quotes, accounts, callback, 1);
+                }
                 return;
             }
             //卖一和2是互斥的，return后就不能执行到后面去
@@ -131,7 +138,8 @@ namespace NineSunScripture
             }
         }
 
-        private bool StopWinOrLoss(List<Account> accounts, ITrade callback, Quotes quotes, float avgCost)
+        private bool StopWinOrLoss(
+            List<Account> accounts, ITrade callback, Quotes quotes, float avgCost)
         {
             float highLimit = quotes.HighLimit;
             float curPrice = quotes.LatestPrice;
@@ -140,7 +148,7 @@ namespace NineSunScripture
             DateTime now = DateTime.Now;
             if (open != highLimit)
             {
-                StopWin(quotes, accounts, callback);
+                StopWin(quotes, accounts, callback, avgCost);
                 StopWinForLessThan3Boards(accounts, quotes, callback);
                 if (open < quotes.PreClose * StopLossRatio)
                 {
@@ -178,9 +186,9 @@ namespace NineSunScripture
             string code = quotes.Code;
             DateTime now = DateTime.Now;
 
-            RWLockSlim.EnterReadLock();
+            rwLockSlim.EnterReadLock();
             Quotes[] ticks = historyTicks[code].ToArray();
-            RWLockSlim.ExitReadLock();
+            rwLockSlim.ExitReadLock();
             if (null != ticks && ticks.Length >= 2 &&
                 ticks[ticks.Length - 2].LatestPrice == highLimit && quotes.Buy1 < highLimit)
             {
@@ -224,51 +232,46 @@ namespace NineSunScripture
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
         /// <param name="callback">交易结果回调</param>
-        private void StopWin(Quotes quotes, List<Account> accounts, ITrade callback)
+        private void StopWin(Quotes quotes, List<Account> accounts, ITrade callback, float avgCost)
         {
             if (null == accounts || null == quotes)
             {
                 return;
             }
-            Task[] tasks = new Task[accounts.Count];
-            for (int i = 0; i < accounts.Count; i++)
+            List<Task> tasks = new List<Task>();
+            foreach (Account account in accounts)
             {
-                Account account = accounts[i];
                 //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                tasks[i] = Task.Run(() =>
+                tasks.Add(Task.Run(() =>
                 {
-                    Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
-                    if (null == position)
-                    {
-                        return;
-                    }
-                    if (position.ProfitAndLossPct < FirstClassStopWin)
+                    float profit = quotes.Buy1 / avgCost * 100;
+                    if (profit < FirstClassStopWin)
                     {
                         return;
                     }
                     float stopWinPosition = 0;  //止盈仓位
-                    if (position.ProfitAndLossPct > ThirdClassStopWin)
+                    if (profit > ThirdClassStopWin)
                     {
                         stopWinPosition = ThirdStopWinPosition;
                         Logger.Log("40%止盈1/2卖" + quotes.Name);
                     }
-                    else if (position.ProfitAndLossPct > SecondClassStopWin)
+                    else if (profit > SecondClassStopWin)
                     {
                         stopWinPosition = SecondStopWinPosition;
                         Logger.Log("30%止盈1/2卖" + quotes.Name);
                     }
-                    else if (position.ProfitAndLossPct > FirstClassStopWin)
+                    else if (profit > FirstClassStopWin)
                     {
                         stopWinPosition = FirstStopWinPosition;
                         Logger.Log("20%止盈3成卖" + quotes.Name);
                     }
-                    if (stopWinPosition > 0 && !AccountHelper.IsSoldToday(account, quotes))
+                    if (stopWinPosition > 0 && !AccountHelper.IsSoldToday(account, quotes, callback))
                     {
                         SellWithAcct(quotes, account, callback, stopWinPosition);
                     }
-                });
+                }));
             }
-            Task.WaitAll(tasks);
+            Task.WaitAll(tasks.ToArray());
         }
 
         /// <summary>
@@ -291,44 +294,55 @@ namespace NineSunScripture
                 //这里要把输入的价格传进来，否则就查询最新价格直接卖出了
                 Buy2 = stock.Buy2
             };
-            //这里必须查询最新持仓，连续触发卖点信号会使得卖出失败导致策略重启
-            account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
-            Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
-            if (null == position || position.AvailableBalance == 0)
+            try
             {
-                return;
+                //这里必须查询最新持仓，连续触发卖点信号会使得卖出失败导致策略重启
+                account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
+                Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
+                if (null == position || position.AvailableBalance == 0)
+                {
+                    return;
+                }
+                if (quotes.Buy2 == 0)
+                {
+                    string name = quotes.Name;
+                    quotes = PriceAPI.QueryTenthGearPrice(account.TradeSessionId, quotes.Code);
+                    //这个行情接口不返回name
+                    quotes.Name = name;
+                }
+                Order order = new Order();
+                order.TradeSessionId = account.TradeSessionId;
+                order.Code = quotes.Code;
+                order.Price = quotes.Buy2;
+                order.Quantity = position.AvailableBalance;
+                ApiHelper.SetShareholderAcct(account, quotes, order);
+                if (sellRatio > 0)
+                {
+                    order.Quantity = Utils.FixQuantity((int)(order.Quantity * sellRatio));
+                }
+                if (order.Quantity == 0)
+                {
+                    return;
+                }
+                int rspCode = TradeAPI.Sell(order);
+                string opLog = "资金账号【" + account.FundAcct + "】" + "策略卖出【" + quotes.Name + "】"
+                    + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
+                Logger.Log(opLog + "》" + order.StrErrorInfo);
+                //TODO 这里会导致运行日志添加崩溃，后面再解决
+              /*  if (null != callback)
+                {
+                    callback.OnTradeResult(
+                        rspCode, opLog, ApiHelper.ParseErrInfo(order.PtrErrorInfo), false);
+                }*/
             }
-            if (quotes.Buy2 == 0)
+            catch (ApiTimeoutException e)
             {
-                string name = quotes.Name;
-                quotes = TradeAPI.QueryQuotes(account.TradeSessionId, quotes.Code);
-                //这个行情接口不返回name
-                quotes.Name = name;
+                ApiHelper.HandleCriticalException(e, e.Message, callback);
             }
-            Order order = new Order();
-            order.TradeSessionId = account.TradeSessionId;
-            order.Code = quotes.Code;
-            order.Price = quotes.Buy2;
-            order.Quantity = position.AvailableBalance;
-            ApiHelper.SetShareholderAcct(account, quotes, order);
-            if (sellRatio > 0)
+            catch (Exception e)
             {
-                order.Quantity = Utils.FixQuantity((int)(order.Quantity * sellRatio));
+                Logger.Exception(e);
             }
-            if (order.Quantity == 0)
-            {
-                return;
-            }
-            int rspCode = TradeAPI.Sell(order);
-            string opLog = "资金账号【" + account.FundAcct + "】" + "策略卖出【" + quotes.Name + "】"
-                + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
-            Logger.Log(opLog + "》" + order.StrErrorInfo);
-            //TODO 这里会导致运行日志添加崩溃，后面再解决
-            /* if (null != callback)
-              {
-                  string errInfo = ApiHelper.ParseErrInfo(order.ErrorInfo);
-                  callback.OnTradeResult(rspCode, opLog, errInfo, false);
-              }*/
         }
 
         /// <summary>
@@ -344,17 +358,16 @@ namespace NineSunScripture
             {
                 return;
             }
-            Task[] tasks = new Task[accounts.Count];
-            for (int i = 0; i < accounts.Count; i++)
+            List<Task> tasks = new List<Task>();
+            foreach (Account account in accounts)
             {
-                Account account = accounts[i];
                 //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                tasks[i] = Task.Run(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     SellWithAcct(quotes, account, callback, sellRatio);
-                });
+                }));
             }
-            Task.WaitAll(tasks);
+            Task.WaitAll(tasks.ToArray());
         }
 
         /// <summary>
@@ -369,37 +382,49 @@ namespace NineSunScripture
                 return;
             }
             List<Position> positions;
-            Task[] tasks = new Task[accounts.Count];
-            for (int i = 0; i < accounts.Count; i++)
+            List<Task> tasks = new List<Task>();
+            foreach (Account account in accounts)
             {
-                Account account = accounts[i];
                 //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                tasks[i] = Task.Run(() =>
+                tasks.Add(Task.Run(() =>
                 {
-                    positions = TradeAPI.QueryPositions(account.TradeSessionId);
-                    if (null == positions || positions.Count == 0)
+                    try
                     {
-                        return;
-                    }
-                    foreach (Position position in positions)
-                    {
-                        if (0 == position.AvailableBalance)
+                        positions = TradeAPI.QueryPositions(account.TradeSessionId);
+                        if (null == positions || positions.Count == 0)
                         {
-                            continue;
+                            return;
                         }
-                        Quotes quotes = TradeAPI.QueryQuotes(account.TradeSessionId, position.Code);
-                        quotes.Buy2 = quotes.LatestPrice * 0.95f;
-                        if (quotes.Buy2 < quotes.LowLimit)
+                        foreach (Position position in positions)
                         {
-                            quotes.Buy2 = quotes.LowLimit;
-                        }
-                        quotes.Buy2 = Utils.FormatTo2Digits(quotes.Buy2);
+                            if (0 == position.AvailableBalance)
+                            {
+                                continue;
+                            }
+                            Quotes quotes
+                            = PriceAPI.QueryTenthGearPrice(account.TradeSessionId, position.Code);
+                            quotes.Buy2 = quotes.LatestPrice * 0.95f;
+                            quotes.Name = position.Name;
+                            if (quotes.Buy2 < quotes.LowLimit)
+                            {
+                                quotes.Buy2 = quotes.LowLimit;
+                            }
+                            quotes.Buy2 = Utils.FormatTo2Digits(quotes.Buy2);
 
-                        SellWithAcct(quotes, account, callback, 1);
+                            SellWithAcct(quotes, account, callback, 1);
+                        }
                     }
-                });
+                    catch (ApiTimeoutException e)
+                    {
+                        ApiHelper.HandleCriticalException(e, e.Message, callback);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Exception(e);
+                    }
+                }));
             }
-            Task.WaitAll(tasks);
+            Task.WaitAll(tasks.ToArray());
         }
 
         /// <summary>
@@ -410,9 +435,9 @@ namespace NineSunScripture
         /// <param name="callback">交易接口回调</param>
         private void SellIfSealDecrease(List<Account> accounts, Quotes quotes, ITrade callback)
         {
-            RWLockSlim.EnterReadLock();
+            rwLockSlim.EnterReadLock();
             Quotes[] ticks = historyTicks[quotes.Code].ToArray();
-            RWLockSlim.ExitReadLock();
+            rwLockSlim.ExitReadLock();
             if (ticks.Length < 2)
             {
                 return;
@@ -438,28 +463,27 @@ namespace NineSunScripture
         /// <param name="accounts"></param>
         /// <param name="quotes"></param>
         /// <param name="callback"></param>
-        private void StopWinForLessThan3Boards(List<Account> accounts, Quotes quotes, ITrade callback)
+        private void StopWinForLessThan3Boards(
+            List<Account> accounts, Quotes quotes, ITrade callback)
         {
             if (null == accounts || null == quotes ||
                 quotes.ContBoards >= 3 || quotes.Sell1 / quotes.PreClose < Less3BoardsStopWinRatio)
             {
                 return;
             }
-            Task[] tasks = new Task[accounts.Count];
-            for (int i = 0; i < accounts.Count; i++)
+            List<Task> tasks = new List<Task>();
+            foreach (Account account in accounts)
             {
-                Account account = accounts[i];
-                if (AccountHelper.IsSoldToday(account, quotes))
+                tasks.Add(Task.Run(() =>
                 {
-                    continue;
-                }
-                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                tasks[i] = Task.Run(() =>
-                {
+                    if (AccountHelper.IsSoldToday(account, quotes, callback))
+                    {
+                        return;
+                    }
                     SellWithAcct(quotes, account, callback, Less3BoardsStopWinPosition);
-                });
+                }));
             }
-            Task.WaitAll(tasks);
+            Task.WaitAll(tasks.ToArray());
         }
     }
 }

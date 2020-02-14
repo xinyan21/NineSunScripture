@@ -30,6 +30,7 @@ namespace NineSunScripture
         private Account account;//用来临时保存总账户信息
         private Image imgTaiJi;
         private bool isStrategyStarted = false;
+        private bool isRebooting = false;
         private int rotateDegree = 0;
 
         private delegate void SetTextCallback(string text);
@@ -354,6 +355,7 @@ namespace NineSunScripture
         /// </summary>
         private void RebootStrategy()
         {
+            isRebooting = true;
             if (isStrategyStarted)
             {
                 string runtimeInfo = "重启策略中...";
@@ -368,6 +370,7 @@ namespace NineSunScripture
             {
                 TsmiSwitch_Click(null, null);
             }
+            isRebooting = false;
         }
 
         /// <summary>
@@ -377,10 +380,9 @@ namespace NineSunScripture
         /// <param name="msg">正确消息</param>
         /// <param name="errInfo">错误消息</param>
         /// <param name="needReboot">是否需要重启策略</param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void OnTradeResult(int rspCode, string msg, string errInfo, bool needReboot)
         {
-            Logger.Log(rspCode + ">" + msg);
+            Logger.Log("OnTradeResult：" + rspCode + ">" + msg);
             if (rspCode > 0)
             {
                 //mainStrategy.UpdateTotalAccountInfo(false);
@@ -395,14 +397,16 @@ namespace NineSunScripture
                 }
                 string runtimeInfo = msg + ">失败，错误信息：" + errInfo;
                 AddRuntimeInfo(runtimeInfo);
-                if (needReboot)
+                lock (this)
                 {
-                    InvokeRebootStrategy();
+                    if (needReboot && !isRebooting)
+                    {
+                        InvokeRebootStrategy();
+                    }
                 }
             }
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void OnAcctInfoListen(Account account)
         {
             if (null == account)

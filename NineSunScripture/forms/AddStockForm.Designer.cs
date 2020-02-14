@@ -313,7 +313,6 @@
             this.panelBandParam.Name = "panelBandParam";
             this.panelBandParam.Size = new System.Drawing.Size(627, 67);
             this.panelBandParam.TabIndex = 16;
-            this.panelBandParam.Visible = false;
             // 
             // tbStopLossPrice
             // 
@@ -346,7 +345,6 @@
             this.panelContBoards.Name = "panelContBoards";
             this.panelContBoards.Size = new System.Drawing.Size(627, 67);
             this.panelContBoards.TabIndex = 19;
-            this.panelContBoards.Visible = false;
             // 
             // tbAvgCost
             // 

@@ -74,6 +74,25 @@ namespace NineSunScripture.trade.structApi.helper
             }
         }
 
+        /// <summary>
+        /// 处理严重异常
+        /// </summary>
+        /// <param name="e">异常对象</param>
+        /// <param name="msg">异常信息</param>
+        /// <param name="callback">运行日志回调</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static void HandleCriticalException(Exception e, string errorInfo, ITrade callback)
+        {
+            if (null != e)
+            {
+                Logger.Exception(e);
+            }
+            if (null != callback)
+            {
+                callback.OnTradeResult(0, "", errorInfo, true);
+            }
+        }
+
         public static Quotes ParseStructToQuotes(IntPtr data)
         {
             if (null == data)

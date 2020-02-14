@@ -139,6 +139,7 @@ namespace NineSunScripture.util
             {
                 return false;
             }
+            //只有深圳的才有高速逐笔委托
             if (quotes.Code.StartsWith("6"))
             {
                 return false;

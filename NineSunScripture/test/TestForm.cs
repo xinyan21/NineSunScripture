@@ -95,29 +95,8 @@ namespace NineSunScripture.util.test
             Task.Run(() =>
             {
                 Thread.Sleep(3000);
-                mainForm.OnTradeResult(0, "Test reboot1", "Test reboot", true);
+                mainForm.OnTradeResult(0, "Test reboot5", "Test reboot", true);
             });
-            Task.Run(() =>
-            {
-                Thread.Sleep(3000);
-                mainForm.OnTradeResult(0, "Test reboot2", "Test reboot", false);
-            });
-            Task.Run(() =>
-            {
-                Thread.Sleep(3000);
-                mainForm.OnTradeResult(0, "Test reboot3", "Test reboot", false);
-            });
-            Task.Run(() =>
-            {
-                Thread.Sleep(3000);
-                mainForm.OnTradeResult(0, "Test reboot4", "Test reboot", false);
-            });
-            Task.Run(() =>
-            {
-                Thread.Sleep(3000);
-                mainForm.OnTradeResult(0, "Test reboot5", "Test reboot", false);
-            });
-            Thread.Sleep(2000);
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -137,13 +116,13 @@ namespace NineSunScripture.util.test
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.Serialize(file, accounts);
                 }
-                accounts = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(filePath));
+               /* accounts = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(filePath));
                 accounts.RemoveAt(0);
                 using (StreamWriter file = File.CreateText(filePath))
                 {
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.Serialize(file, accounts);
-                }
+                }*/
                 MessageBox.Show(accounts.ToString());
             });
 

@@ -29,7 +29,7 @@ namespace NineSunScripture.trade.structApi.api
         //comm_password,//通讯密码	可空
         //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串
-        [DllImport(@"StructApi.dll", EntryPoint = "Logon", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath, EntryPoint = "Logon", CallingConvention = CallingConvention.Winapi)]
         public extern static int Logon(int Qsid, string Host, short Port, string Version, string YybId,
             short AccountType, string Account, string Password, string comm_password,
             bool dommac, IntPtr ErrInfo);
@@ -39,7 +39,7 @@ namespace NineSunScripture.trade.structApi.api
         //category,//查询信息的种类 0资金	1股份 2最新委托	3最新成交 4可撤单 5股东账户
         //result, //内保存了返回的查询数据, 形式为表格数据，行数据之间通过\n 字符分割，列数据之间通过\t 分隔。一般要分配 1024 * 1024 字节的空间。出错时为空字符串。
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串。
-        [DllImport(@"StructApi.dll", EntryPoint = "QueryData", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath, EntryPoint = "QueryData", CallingConvention = CallingConvention.Winapi)]
         public extern static int QueryData(int ClientID, int Category, IntPtr Result, IntPtr ErrInfo);
 
         //功能：查行情 券商提供的行情虽然只有5档 但是速度快
@@ -47,7 +47,7 @@ namespace NineSunScripture.trade.structApi.api
         //zqdm,//股票代码
         //result,//内保存了返回的查询数据
         //errInfo//执行返回后，如果出错，保存了错误信息说明
-        [DllImport(@"StructApi.dll", EntryPoint = "QueryHQ", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath, EntryPoint = "QueryHQ", CallingConvention = CallingConvention.Winapi)]
         public extern static int QueryHQ(int ClientID, string Gddm, IntPtr Result, IntPtr ErrInfo);
 
         //功能：委托下单
@@ -59,7 +59,7 @@ namespace NineSunScripture.trade.structApi.api
         //quantity,//委托数量
         //result,//内保存了返回的查询数据, 含有委托编号数据 出错时为空字符串。
         //errInfo//如果出错，保存了错误信息说明。一般要分配 256 字节的空间
-        [DllImport(@"StructApi.dll", EntryPoint = "SendOrder", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath, EntryPoint = "SendOrder", CallingConvention = CallingConvention.Winapi)]
         public extern static int SendOrder(int sessionId, int category, string gddm, string zqdm,
             float price, int quantity, IntPtr result, IntPtr errInfo);
 
@@ -69,12 +69,12 @@ namespace NineSunScripture.trade.structApi.api
         //OrderID,//表示要撤的目标委托的编号
         //result,//内保存了返回的查询数据
         //errInfo//执行返回后，如果出错，保存了错误信息说明
-        [DllImport(@"StructApi.dll", EntryPoint = "CancelOrder", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath, EntryPoint = "CancelOrder", CallingConvention = CallingConvention.Winapi)]
         public extern static int CancelOrder(int sessionId, string gddm, string orderID, IntPtr result, IntPtr errInfo);
 
         //功能：退出登录	无返回值
         //sessionId,//客户端ID
-        [DllImport(@"StructApi.dll", EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath, EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
         public extern static void Logoff(int sessionId);
 
         private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim();
@@ -181,17 +181,19 @@ namespace NineSunScripture.trade.structApi.api
         {
             List<Order> orders = new List<Order>();
             Order order;
-            Order orderResult = new Order();
-            orderResult.AllocCoTaskMem();
+            rwls.EnterWriteLock();
+            IntPtr result = Marshal.AllocCoTaskMem(1024 * 1024);
+            IntPtr errorInfo = Marshal.AllocCoTaskMem(256);
+            rwls.ExitWriteLock();
             try
             {
-                int code = QueryData(sessionId, 3, orderResult.PtrResult, orderResult.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(orderResult.PtrErrorInfo);
+                int code = QueryData(sessionId, 3, result, errorInfo);
+                ApiHelper.HandleTimeOut(errorInfo);
                 if (code > 0)
                 {
-                    int listLength = Marshal.ReadInt32(orderResult.PtrResult + 4);
-                    int structLength = Marshal.ReadInt32(orderResult.PtrResult + 12);
-                    IntPtr dataPtr = orderResult.PtrResult + 32;
+                    int listLength = Marshal.ReadInt32(result + 4);
+                    int structLength = Marshal.ReadInt32(result + 12);
+                    IntPtr dataPtr = result + 32;
 
                     for (int i = 0; i < listLength; i++)
                     {
@@ -212,7 +214,10 @@ namespace NineSunScripture.trade.structApi.api
             }
             finally
             {
-                orderResult.FreeCoTaskMem();
+                rwls.EnterWriteLock();
+                Marshal.FreeCoTaskMem(result);
+                Marshal.FreeCoTaskMem(errorInfo);
+                rwls.ExitWriteLock();
             }
 
             return orders;
@@ -226,18 +231,20 @@ namespace NineSunScripture.trade.structApi.api
         public static List<Order> QueryOrdersCanCancel(int sessionId)
         {
             List<Order> orders = new List<Order>();
-            Order order = null;
-            Order orderResult = new Order();
-            orderResult.AllocCoTaskMem();
+            Order order;
+            rwls.EnterWriteLock();
+            IntPtr result = Marshal.AllocCoTaskMem(1024 * 1024);
+            IntPtr errorInfo = Marshal.AllocCoTaskMem(256);
+            rwls.ExitWriteLock();
             try
             {
-                int code = QueryData(sessionId, 4, orderResult.PtrResult, orderResult.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(orderResult.PtrErrorInfo);
+                int code = QueryData(sessionId, 4, result, errorInfo);
+                ApiHelper.HandleTimeOut(errorInfo);
                 if (code > 0)
                 {
-                    int listLength = Marshal.ReadInt32(orderResult.PtrResult + 4);
-                    int structLength = Marshal.ReadInt32(orderResult.PtrResult + 12);
-                    IntPtr dataPtr = orderResult.PtrResult + 32;
+                    int listLength = Marshal.ReadInt32(result + 4);
+                    int structLength = Marshal.ReadInt32(result + 12);
+                    IntPtr dataPtr = result + 32;
 
                     for (int i = 0; i < listLength; i++)
                     {
@@ -263,7 +270,10 @@ namespace NineSunScripture.trade.structApi.api
             }
             finally
             {
-                orderResult.FreeCoTaskMem();
+                rwls.EnterWriteLock();
+                Marshal.FreeCoTaskMem(result);
+                Marshal.FreeCoTaskMem(errorInfo);
+                rwls.ExitWriteLock();
             }
             return orders;
         }
@@ -293,9 +303,9 @@ namespace NineSunScripture.trade.structApi.api
                         股东账户结构体 temp
                             = (股东账户结构体)Marshal.PtrToStructure(dataPtr, typeof(股东账户结构体));
                         account = new ShareHolderAcct();
-                        account.code = temp.股东代码;
-                        account.category = temp.帐号类别;
-                        account.name = temp.股东姓名;
+                        account.Code = temp.股东代码;
+                        account.Category = temp.帐号类别;
+                        account.Name = temp.股东姓名;
                         accounts.Add(account);
 
                         dataPtr += structLength;

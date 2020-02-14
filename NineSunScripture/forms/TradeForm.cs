@@ -6,6 +6,7 @@ using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -75,6 +76,19 @@ namespace NineSunScripture.forms
                 return;
             }
 
+            float price = 0;
+            try
+            {
+                price = float.Parse(tbPrice.Text);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("价格格式错误");
+                return;
+            }
+
+            short buyCnt = 0;
+            ReaderWriterLockSlim lockSlim = new ReaderWriterLockSlim();
             Task[] tasks = new Task[accounts.Count];
             for (int i = 0; i < accounts.Count; i++)
             {
@@ -83,7 +97,7 @@ namespace NineSunScripture.forms
                 {
                     Order order = new Order();
                     order.Code = tbCode.Text;
-                    order.Price = float.Parse(tbPrice.Text);
+                    order.Price = price;
                     order.TradeSessionId = account.TradeSessionId;
                     account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
                     ApiHelper.SetShareholderAcct(account, quotes, order);
@@ -103,19 +117,21 @@ namespace NineSunScripture.forms
                         = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
                           + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
                     Logger.Log(opLog);
-                    /* if (null != callback)
-                     {
-                         callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
-                     }*/
-                    if (rspCode>0)
+                    if (rspCode > 0)
                     {
-                        quotes.Operation = Quotes.OperationSell;
-                        quotes.StockCategory = Quotes.CategoryBand;
-                        JsonDataHelper.AddStock(quotes);
+                        lockSlim.EnterWriteLock();
+                        buyCnt++;
+                        lockSlim.ExitWriteLock();
                     }
                 });
             }
             Task.WaitAll(tasks);
+            if (buyCnt > 0)
+            {
+                quotes.Operation = Quotes.OperationSell;
+                quotes.StockCategory = Quotes.CategoryBand;
+                JsonDataHelper.AddStock(quotes);
+            }
         }
 
         private void Sell()

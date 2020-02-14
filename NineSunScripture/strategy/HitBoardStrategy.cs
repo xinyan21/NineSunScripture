@@ -1,4 +1,5 @@
 ﻿using NineSunScripture.model;
+using NineSunScripture.trade;
 using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
@@ -48,8 +49,8 @@ namespace NineSunScripture.strategy
         /// </summary>
         private const int MaxSellMoneyCtrl = 1888;
 
-        protected ReaderWriterLockSlim RWLockSlimForHistory = new ReaderWriterLockSlim();
-        protected ReaderWriterLockSlim RWLockSlimForOpenBoard = new ReaderWriterLockSlim();
+        static ReaderWriterLockSlim rwLockSlimForHistory = new ReaderWriterLockSlim();
+        static ReaderWriterLockSlim rwLockSlimForOpenBoard = new ReaderWriterLockSlim();
 
         //由于是每只股票一个线程，这些字典都是根据股票来区分的，所以不会出现并发问题
         /// <summary>
@@ -78,7 +79,7 @@ namespace NineSunScripture.strategy
             string code = quotes.Code;
             float positionRatioCtrl = 1 / 4;   //买入计划仓位比例
 
-            RWLockSlimForHistory.EnterWriteLock();
+            rwLockSlimForHistory.EnterWriteLock();
             if (!historyTicks.ContainsKey(code))
             {
                 historyTicks.Add(code, new Queue<Quotes>(DefaultHistoryTickCnt));
@@ -89,7 +90,7 @@ namespace NineSunScripture.strategy
             }
             //由于逻辑关系会return，数据必须在进来时就放进去，上一个取倒数第二就行了
             historyTicks[code].Enqueue(quotes);
-            RWLockSlimForHistory.ExitWriteLock();
+            rwLockSlimForHistory.ExitWriteLock();
 
             if ((DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 || DateTime.Now.Hour > 14)
                 && !MainStrategy.IsTest)
@@ -102,9 +103,9 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            RWLockSlimForHistory.EnterReadLock();
+            rwLockSlimForHistory.EnterReadLock();
             Quotes[] ticks = historyTicks[code].ToArray();
-            RWLockSlimForHistory.ExitReadLock();
+            rwLockSlimForHistory.ExitReadLock();
             Quotes lastTickQuotes = null;
             if (ticks.Length >= 2)
             {
@@ -134,7 +135,7 @@ namespace NineSunScripture.strategy
             bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
-                RWLockSlimForOpenBoard.EnterWriteLock();
+                rwLockSlimForOpenBoard.EnterWriteLock();
                 openBoardTime.Add(code, DateTime.Now);
                 if (!openBoardCnt.ContainsKey(code))
                 {
@@ -144,7 +145,7 @@ namespace NineSunScripture.strategy
                 {
                     openBoardCnt[code] += 1;
                 }
-                RWLockSlimForOpenBoard.ExitWriteLock();
+                rwLockSlimForOpenBoard.ExitWriteLock();
                 Logger.Log("【" + quotes.Name + "】开板");
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
@@ -163,13 +164,13 @@ namespace NineSunScripture.strategy
                     return false;
                 }
             }
-            RWLockSlimForOpenBoard.EnterReadLock();
+            rwLockSlimForOpenBoard.EnterReadLock();
             if (openBoardCnt.ContainsKey(code) && openBoardCnt[code] > 3)
             {
                 Logger.Log("【" + quotes.Name + "】开板次数大于3次，过滤");
                 return false;
             }
-            RWLockSlimForOpenBoard.ExitReadLock();
+            rwLockSlimForOpenBoard.ExitReadLock();
             //开板时间小于30秒，过滤。如果没触发卖2买点，直接回封，这里的判断是没用的，因为上面回封后会重置开板时间
             //所以上面加上了30s的判断
             if (openBoardTime.ContainsKey(code))
@@ -191,8 +192,8 @@ namespace NineSunScripture.strategy
             return true;
         }
 
-        private static bool CheckMoney(
-            List<Account> accounts, Quotes quotes, Quotes lastTickQuotes, float highLimit, ITrade callback)
+        private static bool CheckMoney(List<Account> accounts,
+            Quotes quotes, Quotes lastTickQuotes, float highLimit, ITrade callback)
         {
             //已经涨停且封单大于MaxBuy1MoneyCtrl，过滤
             if (quotes.Buy1 == highLimit)
@@ -222,7 +223,19 @@ namespace NineSunScripture.strategy
             //买入计划里设置了成交额（单位为万）限制，那么成交额就要大于限制的成交额
             //没有设置大于默认的成交额限制即可
             bool isMoneyQuolified = false;
-            Quotes forMoney = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, quotes.Code);
+            Quotes forMoney = null;
+            try
+            {
+                forMoney = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, quotes.Code);
+            }
+            catch (ApiTimeoutException e)
+            {
+                ApiHelper.HandleCriticalException(e, e.Message, callback);
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
+            }
             if (null != forMoney)
             {
                 quotes.Money = forMoney.Money;
@@ -252,7 +265,7 @@ namespace NineSunScripture.strategy
                     positionRatioCtrl = quotes.PositionCtrl;
                     Logger.Log("【" + quotes.Name + "】设置仓位控制为" + positionRatioCtrl);
                 }
-                Funds funds = AccountHelper.QueryTotalFunds(accounts);
+                Funds funds = AccountHelper.QueryTotalFunds(accounts, callback);
                 //所有账户总可用金额小于每个账号一手的金额或者小于1万，直接退出
                 if (funds.AvailableAmt <= MinTotalAvailableAmt * accounts.Count
                     || funds.AvailableAmt <= highLimit * 100 * accounts.Count)
@@ -271,7 +284,21 @@ namespace NineSunScripture.strategy
                 foreach (Account account in accounts)
                 {
                     //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                    tasks.Add(Task.Run(() => BuyWithAcct(account, quotes, positionRatioCtrl, callback)));
+                    tasks.Add(Task.Run(() =>
+                    {
+                        try
+                        {
+                            BuyWithAcct(account, quotes, positionRatioCtrl, callback);
+                        }
+                        catch (ApiTimeoutException e)
+                        {
+                            ApiHelper.HandleCriticalException(e, e.Message, callback);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Exception(e);
+                        }
+                    }));
                 }
                 Task.WaitAll(tasks.ToArray());
             }
@@ -377,8 +404,20 @@ namespace NineSunScripture.strategy
 
         private bool CheckQuantity(Account account, Quotes quotes, Order order, ITrade callback)
         {
-            int boughtQuantity = GetTodayTransactionQuantityOf(
-                 account.TradeSessionId, quotes.Code, Order.OperationBuy);
+            int boughtQuantity = 0;
+            try
+            {
+                boughtQuantity = GetTodayTransactionQuantityOf(
+                         account.TradeSessionId, quotes.Code, Order.OperationBuy);
+            }
+            catch (ApiTimeoutException e)
+            {
+                ApiHelper.HandleCriticalException(e, e.Message, callback);
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
+            }
             if (order.Quantity <= boughtQuantity)
             {
                 Logger.Log("【" + quotes.Name + "】触发买点，账户["

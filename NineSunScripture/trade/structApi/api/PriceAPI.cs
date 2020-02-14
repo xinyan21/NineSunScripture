@@ -1,7 +1,10 @@
 ﻿using NineSunScripture.model;
+using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
+using static NineSunScripture.trade.structApi.ApiDataStruct;
 
 namespace NineSunScripture.trade.structApi.api
 {
@@ -55,6 +58,8 @@ namespace NineSunScripture.trade.structApi.api
         public static extern int HQ_PushData(
             int ClientID, int Category, string Gddm, string name, PushCallback Callback, bool state);
 
+        private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim();
+
         /// <summary>
         /// 十档行情，支持level2高速行情（没有成交额），这2个接口都没有股票名称，日
         /// </summary>
@@ -64,43 +69,45 @@ namespace NineSunScripture.trade.structApi.api
         public static Quotes QueryTenthGearPrice(int priceSessionId, string code)
         {
             Quotes quotes = new Quotes();
-            quotes.AllocCoTaskMem();
-
+            rwls.EnterWriteLock();
+            IntPtr result = Marshal.AllocCoTaskMem(1024 * 1024);
+            IntPtr errorInfo = Marshal.AllocCoTaskMem(256);
+            rwls.ExitWriteLock();
             try
             {
-                /*  int rspCode
-                     = HQ_QueryData(priceSessionId, 1, code, "", quotes.PtrResult, quotes.PtrErrorInfo);
-                 ApiHelper.HandleTimeOut(quotes.PtrErrorInfo);
-                  quotes.StrErrorInfo = ApiHelper.ParseErrInfo(quotes.PtrErrorInfo);
-                  if (rspCode > 0)
-                  {
-                      十档行情结构体 price =(十档行情结构体)
-                          Marshal.PtrToStructure(quotes.PtrResult + 32, typeof(十档行情结构体));
-                      quotes.Code = code;
-                      quotes.Open = (float)price.开盘;
-                      quotes.LatestPrice = (float)price.最新;
-                      quotes.Volume = (int)price.总量;
-                      quotes.HighLimit = (float)price.涨停;
-                      quotes.LowLimit = (float)price.跌停;
-                      quotes.Sell1 = (float)price.卖一价;
-                      quotes.Sell2 = (float)price.卖二价;
-                      quotes.Sell3 = (float)price.卖三价;
-                      quotes.Buy1 = (float)price.买一价;
-                      quotes.Buy2 = (float)price.买二价;
-                      quotes.Buy3 = (float)price.买三价;
-                      quotes.Sell1Vol = (int)price.卖一量;
-                      quotes.Sell2Vol = (int)price.卖二量;
-                      quotes.Sell3Vol = (int)price.卖三量;
-                      quotes.Buy1Vol = (int)price.买一量;
-                      quotes.Buy2Vol = (int)price.买二量;
-                      quotes.Buy3Vol = (int)price.买三量;
-                      quotes.PreClose = (float)price.昨收;
-                  }
-                  else
-                  {
-                      Logger.Log("QueryTenthGearPrice error：" + quotes.StrErrorInfo);
-                      return null;
-                  }*/
+                int rspCode
+                   = HQ_QueryData(priceSessionId, 1, code, "", result, errorInfo);
+                ApiHelper.HandleTimeOut(errorInfo);
+                quotes.StrErrorInfo = ApiHelper.ParseErrInfo(errorInfo);
+                if (rspCode > 0)
+                {
+                    十档行情结构体 price = (十档行情结构体)
+                        Marshal.PtrToStructure(result + 32, typeof(十档行情结构体));
+                    quotes.Code = code;
+                    quotes.Open = (float)price.开盘;
+                    quotes.LatestPrice = (float)price.最新;
+                    quotes.Volume = (int)price.总量;
+                    quotes.HighLimit = (float)price.涨停;
+                    quotes.LowLimit = (float)price.跌停;
+                    quotes.Sell1 = (float)price.卖一价;
+                    quotes.Sell2 = (float)price.卖二价;
+                    quotes.Sell3 = (float)price.卖三价;
+                    quotes.Buy1 = (float)price.买一价;
+                    quotes.Buy2 = (float)price.买二价;
+                    quotes.Buy3 = (float)price.买三价;
+                    quotes.Sell1Vol = (int)price.卖一量;
+                    quotes.Sell2Vol = (int)price.卖二量;
+                    quotes.Sell3Vol = (int)price.卖三量;
+                    quotes.Buy1Vol = (int)price.买一量;
+                    quotes.Buy2Vol = (int)price.买二量;
+                    quotes.Buy3Vol = (int)price.买三量;
+                    quotes.PreClose = (float)price.昨收;
+                }
+                else
+                {
+                    Logger.Log("QueryTenthGearPrice error：" + quotes.StrErrorInfo);
+                    return null;
+                }
             }
             catch (Exception e)
             {
@@ -110,7 +117,10 @@ namespace NineSunScripture.trade.structApi.api
             }
             finally
             {
-                quotes.FreeCoTaskMem();
+                rwls.EnterWriteLock();
+                Marshal.FreeCoTaskMem(result);
+                Marshal.FreeCoTaskMem(errorInfo);
+                rwls.ExitWriteLock();
             }
             /*if (MainStrategy.IsTest
                    && quotes.Code.Equals("300643") && DateTime.Now.Second == 30)
@@ -124,7 +134,7 @@ namespace NineSunScripture.trade.structApi.api
                 quotes = TradeTestCase.ConstructHitBoardData(quotes);
                 Logger.Log("ConstructHitBoardData for 300643 is ready>" + quotes.ToString());
             }*/
-            quotes.Code = "000004";
+          /*  quotes.Code = "000004";
             quotes.HighLimit = 24.55f;
             quotes.Open = 22;
             quotes.Buy1 = 22.3f;
@@ -136,7 +146,7 @@ namespace NineSunScripture.trade.structApi.api
             quotes.Sell2 = 22.33f;
             quotes.Sell2Vol = 10000;
             quotes.Money = 100000000;
-            quotes.LatestPrice = quotes.Sell1;
+            quotes.LatestPrice = quotes.Sell1;*/
             return quotes;
         }
     }

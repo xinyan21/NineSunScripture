@@ -30,12 +30,12 @@ namespace NineSunScripture.strategy
         private const short CycleTimeOfTrade = 1000;
 
         //更新资金、持仓信息间隔，单位秒
-        private const short UpdateFundCycle = 15;
+        private const short UpdateFundCycle = 10;
 
         //回调委托声明成静态变量防止被回收
         private static PriceAPI.PushCallback pushCallback;
 
-        protected ReaderWriterLockSlim rwLockSlimForBuy;
+        private static ReaderWriterLockSlim rwLockSlimForBuy;
 
         //主策略周期时间
         private short cycleTime = CycleTimeOfTrade;
@@ -44,13 +44,11 @@ namespace NineSunScripture.strategy
         private bool isHoliday;
         //涨跌停是否初始化（由于推送接口不推送这2个值，所以需要开盘的时候查出来存着）
         private bool isLimitInited = false;
-        private bool isStopStrategy = false;
 
         //stocks是供买入的股票池，stocksForPrice是用来查询行情的股票池（包括卖的）
         private List<Quotes> stocksForPrice;
-
         private List<Quotes> stocksToBuy;
-        private static List<Quotes> stocksToSell;
+        private List<Quotes> stocksToSell;
 
         private Account mainAcct;
         private List<Account> accounts;
@@ -64,6 +62,7 @@ namespace NineSunScripture.strategy
         private IAcctInfoListener fundListener;
         private IShowWorkingSatus showWorkingSatus;
         private DateTime lastFundUpdateTime;
+        private Thread strategyThread;
 
         //逆回购记录，使用日期记录以支持不关策略长时间运行
         private Dictionary<DateTime, bool> reverseRepurchaseRecords;
@@ -96,7 +95,7 @@ namespace NineSunScripture.strategy
                 accounts = AccountHelper.Login(callback);
                 if (null == accounts || accounts.Count == 0)
                 {
-                    callback.OnTradeResult(0, "策略启动", "没有可操作的账户", false);
+                    callback.OnTradeResult(0, "策略启动", "登录账户失败", false);
                     return;
                 }
                 mainAcct = accounts[0];
@@ -109,10 +108,6 @@ namespace NineSunScripture.strategy
                 PrepareStocksAndSubPrice();
                 while (true)
                 {
-                    if (isStopStrategy)
-                    {
-                        break;
-                    }
                     Thread.Sleep(cycleTime);
                     if (!IsTest && !IsTradeTime())
                     {
@@ -124,11 +119,14 @@ namespace NineSunScripture.strategy
                         ReverseRepurchaseBonds();
                         continue;
                     }
-                    if (!isLimitInited && (DateTime.Now.Hour == 9 && DateTime.Now.Minute >= 30
-                        || DateTime.Now.Hour >= 10))
+                    if (!isLimitInited)
                     {
-                        InitLimitPrice();
-                        isLimitInited = true;
+                        if ((DateTime.Now.Hour == 9 && DateTime.Now.Minute >= 30)
+                            || DateTime.Now.Hour >= 10)
+                        {
+                            InitLimitPrice();
+                            isLimitInited = true;
+                        }
                     }
                     UpdateTotalAccountInfo(true);
                     if (null != showWorkingSatus)
@@ -150,7 +148,7 @@ namespace NineSunScripture.strategy
         private void PrepareStocksAndSubPrice()
         {
             //登录时的持仓股
-            List<Quotes> stocksInPosition = AccountHelper.QueryPositionStocks(accounts);
+            List<Quotes> stocksInPosition = AccountHelper.QueryPositionStocks(accounts, callback);
             foreach (Quotes item in stocksInPosition)
             {
                 //如果股票池里有持仓股说明可以继续做，没有就不能做InPosition要设置成true
@@ -311,7 +309,8 @@ namespace NineSunScripture.strategy
         {
             try
             {
-                if (quotes.StockCategory == Quotes.CategoryWeakTurnStrong)
+                short category = quotes.StockCategory;
+                if (Quotes.CategoryWeakTurnStrong == category)
                 {
                     if (Quotes.OperationBuy == quotes.Operation)
                     {
@@ -322,20 +321,19 @@ namespace NineSunScripture.strategy
                         contBoardSellStrategy.Sell(quotes, accounts, callback);
                     }
                 }
-                else if (quotes.StockCategory == Quotes.CategoryBand)
+                else if (Quotes.CategoryBand == category)
                 {
                     bandStrategy.Process(quotes, accounts, callback);
                 }
-                else if (quotes.StockCategory == Quotes.CategoryDragonLeader)
+                else if (Quotes.CategoryDragonLeader == category)
                 {
                     if (stocksToSell.Contains(quotes))
                     {
                         contBoardSellStrategy.Sell(quotes, accounts, callback);
                     }
                 }
-                else
+                else if (Quotes.CategoryLatest == category || Quotes.CategoryLongTerm == category)
                 {
-                    //暂时除了龙头、弱转强和波段，其余都是打板
                     //持仓股回封要买回，所以全部股票都在买的范围，InPosition参数依然有效
                     hitBoardStrategy.Buy(quotes, accounts, callback);
                     if (stocksToSell.Contains(quotes))
@@ -376,8 +374,9 @@ namespace NineSunScripture.strategy
                 }
             }
 
-            isStopStrategy = false;
-            Task.Run(InitStrategy);
+            Stop();
+            strategyThread = new Thread(InitStrategy);
+            strategyThread.Start();
 
             return true;
         }
@@ -388,8 +387,11 @@ namespace NineSunScripture.strategy
         /// </summary>
         public void Stop()
         {
-            isStopStrategy = true;
-            UnsubscribeAll();
+            if (null != strategyThread)
+            {
+                strategyThread.Abort();
+            }
+            //UnsubscribeAll();
         }
 
         /// <summary>
@@ -460,9 +462,9 @@ namespace NineSunScripture.strategy
                 try
                 {
                     Account account = new Account();
-                    account.Funds = AccountHelper.QueryTotalFunds(accounts);
-                    account.Positions = AccountHelper.QueryTotalPositions(accounts);
-                    account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts);
+                    account.Funds = AccountHelper.QueryTotalFunds(accounts, callback);
+                    account.Positions = AccountHelper.QueryTotalPositions(accounts, callback);
+                    account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts, callback);
                     fundListener.OnAcctInfoListen(account);
                 }
                 catch (ApiTimeoutException e)
@@ -493,13 +495,13 @@ namespace NineSunScripture.strategy
                 {
                     try
                     {
-                        Quotes quotes = TradeAPI.QueryQuotes(mainAcct.TradeSessionId, item.Code);
+                        Quotes quotes
+                        = PriceAPI.QueryTenthGearPrice(mainAcct.PriceSessionId, item.Code);
                         if (null != quotes)
                         {
                             item.HighLimit = quotes.HighLimit;
                             item.LowLimit = quotes.LowLimit;
                             item.Open = quotes.Open;
-                            item.Name = quotes.Name;
                         }
                         Logger.Log("InitLimitPrice " + item);
                     }

@@ -41,125 +41,177 @@ namespace NineSunScripture.model
         public const short OperationBuy = 1;
         public const short OperationSell = 2;
 
-        public string Code;
-        public string Name;
+        private string code;
+        private string name;
 
         //昨收
-        public float PreClose;
+        private float preClose;
 
         //最新价
-        public float LatestPrice;
+        private float latestPrice;
 
         //涨停价
-        public float HighLimit;
+        private float highLimit;
 
         //跌停价
-        public float LowLimit;
+        private float lowLimit;
 
-        public float High;
-        public float Low;
+        private float high;
+        private float low;
 
         //成交金额
-        public double Money;
+        private double money;
 
         //成交量
-        public int Volume;
+        private int volume;
 
-        public float Open;
+        private float open;
 
         //卖一到卖五
-        public float Sell1;
+        private float sell1;
 
-        public float Sell2;
-        public float Sell3;
-        public float Sell4;
-        public float Sell5;
+        private float sell2;
+        private float sell3;
+        private float sell4;
+        private float sell5;
 
         //买一到买五
-        public float Buy1;
+        private float buy1;
 
-        public float Buy2;
-        public float Buy3;
-        public float Buy4;
-        public float Buy5;
+        private float buy2;
+        private float buy3;
+        private float buy4;
+        private float buy5;
 
         //对应的委托量
-        public int Sell1Vol;
+        private int sell1Vol;
 
-        public int Sell2Vol;
-        public int Sell3Vol;
-        public int Sell4Vol;
-        public int Sell5Vol;
-        public int Buy1Vol;
-        public int Buy2Vol;
-        public int Buy3Vol;
-        public int Buy4Vol;
-        public int Buy5Vol;
+        private int sell2Vol;
+        private int sell3Vol;
+        private int sell4Vol;
+        private int sell5Vol;
+        private int buy1Vol;
+        private int buy2Vol;
+        private int buy3Vol;
+        private int buy4Vol;
+        private int buy5Vol;
 
         /// <summary>
         /// 仓位控制，用于买入策略
         /// </summary>
-        public float PositionCtrl;
+        private float positionCtrl;
 
         /// <summary>
         /// 买入前的成交额限制，用于买入策略（单位为万）
         /// </summary>
-        public int MoneyCtrl;
+        private int moneyCtrl;
 
         /// <summary>
         /// 股票类型：打板（常驻0、龙头1、最新2），弱转强（3），波段（4）
         /// </summary>
-        public short StockCategory = 2;
+        private short stockCategory = 2;
 
         /// <summary>
         /// 操作方向：OperationBuy, OperationSell。于此区分买入和卖出的股票池
         /// </summary>
-        public short Operation;
+        private short operation;
 
         /// <summary>
         /// 连扳数
         /// </summary>
-        public short ContBoards;
+        private short contBoards;
 
         /// <summary>
         /// 是否是持仓股，默认不是，此属性用来解决新增账户后持仓不一致导致的开仓问题
         /// 值为true的时候不能新开仓
         /// </summary>
-        public bool InPosition = false;
+        private bool inPosition = false;
 
-        public bool IsDragonLeader = false;
+        private bool isDragonLeader = false;
 
-        public float AvgCost;
+        private float avgCost;
 
         /// <summary>
         /// 止盈比例
         /// </summary>
-        public float StopWinPct;
+        private float stopWinPct;
 
         /// <summary>
         /// 止盈价格
         /// </summary>
-        public float StopWinPrice;
+        private float stopWinPrice;
 
         /// <summary>
         /// 止损比例
         /// </summary>
-        public float StopLossPct;
+        private float stopLossPct;
 
         /// <summary>
         /// 止损价格
         /// </summary>
-        public float StopLossPrice;
+        private float stopLossPrice;
 
         /// <summary>
         /// 十档行情是否已经订阅
         /// </summary>
-        public bool IsTenthGearSubscribed;
+        private bool isTenthGearSubscribed;
 
         /// <summary>
         /// 逐笔委托行情是否已经订阅
         /// </summary>
-        public bool IsOByOComissionSubscribed;
+        private bool isOByOComissionSubscribed;
+
+        public string Code { get => code; set => code = value; }
+        public string Name { get => name; set => name = value; }
+        public float PreClose { get => preClose; set => preClose = value; }
+        public float LatestPrice { get => latestPrice; set => latestPrice = value; }
+        public float HighLimit { get => highLimit; set => highLimit = value; }
+        public float LowLimit { get => lowLimit; set => lowLimit = value; }
+        public float High { get => high; set => high = value; }
+        public float Low { get => low; set => low = value; }
+        public double Money { get => money; set => money = value; }
+        public int Volume { get => volume; set => volume = value; }
+        public float Open { get => open; set => open = value; }
+        public float Sell1 { get => sell1; set => sell1 = value; }
+        public float Sell2 { get => sell2; set => sell2 = value; }
+        public float Sell3 { get => sell3; set => sell3 = value; }
+        public float Sell4 { get => sell4; set => sell4 = value; }
+        public float Sell5 { get => sell5; set => sell5 = value; }
+        public float Buy1 { get => buy1; set => buy1 = value; }
+        public float Buy2 { get => buy2; set => buy2 = value; }
+        public float Buy3 { get => buy3; set => buy3 = value; }
+        public float Buy5 { get => buy5; set => buy5 = value; }
+        public float Buy4 { get => buy4; set => buy4 = value; }
+        public int Sell1Vol { get => sell1Vol; set => sell1Vol = value; }
+        public int Sell2Vol { get => sell2Vol; set => sell2Vol = value; }
+        public int Sell3Vol { get => sell3Vol; set => sell3Vol = value; }
+        public int Sell4Vol { get => sell4Vol; set => sell4Vol = value; }
+        public int Sell5Vol { get => sell5Vol; set => sell5Vol = value; }
+        public int Buy1Vol { get => buy1Vol; set => buy1Vol = value; }
+        public int Buy2Vol { get => buy2Vol; set => buy2Vol = value; }
+        public int Buy3Vol { get => buy3Vol; set => buy3Vol = value; }
+        public int Buy4Vol { get => buy4Vol; set => buy4Vol = value; }
+        public int Buy5Vol { get => buy5Vol; set => buy5Vol = value; }
+        public float PositionCtrl { get => positionCtrl; set => positionCtrl = value; }
+        public int MoneyCtrl { get => moneyCtrl; set => moneyCtrl = value; }
+        public short StockCategory { get => stockCategory; set => stockCategory = value; }
+        public short Operation { get => operation; set => operation = value; }
+        public short ContBoards { get => contBoards; set => contBoards = value; }
+        public bool InPosition { get => inPosition; set => inPosition = value; }
+        public bool IsDragonLeader { get => isDragonLeader; set => isDragonLeader = value; }
+        public float AvgCost { get => avgCost; set => avgCost = value; }
+        public float StopWinPct { get => stopWinPct; set => stopWinPct = value; }
+        public float StopWinPrice { get => stopWinPrice; set => stopWinPrice = value; }
+        public float StopLossPct { get => stopLossPct; set => stopLossPct = value; }
+        public float StopLossPrice { get => stopLossPrice; set => stopLossPrice = value; }
+        public bool IsTenthGearSubscribed
+        {
+            get => isTenthGearSubscribed; set => isTenthGearSubscribed = value;
+        }
+        public bool IsOByOComissionSubscribed
+        {
+            get => isOByOComissionSubscribed; set => isOByOComissionSubscribed = value;
+        }
 
         public bool Equals(Quotes other)
         {

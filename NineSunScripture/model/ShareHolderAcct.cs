@@ -8,16 +8,20 @@
         /// <summary>
         /// 股东代码
         /// </summary>
-        public string code;
+        private string code;
 
         /// <summary>
         /// 账号类别
         /// </summary>
-        public string category;
+        private string category;
 
         /// <summary>
         /// 股东姓名
         /// </summary>
-        public string name;
+        private string name;
+
+        public string Category { get => category; set => category = value; }
+        public string Name { get => name; set => name = value; }
+        public string Code { get => code; set => code = value; }
     }
 }

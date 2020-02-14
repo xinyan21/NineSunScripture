@@ -46,7 +46,7 @@ namespace NineSunScripture.strategy
                 positionRatioCtrl = quotes.PositionCtrl;
                 Logger.Log("【" + quotes.Name + "】设置仓位控制为" + positionRatioCtrl);
             }
-            Funds funds = AccountHelper.QueryTotalFunds(accounts);
+            Funds funds = AccountHelper.QueryTotalFunds(accounts, callback);
             //所有账户总可用金额小于每个账号一手的金额或者小于1万，直接退出
             if (funds.AvailableAmt < MinTotalAvailableAmt * accounts.Count
                 || funds.AvailableAmt < quotes.Buy1 * 100 * accounts.Count)

@@ -9,6 +9,8 @@ namespace NineSunScripture.model
     /// </summary>
     public class Account : BaseModel
     {
+        private short acctType;
+
         //Qsid,//券商id 					这个值可以在IP文件中查看
         //Host,//券商服务器IP
         //Port,//券商服务器端口
@@ -19,47 +21,92 @@ namespace NineSunScripture.model
         //Password,//券商密码
         //comm_password,//通讯密码	可空
         //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
-        public int BrokerId;
+        private int brokerId;
 
-        public string BrokerName;
-        public string BrokerServerIP;
-        public short BrokerServerPort;
-        public string VersionOfTHS;
-        public short AcctType;
-        public string CommPwd;
-        public bool IsRandomMac = false;
-        public string SalesDepartId;
-        public string FundAcct;//资金账号
-        public string PriceAcct;//行情账号
-        public string FundPassword;
-        public string PricePassword;
-        public string ShShareholderAcct;//上海股东账号
-        public string SzShareholderAcct;//深圳股东账户
-        public int InitTotalAsset;    //初始总资金，作为单股开仓仓位依据
+        private string brokerName;
+        private string brokerServerIP;
+        private short brokerServerPort;
+        /// <summary>
+        /// 撤单
+        /// </summary>
+        private List<Order> cancelOrders;
+
+        private string commPwd;
+        private string fundAcct;
+        private string fundPassword;
+        private Funds funds;
+        private int initTotalAsset;
+        private bool isRandomMac = true;
+        private List<Position> positions;
+        //资金账号
+        private string priceAcct;
+
+        //行情账号
+        private string pricePassword;
 
         /// <summary>
         /// 行情会话id
         /// </summary>
-        public int PriceSessionId;
+        private int priceSessionId;
 
-        public Funds Funds;
-        public List<Position> Positions;
-        public List<ShareHolderAcct> ShareHolderAccts;
+        private string salesDepartId;
+        //初始总资金，作为单股开仓仓位依据
+        private List<ShareHolderAcct> shareHolderAccts;
 
-        /// <summary>
-        /// 撤单
-        /// </summary>
-        public List<Order> CancelOrders;
+        private string shShareholderAcct;
+        //上海股东账号
+        private string szShareholderAcct;
+
+        private string versionOfTHS;
+
+        public short AcctType { get => acctType; set => acctType = value; }
+
+        //深圳股东账户
+        public int BrokerId { get => brokerId; set => brokerId = value; }
+        public string BrokerName { get => brokerName; set => brokerName = value; }
+        public string BrokerServerIP { get => brokerServerIP; set => brokerServerIP = value; }
+        public short BrokerServerPort { get => brokerServerPort; set => brokerServerPort = value; }
+        public string CommPwd { get => commPwd; set => commPwd = value; }
+        public string FundAcct { get => fundAcct; set => fundAcct = value; }
+        public string FundPassword { get => fundPassword; set => fundPassword = value; }
+        public int InitTotalAsset { get => initTotalAsset; set => initTotalAsset = value; }
+        public bool IsRandomMac { get => isRandomMac; set => isRandomMac = value; }
+        public string PriceAcct { get => priceAcct; set => priceAcct = value; }
+        public string PricePassword { get => pricePassword; set => pricePassword = value; }
+        public int PriceSessionId { get => priceSessionId; set => priceSessionId = value; }
+        public string SalesDepartId { get => salesDepartId; set => salesDepartId = value; }
+        public string VersionOfTHS { get => versionOfTHS; set => versionOfTHS = value; }
+        public Funds Funds { get => funds; set => funds = value; }
+        public List<Position> Positions { get => positions; set => positions = value; }
+        public List<Order> CancelOrders { get => cancelOrders; set => cancelOrders = value; }
+        public List<ShareHolderAcct> ShareHolderAccts
+        {
+            get => shareHolderAccts; set => shareHolderAccts = value;
+        }
+
+        public string ShShareholderAcct
+        {
+            get => shShareholderAcct; set => shShareholderAcct = value;
+        }
+
+        public string SzShareholderAcct
+        {
+            get => szShareholderAcct; set => szShareholderAcct = value;
+        }
 
         public bool Equals(Account other)
         {
-            return this.FundAcct == other.FundAcct;
+            if (null == other)
+            {
+                return false;
+            }
+            return FundAcct == other.FundAcct;
         }
 
         //重写Equals和GetHashCode方法可以在List里面使用Contains方法
         public override int GetHashCode()
         {
-            return this.FundAcct.GetHashCode();
+            return FundAcct.GetHashCode();
         }
 
         public override string ToString()

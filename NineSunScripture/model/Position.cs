@@ -10,52 +10,69 @@ namespace NineSunScripture.model
     /// </summary>
     public class Position : BaseModel, IEquatable<Position>
     {
-        public string Code;
-        public string Name;
+        private string code;
+        private string name;
 
         /// <summary>
         /// 股票余额=持有数量
         /// </summary>
-        public int StockBalance;
+        private int stockBalance;
 
         /// <summary>
         /// 可用余额=可以卖的股票数
         /// </summary>
-        public int AvailableBalance;
+        private int availableBalance;
 
         /// <summary>
         /// 冻结数量
         /// </summary>
-        public int FrozenQuantity;
+        private int frozenQuantity;
 
         /// <summary>
         /// 参考盈亏
         /// </summary>
-        public float ProfitAndLoss;
+        private float profitAndLoss;
 
-        public float AvgCost;
+        private float avgCost;
 
         /// <summary>
         /// 盈亏比例
         /// </summary>
-        public float ProfitAndLossPct;
+        private float profitAndLossPct;
 
-        public float Price;
+        private float price;
 
         /// <summary>
         /// 市值
         /// </summary>
-        public float MarketValue;
+        private float marketValue;
 
         /// <summary>
         /// 市场
         /// </summary>
-        public string Market;
+        private string market;
 
-        public string ShareholderAcct;
+        private string shareholderAcct;
+
+        public string Code { get => code; set => code = value; }
+        public string Name { get => name; set => name = value; }
+        public int StockBalance { get => stockBalance; set => stockBalance = value; }
+        public int AvailableBalance { get => availableBalance; set => availableBalance = value; }
+        public int FrozenQuantity { get => frozenQuantity; set => frozenQuantity = value; }
+        public float ProfitAndLoss { get => profitAndLoss; set => profitAndLoss = value; }
+        public float AvgCost { get => avgCost; set => avgCost = value; }
+        public float ProfitAndLossPct { get => profitAndLossPct; set => profitAndLossPct = value; }
+        public float Price { get => price; set => price = value; }
+        public float MarketValue { get => marketValue; set => marketValue = value; }
+        public string Market { get => market; set => market = value; }
+        public string ShareholderAcct { get => shareholderAcct; set => shareholderAcct = value; }
 
         public bool Equals(Position other)
         {
+            if (null == other)
+            {
+                return false;
+            }
             return Code.Equals(other.Code);
         }
 

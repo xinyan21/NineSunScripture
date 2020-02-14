@@ -35,7 +35,7 @@ namespace NineSunScripture.trade.structApi.helper
             account.FundPassword = "198921";
             account.PricePassword = "3594035x";
             //没指定初始资产，差点又被大坑
-            account.InitTotalAsset = 60000;
+            account.InitTotalAsset = 20000;
             return account;
         }
 
@@ -89,7 +89,7 @@ namespace NineSunScripture.trade.structApi.helper
                     mainAcct.PriceSessionId = priceSessionId;
                     if (null != callback)
                     {
-                        callback.OnTradeResult(1, "行情登录", "", false);
+                        callback.OnTradeResult(1, "行情登录成功", "", false);
                     }
                 }
                 else
@@ -97,8 +97,9 @@ namespace NineSunScripture.trade.structApi.helper
                     string errInfo = ApiHelper.ParseErrInfo(ptrErrorInfo);
                     if (null != callback)
                     {
-                        callback.OnTradeResult(0, "行情登录", errInfo, true);
+                        callback.OnTradeResult(0, "行情登录失败", errInfo, true);
                     }
+                    return null;
                 }
 
                 LoginTrade(localAccounts, loginAccts, mainAcct, callback);
@@ -113,23 +114,27 @@ namespace NineSunScripture.trade.structApi.helper
         private static void LoginTrade(List<Account> localAccounts,
             List<Account> loginAccts, Account mainAcct, ITrade callback)
         {
-            Task[] tasks = new Task[localAccounts.Count];
-            for (int i = 0; i < localAccounts.Count; i++)
+            ReaderWriterLockSlim lockSlim = new ReaderWriterLockSlim();
+            short successCnt = 0;
+            short failCnt = 0;
+            List<Task> tasks = new List<Task>();
+            foreach (Account account in localAccounts)
             {
-                Account account = localAccounts[i];
-                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                tasks[i] = Task.Run(() =>
+                tasks.Add(Task.Run(() =>
                 {
                     IntPtr ptrErrorInfo = Marshal.AllocCoTaskMem(256);
                     try
                     {
                         int tradeSessionId = TradeAPI.Logon(account.BrokerId, account.BrokerServerIP,
                              account.BrokerServerPort, account.VersionOfTHS, account.SalesDepartId,
-                             account.AcctType, account.FundAcct, account.FundPassword, account.CommPwd,
-                             account.IsRandomMac, ptrErrorInfo);
+                             account.AcctType, account.FundAcct, account.FundPassword,
+                             account.CommPwd, account.IsRandomMac, ptrErrorInfo);
                         string opLog = "";
                         if (tradeSessionId > 0)
                         {
+                            lockSlim.EnterWriteLock();
+                            successCnt++;
+                            lockSlim.ExitWriteLock();
                             account.TradeSessionId = tradeSessionId;
                             account.Funds = TradeAPI.QueryFunds(tradeSessionId);
                             account.ShareHolderAccts = TradeAPI.QueryShareHolderAccts(tradeSessionId);
@@ -143,13 +148,13 @@ namespace NineSunScripture.trade.structApi.helper
                             {
                                 foreach (ShareHolderAcct shareHolderAcct in account.ShareHolderAccts)
                                 {
-                                    if (shareHolderAcct.category == "上海A股")
+                                    if (shareHolderAcct.Category == "上海A股")
                                     {
-                                        account.ShShareholderAcct = shareHolderAcct.code;
+                                        account.ShShareholderAcct = shareHolderAcct.Code;
                                     }
                                     else
                                     {
-                                        account.SzShareholderAcct = shareHolderAcct.code;
+                                        account.SzShareholderAcct = shareHolderAcct.Code;
                                     }
                                 }
                             }
@@ -164,29 +169,32 @@ namespace NineSunScripture.trade.structApi.helper
                         }
                         else
                         {
+                            lockSlim.EnterWriteLock();
+                            failCnt++;
+                            lockSlim.ExitWriteLock();
                             opLog = "资金账号【" + account.FundAcct + "】登录失败，错误信息："
                                 + ApiHelper.ParseErrInfo(ptrErrorInfo);
                             Logger.Log(opLog);
-                        }
-                        if (null != callback)
-                        {
-                            string errInfo = ApiHelper.ParseErrInfo(ptrErrorInfo);
-                            bool needReboot = false;
                             if (account == mainAcct)
                             {
-                                //主账号登录失败或者是其它账户不是因为密码错误都重启策略
-                                needReboot = true;
+                                string errInfo = ApiHelper.ParseErrInfo(ptrErrorInfo);
+                                callback.OnTradeResult(tradeSessionId, opLog, errInfo, true);
                             }
-                            callback.OnTradeResult(tradeSessionId, opLog, errInfo, needReboot);
                         }
                     }
                     finally
                     {
                         Marshal.FreeCoTaskMem(ptrErrorInfo);
                     }
-                });
+                }));
             }
-            Task.WaitAll(tasks);
+            Task.WaitAll(tasks.ToArray());
+            if (null != callback)
+            {
+                bool needReboot = failCnt > 2 ? true : false;
+                string info = "交易登录：成功" + successCnt + "个，失败" + failCnt + "个";
+                callback.OnTradeResult(needReboot ? 0 : 1, info, "登录失败个数较多", needReboot);
+            }
         }
 
         /// <summary>
@@ -253,7 +261,7 @@ namespace NineSunScripture.trade.structApi.helper
         /// </summary>
         /// <param name="accounts">账户数组</param>
         /// <returns></returns>
-        public static List<Position> QueryTotalPositions(List<Account> accounts)
+        public static List<Position> QueryTotalPositions(List<Account> accounts, ITrade callback)
         {
             if (null == accounts)
             {
@@ -267,10 +275,21 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
-                    lock (allPositions)
+                    try
                     {
-                        allPositions.AddRange(account.Positions);
+                        account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
+                        lock (allPositions)
+                        {
+                            allPositions.AddRange(account.Positions);
+                        }
+                    }
+                    catch (ApiTimeoutException e)
+                    {
+                        ApiHelper.HandleCriticalException(e, e.Message, callback);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Exception(e);
                     }
                 }));
             }
@@ -324,20 +343,31 @@ namespace NineSunScripture.trade.structApi.helper
         /// </summary>
         /// <param name="accounts">账号列表</param>
         /// <returns></returns>
-        public static List<Quotes> QueryPositionStocks(List<Account> accounts)
+        public static List<Quotes> QueryPositionStocks(List<Account> accounts, ITrade callback)
         {
             List<Quotes> quotes = new List<Quotes>();
-            List<Position> positions = QueryTotalPositions(accounts);
-            Quotes quote;
-            foreach (Position position in positions)
+            try
             {
-                quote = new Quotes();
-                quote.Code = position.Code;
-                quote.Name = position.Name;
-                if (null == quotes.Find(item => item.Code == position.Code))
+                List<Position> positions = QueryTotalPositions(accounts, callback);
+                Quotes quote;
+                foreach (Position position in positions)
                 {
-                    quotes.Add(quote);
+                    quote = new Quotes();
+                    quote.Code = position.Code;
+                    quote.Name = position.Name;
+                    if (null == quotes.Find(item => item.Code == position.Code))
+                    {
+                        quotes.Add(quote);
+                    }
                 }
+            }
+            catch (ApiTimeoutException e)
+            {
+                ApiHelper.HandleCriticalException(e, e.Message, callback);
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
             }
 
             return quotes;
@@ -348,7 +378,7 @@ namespace NineSunScripture.trade.structApi.helper
         /// </summary>
         /// <param name="accounts">账户列表</param>
         /// <returns></returns>
-        public static Funds QueryTotalFunds(List<Account> accounts)
+        public static Funds QueryTotalFunds(List<Account> accounts, ITrade callback)
         {
             Funds funds = new Funds();
             if (null == accounts)
@@ -360,13 +390,24 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    Funds temp = TradeAPI.QueryFunds(account.TradeSessionId);
-                    lock (funds)
+                    try
                     {
-                        funds.AvailableAmt += temp.AvailableAmt;
-                        funds.FrozenAmt += temp.FrozenAmt;
-                        funds.FundBalance += temp.FundBalance;
-                        funds.TotalAsset += temp.TotalAsset;
+                        Funds temp = TradeAPI.QueryFunds(account.TradeSessionId);
+                        lock (funds)
+                        {
+                            funds.AvailableAmt += temp.AvailableAmt;
+                            funds.FrozenAmt += temp.FrozenAmt;
+                            funds.FundBalance += temp.FundBalance;
+                            funds.TotalAsset += temp.TotalAsset;
+                        }
+                    }
+                    catch (ApiTimeoutException e)
+                    {
+                        ApiHelper.HandleCriticalException(e, e.Message, callback);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Exception(e);
                     }
                 }));
             }
@@ -395,7 +436,7 @@ namespace NineSunScripture.trade.structApi.helper
         /// </summary>
         /// <param name="accounts"></param>
         /// <returns></returns>
-        public static List<Order> QueryTotalCancelOrders(List<Account> accounts)
+        public static List<Order> QueryTotalCancelOrders(List<Account> accounts, ITrade callback)
         {
             if (null == accounts)
             {
@@ -408,10 +449,21 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    List<Order> temp = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
-                    lock (sourceOrders)
+                    try
                     {
-                        sourceOrders.AddRange(temp);
+                        List<Order> temp = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
+                        lock (sourceOrders)
+                        {
+                            sourceOrders.AddRange(temp);
+                        }
+                    }
+                    catch (ApiTimeoutException e)
+                    {
+                        ApiHelper.HandleCriticalException(e, e.Message, callback);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Exception(e);
                     }
                 }));
             }
@@ -444,30 +496,60 @@ namespace NineSunScripture.trade.structApi.helper
         /// <param name="callback"></param>
         public static void CancelTotalOrders(List<Account> accounts, Order order, ITrade callback)
         {
+            if (null == order || null == accounts)
+            {
+                return;
+            }
+            ReaderWriterLockSlim lockSlim = new ReaderWriterLockSlim();
+            short successCnt = 0;
+            short failCnt = 0;
             string info = "撤单【" + order.Name + "】";
             List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
-                    foreach (Order item in orders)
+                    try
                     {
-                        if (!(item.Name.Equals(order.Name) && item.Operation == order.Operation))
+                        List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
+                        foreach (Order item in orders)
                         {
-                            continue;
+                            if (!(item.Name.Equals(order.Name) && item.Operation == order.Operation))
+                            {
+                                continue;
+                            }
+                            item.TradeSessionId = account.TradeSessionId;
+                            int rspCode = TradeAPI.CancelOrder(item);
+                            if (rspCode > 0)
+                            {
+                                lockSlim.EnterWriteLock();
+                                successCnt++;
+                                lockSlim.ExitWriteLock();
+                            }
+                            else
+                            {
+                                lockSlim.EnterWriteLock();
+                                failCnt++;
+                                lockSlim.ExitWriteLock();
+                            }
                         }
-                        item.TradeSessionId = account.TradeSessionId;
-                        int rspCode = TradeAPI.CancelOrder(item);
-                        if (null != callback)
-                        {
-                            info = "资金账号【" + account.FundAcct + "】" + info;
-                            callback.OnTradeResult(rspCode, info, item.StrErrorInfo, false);
-                        }
+                    }
+                    catch (ApiTimeoutException e)
+                    {
+                        ApiHelper.HandleCriticalException(e, e.Message, callback);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Exception(e);
                     }
                 }));
             }
             Task.WaitAll(tasks.ToArray());
+            if (null != callback)
+            {
+                info = info + "成功账户个数：" + successCnt + "，失败账户个数：" + failCnt;
+                callback.OnTradeResult(1, info, "", false);
+            }
         }
 
         /// <summary>
@@ -478,6 +560,10 @@ namespace NineSunScripture.trade.structApi.helper
         public static void CancelOrdersCanCancel(
             List<Account> accounts, Quotes quotes, ITrade callback)
         {
+            if (null == accounts)
+            {
+                return;
+            }
             List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
@@ -497,26 +583,41 @@ namespace NineSunScripture.trade.structApi.helper
         public static void CancelOrdersCanCancel(
             Account account, Quotes quotes, ITrade callback)
         {
-            List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
-            if (null == orders || orders.Count == 0)
+            if (null == account)
             {
                 return;
             }
-            foreach (Order order in orders)
+            try
             {
-                if (order.Code != quotes.Code && order.Operation.Contains(Order.OperationBuy))
+                List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
+                if (null == orders || orders.Count == 0)
                 {
-                    order.TradeSessionId = account.TradeSessionId;
-                    int rspCode = TradeAPI.CancelOrder(order);
-                    string opLog = "资金账号【" + account.FundAcct + "】" + "撤销【"
-                        + quotes.Name + "】委托->"
-                        + (order.Quantity * order.Price).ToString("0.00####") + "万元";
-                    Logger.Log(opLog);
-                    if (null != callback)
+                    return;
+                }
+                foreach (Order order in orders)
+                {
+                    if (order.Code != quotes.Code && order.Operation.Contains(Order.OperationBuy))
                     {
-                        callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
+                        order.TradeSessionId = account.TradeSessionId;
+                        int rspCode = TradeAPI.CancelOrder(order);
+                        string opLog = "资金账号【" + account.FundAcct + "】" + "撤销【"
+                            + quotes.Name + "】委托->"
+                            + (order.Quantity * order.Price).ToString("0.00####") + "万元";
+                        Logger.Log(opLog);
+                        if (null != callback)
+                        {
+                            callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
+                        }
                     }
                 }
+            }
+            catch (ApiTimeoutException e)
+            {
+                ApiHelper.HandleCriticalException(e, e.Message, callback);
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
             }
         }
 
@@ -528,7 +629,7 @@ namespace NineSunScripture.trade.structApi.helper
         public static void AutoReverseRepurchaseBonds(List<Account> accounts, ITrade callback)
         {
             Account mainAcct;
-            if (accounts.Count > 0)
+            if (null != accounts && accounts.Count > 0)
             {
                 mainAcct = accounts[0];
             }
@@ -537,34 +638,45 @@ namespace NineSunScripture.trade.structApi.helper
                 return;
             }
             string code = "131810";
-            Quotes quotes = TradeAPI.QueryQuotes(mainAcct.TradeSessionId, code);
+            Quotes quotes = PriceAPI.QueryTenthGearPrice(mainAcct.TradeSessionId, code);
             List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    //为了减少并发导致的锁和阻塞问题，每个账户都new一个对象
-                    Order order = new Order();
-                    order.Code = code;
-                    order.Price = quotes.Buy3;
-                    //要查最新资金
-                    account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
-                    order.TradeSessionId = account.TradeSessionId;
-                    ApiHelper.SetShareholderAcct(account, quotes, order);
-                    double availableCash = account.Funds.AvailableAmt;
-                    order.Quantity = (int)(availableCash / 1000) * 10;
-                    if (order.Quantity == 0)
+                    try
                     {
-                        Logger.Log("资金账号【" + account.FundAcct + "】可用金额不够逆回购");
-                        return;
+                        //为了减少并发导致的锁和阻塞问题，每个账户都new一个对象
+                        Order order = new Order();
+                        order.Code = code;
+                        order.Price = quotes.Buy3;
+                        //要查最新资金
+                        account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
+                        order.TradeSessionId = account.TradeSessionId;
+                        ApiHelper.SetShareholderAcct(account, quotes, order);
+                        double availableCash = account.Funds.AvailableAmt;
+                        order.Quantity = (int)(availableCash / 1000) * 10;
+                        if (order.Quantity == 0)
+                        {
+                            Logger.Log("资金账号【" + account.FundAcct + "】可用金额不够逆回购");
+                            return;
+                        }
+                        int rspCode = TradeAPI.Sell(order);
+                        string opLog
+                            = "资金账号【" + account.FundAcct + "】" + "逆回购" + order.Quantity * 100 + "元";
+                        Logger.Log(opLog);
+                        if (null != callback)
+                        {
+                            callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
+                        }
                     }
-                    int rspCode = TradeAPI.Sell(order);
-                    string opLog
-                        = "资金账号【" + account.FundAcct + "】" + "逆回购" + order.Quantity * 100 + "元";
-                    Logger.Log(opLog);
-                    if (null != callback)
+                    catch (ApiTimeoutException e)
                     {
-                        callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
+                        ApiHelper.HandleCriticalException(e, e.Message, callback);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Exception(e);
                     }
                 }));
             }
@@ -577,26 +689,37 @@ namespace NineSunScripture.trade.structApi.helper
         /// <param name="account">账户对象</param>
         /// <param name="quotes">股票对象</param>
         /// <returns></returns>
-        public static bool IsSoldToday(Account account, Quotes quotes)
+        public static bool IsSoldToday(Account account, Quotes quotes, ITrade callback)
         {
             if (null == account || null == quotes)
             {
                 return false;
             }
-            List<Order> todayTransactions
-                   = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
             bool isSoldToday = false;
-            if (todayTransactions.Count > 0)
+            try
             {
-                foreach (Order order in todayTransactions)
+                List<Order> todayTransactions
+                        = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
+                if (todayTransactions.Count > 0)
                 {
-                    if (order.Code == quotes.Code
-                        && order.Operation.Contains(Order.OperationSell))
+                    foreach (Order order in todayTransactions)
                     {
-                        isSoldToday = true;
-                        break;
+                        if (order.Code == quotes.Code
+                            && order.Operation.Contains(Order.OperationSell))
+                        {
+                            isSoldToday = true;
+                            break;
+                        }
                     }
                 }
+            }
+            catch (ApiTimeoutException e)
+            {
+                ApiHelper.HandleCriticalException(e, e.Message, callback);
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
             }
             return isSoldToday;
         }

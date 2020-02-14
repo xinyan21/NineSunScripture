@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,7 @@ namespace NineSunScripture.trade.persistence
         /// 获取所有账号，账号由人工编辑json文件，方便快捷
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public static List<Account> GetAccounts()
         {
             List<Account> accounts = null;
@@ -39,6 +41,7 @@ namespace NineSunScripture.trade.persistence
             return accounts;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void InitTotalAsset(Account account)
         {
             List<Account> accounts = GetAccounts();
@@ -103,6 +106,7 @@ namespace NineSunScripture.trade.persistence
         /// 增加股票quotes到股票池
         /// </summary>
         /// <param name="quotes">个股</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void AddStock(Quotes quotes)
         {
             List<Quotes> stocks = GetStocks();

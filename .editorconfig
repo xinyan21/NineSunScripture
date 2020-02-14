@@ -1,10 +1,4 @@
-﻿[*.{cs,vb}]
+﻿[*.cs]
 
-# IDE0046: 转换为条件表达式
-dotnet_style_prefer_conditional_expression_over_return = true:silent
-
-# CA1051: 不要声明可见实例字段
-dotnet_diagnostic.CA1051.severity = silent
-
-# CA1307: 指定 StringComparison
-dotnet_diagnostic.CA1307.severity = silent
+# CA1031: 不捕获常规异常类型
+dotnet_diagnostic.CA1031.severity = silent

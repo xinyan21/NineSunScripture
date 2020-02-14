@@ -84,13 +84,13 @@ namespace NineSunScripture.trade.helper
                     {
                         foreach (ShareHolderAcct shareHolderAcct in account.ShareHolderAccts)
                         {
-                            if (shareHolderAcct.category == "上海A股")
+                            if (shareHolderAcct.Category == "上海A股")
                             {
-                                account.ShShareholderAcct = shareHolderAcct.code;
+                                account.ShShareholderAcct = shareHolderAcct.Code;
                             }
                             else
                             {
-                                account.SzShareholderAcct = shareHolderAcct.code;
+                                account.SzShareholderAcct = shareHolderAcct.Code;
                             }
                         }
                     }

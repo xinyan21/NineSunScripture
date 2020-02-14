@@ -8,16 +8,21 @@ namespace NineSunScripture.model
     public class Funds : BaseModel
     {
         //总资产
-        public double TotalAsset;
+        private double totalAsset;
 
         //资金余额
-        public double FundBalance;
+        private double fundBalance;
 
         //冻结金额
-        public double FrozenAmt;
+        private double frozenAmt;
 
         //可用金额
-        public double AvailableAmt;
+        private double availableAmt;
+
+        public double TotalAsset { get => totalAsset; set => totalAsset = value; }
+        public double FundBalance { get => fundBalance; set => fundBalance = value; }
+        public double FrozenAmt { get => frozenAmt; set => frozenAmt = value; }
+        public double AvailableAmt { get => availableAmt; set => availableAmt = value; }
 
         public override string ToString()
         {

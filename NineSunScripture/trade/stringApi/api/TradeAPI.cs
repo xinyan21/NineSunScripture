@@ -226,9 +226,9 @@ namespace NineSunScripture.trade.api
                 for (int i = 0; i < temp.GetLength(0); i++)
                 {
                     account = new ShareHolderAcct();
-                    account.code = temp[i, 0];
-                    account.category = temp[i, 1];
-                    account.name = temp[i, 2];
+                    account.Code = temp[i, 0];
+                    account.Category = temp[i, 1];
+                    account.Name = temp[i, 2];
                     accounts.Add(account);
                 }
             }

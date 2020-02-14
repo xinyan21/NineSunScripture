@@ -10,19 +10,24 @@ namespace NineSunScripture.model
         /// <summary>
         ///时间戳
         /// </summary>
-        public int Time;
+        private int time;
         /// <summary>
         /// 报价分类：1买，2卖
         /// </summary>
-        public int Category;
+        private int category;
         /// <summary>
         /// 委托价格
         /// </summary>
-        public double Price;
+        private double price;
         /// <summary>
         /// 委托量
         /// </summary>
-        public double Quantity;
+        private double quantity;
+
+        public int Category { get => category; set => category = value; }
+        public int Time { get => time; set => time = value; }
+        public double Price { get => price; set => price = value; }
+        public double Quantity { get => quantity; set => quantity = value; }
 
         public override string ToString()
         {

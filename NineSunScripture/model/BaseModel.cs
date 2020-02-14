@@ -17,20 +17,24 @@ namespace NineSunScripture.model
         /// </summary>
         private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim();
 
-        public int TradeSessionId;
+        private byte[] errorInfo;
+        private IntPtr ptrErrorInfo;
+        //结构体版本结果接收数组，此内存要手动释放
+        private IntPtr ptrResult;
 
         //字符串版本结果接收数组
-        public byte[] Result;
-
-        public byte[] ErrorInfo;
-
-        //结构体版本结果接收数组，此内存要手动释放
-        public IntPtr PtrResult;
-
-        public IntPtr PtrErrorInfo;
+        private byte[] result;
 
         //为了方便管理内存释放，新增字符串错误信息存放字段
-        public string StrErrorInfo;
+        private string strErrorInfo;
+
+        private int tradeSessionId;
+        public byte[] ErrorInfo { get => errorInfo; set => errorInfo = value; }
+        public IntPtr PtrErrorInfo { get => ptrErrorInfo; set => ptrErrorInfo = value; }
+        public IntPtr PtrResult { get => ptrResult; set => ptrResult = value; }
+        public byte[] Result { get => result; set => result = value; }
+        public string StrErrorInfo { get => strErrorInfo; set => strErrorInfo = value; }
+        public int TradeSessionId { get => tradeSessionId; set => tradeSessionId = value; }
 
         /// <summary>
         /// 给Result和ErrorInfo分配内存，此内存是托管内存，由垃圾回收器自动管理
