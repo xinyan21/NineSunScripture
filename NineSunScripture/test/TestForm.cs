@@ -136,5 +136,10 @@ namespace NineSunScripture.util.test
                 lblTenthGearPrice.Text = "总资产：" + positions[0];
             }
         }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            new TradeTestCase().TestStopWinOfLess2Boards(accounts, mainForm);
+        }
     }
 }

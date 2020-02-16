@@ -1,4 +1,6 @@
 ﻿using NineSunScripture.model;
+using NineSunScripture.strategy;
+using NineSunScripture.trade.persistence;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
@@ -6,7 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
-using System.Windows.Documents;
+using System.Text;
 
 namespace NineSunScripture.util
 {
@@ -177,6 +179,47 @@ namespace NineSunScripture.util
                 return false;
             }
             return true;
+        }
+
+        public static bool IsListEmpty(List<Account> list)
+        {
+            if (null != list && list.Count > 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static void LogTradeFailedAccts(List<Account> accounts, Quotes quotes)
+        {
+            if (IsListEmpty(accounts))
+            {
+                return;
+            }
+            StringBuilder sb = new StringBuilder("");
+        }
+
+        public static void ShowRuntimeInfo(ITrade callback, string text)
+        {
+            if (null == callback || string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+            Logger.Log(text);
+            callback.OnTradeResult(1, text, "", false);
+        }
+
+        public static bool IsUpPeriod()
+        {
+            Dictionary<string, string> settings = JsonDataHelper.Instance.Settings;
+            if (null != settings && settings.ContainsKey("period"))
+            {
+                if (settings["period"].Equals("up"))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

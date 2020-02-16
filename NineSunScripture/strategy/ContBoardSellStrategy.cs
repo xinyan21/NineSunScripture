@@ -111,8 +111,7 @@ namespace NineSunScripture.strategy
             rwLockSlim.ExitWriteLock();
 
             Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
-            if (curPrice == lowLimit || null == position ||
-                quotes.LatestPrice == 0 || quotes.Buy1 == 0 || position.AvailableBalance == 0)
+            if (!BasicCheck(quotes, position, curPrice, lowLimit))
             {
                 return;
             }
@@ -127,7 +126,7 @@ namespace NineSunScripture.strategy
                 Logger.Log("收盘不板卖" + quotes.Name);
                 if (now.Minute >= 55 && curPrice < highLimit)
                 {
-                    SellByRatio(quotes, accounts, callback, 1);
+                    AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                 }
                 return;
             }
@@ -138,6 +137,32 @@ namespace NineSunScripture.strategy
             }
         }
 
+        /// <summary>
+        /// 卖点基础筛查，过滤无效的请求，不通过返回false，通过返回true
+        /// </summary>
+        /// <param name="quotes">股票对象</param>
+        /// <param name="position">持仓对象</param>
+        /// <param name="curPrice">当前价格</param>
+        /// <param name="lowLimit">跌停价</param>
+        /// <returns></returns>
+        private bool BasicCheck(Quotes quotes, Position position, float curPrice, float lowLimit)
+        {
+            if (curPrice == lowLimit || null == position ||
+               quotes.LatestPrice == 0 || quotes.Buy1 == 0 || position.AvailableBalance == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 止盈或者止损
+        /// </summary>
+        /// <param name="accounts">账户列表</param>
+        /// <param name="callback">回调</param>
+        /// <param name="quotes">股票对象</param>
+        /// <param name="avgCost">成本价</param>
+        /// <returns></returns>
         private bool StopWinOrLoss(
             List<Account> accounts, ITrade callback, Quotes quotes, float avgCost)
         {
@@ -155,13 +180,13 @@ namespace NineSunScripture.strategy
                     if (curPrice > open * 1.04)
                     {
                         Logger.Log("超低开拉升4%卖" + quotes.Name);
-                        SellByRatio(quotes, accounts, callback, 1);
+                        AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                         return false;
                     }
                     if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * TooWeakRatio)
                     {
                         Logger.Log("超低开10:10还小于-5%卖" + quotes.Name);
-                        SellByRatio(quotes, accounts, callback, 1);
+                        AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                         return false;
                     }
                 }
@@ -170,7 +195,7 @@ namespace NineSunScripture.strategy
                     if (curPrice <= avgCost * StopLossRatio || curPrice <= preClose * StopLossRatio)
                     {
                         Logger.Log("小于-8%卖" + quotes.Name);
-                        SellByRatio(quotes, accounts, callback, 1);
+                        AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                         return false;
                     }
                 }
@@ -193,7 +218,7 @@ namespace NineSunScripture.strategy
                 ticks[ticks.Length - 2].LatestPrice == highLimit && quotes.Buy1 < highLimit)
             {
                 Logger.Log("开板卖" + quotes.Name);
-                SellByRatio(quotes, accounts, callback, 1);
+                AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                 return;
             }
             if (curPrice == highLimit)
@@ -206,19 +231,19 @@ namespace NineSunScripture.strategy
                 if (curPrice <= preClose * NotGoodRatio)
                 {
                     Logger.Log("2:00小于1%卖" + quotes.Name);
-                    SellByRatio(quotes, accounts, callback, 1);
+                    AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                     return;
                 }
                 if (now.Minute >= 30 && curPrice <= preClose * GoodByeRatio)
                 {
                     Logger.Log("2:30小于5%卖" + quotes.Name);
-                    SellByRatio(quotes, accounts, callback, 1);
+                    AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                     return;
                 }
                 if (now.Minute >= 55 && curPrice < highLimit)
                 {
                     Logger.Log("收盘不板卖" + quotes.Name);
-                    SellByRatio(quotes, accounts, callback, 1);
+                    AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                     return;
                 }
             }
@@ -238,193 +263,62 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
+            float profitPct = (quotes.Buy1 / avgCost - 1) * 100;
+            if (profitPct < FirstClassStopWin)
+            {
+                return;
+            }
+            string log = "";
+            float stopWinPosition = 0;  //止盈仓位
+            if (profitPct > ThirdClassStopWin)
+            {
+                stopWinPosition = ThirdStopWinPosition;
+                log = "40%止盈1/2卖" + quotes.Name;
+            }
+            else if (profitPct > SecondClassStopWin)
+            {
+                stopWinPosition = SecondStopWinPosition;
+                log = "30%止盈1/2卖" + quotes.Name;
+            }
+            else if (profitPct > FirstClassStopWin)
+            {
+                stopWinPosition = FirstStopWinPosition;
+                log = "20%止盈3成卖" + quotes.Name;
+            }
+            Logger.Log(log);
+
             List<Task> tasks = new List<Task>();
+            List<Account> failAccts = new List<Account>();
+            short successCnt = 0;
             foreach (Account account in accounts)
             {
                 //每个账户开个线程去处理，账户间同时操作，效率提升大大的
                 tasks.Add(Task.Run(() =>
                 {
-                    float profit = quotes.Buy1 / avgCost * 100;
-                    if (profit < FirstClassStopWin)
-                    {
-                        return;
-                    }
-                    float stopWinPosition = 0;  //止盈仓位
-                    if (profit > ThirdClassStopWin)
-                    {
-                        stopWinPosition = ThirdStopWinPosition;
-                        Logger.Log("40%止盈1/2卖" + quotes.Name);
-                    }
-                    else if (profit > SecondClassStopWin)
-                    {
-                        stopWinPosition = SecondStopWinPosition;
-                        Logger.Log("30%止盈1/2卖" + quotes.Name);
-                    }
-                    else if (profit > FirstClassStopWin)
-                    {
-                        stopWinPosition = FirstStopWinPosition;
-                        Logger.Log("20%止盈3成卖" + quotes.Name);
-                    }
                     if (stopWinPosition > 0 && !AccountHelper.IsSoldToday(account, quotes, callback))
                     {
-                        SellWithAcct(quotes, account, callback, stopWinPosition);
-                    }
-                }));
-            }
-            Task.WaitAll(tasks.ToArray());
-        }
-
-        /// <summary>
-        /// 单个账户卖出，多线程操作，引用对象修相当于外部变量要加锁或者新建个局部变量替换
-        /// </summary>
-        /// <param name="quotes">行情对象</param>
-        /// <param name="account">账户对象</param>
-        /// <param name="sellRatio">卖出比例</param>
-        public static void SellWithAcct(
-            Quotes stock, Account account, ITrade callback, float sellRatio)
-        {
-            if (null == stock || null == account)
-            {
-                return;
-            }
-            Quotes quotes = new Quotes
-            {
-                Code = stock.Code,
-                Name = stock.Name,
-                //这里要把输入的价格传进来，否则就查询最新价格直接卖出了
-                Buy2 = stock.Buy2
-            };
-            try
-            {
-                //这里必须查询最新持仓，连续触发卖点信号会使得卖出失败导致策略重启
-                account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
-                Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
-                if (null == position || position.AvailableBalance == 0)
-                {
-                    return;
-                }
-                if (quotes.Buy2 == 0)
-                {
-                    string name = quotes.Name;
-                    quotes = PriceAPI.QueryTenthGearPrice(account.TradeSessionId, quotes.Code);
-                    //这个行情接口不返回name
-                    quotes.Name = name;
-                }
-                Order order = new Order();
-                order.TradeSessionId = account.TradeSessionId;
-                order.Code = quotes.Code;
-                order.Price = quotes.Buy2;
-                order.Quantity = position.AvailableBalance;
-                ApiHelper.SetShareholderAcct(account, quotes, order);
-                if (sellRatio > 0)
-                {
-                    order.Quantity = Utils.FixQuantity((int)(order.Quantity * sellRatio));
-                }
-                if (order.Quantity == 0)
-                {
-                    return;
-                }
-                int rspCode = TradeAPI.Sell(order);
-                string opLog = "资金账号【" + account.FundAcct + "】" + "策略卖出【" + quotes.Name + "】"
-                    + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
-                Logger.Log(opLog + "》" + order.StrErrorInfo);
-                //TODO 这里会导致运行日志添加崩溃，后面再解决
-              /*  if (null != callback)
-                {
-                    callback.OnTradeResult(
-                        rspCode, opLog, ApiHelper.ParseErrInfo(order.PtrErrorInfo), false);
-                }*/
-            }
-            catch (ApiTimeoutException e)
-            {
-                ApiHelper.HandleCriticalException(e, e.Message, callback);
-            }
-            catch (Exception e)
-            {
-                Logger.Exception(e);
-            }
-        }
-
-        /// <summary>
-        /// 多账户卖出
-        /// </summary>
-        /// <param name="quotes">行情对象</param>
-        /// <param name="accounts">账户数组</param>
-        /// <param name="sellRatio">卖出比例</param>
-        public static void SellByRatio(
-            Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
-        {
-            if (null == accounts)
-            {
-                return;
-            }
-            List<Task> tasks = new List<Task>();
-            foreach (Account account in accounts)
-            {
-                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                tasks.Add(Task.Run(() =>
-                {
-                    SellWithAcct(quotes, account, callback, sellRatio);
-                }));
-            }
-            Task.WaitAll(tasks.ToArray());
-        }
-
-        /// <summary>
-        /// 一键清仓，挂当前价-5%的价格砸，最低价是跌停价砸
-        /// </summary>
-        /// <param name="accounts">账户列表</param>
-        /// <param name="callback">交易接口回调</param>
-        public static void SellAll(List<Account> accounts, ITrade callback)
-        {
-            if (null == accounts)
-            {
-                return;
-            }
-            List<Position> positions;
-            List<Task> tasks = new List<Task>();
-            foreach (Account account in accounts)
-            {
-                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
-                tasks.Add(Task.Run(() =>
-                {
-                    try
-                    {
-                        positions = TradeAPI.QueryPositions(account.TradeSessionId);
-                        if (null == positions || positions.Count == 0)
+                        int code = AccountHelper.SellWithAcct(quotes, account, callback, stopWinPosition);
+                        lock (failAccts)
                         {
-                            return;
-                        }
-                        foreach (Position position in positions)
-                        {
-                            if (0 == position.AvailableBalance)
+                            if (code <= 0)
                             {
-                                continue;
+                                failAccts.Add(account);
                             }
-                            Quotes quotes
-                            = PriceAPI.QueryTenthGearPrice(account.TradeSessionId, position.Code);
-                            quotes.Buy2 = quotes.LatestPrice * 0.95f;
-                            quotes.Name = position.Name;
-                            if (quotes.Buy2 < quotes.LowLimit)
+                            if (code != 888)
                             {
-                                quotes.Buy2 = quotes.LowLimit;
+                                successCnt++;
                             }
-                            quotes.Buy2 = Utils.FormatTo2Digits(quotes.Buy2);
-
-                            SellWithAcct(quotes, account, callback, 1);
                         }
                     }
-                    catch (ApiTimeoutException e)
-                    {
-                        ApiHelper.HandleCriticalException(e, e.Message, callback);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Exception(e);
-                    }
                 }));
             }
             Task.WaitAll(tasks.ToArray());
+            if (null != callback && stopWinPosition > 0)
+            {
+                string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
+                    + successCnt + "个，失败账户" + failAccts.Count + "个";
+                callback.OnTradeResult(1, tradeResult, "", false);
+            }
         }
 
         /// <summary>
@@ -446,32 +340,37 @@ namespace NineSunScripture.strategy
                && ticks.Last().Buy1Vol * quotes.HighLimit < MinSealMoneyToSell * 10000)
             {
                 Logger.Log("封单减少到1000万以下清" + quotes.Name);
-                SellByRatio(quotes, accounts, callback, 1);
+                AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                 return;
             }
             if (ticks.First().Buy1Vol * quotes.HighLimit > SealMoneyBeginToDecrease * 10000
                 && ticks.Last().Buy1Vol * quotes.HighLimit < MaxSealMoneyToSell * 10000)
             {
                 Logger.Log("封单减少到1500万以下卖1/2" + quotes.Name);
-                SellByRatio(quotes, accounts, callback, 0.5f);
+                AccountHelper.SellByRatio(quotes, accounts, callback, 0.5f);
             }
         }
 
         /// <summary>
-        /// 3板一下卖点
+        /// 3板以下止盈卖点
         /// </summary>
-        /// <param name="accounts"></param>
-        /// <param name="quotes"></param>
-        /// <param name="callback"></param>
+        /// <param name="accounts">账户列表</param>
+        /// <param name="quotes">股票对象</param>
+        /// <param name="callback">日志回显接口</param>
         private void StopWinForLessThan3Boards(
             List<Account> accounts, Quotes quotes, ITrade callback)
         {
             if (null == accounts || null == quotes ||
-                quotes.ContBoards >= 3 || quotes.Sell1 / quotes.PreClose < Less3BoardsStopWinRatio)
+                quotes.ContBoards >= 3 || quotes.Sell1 / quotes.AvgCost < Less3BoardsStopWinRatio)
             {
                 return;
             }
+            string log = " 3板以下止盈卖【"
+                + quotes.Name + "】" + Less3BoardsStopWinPosition * 100 + "%仓位";
+            Utils.ShowRuntimeInfo(callback, log);
+
             List<Task> tasks = new List<Task>();
+            List<Account> failAccts = new List<Account>();
             foreach (Account account in accounts)
             {
                 tasks.Add(Task.Run(() =>
@@ -480,10 +379,21 @@ namespace NineSunScripture.strategy
                     {
                         return;
                     }
-                    SellWithAcct(quotes, account, callback, Less3BoardsStopWinPosition);
+                    int code = AccountHelper.SellWithAcct(
+                        quotes, account, callback, Less3BoardsStopWinPosition);
+                    lock (failAccts)
+                    {
+                        if (code <= 0)
+                        {
+                            failAccts.Add(account);
+                        }
+                    }
                 }));
             }
             Task.WaitAll(tasks.ToArray());
+            string tradeResult = "3板以下止盈卖结果：成功账户"
+                + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
+            Utils.ShowRuntimeInfo(callback, tradeResult);
         }
     }
 }

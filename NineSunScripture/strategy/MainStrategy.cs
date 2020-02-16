@@ -42,8 +42,7 @@ namespace NineSunScripture.strategy
 
         private short queryPriceErrorCnt = 0;
         private bool isHoliday;
-        //涨跌停是否初始化（由于推送接口不推送这2个值，所以需要开盘的时候查出来存着）
-        private bool isLimitInited = false;
+        private bool isMarketOpen = false;
 
         //stocks是供买入的股票池，stocksForPrice是用来查询行情的股票池（包括卖的）
         private List<Quotes> stocksForPrice;
@@ -105,7 +104,6 @@ namespace NineSunScripture.strategy
                     callback.OnTradeResult(0, "策略启动", "现在是假期", false);
                     return;
                 }
-                PrepareStocksAndSubPrice();
                 while (true)
                 {
                     Thread.Sleep(cycleTime);
@@ -119,15 +117,8 @@ namespace NineSunScripture.strategy
                         ReverseRepurchaseBonds();
                         continue;
                     }
-                    if (!isLimitInited)
-                    {
-                        if ((DateTime.Now.Hour == 9 && DateTime.Now.Minute >= 30)
-                            || DateTime.Now.Hour >= 10)
-                        {
-                            InitLimitPrice();
-                            isLimitInited = true;
-                        }
-                    }
+                    OpenMarket();
+                    CloseMarket();
                     UpdateTotalAccountInfo(true);
                     if (null != showWorkingSatus)
                     {
@@ -140,7 +131,30 @@ namespace NineSunScripture.strategy
                 Logger.Exception(e);
                 if (null != callback)
                 {
-                    callback.OnTradeResult(0, "InitStrategy", e.Message, true);
+                    callback.OnTradeResult(0, "InitStrategy", e.Message, false);
+                }
+            }
+        }
+
+        private void CloseMarket()
+        {
+            if (isMarketOpen && DateTime.Now.Hour >= 15)
+            {
+                UnsubscribeAll();
+                isMarketOpen = false;
+            }
+        }
+
+        private void OpenMarket()
+        {
+            if (!isMarketOpen)
+            {
+                if (((DateTime.Now.Hour == 9 && DateTime.Now.Minute >= 30)
+                    || DateTime.Now.Hour >= 10) && DateTime.Now.Hour < 15)
+                {
+                    InitLimitPrice();
+                    PrepareStocksAndSubPrice();
+                    isMarketOpen = true;
                 }
             }
         }
@@ -165,11 +179,11 @@ namespace NineSunScripture.strategy
                     }
                 }
             }
-            if (stocksForPrice.Count > 0)
+            if (!Utils.IsListEmpty(stocksForPrice))
             {
-                for (int i = 0; i < stocksForPrice.Count; i++)
+                foreach (var item in stocksForPrice)
                 {
-                    EditStockSub(stocksForPrice[i], true, PriceAPI.PushTypeTenGear);
+                    EditStockSub(item, true, PriceAPI.PushTypeTenGear);
                 }
             }
             else
@@ -375,6 +389,7 @@ namespace NineSunScripture.strategy
             }
 
             Stop();
+            Thread.Sleep(2000);
             strategyThread = new Thread(InitStrategy);
             strategyThread.Start();
 
@@ -525,7 +540,7 @@ namespace NineSunScripture.strategy
             }
             if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 24)
             {
-                isLimitInited = false;
+                isMarketOpen = false;
                 return false;
             }
 
@@ -555,12 +570,12 @@ namespace NineSunScripture.strategy
 
         public void SellAll(ITrade callBack)
         {
-            if (null == accounts || accounts.Count == 0)
+            if (Utils.IsListEmpty(accounts))
             {
                 MessageBox.Show("没有可操作的账户");
                 return;
             }
-            ContBoardSellStrategy.SellAll(accounts, callBack);
+            AccountHelper.SellAll(accounts, callBack);
         }
 
         public void SellStock(Quotes quotes, ITrade callBack)
@@ -570,7 +585,7 @@ namespace NineSunScripture.strategy
                 MessageBox.Show("没有可操作的账户");
                 return;
             }
-            ContBoardSellStrategy.SellByRatio(quotes, accounts, callBack, 1);
+            AccountHelper.SellByRatio(quotes, accounts, callBack, 1);
         }
 
         public void SetFundListener(IAcctInfoListener fundListener)

@@ -61,7 +61,7 @@ namespace NineSunScripture.trade.structApi.api
         private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim();
 
         /// <summary>
-        /// 十档行情，支持level2高速行情（没有成交额），这2个接口都没有股票名称，日
+        /// 十档行情，没有股票名称
         /// </summary>
         /// <param name="priceSessionId">行情会话Id</param>
         /// <param name="code">股票代码</param>
@@ -69,6 +69,7 @@ namespace NineSunScripture.trade.structApi.api
         public static Quotes QueryTenthGearPrice(int priceSessionId, string code)
         {
             Quotes quotes = new Quotes();
+            //有的接口就是不能用封装在对象里面的那种形式，只能采取下面这种不封装的形式
             rwls.EnterWriteLock();
             IntPtr result = Marshal.AllocCoTaskMem(1024 * 1024);
             IntPtr errorInfo = Marshal.AllocCoTaskMem(256);
@@ -76,7 +77,7 @@ namespace NineSunScripture.trade.structApi.api
             try
             {
                 int rspCode
-                   = HQ_QueryData(priceSessionId, 1, code, "", result, errorInfo);
+                   = HQ_QueryData(priceSessionId, 0, code, "", result, errorInfo);
                 ApiHelper.HandleTimeOut(errorInfo);
                 quotes.StrErrorInfo = ApiHelper.ParseErrInfo(errorInfo);
                 if (rspCode > 0)
@@ -122,31 +123,6 @@ namespace NineSunScripture.trade.structApi.api
                 Marshal.FreeCoTaskMem(errorInfo);
                 rwls.ExitWriteLock();
             }
-            /*if (MainStrategy.IsTest
-                   && quotes.Code.Equals("300643") && DateTime.Now.Second == 30)
-               {
-                   quotes = TradeTestCase.ConstructHitBoardData(quotes);
-                   Logger.Log("ConstructHitBoardData for 300643 is ready>" + quotes.ToString());
-               }
-               if (MainStrategy.IsTest
-              && quotes.Code.Equals("002351") && DateTime.Now.Second == 0)
-            {
-                quotes = TradeTestCase.ConstructHitBoardData(quotes);
-                Logger.Log("ConstructHitBoardData for 300643 is ready>" + quotes.ToString());
-            }*/
-          /*  quotes.Code = "000004";
-            quotes.HighLimit = 24.55f;
-            quotes.Open = 22;
-            quotes.Buy1 = 22.3f;
-            quotes.PreClose = 22.3f;
-            quotes.Name = "国农科技";
-            quotes.Buy1Vol = 100000;
-            quotes.Sell1 = 22.32f;
-            quotes.Sell1Vol = 10000;
-            quotes.Sell2 = 22.33f;
-            quotes.Sell2Vol = 10000;
-            quotes.Money = 100000000;
-            quotes.LatestPrice = quotes.Sell1;*/
             return quotes;
         }
     }

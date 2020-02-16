@@ -161,6 +161,11 @@ namespace NineSunScripture.model
         /// </summary>
         private bool isOByOComissionSubscribed;
 
+        /// <summary>
+        /// 回封是否买回
+        /// </summary>
+        private bool isBuyBackWhenReboard = true;
+
         public string Code { get => code; set => code = value; }
         public string Name { get => name; set => name = value; }
         public float PreClose { get => preClose; set => preClose = value; }
@@ -211,6 +216,10 @@ namespace NineSunScripture.model
         public bool IsOByOComissionSubscribed
         {
             get => isOByOComissionSubscribed; set => isOByOComissionSubscribed = value;
+        }
+        public bool IsBuyBackWhenReboard
+        { 
+            get => isBuyBackWhenReboard; set => isBuyBackWhenReboard = value;
         }
 
         public bool Equals(Quotes other)

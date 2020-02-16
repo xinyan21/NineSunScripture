@@ -120,5 +120,26 @@ namespace NineSunScripture.util.test
 
             new ContBoardSellStrategy().Sell(quotes, accounts, null);
         }
+
+        public void TestStopWinOfLess2Boards(List<Account> accounts,ITrade callback)
+        {
+            Quotes quotes = new Quotes();
+            quotes.Code = "002079";
+            quotes.Name = "苏州固锝";
+            quotes.PreClose = 14.95f;
+            quotes.Buy1 = 15.3f;
+            quotes.Buy1Vol = 10000;
+            quotes.Sell1 = 15.4f;
+            quotes.HighLimit = 16.45f;
+            quotes.Money = 5000 * 10000;
+            quotes.MoneyCtrl = 1000;
+            quotes.PositionCtrl = 0.1f;
+            quotes.LatestPrice = quotes.Buy1;
+            quotes.Open = 15;
+            quotes.LowLimit = 13.46f;
+            quotes.ContBoards = 2;
+
+            new ContBoardSellStrategy().Sell(quotes, accounts, callback);
+        }
     }
 }

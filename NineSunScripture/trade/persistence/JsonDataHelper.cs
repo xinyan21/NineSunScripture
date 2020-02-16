@@ -4,32 +4,48 @@ using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NineSunScripture.trade.persistence
 {
     /// <summary>
-    /// 将账户和股票持久化到json文件，方便使用
+    /// 将账户和股票持久化到json文件，方便使用，
+    /// 为防止多线程调用导致数据错误，特使用线程安全的单例模式
     /// </summary>
-    public static class JsonDataHelper
+    public sealed class JsonDataHelper
     {
         private static string baseDir = Environment.CurrentDirectory + @"\data\";
         private static string acctsFilePath = baseDir + "accounts.json";
         private static string stocksFilePath = baseDir + "stocks.json";
+        private static string settingsFilePath = baseDir + "settings.json";
+
+        private Dictionary<string, string> settings;
+        private static readonly Lazy<JsonDataHelper> lazy
+            = new Lazy<JsonDataHelper>(() => new JsonDataHelper());
+
+        public static JsonDataHelper Instance { get { return lazy.Value; } }
+
+        public Dictionary<string, string> Settings { get => settings; set => settings = value; }
+
+        private JsonDataHelper()
+        {
+            Settings = GetSettings();
+        }
 
         /// <summary>
         /// 获取所有账号，账号由人工编辑json文件，方便快捷
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static List<Account> GetAccounts()
+        public List<Account> GetAccounts()
         {
             List<Account> accounts = null;
             try
             {
+                if (!File.Exists(acctsFilePath))
+                {
+                    File.Create(acctsFilePath);
+                }
                 accounts
                     = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(acctsFilePath));
             }
@@ -42,32 +58,61 @@ namespace NineSunScripture.trade.persistence
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void InitTotalAsset(Account account)
+        public void InitTotalAsset(Account account)
         {
             List<Account> accounts = GetAccounts();
             if (null == accounts || null == account)
             {
                 return;
             }
-            Account temp = accounts.Find(item => account.FundAcct == item.FundAcct);
-            if (null == temp)
+            Account item = accounts.Find(i => account.FundAcct == i.FundAcct);
+            if (null == item)
             {
                 Logger.Log("Set account init total asset  failed, cannot found this account. " + account);
                 return;
             }
-            temp.InitTotalAsset = account.InitTotalAsset;
+            item.InitTotalAsset = account.InitTotalAsset;
             SaveAccounts(accounts);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private Dictionary<string, string> GetSettings()
+        {
+            Dictionary<string, string> settings = null;
+            try
+            {
+                if (!File.Exists(settingsFilePath))
+                {
+                    File.Create(settingsFilePath);
+                }
+                settings = JsonConvert
+                    .DeserializeObject<Dictionary<string, string>>(File.ReadAllText(settingsFilePath));
+                if (null == settings)
+                {
+                    settings = new Dictionary<string, string>();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log("GetSettings exception: " + e.Message);
+                Logger.Exception(e);
+            }
+            return settings;
         }
 
         /// <summary>
         /// 获取股票池所有股票
         /// </summary>
         /// <returns></returns>
-        public static List<Quotes> GetStocks()
+        public List<Quotes> GetStocks()
         {
             List<Quotes> stocks = null;
             try
             {
+                if (!File.Exists(stocksFilePath))
+                {
+                    File.Create(stocksFilePath);
+                }
                 stocks
                     = JsonConvert.DeserializeObject<List<Quotes>>(File.ReadAllText(stocksFilePath));
             }
@@ -79,18 +124,18 @@ namespace NineSunScripture.trade.persistence
             return stocks;
         }
 
-        public static List<Quotes> GetStocksByOperation(short operation)
+        public List<Quotes> GetStocksByOperation(short operation)
         {
             List<Quotes> stocks = GetStocks();
             if (null == stocks || stocks.Count == 0)
             {
                 return null;
             }
-            List<Quotes> result = stocks.FindAll(temp => temp.Operation == operation);
+            List<Quotes> result = stocks.FindAll(item => item.Operation == operation);
             return result;
         }
 
-        public static List<Quotes> GetStocksByCatgory(short operation, short category)
+        public List<Quotes> GetStocksByCatgory(short operation, short category)
         {
             List<Quotes> stocks = GetStocks();
             if (null == stocks || stocks.Count == 0)
@@ -98,7 +143,7 @@ namespace NineSunScripture.trade.persistence
                 return null;
             }
             List<Quotes> result = stocks.FindAll(
-                temp => temp.StockCategory == category && temp.Operation == operation);
+                item => item.StockCategory == category && item.Operation == operation);
             return result;
         }
 
@@ -107,7 +152,7 @@ namespace NineSunScripture.trade.persistence
         /// </summary>
         /// <param name="quotes">个股</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void AddStock(Quotes quotes)
+        public void AddStock(Quotes quotes)
         {
             List<Quotes> stocks = GetStocks();
             if (null == stocks)
@@ -115,26 +160,28 @@ namespace NineSunScripture.trade.persistence
                 stocks = new List<Quotes>();
             }
             if (!stocks.Exists(
-                temp => temp.Code == quotes.Code && temp.Operation == quotes.Operation &&
-                 temp.StockCategory == quotes.StockCategory))
+                item => item.Code == quotes.Code && item.Operation == quotes.Operation &&
+                 item.StockCategory == quotes.StockCategory))
             {
                 stocks.Add(quotes);
             }
             SaveStocks(stocks);
         }
 
-        public static void DelStockByCode(string code, short operation)
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void DelStockByCode(string code, short operation)
         {
             List<Quotes> stocks = GetStocks();
             if (null == stocks || stocks.Count == 0)
             {
                 return;
             }
-            stocks.RemoveAll(temp => temp.Code == code && temp.Operation == operation);
+            stocks.RemoveAll(item => item.Code == code && item.Operation == operation);
             SaveStocks(stocks);
         }
 
-        public static void DelStocksByCategory(short operation, short category)
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void DelStocksByCategory(short operation, short category)
         {
             List<Quotes> stocks = GetStocks();
             if (null == stocks || stocks.Count == 0)
@@ -142,16 +189,18 @@ namespace NineSunScripture.trade.persistence
                 return;
             }
             stocks.RemoveAll(
-                temp => temp.StockCategory == category && temp.Operation == operation);
+                item => item.StockCategory == category && item.Operation == operation);
             SaveStocks(stocks);
         }
 
-        public static void ClearStocks()
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void ClearStocks()
         {
             SaveStocks(new List<Quotes>());
         }
 
-        private static void SaveStocks(List<Quotes> quotes)
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void SaveStocks(List<Quotes> quotes)
         {
             try
             {
@@ -171,7 +220,8 @@ namespace NineSunScripture.trade.persistence
             }
         }
 
-        private static void SaveAccounts(List<Account> accounts)
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void SaveAccounts(List<Account> accounts)
         {
             try
             {
@@ -184,6 +234,28 @@ namespace NineSunScripture.trade.persistence
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.Serialize(file, accounts);
                 }
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SaveSettings(Dictionary<string, string> settings)
+        {
+            try
+            {
+                if (!Directory.Exists(baseDir))
+                {
+                    Directory.CreateDirectory(baseDir);
+                }
+                using (StreamWriter file = File.CreateText(settingsFilePath))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.Serialize(file, settings);
+                }
+                Settings = settings;
             }
             catch (Exception e)
             {

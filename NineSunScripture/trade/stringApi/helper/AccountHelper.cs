@@ -41,7 +41,7 @@ namespace NineSunScripture.trade.helper
         /// <param name="callback">回调接口</param>
         public static List<Account> Login(ITrade callback)
         {
-            List<Account> dbAccounts = JsonDataHelper.GetAccounts();
+            List<Account> dbAccounts = JsonDataHelper.Instance.GetAccounts();
             Account mainAcct = GetMainAccount();
             dbAccounts.Insert(0, mainAcct);
             if (null == dbAccounts || dbAccounts.Count == 0)
@@ -78,7 +78,7 @@ namespace NineSunScripture.trade.helper
                     if (account.InitTotalAsset == 0)
                     {
                         account.InitTotalAsset = (int)account.Funds.TotalAsset;
-                        JsonDataHelper.InitTotalAsset(account);
+                        JsonDataHelper.Instance.InitTotalAsset(account);
                     }
                     if (account.ShareHolderAccts.Count > 0)
                     {

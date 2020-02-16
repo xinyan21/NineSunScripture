@@ -2,6 +2,7 @@
 using NineSunScripture.strategy;
 using NineSunScripture.trade.persistence;
 using NineSunScripture.trade.structApi.api;
+using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
@@ -66,7 +67,7 @@ namespace NineSunScripture.trade.structApi.helper
         /// <param name="callback">回调接口</param>
         public static List<Account> Login(ITrade callback)
         {
-            List<Account> localAccounts = JsonDataHelper.GetAccounts();
+            List<Account> localAccounts = JsonDataHelper.Instance.GetAccounts();
             Account mainAcct = MainStrategy.IsTest ? GetTestMainAccount() : GetPrdMainAccount();
             //TODO TESET CODE
             //mainAcct = GetPrdMainAccount();
@@ -142,7 +143,7 @@ namespace NineSunScripture.trade.structApi.helper
                             if (account.InitTotalAsset == 0)
                             {
                                 account.InitTotalAsset = (int)account.Funds.TotalAsset;
-                                JsonDataHelper.InitTotalAsset(account);
+                                JsonDataHelper.Instance.InitTotalAsset(account);
                             }
                             if (null != account.ShareHolderAccts && account.ShareHolderAccts.Count > 0)
                             {
@@ -638,7 +639,7 @@ namespace NineSunScripture.trade.structApi.helper
                 return;
             }
             string code = "131810";
-            Quotes quotes = PriceAPI.QueryTenthGearPrice(mainAcct.TradeSessionId, code);
+            Quotes quotes = PriceAPI.QueryTenthGearPrice(mainAcct.PriceSessionId, code);
             List<Task> tasks = new List<Task>();
             foreach (Account account in accounts)
             {
@@ -722,6 +723,182 @@ namespace NineSunScripture.trade.structApi.helper
                 Logger.Exception(e);
             }
             return isSoldToday;
+        }
+
+        /// <summary>
+        /// 一键清仓，挂当前价-5%的价格砸，最低价是跌停价砸
+        /// </summary>
+        /// <param name="accounts">账户列表</param>
+        /// <param name="callback">交易接口回调</param>
+        public static void SellAll(List<Account> accounts, ITrade callback)
+        {
+            if (null == accounts)
+            {
+                return;
+            }
+            List<Position> positions;
+            List<Task> tasks = new List<Task>();
+            List<Account> failAccts = new List<Account>();
+            foreach (Account account in accounts)
+            {
+                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
+                tasks.Add(Task.Run(() =>
+                {
+                    try
+                    {
+                        positions = TradeAPI.QueryPositions(account.TradeSessionId);
+                        if (null == positions || positions.Count == 0)
+                        {
+                            return;
+                        }
+                        foreach (Position position in positions)
+                        {
+                            if (0 == position.AvailableBalance)
+                            {
+                                continue;
+                            }
+                            Quotes quotes
+                            = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, position.Code);
+                            quotes.Buy2 = quotes.LatestPrice * 0.95f;
+                            quotes.Name = position.Name;
+                            if (quotes.Buy2 < quotes.LowLimit)
+                            {
+                                quotes.Buy2 = quotes.LowLimit;
+                            }
+                            quotes.Buy2 = Utils.FormatTo2Digits(quotes.Buy2);
+                            int code = SellWithAcct(quotes, account, callback, 1);
+                            lock (failAccts)
+                            {
+                                if (code <= 0)
+                                {
+                                    failAccts.Add(account);
+                                }
+                            }
+                        }
+                    }
+                    catch (ApiTimeoutException e)
+                    {
+                        ApiHelper.HandleCriticalException(e, e.Message, callback);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Exception(e);
+                    }
+                }));
+            }
+            Task.WaitAll(tasks.ToArray());
+            if (null != callback)
+            {
+                string tradeResult = "一键清仓结果：成功账户"
+                    + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
+                callback.OnTradeResult(1, tradeResult, "", false);
+            }
+        }
+
+
+        /// <summary>
+        /// 单个账户卖出，多线程操作，引用对象修相当于外部变量要加锁或者新建个局部变量替换
+        /// </summary>
+        /// <param name="quotes">行情对象</param>
+        /// <param name="account">账户对象</param>
+        /// <param name="sellRatio">卖出比例</param>
+        public static int SellWithAcct(
+            Quotes stock, Account account, ITrade callback, float sellRatio)
+        {
+            if (null == stock || null == account)
+            {
+                return 888;
+            }
+            Quotes quotes = new Quotes
+            {
+                Code = stock.Code,
+                Name = stock.Name,
+                //这里要把输入的价格传进来，否则就查询最新价格直接卖出了
+                Buy2 = stock.Buy2
+            };
+            try
+            {
+                //这里必须查询最新持仓，连续触发卖点信号会使得卖出失败导致策略重启
+                account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
+                Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
+                if (null == position || position.AvailableBalance == 0)
+                {
+                    return 888;
+                }
+                if (quotes.Buy2 == 0)
+                {
+                    string name = quotes.Name;
+                    quotes = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, quotes.Code);
+                    //这个行情接口不返回name
+                    quotes.Name = name;
+                }
+                Order order = new Order();
+                order.TradeSessionId = account.TradeSessionId;
+                order.Code = quotes.Code;
+                order.Price = quotes.Buy2;
+                order.Quantity = position.AvailableBalance;
+                ApiHelper.SetShareholderAcct(account, quotes, order);
+                if (sellRatio > 0)
+                {
+                    order.Quantity = Utils.FixQuantity((int)(order.Quantity * sellRatio));
+                }
+                if (order.Quantity == 0)
+                {
+                    return 888;
+                }
+                int rspCode = TradeAPI.Sell(order);
+                string opLog = "资金账号【" + account.FundAcct + "】" + "策略卖出【" + quotes.Name + "】"
+                    + (order.Quantity * order.Price / 10000).ToString("0.00####") + "万元";
+                string tradeResult = rspCode > 0 ? "#成功" : "#失败：" + order.StrErrorInfo;
+                Logger.Log(opLog + tradeResult);
+                return rspCode;
+            }
+            catch (ApiTimeoutException e)
+            {
+                ApiHelper.HandleCriticalException(e, e.Message, callback);
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
+            }
+            return 888;
+        }
+
+        /// <summary>
+        /// 多账户卖出
+        /// </summary>
+        /// <param name="quotes">行情对象</param>
+        /// <param name="accounts">账户数组</param>
+        /// <param name="sellRatio">卖出比例</param>
+        public static void SellByRatio(
+            Quotes quotes, List<Account> accounts, ITrade callback, float sellRatio)
+        {
+            if (null == accounts || null == quotes)
+            {
+                return;
+            }
+            List<Task> tasks = new List<Task>();
+            List<Account> failAccts = new List<Account>();
+            foreach (Account account in accounts)
+            {
+                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
+                tasks.Add(Task.Run(() =>
+                {
+                    int code = SellWithAcct(quotes, account, callback, sellRatio);
+                    lock (failAccts)
+                    {
+                        if (code <= 0)
+                        {
+                            failAccts.Add(account);
+                        }
+                    }
+                }));
+            }
+            Task.WaitAll(tasks.ToArray());
+            string tradeResult
+                = "【" + quotes.Name + "】卖出" + sellRatio * 100 + "%仓位结果：成功账户"
+                + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
+            Utils.ShowRuntimeInfo(callback, tradeResult);
         }
     }
 }

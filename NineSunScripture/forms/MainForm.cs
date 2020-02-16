@@ -9,7 +9,6 @@ using NineSunScripture.util.test;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -47,10 +46,30 @@ namespace NineSunScripture
             mainStrategy.SetShowWorkingStatus(this);
             imgTaiJi = Properties.Resources.taiji;
 
+            Dictionary<string, string> settings = JsonDataHelper.Instance.Settings;
+            if (null != settings)
+            {
+                if (!settings.ContainsKey("period"))
+                {
+                    settings.Add("period", "up");
+                    JsonDataHelper.Instance.SaveSettings(settings);
+                }
+                if (settings["period"].Equals("up"))
+                {
+                    btnPeriod.Text = "上升期";
+                    btnPeriod.BackColor = Color.Red;
+                }
+                else
+                {
+                    btnPeriod.Text = "下降期";
+                    btnPeriod.BackColor = Color.Green;
+                }
+            }
+
             //Start strategy
             Task.Run(() =>
             {
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
                 RebootStrategy();
             });
         }
@@ -138,7 +157,7 @@ namespace NineSunScripture
             lvStocks.Groups.Add(lvgPositions);
 
             ListViewItem lvi;
-            List<Quotes> quotes = JsonDataHelper.GetStocksByCatgory(
+            List<Quotes> quotes = JsonDataHelper.Instance.GetStocksByCatgory(
                 Quotes.OperationBuy, Quotes.CategoryDragonLeader);
             dragonLeaders = quotes;
             if (!Utils.IsListEmpty(quotes))
@@ -152,7 +171,7 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            longTermStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+            longTermStocks = quotes = JsonDataHelper.Instance.GetStocksByCatgory(
                 Quotes.OperationBuy, Quotes.CategoryLongTerm);
             if (!Utils.IsListEmpty(quotes))
             {
@@ -165,7 +184,7 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            bandStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+            bandStocks = quotes = JsonDataHelper.Instance.GetStocksByCatgory(
                 Quotes.OperationBuy, Quotes.CategoryBand);
             if (!Utils.IsListEmpty(quotes))
             {
@@ -178,7 +197,7 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            weakTurnStrongStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+            weakTurnStrongStocks = quotes = JsonDataHelper.Instance.GetStocksByCatgory(
                 Quotes.OperationBuy, Quotes.CategoryWeakTurnStrong);
             if (!Utils.IsListEmpty(quotes))
             {
@@ -191,7 +210,7 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            latestStocks = quotes = JsonDataHelper.GetStocksByCatgory(
+            latestStocks = quotes = JsonDataHelper.Instance.GetStocksByCatgory(
                 Quotes.OperationBuy, Quotes.CategoryLatest);
             if (!Utils.IsListEmpty(quotes))
             {
@@ -204,7 +223,7 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            positionStocks = quotes = JsonDataHelper.GetStocksByOperation(Quotes.OperationSell);
+            positionStocks = quotes = JsonDataHelper.Instance.GetStocksByOperation(Quotes.OperationSell);
             if (!Utils.IsListEmpty(quotes))
             {
                 foreach (Quotes item in quotes)
@@ -277,9 +296,9 @@ namespace NineSunScripture
                 ListViewItem lvi = new ListViewItem(position.Name);
                 lvi.SubItems.Add(position.StockBalance + "");
                 lvi.SubItems.Add(position.AvailableBalance + "");
-                lvi.SubItems.Add(position.ProfitAndLoss + "");
-                lvi.SubItems.Add(position.ProfitAndLossPct + "%");
-                lvi.SubItems.Add(position.StockBalance * position.Price + "");
+                lvi.SubItems.Add(Math.Round(position.ProfitAndLoss / 10000, 2) + "万");
+                lvi.SubItems.Add(Math.Round(position.ProfitAndLossPct, 1) + "%");
+                lvi.SubItems.Add(Math.Round(position.MarketValue / 10000, 2) + "万");
                 if (null != account.Funds && account.Funds.TotalAsset > 0)
                 {
                     int positionRatio = (int)(position.MarketValue / account.Funds.TotalAsset * 100);
@@ -306,7 +325,7 @@ namespace NineSunScripture
                 lvi.SubItems.Add(order.Operation + "");
                 lvi.SubItems.Add(order.Quantity + "");
                 lvi.SubItems.Add(order.TransactionQuantity + "");
-                lvi.SubItems.Add(order.Price + "");
+                lvi.SubItems.Add(Math.Round(order.Price, 2) + "");
                 lvi.SubItems.Add(order.TransactionPrice + "");
                 lvi.SubItems.Add(order.CanceledQuantity + "");
                 lvi.Tag = order;
@@ -326,7 +345,7 @@ namespace NineSunScripture
             {
                 return;
             }
-            JsonDataHelper.AddStock(quotes);
+            JsonDataHelper.Instance.AddStock(quotes);
             string runtimeInfo = "新增股票【" + quotes.Name + "】";
             AddRuntimeInfo(runtimeInfo);
             RefreshStocksListView();
@@ -385,7 +404,6 @@ namespace NineSunScripture
             Logger.Log("OnTradeResult：" + rspCode + ">" + msg);
             if (rspCode > 0)
             {
-                //mainStrategy.UpdateTotalAccountInfo(false);
                 string runtimeInfo = msg + ">成功";
                 AddRuntimeInfo(runtimeInfo);
             }
@@ -492,7 +510,7 @@ namespace NineSunScripture
             if (dr == DialogResult.OK)
             {
                 lvStocks.Items.Clear();
-                JsonDataHelper.ClearStocks();
+                JsonDataHelper.Instance.ClearStocks();
                 mainStrategy.ClearStocks();
 
                 stocks.Clear();
@@ -528,7 +546,7 @@ namespace NineSunScripture
             dragonLeaders.Remove(quotes);
             longTermStocks.Remove(quotes);
             stocks.Remove(quotes);
-            JsonDataHelper.DelStockByCode(quotes.Code, quotes.Operation);
+            JsonDataHelper.Instance.DelStockByCode(quotes.Code, quotes.Operation);
             mainStrategy.DelStock(quotes);
 
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
@@ -569,8 +587,8 @@ namespace NineSunScripture
             {
                 runtimeInfo = "策略开始停止";
                 AddRuntimeInfo(runtimeInfo);
-                mainStrategy.Stop();
                 tsmiSwitch.Text = "启动";
+                mainStrategy.Stop();
                 isStrategyStarted = false;
                 runtimeInfo = "策略已停止";
                 AddRuntimeInfo(runtimeInfo);
@@ -599,7 +617,7 @@ namespace NineSunScripture
         /// <param name="e"></param>
         private void TsmiClearPositions_Click(object sender, EventArgs e)
         {
-            DialogResult dr = MessageBox.Show("确认要清仓吗？", "警告",
+            DialogResult dr = MessageBox.Show("确认要清空所有仓位吗？", "警告",
                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (dr == DialogResult.OK)
             {
@@ -654,7 +672,7 @@ namespace NineSunScripture
             if (dr == DialogResult.OK)
             {
                 mainStrategy.SellStock(quotes, this);
-                //mainStrategy.UpdateTotalAccountInfo(false);
+                mainStrategy.UpdateTotalAccountInfo(false);
             }
         }
 
@@ -765,6 +783,28 @@ namespace NineSunScripture
                 flpStockPool.Visible = true;
                 panelFundInfo.Visible = true;
             }
+        }
+
+        private void BtnUpPeriod_Click(object sender, EventArgs e)
+        {
+            Dictionary<string, string> settings = JsonDataHelper.Instance.Settings;
+            if (!settings.ContainsKey("period"))
+            {
+                settings.Add("period", "up");
+            }
+            if (btnPeriod.Text.Equals("上升期"))
+            {
+                btnPeriod.Text = "下降期";
+                btnPeriod.BackColor = Color.Green;
+                settings["period"] = "up";
+            }
+            else
+            {
+                btnPeriod.Text = "上升期";
+                btnPeriod.BackColor = Color.Red;
+                settings["period"] = "down";
+            }
+            JsonDataHelper.Instance.SaveSettings(settings);
         }
     }
 

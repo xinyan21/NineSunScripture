@@ -1,5 +1,6 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.trade;
+using NineSunScripture.trade.persistence;
 using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
@@ -29,14 +30,24 @@ namespace NineSunScripture.strategy
         private const float MinBuy1Ratio = 1.085f;
 
         /// <summary>
+        /// 回封买回比例
+        /// </summary>
+        private const float BuyBackRatio = 2 / 3;
+
+        /// <summary>
         /// 单账户最小可用金额默认为5000
         /// </summary>
         private const int MinTotalAvailableAmt = 5000;
 
         /// <summary>
-        ///T字板 最小开板时间
+        ///下降期T字板 最小开板时间
         /// </summary>
-        private const int MinOpenBoardTime = 26;
+        private const int MinOpenBoardTimeOfDown = 26;
+
+        /// <summary>
+        ///上升期T字板 最小开板时间
+        /// </summary>
+        private const int MinOpenBoardTimeOfUp = 10;
 
         /// <summary>
         /// 最大买一额限制默认是1888万
@@ -148,6 +159,11 @@ namespace NineSunScripture.strategy
                 rwLockSlimForOpenBoard.ExitWriteLock();
                 Logger.Log("【" + quotes.Name + "】开板");
             }
+            int minOpenBoardTime = MinOpenBoardTimeOfDown;
+            if (Utils.IsUpPeriod())
+            {
+                minOpenBoardTime = MinOpenBoardTimeOfUp;
+            }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
             bool isBoardThisTick = quotes.Buy1 == highLimit;
             if (!isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
@@ -156,8 +172,9 @@ namespace NineSunScripture.strategy
                     = (int)DateTime.Now.Subtract(openBoardTime[code]).TotalSeconds;
                 Logger.Log("【" + quotes.Name + "】回封");
                 openBoardTime.Remove(code);
+
                 //重置后因为触发了买点需要判断下开板时间是否足够
-                if (openBoardInterval < MinOpenBoardTime)
+                if (openBoardInterval < minOpenBoardTime)
                 {
                     Logger.Log(
                         "【" + quotes.Name + "】开板时间（已回封），此次开板时间为" + openBoardInterval + "s");
@@ -177,7 +194,7 @@ namespace NineSunScripture.strategy
             {
                 int openBoardInterval
                     = (int)DateTime.Now.Subtract(openBoardTime[code]).TotalSeconds;
-                if (openBoardInterval < MinOpenBoardTime)
+                if (openBoardInterval < minOpenBoardTime)
                 {
                     Logger.Log("【" + quotes.Name + "】开板时间->" + openBoardInterval + "s");
                     return false;
@@ -280,6 +297,7 @@ namespace NineSunScripture.strategy
                     //这里取消撤单后，后面要重新查询资金，否则白撤
                     AccountHelper.CancelOrdersCanCancel(accounts, quotes, callback);
                 }
+                List<Account> failAccts = new List<Account>();
                 List<Task> tasks = new List<Task>();
                 foreach (Account account in accounts)
                 {
@@ -288,7 +306,14 @@ namespace NineSunScripture.strategy
                     {
                         try
                         {
-                            BuyWithAcct(account, quotes, positionRatioCtrl, callback);
+                            int code = BuyWithAcct(account, quotes, positionRatioCtrl, callback);
+                            lock (failAccts)
+                            {
+                                if (code <= 0)
+                                {
+                                    failAccts.Add(account);
+                                }
+                            }
                         }
                         catch (ApiTimeoutException e)
                         {
@@ -301,10 +326,16 @@ namespace NineSunScripture.strategy
                     }));
                 }
                 Task.WaitAll(tasks.ToArray());
+                if (null != callback)
+                {
+                    string tradeResult = "【" + quotes.Name + "】买入结果：成功账户"
+                        + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
+                    callback.OnTradeResult(1, tradeResult, "", false);
+                }
             }
         }
 
-        private void BuyWithAcct(
+        private int BuyWithAcct(
             Account account, Quotes quotes, float positionRatioCtrl, ITrade callback)
         {
             float highLimit = quotes.HighLimit;
@@ -321,12 +352,13 @@ namespace NineSunScripture.strategy
                 Logger.Log("【" + quotes.Name + "】触发买点，账户["
                     + account.FundAcct + "]结束于可用金额不够，余额为"
                     + account.Funds.AvailableAmt);
-                return;
+                return 888;
             }
             //################计算买入数量BEGIN#######################
             //新增账户后之前账户已经持仓的股，新增账户不买（交了很多学费解决的bug）
             //持仓股都合并在一起，有的买了有的没买，没买的卖出数量是0，也没必要买入了
-            if (quotes.InPosition)
+            //增加买回限制条件上升期和设置是否买回设置
+            if (quotes.InPosition && quotes.IsBuyBackWhenReboard && Utils.IsUpPeriod())
             {
                 Logger.Log(
                     "【" + quotes.Name + "】触发买点，账户[" + account.FundAcct + "]已经持有");
@@ -342,7 +374,7 @@ namespace NineSunScripture.strategy
                 }
                 else
                 {
-                    order.Quantity = Utils.FixQuantity(sellQuantity / 2);
+                    order.Quantity = Utils.FixQuantity((int)(sellQuantity * BuyBackRatio));
                     Logger.Log("【" + quotes.Name + "】触发买点，账户["
                 + account.FundAcct + "]设置买回数量为卖掉的1/2=" + order.Quantity);
                 }
@@ -350,7 +382,7 @@ namespace NineSunScripture.strategy
                 {
                     Logger.Log("【" + quotes.Name + "】触发买点，账户["
                 + account.FundAcct + "]买回数量为0，过滤");
-                    return;
+                    return 888;
                 }
             }   //END  if (null != position)
             else    //新开仓买入
@@ -381,7 +413,7 @@ namespace NineSunScripture.strategy
             }//END else 新开仓买入
             if (!CheckQuantity(account, quotes, order, callback))
             {
-                return;
+                return 888;
             }
             //################计算买入数量END#######################
             //计算出来的数量不够资金买，那么把剩余资金买完
@@ -394,12 +426,8 @@ namespace NineSunScripture.strategy
             string tradeResult
                 = rspCode > 0 ? "#成功" : "#失败：" + order.StrErrorInfo;
             Logger.Log(opLog + tradeResult);
-            StringBuilder sbOpLog = new StringBuilder();
-            sbOpLog.Append("\n\n").Append(opLog).Append(tradeResult);
-            if (null != callback)
-            {
-                callback.OnTradeResult(rspCode, sbOpLog.ToString(), order.StrErrorInfo, false);
-            }
+
+            return rspCode;
         }
 
         private bool CheckQuantity(Account account, Quotes quotes, Order order, ITrade callback)

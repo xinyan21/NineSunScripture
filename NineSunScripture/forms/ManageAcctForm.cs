@@ -27,7 +27,7 @@ namespace NineSunScripture.forms
             lvAccounts.SmallImageList = imgList;
 
             lvAccounts.BeginUpdate();
-            accounts = JsonDataHelper.GetAccounts();
+            accounts = JsonDataHelper.Instance.GetAccounts();
 
             ListViewItem item = null;
             foreach (Account account in accounts)

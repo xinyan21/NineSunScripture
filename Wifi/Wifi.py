@@ -55,7 +55,8 @@ class PoJie():
         self.file.close()
  
 # 密码字典需在网上下载
-path = r'password-8位数字.txt' # wifi密码文件
+#path = r'password-8位数字.txt' # wifi密码文件
 #path = r'test.txt' # wifi密码文件
-start = PoJie(path)
-start.readPassWord()
+#start = PoJie(path)
+#start.readPassWord()
+

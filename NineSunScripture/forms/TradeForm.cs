@@ -130,7 +130,7 @@ namespace NineSunScripture.forms
             {
                 quotes.Operation = Quotes.OperationSell;
                 quotes.StockCategory = Quotes.CategoryBand;
-                JsonDataHelper.AddStock(quotes);
+                JsonDataHelper.Instance.AddStock(quotes);
             }
         }
 
@@ -144,8 +144,8 @@ namespace NineSunScripture.forms
             {
                 Logger.Exception(e);
             }
-            ContBoardSellStrategy.SellByRatio(quotes, accounts, callback, positionRatio);
-            JsonDataHelper.DelStockByCode(quotes.Code, Quotes.OperationSell);
+            AccountHelper.SellByRatio(quotes, accounts, callback, positionRatio);
+            JsonDataHelper.Instance.DelStockByCode(quotes.Code, Quotes.OperationSell);
         }
 
         private void tbCode_TextChanged(object sender, EventArgs e)
