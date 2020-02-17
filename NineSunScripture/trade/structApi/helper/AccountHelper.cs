@@ -68,17 +68,16 @@ namespace NineSunScripture.trade.structApi.helper
         public static List<Account> Login(ITrade callback)
         {
             List<Account> localAccounts = JsonDataHelper.Instance.GetAccounts();
-            Account mainAcct = MainStrategy.IsTest ? GetTestMainAccount() : GetPrdMainAccount();
-            //TODO TESET CODE
-            //mainAcct = GetPrdMainAccount();
             if (null == localAccounts)
             {
                 localAccounts = new List<Account>();
             }
-            if (!localAccounts.Contains(mainAcct))
+            localAccounts.Insert(0, GetTestMainAccount());
+            if (!MainStrategy.IsTest)
             {
-                localAccounts.Insert(0, mainAcct);
+                localAccounts.Insert(0, GetPrdMainAccount());
             }
+            Account mainAcct = localAccounts[0];
             List<Account> loginAccts = new List<Account>();
             IntPtr ptrErrorInfo = Marshal.AllocCoTaskMem(256);
             try
@@ -165,7 +164,8 @@ namespace NineSunScripture.trade.structApi.helper
                                 account.PriceSessionId = mainAcct.PriceSessionId;
                             }
                             loginAccts.Add(account);
-                            opLog = "资金账号【" + account.FundAcct + "】登录成功，会话ID为" + tradeSessionId;
+                            opLog
+                            = "资金账号【" + account.FundAcct + "】登录成功，会话ID为" + tradeSessionId;
                             Logger.Log(opLog);
                         }
                         else

@@ -35,8 +35,6 @@ namespace NineSunScripture.strategy
         //回调委托声明成静态变量防止被回收
         private static PriceAPI.PushCallback pushCallback;
 
-        private static ReaderWriterLockSlim rwLockSlimForBuy;
-
         //主策略周期时间
         private short cycleTime = CycleTimeOfTrade;
 
@@ -82,7 +80,6 @@ namespace NineSunScripture.strategy
             isHoliday = Utils.IsHolidayByDate(DateTime.Now);
             reverseRepurchaseRecords = new Dictionary<DateTime, bool>();
             lastFundUpdateTime = DateTime.Now;
-            rwLockSlimForBuy = new ReaderWriterLockSlim();
             pushCallback = OnPushResult;
             buyProtection = new Dictionary<string, bool>();
         }
@@ -113,7 +110,6 @@ namespace NineSunScripture.strategy
                         {
                             showWorkingSatus.RotateStatusImg(-1);
                         }
-                        Logger.Log("Not trade time, pass");
                         ReverseRepurchaseBonds();
                         continue;
                     }

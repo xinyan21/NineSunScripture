@@ -37,6 +37,7 @@
             this.tsmiAddStock = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiBuy = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiDelStock = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiDelGroup = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiClearStocks = new System.Windows.Forms.ToolStripMenuItem();
             this.lblTotalAsset = new System.Windows.Forms.Label();
             this.lblMoneyAvailable = new System.Windows.Forms.Label();
@@ -77,7 +78,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.btnPeriod = new System.Windows.Forms.Button();
-            this.tsmiDelGroup = new System.Windows.Forms.ToolStripMenuItem();
             this.flpStockPool.SuspendLayout();
             this.cmsStocks.SuspendLayout();
             this.panelFundInfo.SuspendLayout();
@@ -172,6 +172,15 @@
             this.tsmiDelStock.Size = new System.Drawing.Size(192, 30);
             this.tsmiDelStock.Text = "删除股票";
             this.tsmiDelStock.Click += new System.EventHandler(this.TsmDelStock_Click);
+            // 
+            // tsmiDelGroup
+            // 
+            this.tsmiDelGroup.AutoSize = false;
+            this.tsmiDelGroup.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
+            this.tsmiDelGroup.Name = "tsmiDelGroup";
+            this.tsmiDelGroup.Size = new System.Drawing.Size(180, 30);
+            this.tsmiDelGroup.Text = "删除该组";
+            this.tsmiDelGroup.Click += new System.EventHandler(this.TsmiDelGroup_Click);
             // 
             // tsmiClearStocks
             // 
@@ -362,7 +371,7 @@
             this.tsmiSell,
             this.tsmiSellInForm});
             this.cmsPositions.Name = "cmsPositionsMenu";
-            this.cmsPositions.Size = new System.Drawing.Size(181, 116);
+            this.cmsPositions.Size = new System.Drawing.Size(134, 94);
             this.cmsPositions.Text = "持仓菜单";
             // 
             // tsmiSell
@@ -601,22 +610,14 @@
             this.btnPeriod.BackColor = System.Drawing.Color.Red;
             this.btnPeriod.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
             this.btnPeriod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.btnPeriod.Location = new System.Drawing.Point(564, 68);
+            this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.btnPeriod.Location = new System.Drawing.Point(555, 68);
             this.btnPeriod.Name = "btnPeriod";
             this.btnPeriod.Size = new System.Drawing.Size(126, 42);
             this.btnPeriod.TabIndex = 23;
             this.btnPeriod.Text = "上升期";
             this.btnPeriod.UseVisualStyleBackColor = false;
             this.btnPeriod.Click += new System.EventHandler(this.BtnUpPeriod_Click);
-            // 
-            // tsmiDelGroup
-            // 
-            this.tsmiDelGroup.AutoSize = false;
-            this.tsmiDelGroup.Margin = new System.Windows.Forms.Padding(0, 6, 0, 0);
-            this.tsmiDelGroup.Name = "tsmiDelGroup";
-            this.tsmiDelGroup.Size = new System.Drawing.Size(180, 30);
-            this.tsmiDelGroup.Text = "删除该组";
             // 
             // MainForm
             // 

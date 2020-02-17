@@ -221,5 +221,29 @@ namespace NineSunScripture.util
             }
             return false;
         }
+
+        /// <summary>
+        /// 获取股票分类名称
+        /// </summary>
+        /// <param name="category">分类标志</param>
+        /// <returns>分类名称</returns>
+        public static string GetNameByStockCategory(short category)
+        {
+            switch (category)
+            {
+                case Quotes.CategoryWeakTurnStrong:
+                    return "弱转强";
+                case Quotes.CategoryBand:
+                    return "波段";
+                case Quotes.CategoryDragonLeader:
+                    return "龙头";
+                case Quotes.CategoryHitBoard:
+                    return "打板";
+                case Quotes.CategoryLongTerm:
+                    return "常驻打板";
+                default:
+                    return "";
+            }
+        }
     }
 }

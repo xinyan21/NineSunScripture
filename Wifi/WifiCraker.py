@@ -121,8 +121,8 @@ def crack(wifinamelist):
 if __name__ == '__main__':
     #wifiname_e = ['Honor 9'] #排除不破解的wifi的名字, 'CMCCâ\x80\x94yhfG', 'ChinaNet-ehSP'
     #wifinames = getwifi(wifiname_e,5)
-    wifinames = ['CMCC一yhfG']
-    #wifinames = ['CMCC-QwYf']
+    #wifinames = ['CMCC一yhfG']
+    wifinames = ['CMCC-wpyC']
     print(wifinames)
     #beginwork(wifinames)
 

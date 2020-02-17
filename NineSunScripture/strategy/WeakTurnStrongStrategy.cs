@@ -14,14 +14,24 @@ namespace NineSunScripture.strategy
     public class WeakTurnStrongStrategy
     {
         /// <summary>
-        /// 最小买一额限制默认是2000万
+        /// 最小买一额限制默认是1888万
         /// </summary>
-        private const int MinBuy1MoneyCtrl = 2000;
+        private const int MinBuy1MoneyCtrl = 1888;
 
         /// <summary>
         /// 单账户最小可用金额默认为5000
         /// </summary>
         private const int MinTotalAvailableAmt = 5000;
+
+        /// <summary>
+        /// 开盘最小涨幅
+        /// </summary>
+        private const float MinUpRatio = 1.01f;
+
+        /// <summary>
+        /// 开盘最大涨幅
+        /// </summary>
+        private const float MaxUpRatio = 1.055f;
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
@@ -36,7 +46,7 @@ namespace NineSunScripture.strategy
                 return;
             }
             float changeRatio = quotes.Buy1 / quotes.PreClose;
-            bool canBuy = changeRatio > 1.02 && changeRatio < 1.055
+            bool canBuy = changeRatio > MinUpRatio && changeRatio < MaxUpRatio
                 && quotes.Buy1 * quotes.Buy1Vol > MinBuy1MoneyCtrl;
             if (!canBuy)
             {
