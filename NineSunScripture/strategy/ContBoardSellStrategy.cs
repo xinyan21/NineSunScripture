@@ -313,7 +313,7 @@ namespace NineSunScripture.strategy
                 }));
             }
             Task.WaitAll(tasks.ToArray());
-            if (null != callback && stopWinPosition > 0)
+            if (null != callback && stopWinPosition > 0 && (successCnt + failAccts.Count) > 0)
             {
                 string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
                     + successCnt + "个，失败账户" + failAccts.Count + "个";

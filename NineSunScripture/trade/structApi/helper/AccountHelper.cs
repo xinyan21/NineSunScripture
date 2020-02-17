@@ -820,7 +820,7 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 //这里必须查询最新持仓，连续触发卖点信号会使得卖出失败导致策略重启
                 account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
-                Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
+                Position position = GetPositionOf(account.Positions, quotes.Code);
                 if (null == position || position.AvailableBalance == 0)
                 {
                     return 888;
@@ -899,6 +899,32 @@ namespace NineSunScripture.trade.structApi.helper
                 = "【" + quotes.Name + "】卖出" + sellRatio * 100 + "%仓位结果：成功账户"
                 + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
             Utils.ShowRuntimeInfo(callback, tradeResult);
+        }
+
+        /// <summary>
+        /// 获取当天成交的code股票数量
+        /// </summary>
+        /// <param name="sessionId">登录账号的ID</param>
+        /// <param name="code">股票代码</param>
+        /// <param name="op">操作方向</param>
+        /// <returns></returns>
+        public static int GetTodayTransactionQuantityOf(int sessionId, string code, string op)
+        {
+            int quantity = 0;
+            List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(sessionId);
+            if (null == todayTransactions || todayTransactions.Count == 0)
+            {
+                return quantity;
+            }
+            foreach (Order order in todayTransactions)
+            {
+                if (order.Code == code && order.Operation.Contains(op))
+                {
+                    quantity += order.Quantity;
+                }
+            }
+
+            return quantity;
         }
     }
 }

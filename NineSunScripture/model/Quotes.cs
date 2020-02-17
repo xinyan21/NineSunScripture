@@ -19,9 +19,9 @@ namespace NineSunScripture.model
         public const short CategoryDragonLeader = 1;
 
         /// <summary>
-        ///  【买入策略】最新股票池中的股票
+        ///  【买入策略】打板股票池中的股票
         /// </summary>
-        public const short CategoryLatest = 2;
+        public const short CategoryHitBoard = 2;
 
         /// <summary>
         /// 【买入策略】 弱转强股票池中的股票
@@ -107,9 +107,9 @@ namespace NineSunScripture.model
         private int moneyCtrl;
 
         /// <summary>
-        /// 股票类型：打板（常驻0、龙头1、最新2），弱转强（3），波段（4）
+        /// 股票类型：打板（常驻0、龙头1、打板2），弱转强（3），波段（4）默认为波段不自动卖
         /// </summary>
-        private short stockCategory = 2;
+        private short stockCategory = CategoryBand;
 
         /// <summary>
         /// 操作方向：OperationBuy, OperationSell。于此区分买入和卖出的股票池

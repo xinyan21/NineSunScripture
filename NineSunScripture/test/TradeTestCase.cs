@@ -25,6 +25,17 @@ namespace NineSunScripture.util.test
             return quotes;
         }
 
+        public static Quotes ConstructBandData()
+        {
+            Quotes quotes = new Quotes();
+            quotes.Code = "300155";
+            quotes.Name = "安居宝";
+            quotes.HighLimit = 9.5f;
+            quotes.LatestPrice = 9f;
+
+            return quotes;
+        }
+
         public void TestSell(List<Account> accounts)
         {
             Order order = new Order();

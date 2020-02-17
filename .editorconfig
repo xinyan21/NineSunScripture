@@ -20,3 +20,6 @@ dotnet_style_prefer_auto_properties = true:silent
 
 # CA2227: 集合属性应为只读
 dotnet_diagnostic.CA2227.severity = silent
+
+# CA1305: 指定 IFormatProvider
+dotnet_diagnostic.CA1305.severity = silent

@@ -4,6 +4,7 @@ using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NineSunScripture.strategy
 {
@@ -24,9 +25,13 @@ namespace NineSunScripture.strategy
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            bool isTradeTime = DateTime.Now.Hour == 9
-                && DateTime.Now.Minute == 24 && DateTime.Now.Second == 55;
+            //行情在26-29会每分钟开始的时候推一次
+            bool isTradeTime = DateTime.Now.Hour == 9 && DateTime.Now.Minute == 26;
             if (!isTradeTime)
+            {
+                return;
+            }
+            if (null == accounts || null == quotes)
             {
                 return;
             }
@@ -60,120 +65,146 @@ namespace NineSunScripture.strategy
                 //这里取消撤单后，后面要重新查询资金，否则白撤
                 AccountHelper.CancelOrdersCanCancel(accounts, quotes, callback);
             }
+            short successCnt = 0;
+            List<Task> tasks = new List<Task>();
+            List<Account> failAccts = new List<Account>();
+            foreach (Account account in accounts)
+            {
+                tasks.Add(Task.Run(() =>
+                {
+                    int code = BuyWithAcct(account, quotes, funds, positionRatioCtrl, callback);
+                    lock (failAccts)
+                    {
+                        if (code <= 0)
+                        {
+                            failAccts.Add(account);
+                        }
+                        if (code != 888)
+                        {
+                            successCnt++;
+                        }
+                    }
+                }));
+            }//END FOR
+            Task.WaitAll(tasks.ToArray());
+            if (null != callback && (successCnt + failAccts.Count) > 0)
+            {
+                string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
+                    + successCnt + "个，失败账户" + failAccts.Count + "个";
+                callback.OnTradeResult(1, tradeResult, "", false);
+            }
+        }//END BUY
+
+        private int BuyWithAcct(
+            Account account, Quotes quotes, Funds funds, float positionRatioCtrl, ITrade callback)
+        {
             Order order = new Order();
             order.Code = quotes.Code;
             order.Price = quotes.Sell1;
-            foreach (Account account in accounts)
+            account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
+            if (funds.AvailableAmt < MinTotalAvailableAmt || funds.AvailableAmt < quotes.Sell1 * 100)
             {
-                account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
-                if (funds.AvailableAmt < MinTotalAvailableAmt
-                    || funds.AvailableAmt < quotes.Sell1 * 100)
+                Logger.Log("【" + quotes.Name + "】触发买点，账户["
+                    + account.FundAcct + "]结束于可用金额不够");
+                return 888;
+            }
+            account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
+            Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
+            //################计算买入数量BEGIN#######################
+            if (null != position)
+            {
+                Logger.Log(
+                    "【" + quotes.Name + "】触发买点，账户[" + account.FundAcct + "]已经持有");
+                return 888;
+            }   //END  if (null != position)
+            else    //新开仓买入
+            {
+                //新增账户后之前账户已经持仓的股，新增账户不买（交了很多学费解决的bug）
+                if (quotes.InPosition)
                 {
-                    Logger.Log("【" + quotes.Name + "】触发买点，账户["
-                        + account.FundAcct + "]结束于可用金额不够");
-                    continue;
+                    Logger.Log("【" + quotes.Name + "】触发买点，但由于是持仓股且账户[" + account.FundAcct
+                    + "]是新增账户，不买");
+                    return 888;
                 }
-                account.Positions = TradeAPI.QueryPositions(account.TradeSessionId);
-                Position position = AccountHelper.GetPositionOf(account.Positions, quotes.Code);
-                //################计算买入数量BEGIN#######################
-                if (null != position)
+                Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
+                    + "]将新开仓买入");
+                //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
+                //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
+                float acctPositionCtrl = HitBoardStrategy.GetNewPositionRatio(account);
+                double availableCash = account.Funds.AvailableAmt;
+                if (acctPositionCtrl <= positionRatioCtrl)
                 {
-                    Logger.Log(
-                        "【" + quotes.Name + "】触发买点，账户[" + account.FundAcct + "]已经持有");
-                    return;
-                }   //END  if (null != position)
-                else    //新开仓买入
-                {
-                    //新增账户后之前账户已经持仓的股，新增账户不买（交了很多学费解决的bug）
-                    if (quotes.InPosition)
-                    {
-                        Logger.Log("【" + quotes.Name + "】触发买点，但由于是持仓股且账户[" + account.FundAcct
-                        + "]是新增账户，不买");
-                        return;
-                    }
+                    positionRatioCtrl = acctPositionCtrl;
                     Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
-                        + "]将新开仓买入");
-                    //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
-                    //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
-                    float acctPositionCtrl = HitBoardStrategy.GetNewPositionRatio(account);
-                    double availableCash = account.Funds.AvailableAmt;
-                    if (acctPositionCtrl <= positionRatioCtrl)
-                    {
-                        positionRatioCtrl = acctPositionCtrl;
-                        Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
-                            + "]的仓位控制为账户级风险控制，仓位为" + acctPositionCtrl);
-                    }
-                    if (availableCash > account.Funds.TotalAsset * positionRatioCtrl)
-                    {
-                        availableCash = account.Funds.TotalAsset * positionRatioCtrl;
-                        Logger.Log("【" + quotes.Name + "】触发买点，账户["
-                       + account.FundAcct + "]的买入金额设置为仓位控制后的"
-                       + availableCash.ToString("0.00####") + "元");
-                    }
-                    //数量是整百整百的
-                    order.Quantity = ((int)(availableCash / (quotes.Sell1 * 100))) * 100;
-                    Logger.Log("【" + quotes.Name + "】触发买点，账户["
-                        + account.FundAcct + "]经过仓位控制后可买数量为" + order.Quantity + "股");
-                }//END else 新开仓买入
-                int boughtQuantity = HitBoardStrategy.GetTodayTransactionQuantityOf(
-                       account.TradeSessionId, quotes.Code, Order.OperationBuy);
-                if (order.Quantity <= boughtQuantity)
-                {
-                    Logger.Log("【" + quotes.Name + "】触发买点，账户["
-                       + account.FundAcct + "]结束于计划买入数量>=今天已买数量");
-                    return;
+                        + "]的仓位控制为账户级风险控制，仓位为" + acctPositionCtrl);
                 }
-                else
+                if (availableCash > account.Funds.TotalAsset * positionRatioCtrl)
                 {
-                    order.Quantity -= boughtQuantity;
+                    availableCash = account.Funds.TotalAsset * positionRatioCtrl;
+                    Logger.Log("【" + quotes.Name + "】触发买点，账户["
+                   + account.FundAcct + "]的买入金额设置为仓位控制后的"
+                   + availableCash.ToString("0.00####") + "元");
                 }
-                //检查委托，如果已经委托，但是没成交，要减去已经委托数量
-                List<Order> orders =
-                    AccountHelper.GetOrdersCanCancelOf(account.TradeSessionId, quotes.Code);
-                int orderedQauntity = 0;
-                if (orders.Count > 0)
+                //数量是整百整百的
+                order.Quantity = ((int)(availableCash / (quotes.Sell1 * 100))) * 100;
+                Logger.Log("【" + quotes.Name + "】触发买点，账户["
+                    + account.FundAcct + "]经过仓位控制后可买数量为" + order.Quantity + "股");
+            }//END else 新开仓买入
+            int boughtQuantity = AccountHelper.GetTodayTransactionQuantityOf(
+                   account.TradeSessionId, quotes.Code, Order.OperationBuy);
+            if (order.Quantity <= boughtQuantity)
+            {
+                Logger.Log("【" + quotes.Name + "】触发买点，账户["
+                   + account.FundAcct + "]结束于计划买入数量>=今天已买数量");
+                return 888;
+            }
+            else
+            {
+                order.Quantity -= boughtQuantity;
+            }
+            //检查委托，如果已经委托，但是没成交，要减去已经委托数量
+            List<Order> orders =
+                AccountHelper.GetOrdersCanCancelOf(account.TradeSessionId, quotes.Code);
+            int orderedQauntity = 0;
+            if (orders.Count > 0)
+            {
+                foreach (Order item in orders)
                 {
-                    foreach (Order item in orders)
+                    if (item.Operation.Contains("买入"))
                     {
-                        if (item.Operation.Contains("买入"))
-                        {
-                            orderedQauntity += item.Quantity;
-                        }
+                        orderedQauntity += item.Quantity;
                     }
                 }
-                if (orderedQauntity > 0)
-                {
-                    //买入数量要减去已经委托数量
-                    order.Quantity = order.Quantity - orderedQauntity;
-                    Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
-                        + "]已下单数量为" + orderedQauntity + "，减去后为" + order.Quantity);
-                }
-                if (order.Quantity <= 0)
-                {
-                    Logger.Log("【" + quotes.Name + "】触发买点，账户["
-                        + account.FundAcct + "]结束于出去委托数量后可买数量为0");
-                    return;
-                }
-                //################计算买入数量END#######################
-                //计算出来的数量不够资金买，那么把剩余资金买完
-                if (account.Funds.AvailableAmt < order.Quantity * quotes.Sell1)
-                {
-                    order.Quantity = ((int)(account.Funds.AvailableAmt / (quotes.Sell1 * 100))) * 100;
-                    Logger.Log("【" + quotes.Name + "】触发买点，账户["
-                        + account.FundAcct + "]可用金额不够，数量改为" + order.Quantity);
-                }
-                order.TradeSessionId = account.TradeSessionId;
-                ApiHelper.SetShareholderAcct(account, quotes, order);
-                int rspCode = TradeAPI.Buy(order);
-                string opLog = "资金账号【" + account.FundAcct + "】" + "策略买入【"
-                    + quotes.Name + "】"
-                     + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
-                Logger.Log(opLog);
-                if (null != callback)
-                {
-                    callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
-                }
-            }//END FOR
-        }//END BUY
+            }
+            if (orderedQauntity > 0)
+            {
+                //买入数量要减去已经委托数量
+                order.Quantity = order.Quantity - orderedQauntity;
+                Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
+                    + "]已下单数量为" + orderedQauntity + "，减去后为" + order.Quantity);
+            }
+            if (order.Quantity <= 0)
+            {
+                Logger.Log("【" + quotes.Name + "】触发买点，账户["
+                    + account.FundAcct + "]结束于出去委托数量后可买数量为0");
+                return 888;
+            }
+            //################计算买入数量END#######################
+            //计算出来的数量不够资金买，那么把剩余资金买完
+            if (account.Funds.AvailableAmt < order.Quantity * quotes.Sell1)
+            {
+                order.Quantity = ((int)(account.Funds.AvailableAmt / (quotes.Sell1 * 100))) * 100;
+                Logger.Log("【" + quotes.Name + "】触发买点，账户["
+                    + account.FundAcct + "]可用金额不够，数量改为" + order.Quantity);
+            }
+            order.TradeSessionId = account.TradeSessionId;
+            ApiHelper.SetShareholderAcct(account, quotes, order);
+            int rspCode = TradeAPI.Buy(order);
+            string opLog = "资金账号【" + account.FundAcct + "】" + "策略买入【"
+                + quotes.Name + "】"
+                 + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
+            Logger.Log(opLog);
+            return rspCode;
+        }
     }//END CLASS
 }

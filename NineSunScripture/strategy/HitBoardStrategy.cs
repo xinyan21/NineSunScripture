@@ -1,13 +1,11 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.trade;
-using NineSunScripture.trade.persistence;
 using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -297,8 +295,9 @@ namespace NineSunScripture.strategy
                     //这里取消撤单后，后面要重新查询资金，否则白撤
                     AccountHelper.CancelOrdersCanCancel(accounts, quotes, callback);
                 }
-                List<Account> failAccts = new List<Account>();
+                short successCnt = 0;
                 List<Task> tasks = new List<Task>();
+                List<Account> failAccts = new List<Account>();
                 foreach (Account account in accounts)
                 {
                     //每个账户开个线程去处理，账户间同时操作，效率提升大大的
@@ -313,6 +312,10 @@ namespace NineSunScripture.strategy
                                 {
                                     failAccts.Add(account);
                                 }
+                                if (code != 888)
+                                {
+                                    successCnt++;
+                                }
                             }
                         }
                         catch (ApiTimeoutException e)
@@ -326,10 +329,10 @@ namespace NineSunScripture.strategy
                     }));
                 }
                 Task.WaitAll(tasks.ToArray());
-                if (null != callback)
+                if (null != callback && (successCnt + failAccts.Count) > 0)
                 {
-                    string tradeResult = "【" + quotes.Name + "】买入结果：成功账户"
-                        + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
+                    string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
+                        + successCnt + "个，失败账户" + failAccts.Count + "个";
                     callback.OnTradeResult(1, tradeResult, "", false);
                 }
             }
@@ -363,7 +366,7 @@ namespace NineSunScripture.strategy
                 Logger.Log(
                     "【" + quotes.Name + "】触发买点，账户[" + account.FundAcct + "]已经持有");
                 //查询已卖数量得到买入数量（可用大于0说明今天之前买的，这种情况只回补仓位）
-                int sellQuantity = GetTodayTransactionQuantityOf(
+                int sellQuantity = AccountHelper.GetTodayTransactionQuantityOf(
                     account.TradeSessionId, quotes.Code, Order.OperationSell);
                 //因为1/2板会在7%止盈，上板的时候全部打回，T字板也全部打回
                 if (open == highLimit || quotes.ContBoards < 3)
@@ -435,7 +438,7 @@ namespace NineSunScripture.strategy
             int boughtQuantity = 0;
             try
             {
-                boughtQuantity = GetTodayTransactionQuantityOf(
+                boughtQuantity = AccountHelper.GetTodayTransactionQuantityOf(
                          account.TradeSessionId, quotes.Code, Order.OperationBuy);
             }
             catch (ApiTimeoutException e)
@@ -516,32 +519,6 @@ namespace NineSunScripture.strategy
             {
                 return 1f;
             }
-        }
-
-        /// <summary>
-        /// 获取当天成交的code股票数量
-        /// </summary>
-        /// <param name="sessionId">登录账号的ID</param>
-        /// <param name="code">股票代码</param>
-        /// <param name="op">操作方向</param>
-        /// <returns></returns>
-        public static int GetTodayTransactionQuantityOf(int sessionId, string code, string op)
-        {
-            int quantity = 0;
-            List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(sessionId);
-            if (null == todayTransactions || todayTransactions.Count == 0)
-            {
-                return quantity;
-            }
-            foreach (Order order in todayTransactions)
-            {
-                if (order.Code == code && order.Operation.Contains(op))
-                {
-                    quantity += order.Quantity;
-                }
-            }
-
-            return quantity;
         }
 
         /// <summary>

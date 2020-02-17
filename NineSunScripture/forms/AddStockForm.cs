@@ -20,7 +20,7 @@ namespace NineSunScripture.forms
             quotes = new Quotes();
             //默认值
             quotes.Operation = Quotes.OperationBuy;
-            quotes.StockCategory = Quotes.CategoryLatest;
+            quotes.StockCategory = Quotes.CategoryHitBoard;
         }
 
         private void BtnAddStcok_Click(object sender, EventArgs e)
@@ -40,7 +40,7 @@ namespace NineSunScripture.forms
             {
                 if (tbPosition.Text.Length > 0)
                 {
-                    quotes.PositionCtrl = float.Parse(tbPosition.Text);
+                    quotes.PositionCtrl = float.Parse(tbPosition.Text) / 10;
                 }
                 if (tbMoney.Text.Length > 0)
                 {
@@ -87,7 +87,7 @@ namespace NineSunScripture.forms
 
         private void RbtnLatest_CheckedChanged(object sender, EventArgs e)
         {
-            quotes.StockCategory = Quotes.CategoryLatest;
+            quotes.StockCategory = Quotes.CategoryHitBoard;
         }
 
         private void RbWeakTurnStrong_CheckedChanged(object sender, EventArgs e)
@@ -129,6 +129,16 @@ namespace NineSunScripture.forms
         private void RbtnSell_CheckedChanged(object sender, EventArgs e)
         {
             quotes.Operation = Quotes.OperationSell;
+        }
+
+        private void RbtnYes_CheckedChanged(object sender, EventArgs e)
+        {
+            quotes.IsBuyBackWhenReboard = true;
+        }
+
+        private void RbtnNo_CheckedChanged(object sender, EventArgs e)
+        {
+            quotes.IsBuyBackWhenReboard = false;
         }
     }
 }

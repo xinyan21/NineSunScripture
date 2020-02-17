@@ -115,12 +115,13 @@ namespace NineSunScripture
         private void InitLvPositions()
         {
             lvPositions.Columns.Add("股票", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("持仓数量", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("可用", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("盈亏", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("盈亏比例", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("市值", 100, HorizontalAlignment.Center);
-            lvPositions.Columns.Add("仓位", 100, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("持仓数量", 86, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("可用", 86, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("成本价", 85, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("盈亏", 86, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("盈亏比例", 85, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("市值", 85, HorizontalAlignment.Center);
+            lvPositions.Columns.Add("仓位", 85, HorizontalAlignment.Center);
         }
 
         /// <summary>
@@ -143,8 +144,8 @@ namespace NineSunScripture
         private void BindStocksData()
         {
             ListViewGroup lvgDragonLeader = new ListViewGroup("龙头");
-            ListViewGroup lvgLongTerm = new ListViewGroup("常驻");
-            ListViewGroup lvgTomorrow = new ListViewGroup("最新");
+            ListViewGroup lvgLongTerm = new ListViewGroup("常驻打板");
+            ListViewGroup lvgTomorrow = new ListViewGroup("打板");
             ListViewGroup lvgWeakTurnStrong = new ListViewGroup("弱转强");
             ListViewGroup lvgBand = new ListViewGroup("波段");
             ListViewGroup lvgPositions = new ListViewGroup("持仓");
@@ -211,7 +212,7 @@ namespace NineSunScripture
                 }
             }
             latestStocks = quotes = JsonDataHelper.Instance.GetStocksByCatgory(
-                Quotes.OperationBuy, Quotes.CategoryLatest);
+                Quotes.OperationBuy, Quotes.CategoryHitBoard);
             if (!Utils.IsListEmpty(quotes))
             {
                 foreach (Quotes item in quotes)
@@ -296,6 +297,7 @@ namespace NineSunScripture
                 ListViewItem lvi = new ListViewItem(position.Name);
                 lvi.SubItems.Add(position.StockBalance + "");
                 lvi.SubItems.Add(position.AvailableBalance + "");
+                lvi.SubItems.Add(Math.Round(position.AvgCost, 2) + "");
                 lvi.SubItems.Add(Math.Round(position.ProfitAndLoss / 10000, 2) + "万");
                 lvi.SubItems.Add(Math.Round(position.ProfitAndLossPct, 1) + "%");
                 lvi.SubItems.Add(Math.Round(position.MarketValue / 10000, 2) + "万");
@@ -440,7 +442,6 @@ namespace NineSunScripture
         /// </summary>
         private void UpdateAcctInfo()
         {
-            Logger.Log("Mainform UpdateAcctInfo");
             if (null != account.Funds)
             {
                 lblTotalAsset.Text

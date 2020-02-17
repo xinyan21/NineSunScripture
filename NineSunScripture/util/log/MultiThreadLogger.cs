@@ -178,8 +178,10 @@ namespace NineSunScripture.util.log
         private static void Write()
         {
             //获取物理路径
-            var infoDir = GetPhysicalPath(ConfigurationManager.AppSettings["logInfo"] ?? @"Logs\Info");
-            var errorDir = GetPhysicalPath(ConfigurationManager.AppSettings["logError"] ?? @"Logs\Error");
+            var infoDir 
+                = GetPhysicalPath(ConfigurationManager.AppSettings["logInfo"] ?? @"Logs\Info");
+            var errorDir 
+                = GetPhysicalPath(ConfigurationManager.AppSettings["logError"] ?? @"Logs\Error");
             var quotesDir = GetPhysicalPath(@"Logs\Quotes");
             //根据当天日期创建日志文件
             var fileName = $"{DateTime.Now.ToString("yyyy-MM-dd")}.log";
