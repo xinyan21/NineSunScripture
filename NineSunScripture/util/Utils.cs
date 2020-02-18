@@ -6,9 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Media;
 using System.Net;
 using System.Net.Mail;
+using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NineSunScripture.util
 {
@@ -141,12 +145,16 @@ namespace NineSunScripture.util
             {
                 return false;
             }
+            bool isHitboard = quotes.Operation == Quotes.OperationBuy
+                && (quotes.StockCategory == Quotes.CategoryHitBoard
+                || quotes.StockCategory == Quotes.CategoryLongTerm);
             //只有深圳的才有高速逐笔委托
-            if (quotes.Code.StartsWith("6"))
+            if (quotes.Code.StartsWith("6") || !isHitboard)
             {
                 return false;
             }
-            if (quotes.PreClose > 0 && quotes.LatestPrice / quotes.PreClose > 1.085)
+            if (quotes.PreClose > 0 && quotes.LatestPrice / quotes.PreClose > 1.085
+                && quotes.Buy1 != quotes.HighLimit)
             {
                 return true;
             }
@@ -190,13 +198,25 @@ namespace NineSunScripture.util
             return true;
         }
 
-        public static void LogTradeFailedAccts(List<Account> accounts, Quotes quotes)
+        /// <summary>
+        /// 记录交易失败的账户
+        /// </summary>
+        /// <param name="opLog"></param>
+        /// <param name="accounts"></param>
+        /// <param name="quotes"></param>
+        public static void LogTradeFailedAccts(string opLog, List<Account> accounts)
         {
             if (IsListEmpty(accounts))
             {
                 return;
             }
-            StringBuilder sb = new StringBuilder("");
+            StringBuilder sb = new StringBuilder(opLog);
+            sb.Append("\n失败账户如下：");
+            foreach (var item in accounts)
+            {
+                sb.Append("[").Append(item.FundAcct).Append("]");
+            }
+            Logger.Log(sb.ToString());
         }
 
         public static void ShowRuntimeInfo(ITrade callback, string text)
@@ -244,6 +264,21 @@ namespace NineSunScripture.util
                 default:
                     return "";
             }
+        }
+
+        public static void PlaySoundHint()
+        {
+            /*Task.Run(() =>
+            {
+                
+            });*/
+            SoundPlayer sp = new SoundPlayer(
+                    Assembly.GetExecutingAssembly().GetManifestResourceStream("ding.wav"));
+            sp.Play();
+            //Thread.Sleep(1000);
+            sp.Play();
+          //  Thread.Sleep(1000);
+            sp.Play();
         }
     }
 }

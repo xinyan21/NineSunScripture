@@ -188,6 +188,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Marshal.FreeCoTaskMem(ptrErrorInfo);
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback)
@@ -226,6 +227,7 @@ namespace NineSunScripture.trade.structApi.helper
                 return null;
             }
             Position position = new Position();
+            short cnt = 0;
             foreach (Account account in accounts)
             {
                 Position temp = GetPositionOf(account.Positions, stock);
@@ -233,27 +235,17 @@ namespace NineSunScripture.trade.structApi.helper
                 {
                     continue;
                 }
+                cnt++;
                 position.AvailableBalance += temp.AvailableBalance;
-                if (0 == position.AvgCost)
-                {
-                    position.AvgCost = temp.AvgCost;
-                }
-                else
-                {
-                    position.AvgCost = (position.AvgCost + temp.AvgCost) / 2;
-                }
+                position.AvgCost += temp.AvgCost;
                 position.FrozenQuantity += temp.FrozenQuantity;
                 position.ProfitAndLoss += temp.ProfitAndLoss;
-                if (0 == position.ProfitAndLossPct)
-                {
-                    position.ProfitAndLossPct = temp.ProfitAndLossPct;
-                }
-                else
-                {
-                    position.ProfitAndLossPct = (position.ProfitAndLossPct + temp.ProfitAndLossPct) / 2;
-                }
+                position.ProfitAndLossPct += temp.ProfitAndLossPct;
                 position.MarketValue += temp.MarketValue;
             }
+            position.AvgCost /= cnt;
+            position.ProfitAndLossPct /= cnt;
+
             return position;
         }
 
@@ -293,6 +285,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
             List<Position> temp = allPositions.Distinct().ToList();
@@ -304,6 +297,7 @@ namespace NineSunScripture.trade.structApi.helper
                 position.Price = item.Price;
                 positions.Add(position);
             }
+            Dictionary<string, short> positionCnt = new Dictionary<string, short>();
             //把所有个股持仓数据分别汇总
             foreach (Position item in allPositions)
             {
@@ -311,29 +305,28 @@ namespace NineSunScripture.trade.structApi.helper
                 {
                     if (item.Code == item2.Code)
                     {
-                        item2.AvailableBalance += item.AvailableBalance;
-                        if (item2.AvgCost == 0)
+                        if (positionCnt.ContainsKey(item.Code))
                         {
-                            item2.AvgCost = item.AvgCost;
+                            positionCnt[item.Code] += 1;
                         }
                         else
                         {
-                            item2.AvgCost = (item2.AvgCost + item.AvgCost) / 2;
+                            positionCnt.Add(item.Code, 1);
                         }
+                        item2.AvailableBalance += item.AvailableBalance;
+                        item2.AvgCost += item.AvgCost;
                         item2.FrozenQuantity += item.FrozenQuantity;
                         item2.ProfitAndLoss += item.ProfitAndLoss;
-                        if (item2.ProfitAndLossPct == 0)
-                        {
-                            item2.ProfitAndLossPct = item.ProfitAndLossPct;
-                        }
-                        else
-                        {
-                            item2.ProfitAndLossPct = (item2.ProfitAndLossPct + item.ProfitAndLossPct) / 2;
-                        }
+                        item2.ProfitAndLossPct += item.ProfitAndLossPct;
                         item2.StockBalance += item.StockBalance;
                         item2.MarketValue += item.MarketValue;
                     }
                 }
+            }
+            foreach (var item in positions)
+            {
+                item.AvgCost /= positionCnt[item.Code];
+                item.ProfitAndLossPct /= positionCnt[item.Code];
             }
 
             return positions;
@@ -394,6 +387,7 @@ namespace NineSunScripture.trade.structApi.helper
                     try
                     {
                         Funds temp = TradeAPI.QueryFunds(account.TradeSessionId);
+                        account.Funds = temp;
                         lock (funds)
                         {
                             funds.AvailableAmt += temp.AvailableAmt;
@@ -411,6 +405,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
 
@@ -453,6 +448,7 @@ namespace NineSunScripture.trade.structApi.helper
                     try
                     {
                         List<Order> temp = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
+                        account.CancelOrders = temp;
                         lock (sourceOrders)
                         {
                             sourceOrders.AddRange(temp);
@@ -467,6 +463,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
             foreach (Order order in sourceOrders)
@@ -501,7 +498,6 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 return;
             }
-            ReaderWriterLockSlim lockSlim = new ReaderWriterLockSlim();
             short successCnt = 0;
             short failCnt = 0;
             string info = "撤单【" + order.Name + "】";
@@ -521,17 +517,16 @@ namespace NineSunScripture.trade.structApi.helper
                             }
                             item.TradeSessionId = account.TradeSessionId;
                             int rspCode = TradeAPI.CancelOrder(item);
-                            if (rspCode > 0)
+                            lock (tasks)
                             {
-                                lockSlim.EnterWriteLock();
-                                successCnt++;
-                                lockSlim.ExitWriteLock();
-                            }
-                            else
-                            {
-                                lockSlim.EnterWriteLock();
-                                failCnt++;
-                                lockSlim.ExitWriteLock();
+                                if (rspCode <= 0)
+                                {
+                                    failCnt++;
+                                }
+                                if (rspCode != 888)
+                                {
+                                    successCnt++;
+                                }
                             }
                         }
                     }
@@ -544,12 +539,13 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback)
             {
                 info = info + "成功账户个数：" + successCnt + "，失败账户个数：" + failCnt;
-                callback.OnTradeResult(1, info, "", false);
+                callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, info, "", false);
             }
         }
 
@@ -572,6 +568,7 @@ namespace NineSunScripture.trade.structApi.helper
                 {
                     CancelOrdersCanCancel(account, quotes, callback);
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
         }
@@ -581,19 +578,19 @@ namespace NineSunScripture.trade.structApi.helper
         /// </summary>
         /// <param name="account">账户对象</param>
         /// <param name="quotes">股票对象</param>
-        public static void CancelOrdersCanCancel(
+        public static int CancelOrdersCanCancel(
             Account account, Quotes quotes, ITrade callback)
         {
             if (null == account)
             {
-                return;
+                return 888;
             }
             try
             {
                 List<Order> orders = TradeAPI.QueryOrdersCanCancel(account.TradeSessionId);
                 if (null == orders || orders.Count == 0)
                 {
-                    return;
+                    return 888;
                 }
                 foreach (Order order in orders)
                 {
@@ -605,10 +602,7 @@ namespace NineSunScripture.trade.structApi.helper
                             + quotes.Name + "】委托->"
                             + (order.Quantity * order.Price).ToString("0.00####") + "万元";
                         Logger.Log(opLog);
-                        if (null != callback)
-                        {
-                            callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
-                        }
+                        return rspCode;
                     }
                 }
             }
@@ -620,6 +614,7 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 Logger.Exception(e);
             }
+            return 888;
         }
 
         /// <summary>
@@ -640,7 +635,9 @@ namespace NineSunScripture.trade.structApi.helper
             }
             string code = "131810";
             Quotes quotes = PriceAPI.QueryTenthGearPrice(mainAcct.PriceSessionId, code);
+            short successCnt = 0;
             List<Task> tasks = new List<Task>();
+            List<Account> failAccts = new List<Account>();
             foreach (Account account in accounts)
             {
                 tasks.Add(Task.Run(() =>
@@ -663,13 +660,20 @@ namespace NineSunScripture.trade.structApi.helper
                             return;
                         }
                         int rspCode = TradeAPI.Sell(order);
+                        lock (failAccts)
+                        {
+                            if (rspCode <= 0)
+                            {
+                                failAccts.Add(account);
+                            }
+                            if (rspCode != 888)
+                            {
+                                successCnt++;
+                            }
+                        }
                         string opLog
                             = "资金账号【" + account.FundAcct + "】" + "逆回购" + order.Quantity * 100 + "元";
                         Logger.Log(opLog);
-                        if (null != callback)
-                        {
-                            callback.OnTradeResult(rspCode, opLog, order.StrErrorInfo, false);
-                        }
                     }
                     catch (ApiTimeoutException e)
                     {
@@ -680,8 +684,17 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
+            if (null != callback && (successCnt + failAccts.Count) > 0)
+            {
+                string tradeResult = "逆回购结果：成功账户"
+                    + successCnt + "个，失败账户" + failAccts.Count + "个";
+                callback.OnTradeResult(
+                    MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                Utils.LogTradeFailedAccts(tradeResult, failAccts);
+            }
         }//END METHOD
 
         /// <summary>
@@ -736,6 +749,7 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 return;
             }
+            short successCnt = 0;
             List<Position> positions;
             List<Task> tasks = new List<Task>();
             List<Account> failAccts = new List<Account>();
@@ -773,6 +787,10 @@ namespace NineSunScripture.trade.structApi.helper
                                 {
                                     failAccts.Add(account);
                                 }
+                                if (code != 888)
+                                {
+                                    successCnt++;
+                                }
                             }
                         }
                     }
@@ -785,13 +803,16 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
-            if (null != callback)
+            if (null != callback && (successCnt + failAccts.Count) > 0)
             {
-                string tradeResult = "一键清仓结果：成功账户"
-                    + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
-                callback.OnTradeResult(1, tradeResult, "", false);
+                string tradeResult
+                    = "一键清仓结果：成功账户" + successCnt + "个，失败账户" + failAccts.Count + "个";
+                callback.OnTradeResult(
+                    MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                Utils.LogTradeFailedAccts(tradeResult, failAccts);
             }
         }
 
@@ -877,6 +898,7 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 return;
             }
+            short successCnt = 0;
             List<Task> tasks = new List<Task>();
             List<Account> failAccts = new List<Account>();
             foreach (Account account in accounts)
@@ -891,14 +913,24 @@ namespace NineSunScripture.trade.structApi.helper
                         {
                             failAccts.Add(account);
                         }
+                        if (code != 888)
+                        {
+                            successCnt++;
+                        }
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
-            string tradeResult
-                = "【" + quotes.Name + "】卖出" + sellRatio * 100 + "%仓位结果：成功账户"
-                + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
-            Utils.ShowRuntimeInfo(callback, tradeResult);
+            if (null != callback && (successCnt + failAccts.Count) > 0)
+            {
+                string tradeResult
+                   = "【" + quotes.Name + "】卖出" + sellRatio * 100 + "%仓位结果：成功账户"
+                   + successCnt + "个，失败账户" + failAccts.Count + "个";
+                callback.OnTradeResult(
+                    MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                Utils.LogTradeFailedAccts(tradeResult, failAccts);
+            }
         }
 
         /// <summary>

@@ -285,11 +285,10 @@ namespace NineSunScripture.strategy
                 stopWinPosition = FirstStopWinPosition;
                 log = "20%止盈3成卖" + quotes.Name;
             }
-            Logger.Log(log);
 
+            short successCnt = 0;
             List<Task> tasks = new List<Task>();
             List<Account> failAccts = new List<Account>();
-            short successCnt = 0;
             foreach (Account account in accounts)
             {
                 //每个账户开个线程去处理，账户间同时操作，效率提升大大的
@@ -311,13 +310,15 @@ namespace NineSunScripture.strategy
                         }
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback && stopWinPosition > 0 && (successCnt + failAccts.Count) > 0)
             {
                 string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
                     + successCnt + "个，失败账户" + failAccts.Count + "个";
-                callback.OnTradeResult(1, tradeResult, "", false);
+                callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                Utils.LogTradeFailedAccts(tradeResult, failAccts);
             }
         }
 
@@ -339,14 +340,18 @@ namespace NineSunScripture.strategy
             if (ticks.First().Buy1Vol * quotes.HighLimit > SealMoneyBeginToDecrease * 10000
                && ticks.Last().Buy1Vol * quotes.HighLimit < MinSealMoneyToSell * 10000)
             {
-                Logger.Log("封单减少到1000万以下清" + quotes.Name);
+                string log = "封单减少到1000万以下清" + quotes.Name;
+                Logger.Log(log);
+                Utils.ShowRuntimeInfo(callback, log);
                 AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                 return;
             }
             if (ticks.First().Buy1Vol * quotes.HighLimit > SealMoneyBeginToDecrease * 10000
                 && ticks.Last().Buy1Vol * quotes.HighLimit < MaxSealMoneyToSell * 10000)
             {
-                Logger.Log("封单减少到1500万以下卖1/2" + quotes.Name);
+                string log = "封单减少到1500万以下卖1/2" + quotes.Name;
+                Logger.Log(log);
+                Utils.ShowRuntimeInfo(callback, log);
                 AccountHelper.SellByRatio(quotes, accounts, callback, 0.5f);
             }
         }
@@ -366,9 +371,12 @@ namespace NineSunScripture.strategy
                 return;
             }
             string log = " 3板以下止盈卖【"
-                + quotes.Name + "】" + Less3BoardsStopWinPosition * 100 + "%仓位";
+                + quotes.Name + "】" + Less3BoardsStopWinPosition * 100
+                + "%仓位，成本=" + quotes.AvgCost;
+            Logger.Log(log + quotes);
             Utils.ShowRuntimeInfo(callback, log);
 
+            short successCnt = 0;
             List<Task> tasks = new List<Task>();
             List<Account> failAccts = new List<Account>();
             foreach (Account account in accounts)
@@ -387,13 +395,23 @@ namespace NineSunScripture.strategy
                         {
                             failAccts.Add(account);
                         }
+                        if (code != 888)
+                        {
+                            successCnt++;
+                        }
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
-            string tradeResult = "3板以下止盈卖结果：成功账户"
+
+            if (null != callback && (successCnt + failAccts.Count) > 0)
+            {
+                string tradeResult = "3板以下止盈卖结果：成功账户"
                 + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
-            Utils.ShowRuntimeInfo(callback, tradeResult);
+                callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                Utils.LogTradeFailedAccts(tradeResult, failAccts);
+            }
         }
     }
 }

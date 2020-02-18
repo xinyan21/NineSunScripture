@@ -45,7 +45,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         ///上升期T字板 最小开板时间
         /// </summary>
-        private const int MinOpenBoardTimeOfUp = 10;
+        private const int MinOpenBoardTimeOfUp = 12;
 
         /// <summary>
         /// 最大买一额限制默认是1888万
@@ -327,13 +327,16 @@ namespace NineSunScripture.strategy
                             Logger.Exception(e);
                         }
                     }));
+                    Thread.Sleep(2);
                 }
                 Task.WaitAll(tasks.ToArray());
                 if (null != callback && (successCnt + failAccts.Count) > 0)
                 {
-                    string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
+                    string tradeResult = "【" + quotes.Name + "】打板买入结果：成功账户"
                         + successCnt + "个，失败账户" + failAccts.Count + "个";
-                    callback.OnTradeResult(1, tradeResult, "", false);
+                    callback.OnTradeResult(
+                        MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                    Utils.LogTradeFailedAccts(tradeResult, failAccts);
                 }
             }
         }

@@ -3,6 +3,7 @@ using NineSunScripture.strategy;
 using NineSunScripture.trade.persistence;
 using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
+using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
@@ -87,13 +88,13 @@ namespace NineSunScripture.forms
                 return;
             }
 
-            short buyCnt = 0;
-            ReaderWriterLockSlim lockSlim = new ReaderWriterLockSlim();
-            Task[] tasks = new Task[accounts.Count];
-            for (int i = 0; i < accounts.Count; i++)
+            short successCnt = 0;
+            List<Task> tasks = new List<Task>();
+            List<Account> failAccts = new List<Account>();
+            foreach (Account account in accounts)
             {
-                Account account = accounts[i];
-                tasks[i] = Task.Run(() =>
+                //每个账户开个线程去处理，账户间同时操作，效率提升大大的
+                tasks.Add(Task.Run(() =>
                 {
                     Order order = new Order();
                     order.Code = tbCode.Text;
@@ -117,20 +118,34 @@ namespace NineSunScripture.forms
                         = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
                           + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
                     Logger.Log(opLog);
-                    if (rspCode > 0)
+                    lock (failAccts)
                     {
-                        lockSlim.EnterWriteLock();
-                        buyCnt++;
-                        lockSlim.ExitWriteLock();
+                        if (rspCode <= 0)
+                        {
+                            failAccts.Add(account);
+                        }
+                        if (rspCode != 888)
+                        {
+                            successCnt++;
+                        }
                     }
-                });
+                }));
+                Thread.Sleep(2);
             }
-            Task.WaitAll(tasks);
-            if (buyCnt > 0)
+            Task.WaitAll(tasks.ToArray());
+            if (successCnt > 0)
             {
                 quotes.Operation = Quotes.OperationSell;
                 quotes.StockCategory = Quotes.CategoryBand;
                 JsonDataHelper.Instance.AddStock(quotes);
+            }
+            if (null != callback && (successCnt + failAccts.Count) > 0)
+            {
+                string tradeResult = "【" + quotes.Name + "】窗口买入结果：成功账户"
+                    + successCnt + "个，失败账户" + failAccts.Count + "个";
+                callback.OnTradeResult(
+                    MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                Utils.LogTradeFailedAccts(tradeResult, failAccts);
             }
         }
 

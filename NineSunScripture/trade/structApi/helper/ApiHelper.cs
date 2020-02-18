@@ -141,6 +141,24 @@ namespace NineSunScripture.trade.structApi.helper
             commision.Price = temp.委托价;
             commision.Quantity = temp.委托量;
 
+            int listSize = Marshal.ReadInt32(data + 8);
+            int structSize = Marshal.ReadInt32(data + 12);
+            if (listSize > 1)
+            {
+                Logger.Log("检测到逐笔委托数组：" );
+                for (int i = 1; i < listSize; i++)
+                {
+                    OByOCommision com = new OByOCommision();
+                    逐笔委托结构体 item = (逐笔委托结构体)
+                        Marshal.PtrToStructure(data + 32 + i * structSize, typeof(逐笔委托结构体));
+                    com.Time = item.时间;
+                    com.Category = item.类型;
+                    com.Price = item.委托价;
+                    com.Quantity = item.委托量;
+                    Logger.Log("逐笔委托数组item：" + com);
+                }
+            }
+
             return commision;
         }
     }

@@ -121,9 +121,20 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.InteropServices, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.4.3.0\lib\net463\System.Runtime.InteropServices.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -188,10 +199,6 @@
     <Compile Include="test\TestApi.cs" />
     <Compile Include="trade\ApiTimeoutException.cs" />
     <Compile Include="trade\persistence\JsonDataHelper.cs" />
-    <Compile Include="trade\stringApi\api\PriceAPI.cs" />
-    <Compile Include="trade\stringApi\api\TradeAPI.cs" />
-    <Compile Include="trade\stringApi\helper\AccountHelper.cs" />
-    <Compile Include="trade\stringApi\helper\ApiHelper.cs" />
     <Compile Include="trade\structApi\ApiDataStruct.cs" />
     <Compile Include="trade\structApi\api\PriceAPI.cs" />
     <Compile Include="trade\structApi\api\TradeAPI.cs" />
@@ -220,7 +227,7 @@
       <DependentUpon>ManageAcctForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
@@ -253,6 +260,7 @@
     <Content Include="docs\开发计划.txt" />
     <Content Include="docs\接口自用版说明.txt" />
     <Content Include="docs\接口返回数据格式.txt" />
+    <Content Include="Resources\ding.wav" />
     <Content Include="taiji_ico500x500.ico" />
     <None Include="Resources\taiji.png" />
     <None Include="Resources\3%281%29.png" />

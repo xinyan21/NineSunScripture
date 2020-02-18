@@ -12,6 +12,7 @@ using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace NineSunScripture
 {
@@ -27,18 +28,18 @@ namespace NineSunScripture
 
     public partial class MainForm : Form, ITrade, IAcctInfoListener, IShowWorkingSatus
     {
-        private Account account;
-        //用来临时保存总账户信息
-        private Image imgTaiJi;
-
         private bool isRebooting = false;
         private bool isStrategyStarted = false;
         private int rotateDegree = 0;
+        private Image imgTaiJi;
+        //用来临时保存总账户信息
+        private Account account;
         private MainStrategy mainStrategy;
+
         private List<Quotes> latestStocks;
+        private List<Quotes> longTermStocks;
         private List<Quotes> bandStocks;
         private List<Quotes> dragonLeaders;
-        private List<Quotes> longTermStocks;
         //持仓股票，这个列表是用来存放卖出计划的，不是底部的那个持仓
         private List<Quotes> positionStocks;
         private List<Quotes> stocks;
@@ -56,25 +57,7 @@ namespace NineSunScripture
             mainStrategy.SetShowWorkingStatus(this);
             imgTaiJi = Properties.Resources.taiji;
 
-            Dictionary<string, string> settings = JsonDataHelper.Instance.Settings;
-            if (null != settings)
-            {
-                if (!settings.ContainsKey("period"))
-                {
-                    settings.Add("period", "up");
-                    JsonDataHelper.Instance.SaveSettings(settings);
-                }
-                if (settings["period"].Equals("up"))
-                {
-                    btnPeriod.Text = "上升期";
-                    btnPeriod.BackColor = Color.Red;
-                }
-                else
-                {
-                    btnPeriod.Text = "下降期";
-                    btnPeriod.BackColor = Color.Green;
-                }
-            }
+            InitPeriod();
 
             //Start strategy
             Task.Run(() =>
@@ -131,6 +114,10 @@ namespace NineSunScripture
             {
                 string runtimeInfo = msg + ">成功";
                 AddRuntimeInfo(runtimeInfo);
+                if (MainStrategy.RspCodeOfUpdateAcctInfo == rspCode)
+                {
+                    mainStrategy.UpdateTotalAccountInfo(false);
+                }
             }
             else
             {
@@ -146,6 +133,29 @@ namespace NineSunScripture
                     {
                         InvokeRebootStrategy();
                     }
+                }
+            }
+        }
+
+        private void InitPeriod()
+        {
+            Dictionary<string, string> settings = JsonDataHelper.Instance.Settings;
+            if (null != settings)
+            {
+                if (!settings.ContainsKey("period"))
+                {
+                    settings.Add("period", "up");
+                    JsonDataHelper.Instance.SaveSettings(settings);
+                }
+                if (settings["period"].Equals("up"))
+                {
+                    btnPeriod.Text = "上升期";
+                    btnPeriod.BackColor = Color.Red;
+                }
+                else
+                {
+                    btnPeriod.Text = "下降期";
+                    btnPeriod.BackColor = Color.Green;
                 }
             }
         }
@@ -404,7 +414,7 @@ namespace NineSunScripture
 
             ImageList imgList = new ImageList
             {
-                ImageSize = new Size(1, 32)//分别是宽和高
+                ImageSize = new Size(1, 28)//分别是宽和高
             };
             lvStocks.SmallImageList = imgList;
             lvPositions.SmallImageList = imgList;

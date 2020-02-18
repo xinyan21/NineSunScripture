@@ -23,6 +23,8 @@ namespace NineSunScripture.strategy
         /// </summary>
         public static bool IsTest = false;
 
+        public const int RspCodeOfUpdateAcctInfo = 8888;
+
         //非交易时间策略执行频率，单位ms
         //    private const short CycleTimeOfNonTrade = 2500;
 
@@ -196,10 +198,10 @@ namespace NineSunScripture.strategy
         /// 此回调在C++线程里面执行
         /// </summary>
         /// <param name="type">功能号</param>
-        /// <param name="Result">数据指针</param>
-        public void OnPushResult(int type, IntPtr Result)
+        /// <param name="result">数据指针</param>
+        public void OnPushResult(int type, IntPtr result)
         {
-            string code = Marshal.PtrToStringAnsi(Result + 16, 6);
+            string code = Marshal.PtrToStringAnsi(result + 16, 6);
             Quotes stock = stocksForPrice.Find(item => item.Code.Equals(code));
             if (null == stock)
             {
@@ -224,7 +226,7 @@ namespace NineSunScripture.strategy
                 }
                 else
                 {
-                    buyProtection.Add(code, true);
+                    buyProtection.Add(code, false);
                 }
             }
             try
@@ -232,11 +234,11 @@ namespace NineSunScripture.strategy
                 //推送过来是数据是十档行情 推送中的十档无换手、总市值、流通值、涨停、跌停
                 if (type == 10001)
                 {
-                    OnTenthGearPricePush(Result, stock);
+                    OnTenthGearPricePush(result, stock);
                 }
                 else if (type == 10206)//逐笔委托 推送太快注意代码优化
                 {
-                    OnOByOCommisionPush(Result, stock, code);
+                    OnOByOCommisionPush(result, stock);
                 }
             }
             finally
@@ -278,10 +280,10 @@ namespace NineSunScripture.strategy
             {
                 queryPriceErrorCnt = 0;
             }
-            
+
             quotes.Name = stock.Name;
-            Utils.SamplingLogQuotes(quotes);
             quotes.CloneStrategyParamsFrom(stock);
+            Utils.SamplingLogQuotes(quotes);
             //打板的深圳股票需要在8.5%之上订阅逐笔委托，可以和十档争夺策略执行，买入之后取消订阅
             //由于是3s一推，所以这里不需要担心并发问题
             if (Utils.IfNeedToSubOByOPrice(quotes))
@@ -302,10 +304,10 @@ namespace NineSunScripture.strategy
             ExeContBoardStrategyByStock(quotes);
         }
 
-        private void OnOByOCommisionPush(IntPtr Result, Quotes stock, string code)
+        private void OnOByOCommisionPush(IntPtr Result, Quotes stock)
         {
             OByOCommision commision = ApiHelper.ParseStructToCommision(Result);
-            Logger.Log(code + "的逐笔委托：" + commision);
+            Logger.Log("【" + stock.Name + "】的逐笔委托：" + commision);
             //逐笔委托只处理特大单，这里还要拿到涨停价
             if (commision.Price != stock.HighLimit)
             {
@@ -317,14 +319,14 @@ namespace NineSunScripture.strategy
             }
             lock (buyProtection)
             {
-                buyProtection[code] = true;
+                buyProtection[stock.Code] = true;
             }
             //TODO 执行买入，同时设置买入保护状态，防止多次买入，把打板的买入逻辑拆出来
             //还有个问题就是这里没有行情对象，要查个行情出来，或者把打板保存的最新对象拿出来
             //修改买一卖一，然后直接调用打板的方法
-            Quotes quotes = hitBoardStrategy.GetLastHistoryQuotesBy(code);
+            Quotes quotes = hitBoardStrategy.GetLastHistoryQuotesBy(stock.Code);
             quotes.Buy1 = stock.HighLimit;
-            Logger.Log("【"+quotes.Name + "】触发逐笔委托买点：");
+            Logger.Log("【" + quotes.Name + "】触发逐笔委托买点：");
             ExeContBoardStrategyByStock(quotes);
         }
 
@@ -548,6 +550,7 @@ namespace NineSunScripture.strategy
                         }
                     }
                 }));
+                Thread.Sleep(2);
             }
             Task.WaitAll(tasks.ToArray());
         }

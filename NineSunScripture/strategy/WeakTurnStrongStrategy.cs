@@ -1,9 +1,11 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
+using NineSunScripture.util;
 using NineSunScripture.util.log;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NineSunScripture.strategy
@@ -82,7 +84,7 @@ namespace NineSunScripture.strategy
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    int code = BuyWithAcct(account, quotes, funds, positionRatioCtrl, callback);
+                    int code = BuyWithAcct(account, quotes, funds, positionRatioCtrl);
                     lock (failAccts)
                     {
                         if (code <= 0)
@@ -95,18 +97,20 @@ namespace NineSunScripture.strategy
                         }
                     }
                 }));
+                Thread.Sleep(2);
             }//END FOR
             Task.WaitAll(tasks.ToArray());
             if (null != callback && (successCnt + failAccts.Count) > 0)
             {
-                string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
+                string tradeResult = "【" + quotes.Name + "】弱转强买入结果：成功账户"
                     + successCnt + "个，失败账户" + failAccts.Count + "个";
-                callback.OnTradeResult(1, tradeResult, "", false);
+                callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                Utils.LogTradeFailedAccts(tradeResult, failAccts);
             }
         }//END BUY
 
         private int BuyWithAcct(
-            Account account, Quotes quotes, Funds funds, float positionRatioCtrl, ITrade callback)
+            Account account, Quotes quotes, Funds funds, float positionRatioCtrl)
         {
             Order order = new Order();
             order.Code = quotes.Code;
