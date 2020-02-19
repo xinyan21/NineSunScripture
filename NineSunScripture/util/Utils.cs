@@ -211,7 +211,7 @@ namespace NineSunScripture.util
                 return;
             }
             StringBuilder sb = new StringBuilder(opLog);
-            sb.Append("\n失败账户如下：");
+            sb.Append("=>失败账户如下：");
             foreach (var item in accounts)
             {
                 sb.Append("[").Append(item.FundAcct).Append("]");

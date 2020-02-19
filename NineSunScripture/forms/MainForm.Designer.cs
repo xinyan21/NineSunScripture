@@ -382,7 +382,7 @@
             this.tsmiSell.Name = "tsmiSell";
             this.tsmiSell.Size = new System.Drawing.Size(214, 40);
             this.tsmiSell.Text = "一键卖出";
-            this.tsmiSell.Click += new System.EventHandler(this.TsmiSell_Click);
+            this.tsmiSell.Click += new System.EventHandler(this.TsmiOneClickSell_Click);
             // 
             // tsmiSellInForm
             // 
@@ -611,7 +611,7 @@
             this.btnPeriod.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
             this.btnPeriod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.btnPeriod.Location = new System.Drawing.Point(555, 68);
+            this.btnPeriod.Location = new System.Drawing.Point(547, 68);
             this.btnPeriod.Name = "btnPeriod";
             this.btnPeriod.Size = new System.Drawing.Size(126, 42);
             this.btnPeriod.TabIndex = 23;

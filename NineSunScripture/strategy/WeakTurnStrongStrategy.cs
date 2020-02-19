@@ -97,7 +97,7 @@ namespace NineSunScripture.strategy
                         }
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }//END FOR
             Task.WaitAll(tasks.ToArray());
             if (null != callback && (successCnt + failAccts.Count) > 0)

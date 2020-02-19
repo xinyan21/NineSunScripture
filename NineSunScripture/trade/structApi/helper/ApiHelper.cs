@@ -37,6 +37,10 @@ namespace NineSunScripture.trade.structApi.helper
         /// <param name="order">订单对象</param>
         public static void SetShareholderAcct(Account account, Quotes quotes, Order order)
         {
+            if (null == quotes || null == account || null == order)
+            {
+                return;
+            }
             if (quotes.Code.StartsWith("6"))
             {
                 order.ShareholderAcct = account.ShShareholderAcct;
@@ -105,8 +109,7 @@ namespace NineSunScripture.trade.structApi.helper
                 Marshal.PtrToStructure(data + 32, typeof(十档行情结构体));
             quotes.Code = code;
             quotes.Open = (float)price.开盘;
-            //需要注意涨停后卖一是0
-            quotes.LatestPrice = (float)(price.卖一价 > 0 ? price.卖一价 : price.买一价);
+            quotes.LatestPrice = (float)(price.最新);
             quotes.Volume = (int)price.总量;
             quotes.HighLimit = (float)price.涨停;
             quotes.LowLimit = (float)price.跌停;
@@ -141,12 +144,12 @@ namespace NineSunScripture.trade.structApi.helper
             commision.Price = temp.委托价;
             commision.Quantity = temp.委托量;
 
-            int listSize = Marshal.ReadInt32(data + 8);
+            int listSize = Marshal.ReadInt32(data + 4);
             int structSize = Marshal.ReadInt32(data + 12);
             if (listSize > 1)
             {
-                Logger.Log("检测到逐笔委托数组：" );
-                for (int i = 1; i < listSize; i++)
+                Logger.Log("检测到逐笔委托数组，长度为：" + listSize);
+                for (int i = 0; i < listSize; i++)
                 {
                     OByOCommision com = new OByOCommision();
                     逐笔委托结构体 item = (逐笔委托结构体)
@@ -155,7 +158,7 @@ namespace NineSunScripture.trade.structApi.helper
                     com.Category = item.类型;
                     com.Price = item.委托价;
                     com.Quantity = item.委托量;
-                    Logger.Log("逐笔委托数组item：" + com);
+                    Logger.Log("逐笔委托数组item" + i + "：" + com);
                 }
             }
 

@@ -1,6 +1,4 @@
 ﻿using NineSunScripture.model;
-using NineSunScripture.trade;
-using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
 using NineSunScripture.util.log;
@@ -115,10 +113,9 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            float avgCost = position.AvgCost;
-            if (quotes.AvgCost > 0)
+            if (quotes.AvgCost == 0)
             {
-                avgCost = quotes.AvgCost;
+                quotes.AvgCost = position.AvgCost;
             }
             //龙头单独卖
             if (quotes.IsDragonLeader)
@@ -131,7 +128,7 @@ namespace NineSunScripture.strategy
                 return;
             }
             //卖一和2是互斥的，return后就不能执行到后面去
-            if (!StopWinOrLoss(accounts, callback, quotes, avgCost))
+            if (!StopWinOrLoss(accounts, callback, quotes))
             {
                 OtherSells(accounts, callback, quotes);
             }
@@ -147,8 +144,8 @@ namespace NineSunScripture.strategy
         /// <returns></returns>
         private bool BasicCheck(Quotes quotes, Position position, float curPrice, float lowLimit)
         {
-            if (curPrice == lowLimit || null == position ||
-               quotes.LatestPrice == 0 || quotes.Buy1 == 0 || position.AvailableBalance == 0)
+            if (curPrice == lowLimit
+                || null == position || quotes.Buy1 == 0 || position.AvailableBalance == 0)
             {
                 return false;
             }
@@ -161,11 +158,11 @@ namespace NineSunScripture.strategy
         /// <param name="accounts">账户列表</param>
         /// <param name="callback">回调</param>
         /// <param name="quotes">股票对象</param>
-        /// <param name="avgCost">成本价</param>
         /// <returns></returns>
         private bool StopWinOrLoss(
-            List<Account> accounts, ITrade callback, Quotes quotes, float avgCost)
+            List<Account> accounts, ITrade callback, Quotes quotes)
         {
+            float avgCost = quotes.AvgCost;
             float highLimit = quotes.HighLimit;
             float curPrice = quotes.LatestPrice;
             float open = quotes.Open;
@@ -173,7 +170,7 @@ namespace NineSunScripture.strategy
             DateTime now = DateTime.Now;
             if (open != highLimit)
             {
-                StopWin(quotes, accounts, callback, avgCost);
+                StopWin(quotes, accounts, callback);
                 StopWinForLessThan3Boards(accounts, quotes, callback);
                 if (open < quotes.PreClose * StopLossRatio)
                 {
@@ -257,13 +254,13 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
         /// <param name="callback">交易结果回调</param>
-        private void StopWin(Quotes quotes, List<Account> accounts, ITrade callback, float avgCost)
+        private void StopWin(Quotes quotes, List<Account> accounts, ITrade callback)
         {
             if (null == accounts || null == quotes)
             {
                 return;
             }
-            float profitPct = (quotes.Buy1 / avgCost - 1) * 100;
+            float profitPct = (quotes.Buy1 / quotes.AvgCost - 1) * 100;
             if (profitPct < FirstClassStopWin)
             {
                 return;
@@ -310,7 +307,7 @@ namespace NineSunScripture.strategy
                         }
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback && stopWinPosition > 0 && (successCnt + failAccts.Count) > 0)
@@ -365,16 +362,14 @@ namespace NineSunScripture.strategy
         private void StopWinForLessThan3Boards(
             List<Account> accounts, Quotes quotes, ITrade callback)
         {
-            if (null == accounts || null == quotes ||
-                quotes.ContBoards >= 3 || quotes.Sell1 / quotes.AvgCost < Less3BoardsStopWinRatio)
+            bool isUpRatioNotEnough = quotes.AvgCost > 0
+                && quotes.Sell1 / quotes.AvgCost < Less3BoardsStopWinRatio;
+            //下降期不检查连板数，到Less3BoardsStopWinRatio就止盈
+            bool isContBoardsNotQualified = Utils.IsUpPeriod() ? quotes.ContBoards >= 3 : false;
+            if (null == accounts || null == quotes || isContBoardsNotQualified || isUpRatioNotEnough)
             {
                 return;
             }
-            string log = " 3板以下止盈卖【"
-                + quotes.Name + "】" + Less3BoardsStopWinPosition * 100
-                + "%仓位，成本=" + quotes.AvgCost;
-            Logger.Log(log + quotes);
-            Utils.ShowRuntimeInfo(callback, log);
 
             short successCnt = 0;
             List<Task> tasks = new List<Task>();
@@ -401,7 +396,7 @@ namespace NineSunScripture.strategy
                         }
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
 

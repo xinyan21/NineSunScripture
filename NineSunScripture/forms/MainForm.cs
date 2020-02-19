@@ -395,13 +395,13 @@ namespace NineSunScripture
             {
                 btnPeriod.Text = "下降期";
                 btnPeriod.BackColor = Color.Green;
-                settings["period"] = "up";
+                settings["period"] = "down";
             }
             else
             {
                 btnPeriod.Text = "上升期";
                 btnPeriod.BackColor = Color.Red;
-                settings["period"] = "down";
+                settings["period"] = "up";
             }
             JsonDataHelper.Instance.SaveSettings(settings);
         }
@@ -717,7 +717,7 @@ namespace NineSunScripture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void TsmiSell_Click(object sender, EventArgs e)
+        private void TsmiOneClickSell_Click(object sender, EventArgs e)
         {
             if (lvPositions.SelectedItems.Count <= 0)
             {

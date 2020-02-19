@@ -257,7 +257,15 @@ namespace NineSunScripture.strategy
             {
                 //这个变量不需要lock，因为大于2后必定会触发
                 queryPriceErrorCnt++;
-                Logger.Log("QueryTenthGearPrice error " + queryPriceErrorCnt);
+                Logger.Log("OnTenthGearPricePush error " + queryPriceErrorCnt);
+                if (null != quotes)
+                {
+                    Logger.Log(quotes.ToString(), LogType.Quotes);
+                }
+                else
+                {
+                    Logger.Log("quotes is null");
+                }
                 if (queryPriceErrorCnt < 3)
                 {
                     return;
@@ -265,7 +273,7 @@ namespace NineSunScripture.strategy
             }
             if (queryPriceErrorCnt > 2)
             {
-                Logger.Log("QueryTenthGearPrice error has been occured 3 times, need to reboot");
+                Logger.Log("OnTenthGearPricePush error has been occured 3 times, need to reboot");
                 if (null != quotes)
                 {
                     Logger.Log(quotes.ToString(), LogType.Quotes);
@@ -550,7 +558,7 @@ namespace NineSunScripture.strategy
                         }
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
         }
@@ -603,7 +611,7 @@ namespace NineSunScripture.strategy
 
         public void SellStock(Quotes quotes, ITrade callBack)
         {
-            if (null == accounts || accounts.Count == 0)
+            if (Utils.IsListEmpty(accounts))
             {
                 MessageBox.Show("没有可操作的账户");
                 return;

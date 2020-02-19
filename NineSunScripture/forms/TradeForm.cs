@@ -66,7 +66,6 @@ namespace NineSunScripture.forms
             {
                 Buy();
             }
-            Close();
         }
 
         private void Buy()
@@ -87,6 +86,7 @@ namespace NineSunScripture.forms
                 MessageBox.Show("价格格式错误");
                 return;
             }
+            Close();
 
             short successCnt = 0;
             List<Task> tasks = new List<Task>();
@@ -130,7 +130,7 @@ namespace NineSunScripture.forms
                         }
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             if (successCnt > 0)
@@ -157,8 +157,11 @@ namespace NineSunScripture.forms
             }
             catch (Exception e)
             {
+                MessageBox.Show("价格格式错误");
                 Logger.Exception(e);
+                return;
             }
+            Close();
             AccountHelper.SellByRatio(quotes, accounts, callback, positionRatio);
             JsonDataHelper.Instance.DelStockByCode(quotes.Code, Quotes.OperationSell);
         }

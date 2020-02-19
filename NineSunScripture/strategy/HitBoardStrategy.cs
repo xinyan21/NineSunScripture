@@ -164,7 +164,7 @@ namespace NineSunScripture.strategy
             }
             //重置开板时间，为了防止信号出现后重置导致下面买点判断失效，需要等连续2个tick涨停才重置
             bool isBoardThisTick = quotes.Buy1 == highLimit;
-            if (!isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
+            if (isBoardLastTick && isBoardThisTick && openBoardTime.ContainsKey(code))
             {
                 int openBoardInterval
                     = (int)DateTime.Now.Subtract(openBoardTime[code]).TotalSeconds;
@@ -174,8 +174,8 @@ namespace NineSunScripture.strategy
                 //重置后因为触发了买点需要判断下开板时间是否足够
                 if (openBoardInterval < minOpenBoardTime)
                 {
-                    Logger.Log(
-                        "【" + quotes.Name + "】开板时间（已回封），此次开板时间为" + openBoardInterval + "s");
+                    Logger.Log( "【" + quotes.Name 
+                        + "】开板时间（已回封），此次开板时间为" + openBoardInterval + "s");
                     return false;
                 }
             }
@@ -186,8 +186,8 @@ namespace NineSunScripture.strategy
                 return false;
             }
             rwLockSlimForOpenBoard.ExitReadLock();
-            //开板时间小于30秒，过滤。如果没触发卖2买点，直接回封，这里的判断是没用的，因为上面回封后会重置开板时间
-            //所以上面加上了30s的判断
+            //开板时间小于30秒，过滤。如果没触发卖2买点，直接回封，这里的判断是没用的
+            //因为上面回封后会重置开板时间，所以上面加上了30s的判断
             if (openBoardTime.ContainsKey(code))
             {
                 int openBoardInterval
@@ -327,7 +327,7 @@ namespace NineSunScripture.strategy
                             Logger.Exception(e);
                         }
                     }));
-                    Thread.Sleep(2);
+                    Thread.Sleep(1);
                 }
                 Task.WaitAll(tasks.ToArray());
                 if (null != callback && (successCnt + failAccts.Count) > 0)

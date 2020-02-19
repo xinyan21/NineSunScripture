@@ -188,7 +188,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Marshal.FreeCoTaskMem(ptrErrorInfo);
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback)
@@ -285,7 +285,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             List<Position> temp = allPositions.Distinct().ToList();
@@ -328,6 +328,8 @@ namespace NineSunScripture.trade.structApi.helper
                 item.AvgCost /= positionCnt[item.Code];
                 item.ProfitAndLossPct /= positionCnt[item.Code];
             }
+            //按市值降序排列
+            positions.Sort((x, y) => { return y.MarketValue.CompareTo(x.MarketValue); });
 
             return positions;
         }
@@ -405,7 +407,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
 
@@ -463,7 +465,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             foreach (Order order in sourceOrders)
@@ -539,7 +541,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback)
@@ -568,7 +570,7 @@ namespace NineSunScripture.trade.structApi.helper
                 {
                     CancelOrdersCanCancel(account, quotes, callback);
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
         }
@@ -684,7 +686,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback && (successCnt + failAccts.Count) > 0)
@@ -803,7 +805,7 @@ namespace NineSunScripture.trade.structApi.helper
                         Logger.Exception(e);
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback && (successCnt + failAccts.Count) > 0)
@@ -848,10 +850,9 @@ namespace NineSunScripture.trade.structApi.helper
                 }
                 if (quotes.Buy2 == 0)
                 {
-                    string name = quotes.Name;
                     quotes = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, quotes.Code);
                     //这个行情接口不返回name
-                    quotes.Name = name;
+                    quotes.Name = stock.Name;
                 }
                 Order order = new Order();
                 order.TradeSessionId = account.TradeSessionId;
@@ -919,7 +920,7 @@ namespace NineSunScripture.trade.structApi.helper
                         }
                     }
                 }));
-                Thread.Sleep(2);
+                Thread.Sleep(1);
             }
             Task.WaitAll(tasks.ToArray());
             if (null != callback && (successCnt + failAccts.Count) > 0)
