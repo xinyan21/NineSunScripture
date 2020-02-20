@@ -300,7 +300,7 @@ namespace NineSunScripture.strategy
                             {
                                 failAccts.Add(account);
                             }
-                            if (code != 888)
+                            else if (code != 888)
                             {
                                 successCnt++;
                             }
@@ -390,7 +390,7 @@ namespace NineSunScripture.strategy
                         {
                             failAccts.Add(account);
                         }
-                        if (code != 888)
+                        else if (code != 888)
                         {
                             successCnt++;
                         }

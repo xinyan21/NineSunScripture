@@ -42,6 +42,7 @@
             this.btnBuy = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.tbName = new System.Windows.Forms.TextBox();
+            this.rbtnOneOfFive = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -101,13 +102,14 @@
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox1.Controls.Add(this.rbtnOneOfFive);
             this.groupBox1.Controls.Add(this.rbtnOneFourth);
             this.groupBox1.Controls.Add(this.rbtnAllIn);
             this.groupBox1.Controls.Add(this.rbtnOneSecond);
             this.groupBox1.Controls.Add(this.rbtnOneThird);
-            this.groupBox1.Location = new System.Drawing.Point(434, 198);
+            this.groupBox1.Location = new System.Drawing.Point(431, 198);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(253, 56);
+            this.groupBox1.Size = new System.Drawing.Size(320, 56);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             // 
@@ -116,7 +118,7 @@
             this.rbtnOneFourth.AutoSize = true;
             this.rbtnOneFourth.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneFourth.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneFourth.Location = new System.Drawing.Point(5, 19);
+            this.rbtnOneFourth.Location = new System.Drawing.Point(69, 17);
             this.rbtnOneFourth.Name = "rbtnOneFourth";
             this.rbtnOneFourth.Size = new System.Drawing.Size(55, 27);
             this.rbtnOneFourth.TabIndex = 4;
@@ -129,7 +131,7 @@
             this.rbtnAllIn.AutoSize = true;
             this.rbtnAllIn.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnAllIn.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnAllIn.Location = new System.Drawing.Point(183, 19);
+            this.rbtnAllIn.Location = new System.Drawing.Point(252, 17);
             this.rbtnAllIn.Name = "rbtnAllIn";
             this.rbtnAllIn.Size = new System.Drawing.Size(62, 27);
             this.rbtnAllIn.TabIndex = 2;
@@ -142,7 +144,7 @@
             this.rbtnOneSecond.AutoSize = true;
             this.rbtnOneSecond.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneSecond.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneSecond.Location = new System.Drawing.Point(127, 19);
+            this.rbtnOneSecond.Location = new System.Drawing.Point(191, 17);
             this.rbtnOneSecond.Name = "rbtnOneSecond";
             this.rbtnOneSecond.Size = new System.Drawing.Size(55, 27);
             this.rbtnOneSecond.TabIndex = 1;
@@ -153,14 +155,12 @@
             // rbtnOneThird
             // 
             this.rbtnOneThird.AutoSize = true;
-            this.rbtnOneThird.Checked = true;
             this.rbtnOneThird.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rbtnOneThird.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.rbtnOneThird.Location = new System.Drawing.Point(70, 19);
+            this.rbtnOneThird.Location = new System.Drawing.Point(130, 17);
             this.rbtnOneThird.Name = "rbtnOneThird";
             this.rbtnOneThird.Size = new System.Drawing.Size(55, 27);
             this.rbtnOneThird.TabIndex = 0;
-            this.rbtnOneThird.TabStop = true;
             this.rbtnOneThird.Text = "1/3";
             this.rbtnOneThird.UseVisualStyleBackColor = true;
             this.rbtnOneThird.CheckedChanged += new System.EventHandler(this.rbtnOneThird_CheckedChanged);
@@ -174,7 +174,7 @@
             this.btnBuy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBuy.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnBuy.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnBuy.Location = new System.Drawing.Point(233, 354);
+            this.btnBuy.Location = new System.Drawing.Point(273, 356);
             this.btnBuy.Name = "btnBuy";
             this.btnBuy.Size = new System.Drawing.Size(252, 66);
             this.btnBuy.TabIndex = 8;
@@ -202,13 +202,28 @@
             this.tbName.Size = new System.Drawing.Size(144, 29);
             this.tbName.TabIndex = 10;
             // 
+            // rbtnOneOfFive
+            // 
+            this.rbtnOneOfFive.AutoSize = true;
+            this.rbtnOneOfFive.Checked = true;
+            this.rbtnOneOfFive.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.rbtnOneOfFive.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.rbtnOneOfFive.Location = new System.Drawing.Point(8, 17);
+            this.rbtnOneOfFive.Name = "rbtnOneOfFive";
+            this.rbtnOneOfFive.Size = new System.Drawing.Size(55, 27);
+            this.rbtnOneOfFive.TabIndex = 5;
+            this.rbtnOneOfFive.TabStop = true;
+            this.rbtnOneOfFive.Text = "1/5";
+            this.rbtnOneOfFive.UseVisualStyleBackColor = true;
+            this.rbtnOneOfFive.CheckedChanged += new System.EventHandler(this.rbtnOneOfFive_CheckedChanged);
+            // 
             // TradeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(712, 525);
+            this.ClientSize = new System.Drawing.Size(766, 525);
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnBuy);
@@ -245,5 +260,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox tbName;
         private System.Windows.Forms.RadioButton rbtnOneFourth;
+        private System.Windows.Forms.RadioButton rbtnOneOfFive;
     }
 }

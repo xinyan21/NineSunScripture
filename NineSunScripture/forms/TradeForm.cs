@@ -15,11 +15,11 @@ namespace NineSunScripture.forms
 {
     partial class TradeForm : Form
     {
-        private float positionRatio = 1 / 3f;
-        private List<Account> accounts;
-        private Quotes quotes;
+        private float positionRatio = 1 / 5f;
         private short opDirection;  //buy or sell, @Order const
+        private Quotes quotes;
         private ITrade callback;
+        private List<Account> accounts;
 
         public TradeForm(
             List<Account> accounts, ITrade callback, short opDirection = Order.CategoryBuy)
@@ -87,6 +87,7 @@ namespace NineSunScripture.forms
                 MessageBox.Show("价格格式错误");
                 return;
             }
+            //关闭后就不能调用控件的值了
             Close();
 
             short successCnt = 0;
@@ -98,7 +99,7 @@ namespace NineSunScripture.forms
                 tasks.Add(Task.Run(() =>
                 {
                     Order order = new Order();
-                    order.Code = tbCode.Text;
+                    order.Code = quotes.Code;
                     order.Price = price;
                     order.TradeSessionId = account.TradeSessionId;
                     account.Funds = TradeAPI.QueryFunds(account.TradeSessionId);
@@ -117,7 +118,8 @@ namespace NineSunScripture.forms
                     int rspCode = TradeAPI.Buy(order);
                     string opLog
                         = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
-                          + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100) + "%仓位";
+                          + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100)
+                          + "%仓位";
                     Logger.Log(opLog);
                     lock (failAccts)
                     {
@@ -125,7 +127,7 @@ namespace NineSunScripture.forms
                         {
                             failAccts.Add(account);
                         }
-                        if (rspCode != 888)
+                        else if (rspCode != 888)
                         {
                             successCnt++;
                         }
@@ -210,6 +212,11 @@ namespace NineSunScripture.forms
         private void rbtnOneFourth_CheckedChanged(object sender, EventArgs e)
         {
             positionRatio = 1 / 4f;
+        }
+
+        private void rbtnOneOfFive_CheckedChanged(object sender, EventArgs e)
+        {
+            positionRatio = 1 / 5f;
         }
     }
 }

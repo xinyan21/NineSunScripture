@@ -64,8 +64,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiBuyStock = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsmiManageAcct = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiClearPositions = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tspiPrivacyMode = new System.Windows.Forms.ToolStripMenuItem();
@@ -453,8 +451,6 @@
             this.toolStripSeparator1,
             this.tsmiBuyStock,
             this.toolStripSeparator2,
-            this.tsmiManageAcct,
-            this.toolStripSeparator3,
             this.tsmiClearPositions,
             this.toolStripSeparator4,
             this.tspiPrivacyMode,
@@ -484,7 +480,7 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(131, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiBuyStock
             // 
@@ -498,21 +494,7 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(131, 6);
-            // 
-            // tsmiManageAcct
-            // 
-            this.tsmiManageAcct.AutoSize = false;
-            this.tsmiManageAcct.Name = "tsmiManageAcct";
-            this.tsmiManageAcct.Padding = new System.Windows.Forms.Padding(0, 10, 0, 1);
-            this.tsmiManageAcct.Size = new System.Drawing.Size(150, 30);
-            this.tsmiManageAcct.Text = "账号管理";
-            this.tsmiManageAcct.Click += new System.EventHandler(this.TsmiManageAcct_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(131, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiClearPositions
             // 
@@ -526,7 +508,7 @@
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(131, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
             // 
             // tspiPrivacyMode
             // 
@@ -539,7 +521,7 @@
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(131, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiTest
             // 
@@ -552,7 +534,7 @@
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(131, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(177, 6);
             // 
             // tspExit
             // 
@@ -565,7 +547,7 @@
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(131, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(177, 6);
             // 
             // tbRuntimeInfo
             // 
@@ -676,7 +658,6 @@
         private System.Windows.Forms.TextBox tbRuntimeInfo;
         private System.Windows.Forms.ListView lvPositions;
         private System.Windows.Forms.ToolStripMenuItem 管理菜单ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem tsmiManageAcct;
         private System.Windows.Forms.ToolStripMenuItem tspExit;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel panel2;
@@ -699,7 +680,6 @@
         private System.Windows.Forms.ToolStripMenuItem tspiPrivacyMode;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;

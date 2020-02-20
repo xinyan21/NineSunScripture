@@ -2,6 +2,7 @@
 using NineSunScripture.strategy;
 using NineSunScripture.util.log;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static NineSunScripture.trade.structApi.ApiDataStruct;
@@ -130,39 +131,28 @@ namespace NineSunScripture.trade.structApi.helper
             return quotes;
         }
 
-        public static OByOCommision ParseStructToCommision(IntPtr data)
+        public static List<OByOCommision> ParseStructToCommision(IntPtr data)
         {
             if (null == data)
             {
                 return null;
             }
-            OByOCommision commision = new OByOCommision();
-            逐笔委托结构体 temp
-                   = (逐笔委托结构体)Marshal.PtrToStructure(data + 32, typeof(逐笔委托结构体));
-            commision.Time = temp.时间;
-            commision.Category = temp.类型;
-            commision.Price = temp.委托价;
-            commision.Quantity = temp.委托量;
-
+            List<OByOCommision> commisions = new List<OByOCommision>();
             int listSize = Marshal.ReadInt32(data + 4);
             int structSize = Marshal.ReadInt32(data + 12);
-            if (listSize > 1)
+            for (int i = 0; i < listSize; i++)
             {
-                Logger.Log("检测到逐笔委托数组，长度为：" + listSize);
-                for (int i = 0; i < listSize; i++)
-                {
-                    OByOCommision com = new OByOCommision();
-                    逐笔委托结构体 item = (逐笔委托结构体)
-                        Marshal.PtrToStructure(data + 32 + i * structSize, typeof(逐笔委托结构体));
-                    com.Time = item.时间;
-                    com.Category = item.类型;
-                    com.Price = item.委托价;
-                    com.Quantity = item.委托量;
-                    Logger.Log("逐笔委托数组item" + i + "：" + com);
-                }
+                OByOCommision com = new OByOCommision();
+                逐笔委托结构体 item = (逐笔委托结构体)
+                    Marshal.PtrToStructure(data + 32 + i * structSize, typeof(逐笔委托结构体));
+                com.Time = item.时间;
+                com.Category = item.类型;
+                com.Price = item.委托价;
+                com.Quantity = item.委托量;
+                Logger.Log("逐笔委托数组item" + i + "：" + com);
             }
 
-            return commision;
+            return commisions;
         }
     }
 }

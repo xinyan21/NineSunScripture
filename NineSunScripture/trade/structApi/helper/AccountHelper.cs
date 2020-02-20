@@ -668,7 +668,7 @@ namespace NineSunScripture.trade.structApi.helper
                             {
                                 failAccts.Add(account);
                             }
-                            if (rspCode != 888)
+                            else if (rspCode != 888)
                             {
                                 successCnt++;
                             }
@@ -789,7 +789,7 @@ namespace NineSunScripture.trade.structApi.helper
                                 {
                                     failAccts.Add(account);
                                 }
-                                if (code != 888)
+                                else if (code != 888)
                                 {
                                     successCnt++;
                                 }
@@ -914,7 +914,7 @@ namespace NineSunScripture.trade.structApi.helper
                         {
                             failAccts.Add(account);
                         }
-                        if (code != 888)
+                        else if (code != 888)
                         {
                             successCnt++;
                         }

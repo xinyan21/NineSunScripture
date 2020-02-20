@@ -314,28 +314,31 @@ namespace NineSunScripture.strategy
 
         private void OnOByOCommisionPush(IntPtr Result, Quotes stock)
         {
-            OByOCommision commision = ApiHelper.ParseStructToCommision(Result);
-            Logger.Log("【" + stock.Name + "】的逐笔委托：" + commision);
-            //逐笔委托只处理特大单，这里还要拿到涨停价
-            if (commision.Price != stock.HighLimit)
+            List<OByOCommision> commisions = ApiHelper.ParseStructToCommision(Result);
+            foreach (var commision in commisions)
             {
-                return;
+                //逐笔委托只处理特大单，这里还要拿到涨停价
+                if (commision.Price != stock.HighLimit)
+                {
+                    return;
+                }
+                //低于1000手或者低于300万的单子过滤
+                if (commision.Quantity < 100000 || commision.Quantity * commision.Price < 3000000)
+                {
+                    return;
+                }
+                lock (buyProtection)
+                {
+                    buyProtection[stock.Code] = true;
+                }
+                //TODO 执行买入，同时设置买入保护状态，防止多次买入，把打板的买入逻辑拆出来
+                //还有个问题就是这里没有行情对象，要查个行情出来，或者把打板保存的最新对象拿出来
+                //修改买一卖一，然后直接调用打板的方法
+                Quotes quotes = hitBoardStrategy.GetLastHistoryQuotesBy(stock.Code);
+                quotes.Buy1 = stock.HighLimit;
+                Logger.Log("【" + quotes.Name + "】触发逐笔委托买点：" + commision);
+                ExeContBoardStrategyByStock(quotes);
             }
-            if (commision.Quantity < 500000 && commision.Quantity * commision.Price < 5000000)
-            {
-                return;
-            }
-            lock (buyProtection)
-            {
-                buyProtection[stock.Code] = true;
-            }
-            //TODO 执行买入，同时设置买入保护状态，防止多次买入，把打板的买入逻辑拆出来
-            //还有个问题就是这里没有行情对象，要查个行情出来，或者把打板保存的最新对象拿出来
-            //修改买一卖一，然后直接调用打板的方法
-            Quotes quotes = hitBoardStrategy.GetLastHistoryQuotesBy(stock.Code);
-            quotes.Buy1 = stock.HighLimit;
-            Logger.Log("【" + quotes.Name + "】触发逐笔委托买点：");
-            ExeContBoardStrategyByStock(quotes);
         }
 
         /// <summary>
