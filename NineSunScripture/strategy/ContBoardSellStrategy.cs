@@ -164,7 +164,7 @@ namespace NineSunScripture.strategy
         {
             float avgCost = quotes.AvgCost;
             float highLimit = quotes.HighLimit;
-            float curPrice = quotes.LatestPrice;
+            float curPrice = quotes.Buy1;
             float open = quotes.Open;
             float preClose = quotes.PreClose;
             DateTime now = DateTime.Now;
@@ -203,7 +203,7 @@ namespace NineSunScripture.strategy
         private void OtherSells(List<Account> accounts, ITrade callback, Quotes quotes)
         {
             float highLimit = quotes.HighLimit;
-            float curPrice = quotes.LatestPrice;
+            float curPrice = quotes.Buy1;
             float preClose = quotes.PreClose;
             string code = quotes.Code;
             DateTime now = DateTime.Now;
@@ -212,7 +212,7 @@ namespace NineSunScripture.strategy
             Quotes[] ticks = historyTicks[code].ToArray();
             rwLockSlim.ExitReadLock();
             if (null != ticks && ticks.Length >= 2 &&
-                ticks[ticks.Length - 2].LatestPrice == highLimit && quotes.Buy1 < highLimit)
+                ticks[ticks.Length - 2].Buy1 == highLimit && quotes.Buy1 < highLimit)
             {
                 Logger.Log("开板卖" + quotes.Name);
                 AccountHelper.SellByRatio(quotes, accounts, callback, 1);
@@ -363,7 +363,7 @@ namespace NineSunScripture.strategy
             List<Account> accounts, Quotes quotes, ITrade callback)
         {
             bool isUpRatioNotEnough = quotes.AvgCost > 0
-                && quotes.Sell1 / quotes.AvgCost < Less3BoardsStopWinRatio;
+                && quotes.Sell1 / quotes.PreClose < Less3BoardsStopWinRatio;
             //下降期不检查连板数，到Less3BoardsStopWinRatio就止盈
             bool isContBoardsNotQualified = Utils.IsUpPeriod() ? quotes.ContBoards >= 3 : false;
             if (null == accounts || null == quotes || isContBoardsNotQualified || isUpRatioNotEnough)

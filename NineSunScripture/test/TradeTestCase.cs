@@ -31,7 +31,7 @@ namespace NineSunScripture.util.test
             quotes.Code = "300155";
             quotes.Name = "安居宝";
             quotes.HighLimit = 9.5f;
-            quotes.LatestPrice = 9f;
+            quotes.Buy1 = 9f;
 
             return quotes;
         }
@@ -125,7 +125,7 @@ namespace NineSunScripture.util.test
             quotes.Money = 5000 * 10000;
             quotes.MoneyCtrl = 1000;
             quotes.PositionCtrl = 0.1f;
-            quotes.LatestPrice = 27;
+            quotes.Buy1 = 27;
             quotes.Open = 27;
             quotes.LowLimit = 24.7f;
 
@@ -145,7 +145,7 @@ namespace NineSunScripture.util.test
             quotes.Money = 5000 * 10000;
             quotes.MoneyCtrl = 1000;
             quotes.PositionCtrl = 0.1f;
-            quotes.LatestPrice = quotes.Buy1;
+            quotes.Buy1 = quotes.Buy1;
             quotes.Open = 15;
             quotes.LowLimit = 13.46f;
             quotes.ContBoards = 2;

@@ -775,7 +775,7 @@ namespace NineSunScripture.trade.structApi.helper
                             }
                             Quotes quotes
                             = PriceAPI.QueryTenthGearPrice(account.PriceSessionId, position.Code);
-                            quotes.Buy2 = quotes.LatestPrice * 0.95f;
+                            quotes.Buy2 = quotes.Buy1 * 0.95f;
                             quotes.Name = position.Name;
                             if (quotes.Buy2 < quotes.LowLimit)
                             {

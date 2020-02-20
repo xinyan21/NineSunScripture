@@ -86,7 +86,7 @@ namespace NineSunScripture.trade.structApi.api
                         Marshal.PtrToStructure(result + 32, typeof(十档行情结构体));
                     quotes.Code = code;
                     quotes.Open = (float)price.开盘;
-                    quotes.LatestPrice = (float)price.最新;
+                    quotes.Buy1 = (float)price.最新;
                     quotes.Volume = (int)price.总量;
                     quotes.HighLimit = (float)price.涨停;
                     quotes.LowLimit = (float)price.跌停;

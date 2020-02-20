@@ -47,6 +47,7 @@ namespace NineSunScripture.forms
             {
                 SetSellView();
             }
+            QueryPrice();
         }
 
         private void SetSellView()
@@ -170,19 +171,24 @@ namespace NineSunScripture.forms
         {
             if (tbCode.TextLength == 6)
             {
-                try
-                {
-                    quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Exception(ex);
-                    return;
-                }
-                if (null != quotes && !string.IsNullOrEmpty(quotes.Name))
-                {
-                    tbName.Text = quotes.Name + "[" + quotes.LatestPrice + "]";
-                }
+                QueryPrice();
+            }
+        }
+
+        private void QueryPrice()
+        {
+            try
+            {
+                quotes = TradeAPI.QueryQuotes(accounts[0].TradeSessionId, tbCode.Text);
+            }
+            catch (Exception ex)
+            {
+                Logger.Exception(ex);
+                return;
+            }
+            if (null != quotes && !string.IsNullOrEmpty(quotes.Name))
+            {
+                tbName.Text = quotes.Name + "[" + quotes.Buy1 + "]";
             }
         }
 

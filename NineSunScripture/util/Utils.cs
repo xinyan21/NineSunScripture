@@ -153,7 +153,7 @@ namespace NineSunScripture.util
             {
                 return false;
             }
-            if (quotes.PreClose > 0 && quotes.LatestPrice / quotes.PreClose > 1.085
+            if (quotes.PreClose > 0 && quotes.Buy1 / quotes.PreClose > 1.085
                 && quotes.Buy1 != quotes.HighLimit)
             {
                 return true;
@@ -268,17 +268,36 @@ namespace NineSunScripture.util
 
         public static void PlaySoundHint()
         {
-            /*Task.Run(() =>
+            Task.Run(() =>
             {
-                
-            });*/
-            SoundPlayer sp = new SoundPlayer(
-                    Assembly.GetExecutingAssembly().GetManifestResourceStream("ding.wav"));
-            sp.Play();
-            //Thread.Sleep(1000);
-            sp.Play();
-          //  Thread.Sleep(1000);
-            sp.Play();
+                SoundPlayer sp = new SoundPlayer();
+                sp.SoundLocation = Environment.CurrentDirectory + @"\sound\ding.wav";
+                sp.Load();
+                sp.Play();
+                Thread.Sleep(2000);
+                sp.Play();
+                Thread.Sleep(2000);
+                sp.Play();
+                Thread.Sleep(2000);
+            });
+        }
+
+        public static string FormatPositionForShow(float position)
+        {
+            return (position * 10) + "成";
+        }
+
+        public static string FormatMoneyForShow(int money)
+        {
+            if (0 == money)
+            {
+                return "不限制";
+            }
+            if (money > 10000)
+            {
+                return money / 10000 + "亿";
+            }
+            return money + "万";
         }
     }
 }

@@ -116,6 +116,7 @@ namespace NineSunScripture
                 AddRuntimeInfo(runtimeInfo);
                 if (MainStrategy.RspCodeOfUpdateAcctInfo == rspCode)
                 {
+                    Utils.PlaySoundHint();
                     mainStrategy.UpdateTotalAccountInfo(false);
                 }
             }
@@ -149,12 +150,12 @@ namespace NineSunScripture
                 }
                 if (settings["period"].Equals("up"))
                 {
-                    btnPeriod.Text = "上升期";
+                    btnPeriod.Text = "涨潮期";
                     btnPeriod.BackColor = Color.Red;
                 }
                 else
                 {
-                    btnPeriod.Text = "下降期";
+                    btnPeriod.Text = "退潮期";
                     btnPeriod.BackColor = Color.Green;
                 }
             }
@@ -298,8 +299,8 @@ namespace NineSunScripture
                 foreach (Quotes item in quotes)
                 {
                     lvi = new ListViewItem(item.Name, lvgDragonLeader);
-                    lvi.SubItems.Add(item.PositionCtrl + "");
-                    lvi.SubItems.Add(item.MoneyCtrl + "");
+                    lvi.SubItems.Add(Utils.FormatPositionForShow(item.PositionCtrl));
+                    lvi.SubItems.Add(Utils.FormatMoneyForShow(item.MoneyCtrl));
                     lvi.Tag = item;
                     lvStocks.Items.Add(lvi);
                 }
@@ -311,8 +312,8 @@ namespace NineSunScripture
                 foreach (Quotes item in quotes)
                 {
                     lvi = new ListViewItem(item.Name, lvgLongTerm);
-                    lvi.SubItems.Add(item.PositionCtrl + "");
-                    lvi.SubItems.Add(item.MoneyCtrl + "");
+                    lvi.SubItems.Add(Utils.FormatPositionForShow(item.PositionCtrl));
+                    lvi.SubItems.Add(Utils.FormatMoneyForShow(item.MoneyCtrl));
                     lvi.Tag = item;
                     lvStocks.Items.Add(lvi);
                 }
@@ -324,8 +325,8 @@ namespace NineSunScripture
                 foreach (Quotes item in quotes)
                 {
                     lvi = new ListViewItem(item.Name, lvgBand);
-                    lvi.SubItems.Add(item.PositionCtrl + "");
-                    lvi.SubItems.Add(item.MoneyCtrl + "");
+                    lvi.SubItems.Add(Utils.FormatPositionForShow(item.PositionCtrl));
+                    lvi.SubItems.Add(Utils.FormatMoneyForShow(item.MoneyCtrl));
                     lvi.Tag = item;
                     lvStocks.Items.Add(lvi);
                 }
@@ -337,8 +338,8 @@ namespace NineSunScripture
                 foreach (Quotes item in quotes)
                 {
                     lvi = new ListViewItem(item.Name, lvgWeakTurnStrong);
-                    lvi.SubItems.Add(item.PositionCtrl + "");
-                    lvi.SubItems.Add(item.MoneyCtrl + "");
+                    lvi.SubItems.Add(Utils.FormatPositionForShow(item.PositionCtrl));
+                    lvi.SubItems.Add(Utils.FormatMoneyForShow(item.MoneyCtrl));
                     lvi.Tag = item;
                     lvStocks.Items.Add(lvi);
                 }
@@ -350,8 +351,8 @@ namespace NineSunScripture
                 foreach (Quotes item in quotes)
                 {
                     lvi = new ListViewItem(item.Name, lvgTomorrow);
-                    lvi.SubItems.Add(item.PositionCtrl + "");
-                    lvi.SubItems.Add(item.MoneyCtrl + "");
+                    lvi.SubItems.Add(Utils.FormatPositionForShow(item.PositionCtrl));
+                    lvi.SubItems.Add(Utils.FormatMoneyForShow(item.MoneyCtrl));
                     lvi.Tag = item;
                     lvStocks.Items.Add(lvi);
                 }

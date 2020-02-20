@@ -260,7 +260,6 @@
     <Content Include="docs\开发计划.txt" />
     <Content Include="docs\接口自用版说明.txt" />
     <Content Include="docs\接口返回数据格式.txt" />
-    <Content Include="Resources\ding.wav" />
     <Content Include="taiji_ico500x500.ico" />
     <None Include="Resources\taiji.png" />
     <None Include="Resources\3%281%29.png" />

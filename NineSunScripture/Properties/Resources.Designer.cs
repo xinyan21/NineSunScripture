@@ -131,15 +131,6 @@ namespace NineSunScripture.Properties {
         }
         
         /// <summary>
-        ///   查找类似于 System.IO.MemoryStream 的 System.IO.UnmanagedMemoryStream 类型的本地化资源。
-        /// </summary>
-        public static System.IO.UnmanagedMemoryStream ding {
-            get {
-                return ResourceManager.GetStream("ding", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
         /// </summary>
         public static System.Drawing.Icon ico_app {

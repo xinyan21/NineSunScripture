@@ -269,6 +269,7 @@ namespace NineSunScripture.model
             {
                 return;
             }
+            Open = quotes.Open;
             HighLimit = quotes.HighLimit;
             LowLimit = quotes.LowLimit;
             InPosition = quotes.InPosition;
