@@ -158,7 +158,7 @@ namespace NineSunScripture.strategy
                     availableCash = account.Funds.TotalAsset * positionRatioCtrl;
                     Logger.Log("【" + quotes.Name + "】触发买点，账户["
                    + account.FundAcct + "]的买入金额设置为仓位控制后的"
-                   + availableCash.ToString("0.00####") + "元");
+                  + Math.Round(availableCash / 10000, 2) + "万元");
                 }
                 //数量是整百整百的
                 order.Quantity = ((int)(availableCash / (quotes.Sell1 * 100))) * 100;

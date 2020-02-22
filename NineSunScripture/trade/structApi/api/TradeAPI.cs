@@ -344,7 +344,7 @@ namespace NineSunScripture.trade.structApi.api
                     quotes.Code = price.证券代码;
                     quotes.Name = price.证券名称;
                     quotes.Open = (float)price.开盘价;
-                    quotes.Buy1 = (float)price.最新价;
+                    quotes.LatestPrice = (float)price.买一价;
                     quotes.Volume = price.成交量;
                     quotes.Money = price.成交额;
                     quotes.HighLimit = (float)price.涨停价;
@@ -396,6 +396,7 @@ namespace NineSunScripture.trade.structApi.api
             {
                 return -1;
             }
+            Logger.Log("Buy=" + order);
             order.AllocCoTaskMem();
             int rspId;
             try
@@ -423,6 +424,7 @@ namespace NineSunScripture.trade.structApi.api
             {
                 return -1;
             }
+            Logger.Log("Sell=" + order);
             order.AllocCoTaskMem();
             int rspId;
             try

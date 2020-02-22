@@ -624,7 +624,7 @@ namespace NineSunScripture.trade.structApi.helper
         /// 【要用专门接口，卖出接口不能逆回购】
         /// </summary>
         /// <param name="accounts"></param>
-        public static void AutoReverseRepurchaseBonds(List<Account> accounts, ITrade callback)
+        public static void ReverseRepurchaseBonds(List<Account> accounts, ITrade callback)
         {
             Account mainAcct;
             if (null != accounts && accounts.Count > 0)

@@ -119,7 +119,7 @@ namespace NineSunScripture.forms
                     string opLog
                         = "资金账号【" + account.FundAcct + "】" + "窗口买入【" + quotes.Name + "】"
                           + Math.Round(order.Quantity * order.Price / account.Funds.TotalAsset * 100)
-                          + "%仓位";
+                          + "%仓位。错误信息=" + order.StrErrorInfo;
                     Logger.Log(opLog);
                     lock (failAccts)
                     {

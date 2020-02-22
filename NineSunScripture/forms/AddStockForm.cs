@@ -115,7 +115,7 @@ namespace NineSunScripture.forms
                 }
                 if (null != stock && !string.IsNullOrEmpty(stock.Name))
                 {
-                    tbName.Text = stock.Name + "[" + stock.LatestPrice + "]";
+                    tbName.Text = stock.Name + "[" + stock.Buy1 + "]";
                     quotes.Name = stock.Name;
                 }
             }

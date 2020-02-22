@@ -61,11 +61,15 @@ namespace NineSunScripture.util.test
                      Invoke(new MethodInvoker(UpdatePrice));
                      Thread.Sleep(200);
                  }*/
-                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002071");
+                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "300160");
+                quotes.Name = "秀强股份";
                 Invoke(new MethodInvoker(UpdatePrice));
+                mainForm.OnPriceChange(quotes);
 
-                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002071");
+                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002239");
+                quotes.Name = "奥特佳";
                 Invoke(new MethodInvoker(UpdatePrice));
+                mainForm.OnPriceChange(quotes);
             }
             catch (Exception e)
             {
@@ -116,13 +120,13 @@ namespace NineSunScripture.util.test
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.Serialize(file, accounts);
                 }
-               /* accounts = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(filePath));
-                accounts.RemoveAt(0);
-                using (StreamWriter file = File.CreateText(filePath))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Serialize(file, accounts);
-                }*/
+                /* accounts = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(filePath));
+                 accounts.RemoveAt(0);
+                 using (StreamWriter file = File.CreateText(filePath))
+                 {
+                     JsonSerializer serializer = new JsonSerializer();
+                     serializer.Serialize(file, accounts);
+                 }*/
                 MessageBox.Show(accounts.ToString());
             });
 

@@ -9,24 +9,23 @@ using NineSunScripture.util.test;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
 
 namespace NineSunScripture
 {
-    public interface IAcctInfoListener
+    public interface IWorkListener
     {
-        void OnAcctInfoListen(Account account);
+        void OnAcctInfoUpdate(Account account);
+
+        void OnPriceChange(Quotes quotes);
+
+        void OnImgRotate(int degree);
     }
 
-    public interface IShowWorkingSatus
-    {
-        void RotateStatusImg(int degree);
-    }
-
-    public partial class MainForm : Form, ITrade, IAcctInfoListener, IShowWorkingSatus
+    public partial class MainForm : Form, ITrade, IWorkListener
     {
         private bool isRebooting = false;
         private bool isStrategyStarted = false;
@@ -35,6 +34,7 @@ namespace NineSunScripture
         //用来临时保存总账户信息
         private Account account;
         private MainStrategy mainStrategy;
+        private UpdatePrice updatePrice;
 
         private List<Quotes> latestStocks;
         private List<Quotes> longTermStocks;
@@ -47,17 +47,16 @@ namespace NineSunScripture
 
         public MainForm()
         {
-            InitializeComponent();
             stocks = new List<Quotes>();
             mainStrategy = new MainStrategy();
+            InitializeComponent();
+            InitPeriod();
             InitializeListViews();
             BindStocksData();
-            mainStrategy.SetFundListener(this);
+            mainStrategy.SetWorkListener(this);
             mainStrategy.SetTradeCallback(this);
-            mainStrategy.SetShowWorkingStatus(this);
             imgTaiJi = Properties.Resources.taiji;
-
-            InitPeriod();
+            updatePrice = new UpdatePrice(UpdateStocksPrice);
 
             //Start strategy
             Task.Run(() =>
@@ -68,6 +67,8 @@ namespace NineSunScripture
         }
 
         private delegate void SetTextCallback(string text);
+
+        private delegate void UpdatePrice(Quotes quotes);
 
         /// <summary>
         /// 添加股票
@@ -80,8 +81,7 @@ namespace NineSunScripture
                 return;
             }
             JsonDataHelper.Instance.AddStock(quotes);
-            string runtimeInfo = "新增股票【" + quotes.Name + "】";
-            AddRuntimeInfo(runtimeInfo);
+            AddRuntimeInfo("新增股票【" + quotes.Name + "】");
             RefreshStocksListView();
             if (!stocks.Contains(quotes))
             {
@@ -90,7 +90,7 @@ namespace NineSunScripture
             mainStrategy.AddStock(quotes);
         }
 
-        public void OnAcctInfoListen(Account account)
+        public void OnAcctInfoUpdate(Account account)
         {
             if (null == account)
             {
@@ -112,11 +112,10 @@ namespace NineSunScripture
             Logger.Log("OnTradeResult：" + rspCode + ">" + msg);
             if (rspCode > 0)
             {
-                string runtimeInfo = msg + ">成功";
-                AddRuntimeInfo(runtimeInfo);
+                AddRuntimeInfo(msg + ">成功");
                 if (MainStrategy.RspCodeOfUpdateAcctInfo == rspCode)
                 {
-                    Utils.PlaySoundHint();
+                    Utils.PlaySuccessSoundHint();
                     mainStrategy.UpdateTotalAccountInfo(false);
                 }
             }
@@ -126,8 +125,9 @@ namespace NineSunScripture
                 {
                     errInfo = msg;
                 }
-                string runtimeInfo = msg + ">失败，错误信息：" + errInfo;
-                AddRuntimeInfo(runtimeInfo);
+                AddRuntimeInfo(msg + ">失败，错误信息：" + errInfo);
+                //多线程同时调用，必须加锁，而整个方法加锁的话会导致方法顺序执行，导致多次重启
+                //只有这样加锁才能解决问题
                 lock (mainStrategy)
                 {
                     if (needReboot && !isRebooting)
@@ -158,33 +158,6 @@ namespace NineSunScripture
                     btnPeriod.Text = "退潮期";
                     btnPeriod.BackColor = Color.Green;
                 }
-            }
-        }
-
-        public void RotateStatusImg(int degree)
-        {
-            try
-            {
-                Image image = pbWorkStatus.Image;
-                if (degree > 0)
-                {
-                    rotateDegree += degree;
-                    //RotateImage会发生异常
-                    pbWorkStatus.Image = Utils.RotateImage(imgTaiJi, rotateDegree);
-                }
-                else
-                {
-                    pbWorkStatus.Image = imgTaiJi;
-                }
-                //imgTaiJi是原图，而且会不停地赋值给控件，不能dispose
-                if (null != image && image != imgTaiJi)
-                {
-                    image.Dispose();
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Exception(e);
             }
         }
 
@@ -357,7 +330,8 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            positionStocks = quotes = JsonDataHelper.Instance.GetStocksByOperation(Quotes.OperationSell);
+            positionStocks = quotes
+                = JsonDataHelper.Instance.GetStocksByOperation(Quotes.OperationSell);
             if (!Utils.IsListEmpty(quotes))
             {
                 foreach (Quotes item in quotes)
@@ -455,10 +429,10 @@ namespace NineSunScripture
             ColumnHeader money = new ColumnHeader();
 
             stock.Text = "股票";
-            stock.Width = 100;
+            stock.Width = 120;
             stock.TextAlign = HorizontalAlignment.Center;
             position.Text = "仓位";
-            position.Width = 100;
+            position.Width = 80;
             position.TextAlign = HorizontalAlignment.Center;
             money.Text = "成交额";
             money.Width = 100;
@@ -470,6 +444,7 @@ namespace NineSunScripture
             lvStocks.MultiSelect = false;
             lvStocks.View = View.Details;
         }
+
         private void InitPositionItems(ListViewItem lvi, Quotes item)
         {
             if (item.IsDragonLeader)
@@ -552,8 +527,7 @@ namespace NineSunScripture
             isRebooting = true;
             if (isStrategyStarted)
             {
-                string runtimeInfo = "重启策略中...";
-                AddRuntimeInfo(runtimeInfo);
+                AddRuntimeInfo("重启策略中...");
                 //Stop
                 TsmiSwitch_Click(null, null);
                 Thread.Sleep(1000);
@@ -607,8 +581,7 @@ namespace NineSunScripture
                 bandStocks.Clear();
                 weakTurnStrongStocks.Clear();
 
-                string runtimeInfo = "清空股票池";
-                AddRuntimeInfo(runtimeInfo);
+                AddRuntimeInfo("清空股票池");
                 InitLvStocks();
                 RefreshStocksListView();
             }
@@ -636,8 +609,7 @@ namespace NineSunScripture
             mainStrategy.DelStock(quotes);
 
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
-            string runtimeInfo = "删除股票【" + quotes.Name + "】";
-            AddRuntimeInfo(runtimeInfo);
+            AddRuntimeInfo("删除股票【" + quotes.Name + "】");
             mainStrategy.EditStockSub(quotes, false);
         }
 
@@ -766,32 +738,25 @@ namespace NineSunScripture
         /// <param name="e"></param>
         private void TsmiSwitch_Click(object sender, EventArgs e)
         {
-            string runtimeInfo = "";
             if (isStrategyStarted)
             {
-                runtimeInfo = "策略开始停止";
-                AddRuntimeInfo(runtimeInfo);
+                AddRuntimeInfo("策略开始停止");
                 tsmiSwitch.Text = "启动";
                 mainStrategy.Stop();
                 isStrategyStarted = false;
-                runtimeInfo = "策略已停止";
-                AddRuntimeInfo(runtimeInfo);
+                AddRuntimeInfo("策略已停止");
                 return;
             }
-            runtimeInfo = "策略开始启动";
-            AddRuntimeInfo(runtimeInfo);
+            AddRuntimeInfo("策略开始启动");
             bool isStarted = mainStrategy.Start(stocks);
             if (!isStarted)
             {
-                string log = "策略启动失败";
-                runtimeInfo = log;
-                AddRuntimeInfo(runtimeInfo);
+                AddRuntimeInfo("策略启动失败");
                 return;
             }
             tsmiSwitch.Text = "停止";
             isStrategyStarted = true;
-            runtimeInfo = "策略已启动";
-            AddRuntimeInfo(runtimeInfo);
+            AddRuntimeInfo("策略已启动");
         }
 
         private void TsmiTest_Click(object sender, EventArgs e)
@@ -806,17 +771,33 @@ namespace NineSunScripture
 
         private void TspiPrivacyMode_Click(object sender, EventArgs e)
         {
-            if (tspiPrivacyMode.Text.Equals("隐私模式"))
+            if (tspiPrivacyMode.Text.Equals("隐私模式【关】"))
             {
                 tspiPrivacyMode.Text = "隐私模式【开】";
-                flpStockPool.Visible = false;
-                panelFundInfo.Visible = false;
+                lblMoneyAvailable.Text = "可用：***";
+                lblTotalAsset.Text = "总资产：***";
+                lblTotalProfit.Text = "总盈亏：***";
+                int[] positionHideIndexs = new int[] { 1, 2, 4, 6 };
+                foreach (ListViewItem item in lvPositions.Items)
+                {
+                    foreach (int i in positionHideIndexs)
+                    {
+                        item.SubItems[i].Text = "***";
+                    }
+                }
+                int[] orderHideIndexs = new int[] { 1, 2, 4, 6 };
+                foreach (ListViewItem item in lvCancelOrders.Items)
+                {
+                    foreach (int i in orderHideIndexs)
+                    {
+                        item.SubItems[i].Text = "***";
+                    }
+                }
             }
             else
             {
-                tspiPrivacyMode.Text = "隐私模式";
-                flpStockPool.Visible = true;
-                panelFundInfo.Visible = true;
+                tspiPrivacyMode.Text = "隐私模式【关】";
+                mainStrategy.UpdateTotalAccountInfo(false);
             }
         }
 
@@ -825,6 +806,10 @@ namespace NineSunScripture
         /// </summary>
         private void UpdateAcctInfo()
         {
+            if (tspiPrivacyMode.Text.Equals("隐私模式【开】"))
+            {
+                return;
+            }
             if (null != account.Funds)
             {
                 lblTotalAsset.Text
@@ -847,6 +832,55 @@ namespace NineSunScripture
             else
             {
                 lvCancelOrders.Items.Clear();
+            }
+        }
+
+        private void UpdateStocksPrice(Quotes quotes)
+        {
+            if (null == quotes)
+            {
+                return;
+            }
+            foreach (ListViewItem item in lvStocks.Items)
+            {
+                if (item.Text.Contains(quotes.Name))
+                {
+                    double changeRatio = Math.Round((quotes.Buy1 / quotes.PreClose - 1) * 100, 1);
+                    item.Text = quotes.Name + "[" + changeRatio + "%]";
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void OnPriceChange(Quotes quotes)
+        {
+            lvStocks.Invoke(updatePrice, quotes);
+        }
+
+        public void OnImgRotate(int degree)
+        {
+            try
+            {
+                Image image = pbWorkStatus.Image;
+                if (degree > 0)
+                {
+                    rotateDegree += degree;
+                    //RotateImage会发生异常
+                    pbWorkStatus.Image = Utils.RotateImage(imgTaiJi, rotateDegree);
+                }
+                else
+                {
+                    pbWorkStatus.Image = imgTaiJi;
+                }
+                //imgTaiJi是原图，而且会不停地赋值给控件，不能dispose
+                if (null != image && image != imgTaiJi)
+                {
+                    image.Dispose();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
             }
         }
     }

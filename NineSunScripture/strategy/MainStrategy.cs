@@ -58,8 +58,7 @@ namespace NineSunScripture.strategy
         private ContBoardSellStrategy contBoardSellStrategy;
 
         private ITrade callback;
-        private IAcctInfoListener fundListener;
-        private IShowWorkingSatus showWorkingSatus;
+        private IWorkListener workListener;
         private DateTime lastFundUpdateTime;
         private Thread strategyThread;
 
@@ -108,9 +107,9 @@ namespace NineSunScripture.strategy
                     Thread.Sleep(cycleTime);
                     if (!IsTest && !IsTradeTime())
                     {
-                        if (null != showWorkingSatus)
+                        if (null != workListener)
                         {
-                            showWorkingSatus.RotateStatusImg(-1);
+                            workListener.OnImgRotate(-1);
                         }
                         ReverseRepurchaseBonds();
                         continue;
@@ -118,9 +117,9 @@ namespace NineSunScripture.strategy
                     OpenMarket();
                     CloseMarket();
                     UpdateTotalAccountInfo(true);
-                    if (null != showWorkingSatus)
+                    if (null != workListener)
                     {
-                        showWorkingSatus.RotateStatusImg(1);
+                        workListener.OnImgRotate(1);
                     }
                 }
             }
@@ -136,7 +135,7 @@ namespace NineSunScripture.strategy
 
         private void CloseMarket()
         {
-            if (isMarketOpen && DateTime.Now.Hour >= 15 && !IsTest)
+            if (isMarketOpen && !IsTest)
             {
                 UnsubscribeAll();
                 isMarketOpen = false;
@@ -147,8 +146,7 @@ namespace NineSunScripture.strategy
         {
             if (!isMarketOpen)
             {
-                if (((DateTime.Now.Hour == 9 && DateTime.Now.Minute >= 26)
-                    || DateTime.Now.Hour >= 10) && DateTime.Now.Hour < 15 || IsTest)
+                if (IsTradeTime() || IsTest)
                 {
                     isMarketOpen = true;
                     InitLimitPrice();
@@ -169,7 +167,6 @@ namespace NineSunScripture.strategy
                 {
                     item.InPosition = true;
                     item.Operation = Quotes.OperationSell;
-                    //TODO 这里都是没有策略参数的，要注意个股分类问题
                     stocksToSell.Add(item);
                     if (!stocksForPrice.Contains(item))
                     {
@@ -203,11 +200,6 @@ namespace NineSunScripture.strategy
         {
             string code = Marshal.PtrToStringAnsi(result + 16, 6);
             Quotes stock = stocksForPrice.Find(item => item.Code.Equals(code));
-            if (null == stock)
-            {
-                Logger.Log("OnPushResult> not find stock in stocksForPrice=" + code);
-                return;
-            }
             if (0 == stock.HighLimit)
             {
                 InitLimitPrice();
@@ -236,7 +228,7 @@ namespace NineSunScripture.strategy
                 {
                     OnTenthGearPricePush(result, stock);
                 }
-                else if (type == 10206)//逐笔委托 推送太快注意代码优化
+                else if (type == 10206)
                 {
                     OnOByOCommisionPush(result, stock);
                 }
@@ -246,6 +238,7 @@ namespace NineSunScripture.strategy
                 lock (buyProtection)
                 {
                     buyProtection[code] = false;
+                    Logger.Log("【" + stock.Name + "】取消买入保护");
                 }
             }
         }
@@ -253,44 +246,16 @@ namespace NineSunScripture.strategy
         private void OnTenthGearPricePush(IntPtr result, Quotes stock)
         {
             Quotes quotes = ApiHelper.ParseStructToQuotes(result);
-            if (null == quotes || quotes.Buy1 == 0)
+            if (!CheckQuotes(quotes))
             {
-                //这个变量不需要lock，因为大于2后必定会触发
-                queryPriceErrorCnt++;
-                Logger.Log("OnTenthGearPricePush error " + queryPriceErrorCnt);
-                if (null != quotes)
-                {
-                    Logger.Log(quotes.ToString(), LogType.Quotes);
-                }
-                else
-                {
-                    Logger.Log("quotes is null");
-                }
-                if (queryPriceErrorCnt < 3)
-                {
-                    return;
-                }
-            }
-            if (queryPriceErrorCnt > 2)
-            {
-                Logger.Log("OnTenthGearPricePush error has been occured 3 times, need to reboot");
-                if (null != quotes)
-                {
-                    Logger.Log(quotes.ToString(), LogType.Quotes);
-                }
-                if (null != callback)
-                {
-                    callback.OnTradeResult(0, "调用行情接口", "行情接口异常", true);
-                }
                 return;
             }
-            if (queryPriceErrorCnt > 0)
+            quotes.Name = stock.Name;
+            if (null != workListener)
             {
-                queryPriceErrorCnt = 0;
+                workListener.OnPriceChange(quotes);
             }
 
-            quotes.Name = stock.Name;
-            quotes.CloneStrategyParamsFrom(stock);
             Utils.SamplingLogQuotes(quotes);
             //打板的深圳股票需要在8.5%之上订阅逐笔委托，可以和十档争夺策略执行，买入之后取消订阅
             //由于是3s一推，所以这里不需要担心并发问题
@@ -308,8 +273,65 @@ namespace NineSunScripture.strategy
             lock (buyProtection)
             {
                 buyProtection[stock.Code] = true;
+                Logger.Log("【" + stock.Name + "】开启十档买入保护");
             }
-            ExeContBoardStrategyByStock(quotes);
+            //由于一只股票可能要分多个策略买，所以单独用行情里的参数去执行是不行的
+            foreach (var item in stocksToBuy)
+            {
+                if (item.Code.Equals(quotes.Code))
+                {
+                    quotes.CloneStrategyParamsFrom(item);
+                    ExeContBoardStrategyByStock(quotes);
+                }
+            }
+            foreach (var item in stocksToSell)
+            {
+                if (item.Code.Equals(quotes.Code))
+                {
+                    quotes.CloneStrategyParamsFrom(item);
+                    ExeContBoardStrategyByStock(quotes);
+                }
+            }
+        }
+
+        private bool CheckQuotes(Quotes quotes)
+        {
+            if (null == quotes || quotes.Buy1 == 0)
+            {
+                //这个变量不需要lock，因为大于2后必定会触发
+                queryPriceErrorCnt++;
+                Logger.Log("OnTenthGearPricePush error " + queryPriceErrorCnt);
+                if (null != quotes)
+                {
+                    Logger.Log(quotes.ToString(), LogType.Quotes);
+                }
+                else
+                {
+                    Logger.Log("quotes is null");
+                }
+                if (queryPriceErrorCnt < 3)
+                {
+                    return false;
+                }
+            }
+            if (queryPriceErrorCnt > 2)
+            {
+                Logger.Log("OnTenthGearPricePush error has been occured 3 times, need to reboot");
+                if (null != quotes)
+                {
+                    Logger.Log(quotes.ToString(), LogType.Quotes);
+                }
+                if (null != callback)
+                {
+                    callback.OnTradeResult(0, "调用行情接口", "行情数据异常", true);
+                }
+                return false;
+            }
+            if (queryPriceErrorCnt > 0)
+            {
+                queryPriceErrorCnt = 0;
+            }
+            return true;
         }
 
         private void OnOByOCommisionPush(IntPtr Result, Quotes stock)
@@ -330,8 +352,9 @@ namespace NineSunScripture.strategy
                 lock (buyProtection)
                 {
                     buyProtection[stock.Code] = true;
+                    Logger.Log("【" + stock.Name + "】开启逐笔买入保护");
                 }
-                //TODO 执行买入，同时设置买入保护状态，防止多次买入，把打板的买入逻辑拆出来
+                //执行买入，同时设置买入保护状态，防止多次买入，把打板的买入逻辑拆出来
                 //还有个问题就是这里没有行情对象，要查个行情出来，或者把打板保存的最新对象拿出来
                 //修改买一卖一，然后直接调用打板的方法
                 Quotes quotes = hitBoardStrategy.GetLastHistoryQuotesBy(stock.Code);
@@ -398,7 +421,7 @@ namespace NineSunScripture.strategy
 
         public bool Start(List<Quotes> stocks)
         {
-            if (null != stocks && stocks.Count > 0)
+            if (!Utils.IsListEmpty(stocks))
             {
                 stocksForPrice.Clear();
                 //这里需要对股票对象进行分类
@@ -409,7 +432,8 @@ namespace NineSunScripture.strategy
                         stocksForPrice.Add(item);
                     }
                     if (item.Operation == Quotes.OperationBuy
-                        && !stocksToBuy.Exists(t => t.Code == item.Code))
+                        && !stocksToBuy.Exists(t => t.Code == item.Code
+                        && t.StockCategory == item.StockCategory))
                     {
                         stocksToBuy.Add(item);
                     }
@@ -420,9 +444,11 @@ namespace NineSunScripture.strategy
                     }
                 }
             }
-
+            //重启策略的时候要重新订阅行情，该清除的状态要清除
             Stop();
             Thread.Sleep(2000);
+
+            hitBoardStrategy.RestoreOpenBoardCnt();
             strategyThread = new Thread(InitStrategy);
             strategyThread.Start();
 
@@ -440,6 +466,7 @@ namespace NineSunScripture.strategy
                 strategyThread.Abort();
             }
             CloseMarket();
+            hitBoardStrategy.SaveOpenBoardCnt();
         }
 
         /// <summary>
@@ -505,7 +532,7 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            if (null != fundListener && null != accounts)
+            if (null != workListener && null != accounts)
             {
                 try
                 {
@@ -513,7 +540,7 @@ namespace NineSunScripture.strategy
                     account.Funds = AccountHelper.QueryTotalFunds(accounts, callback);
                     account.Positions = AccountHelper.QueryTotalPositions(accounts, callback);
                     account.CancelOrders = AccountHelper.QueryTotalCancelOrders(accounts, callback);
-                    fundListener.OnAcctInfoListen(account);
+                    workListener.OnAcctInfoUpdate(account);
                 }
                 catch (ApiTimeoutException e)
                 {
@@ -547,9 +574,26 @@ namespace NineSunScripture.strategy
                         = PriceAPI.QueryTenthGearPrice(mainAcct.PriceSessionId, item.Code);
                         if (null != quotes)
                         {
-                            item.HighLimit = quotes.HighLimit;
-                            item.LowLimit = quotes.LowLimit;
-                            item.Open = quotes.Open;
+                            return;
+                        }
+                        foreach (var buyItem in stocksToBuy)
+                        {
+                            //重写了equal方法，只要代码相等就相等
+                            if (buyItem.Equals(item))
+                            {
+                                buyItem.HighLimit = quotes.HighLimit;
+                                buyItem.LowLimit = quotes.LowLimit;
+                                buyItem.Open = quotes.Open;
+                            }
+                        }
+                        foreach (var sellItem in stocksToBuy)
+                        {
+                            if (sellItem.Equals(item))
+                            {
+                                sellItem.HighLimit = quotes.HighLimit;
+                                sellItem.LowLimit = quotes.LowLimit;
+                                sellItem.Open = quotes.Open;
+                            }
                         }
                         Logger.Log("InitLimitPric=》 " + item);
                     }
@@ -597,7 +641,7 @@ namespace NineSunScripture.strategy
             if (DateTime.Now.Hour == 15 && DateTime.Now.Minute == 20
                 && !reverseRepurchaseRecords.ContainsKey(DateTime.Now.Date))
             {
-                AccountHelper.AutoReverseRepurchaseBonds(accounts, callback);
+                AccountHelper.ReverseRepurchaseBonds(accounts, callback);
                 reverseRepurchaseRecords.Add(DateTime.Now.Date, true);
             }
         }
@@ -622,19 +666,14 @@ namespace NineSunScripture.strategy
             AccountHelper.SellByRatio(quotes, accounts, callBack, 1);
         }
 
-        public void SetFundListener(IAcctInfoListener fundListener)
+        public void SetWorkListener(IWorkListener workListener)
         {
-            this.fundListener = fundListener;
+            this.workListener = workListener;
         }
 
         public void SetTradeCallback(ITrade callback)
         {
             this.callback = callback;
-        }
-
-        public void SetShowWorkingStatus(IShowWorkingSatus showWorkingSatus)
-        {
-            this.showWorkingSatus = showWorkingSatus;
         }
 
         public List<Account> GetAccounts()
@@ -654,19 +693,19 @@ namespace NineSunScripture.strategy
                 stocksForPrice.Add(quotes);
                 EditStockSub(quotes, true);
             }
-            else
+            if (quotes.Operation == Quotes.OperationBuy)
             {
-                stocksForPrice.Find(t => t.Code == quotes.Code).CloneStrategyParamsFrom(quotes);
-            }
-            if (quotes.Operation == Quotes.OperationBuy && !stocksToBuy.Exists(
-                t => t.Code == quotes.Code && t.Operation == Quotes.OperationBuy))
-            {
+                Quotes stock = stocksToBuy.Find(t => t.Code == quotes.Code
+                && t.StockCategory == quotes.StockCategory);
+                if (null != stock)
+                {
+                    stocksToBuy.Remove(stock);
+                }
                 stocksToBuy.Add(quotes);
             }
-            if (quotes.Operation == Quotes.OperationSell)
+            else if (quotes.Operation == Quotes.OperationSell)
             {
-                Quotes stock = stocksToSell.Find(
-                t => t.Code == quotes.Code && t.Operation == Quotes.OperationSell);
+                Quotes stock = stocksToSell.Find(t => t.Code == quotes.Code);
                 if (null != stock)
                 {
                     stocksToSell.Remove(stock);
@@ -687,7 +726,8 @@ namespace NineSunScripture.strategy
                 EditStockSub(quotes, false);
             }
             if (quotes.Operation == Quotes.OperationBuy && stocksToBuy.Exists(
-                t => t.Code == quotes.Code && t.Operation == Quotes.OperationBuy))
+                t => t.Code == quotes.Code && t.Operation == Quotes.OperationBuy
+                && t.StockCategory == quotes.StockCategory))
             {
                 stocksToBuy.Remove(quotes);
             }

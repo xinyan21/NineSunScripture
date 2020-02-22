@@ -9,7 +9,7 @@ namespace NineSunScripture.model
     public class Quotes : BaseModel, IEquatable<Quotes>
     {
         /// <summary>
-        /// 【买入策略】常驻股票池中的股票
+        /// 【买入策略】常驻打板股票池中的股票
         /// </summary>
         public const short CategoryLongTerm = 0;
 
@@ -41,8 +41,8 @@ namespace NineSunScripture.model
         public const short OperationBuy = 1;
         public const short OperationSell = 2;
 
-        private string code;
-        private string name;
+        private string code="";
+        private string name = "";
 
         //昨收
         private float preClose;
@@ -69,27 +69,23 @@ namespace NineSunScripture.model
 
         //卖一到卖五
         private float sell1;
-
         private float sell2;
         private float sell3;
         private float sell4;
         private float sell5;
 
-        //买一到买五
         private float buy1;
-
         private float buy2;
         private float buy3;
         private float buy4;
         private float buy5;
 
-        //对应的委托量
         private int sell1Vol;
-
         private int sell2Vol;
         private int sell3Vol;
         private int sell4Vol;
         private int sell5Vol;
+
         private int buy1Vol;
         private int buy2Vol;
         private int buy3Vol;
@@ -218,10 +214,15 @@ namespace NineSunScripture.model
             get => isOByOComissionSubscribed; set => isOByOComissionSubscribed = value;
         }
         public bool IsBuyBackWhenReboard
-        { 
+        {
             get => isBuyBackWhenReboard; set => isBuyBackWhenReboard = value;
         }
 
+        /// <summary>
+        /// 重写后就不用专门拿出代码来比较，直接比较对象即可
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public bool Equals(Quotes other)
         {
             if (null == other)
@@ -245,7 +246,6 @@ namespace NineSunScripture.model
             sb.Append("#Open=").Append(Open);
             sb.Append("#HighLimit=").Append(HighLimit);
             sb.Append("#LowLimit=").Append(LowLimit);
-            sb.Append("#LatestPrice= ").Append(LatestPrice);
             sb.Append("#Money=").Append(Money);
             sb.Append("#Sell1=").Append(Sell1);
             sb.Append("#Sell1Vol=").Append(Sell1Vol);

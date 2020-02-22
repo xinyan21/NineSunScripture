@@ -18,6 +18,7 @@ namespace NineSunScripture.trade.persistence
         private static string acctsFilePath = baseDir + "accounts.json";
         private static string stocksFilePath = baseDir + "stocks.json";
         private static string settingsFilePath = baseDir + "settings.json";
+        private static string openBoardCntFilePath = baseDir + "openBoardCnt.json";
 
         private Dictionary<string, string> settings;
         private static readonly Lazy<JsonDataHelper> lazy
@@ -30,6 +31,57 @@ namespace NineSunScripture.trade.persistence
         private JsonDataHelper()
         {
             Settings = GetSettings();
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public Dictionary<string, short> GetOpenBoardCnt()
+        {
+            Dictionary<DateTime, Dictionary<string, short>> data
+            = new Dictionary<DateTime, Dictionary<string, short>>();
+            try
+            {
+                if (!File.Exists(openBoardCntFilePath))
+                {
+                    File.Create(openBoardCntFilePath);
+                }
+                data = JsonConvert.DeserializeObject<
+                    Dictionary<DateTime, Dictionary<string, short>>>(File.ReadAllText(openBoardCntFilePath));
+                if (null != data && data.ContainsKey(DateTime.Now.Date))
+                {
+                    return data[DateTime.Now.Date];
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log("GetSettings exception: " + e.Message);
+                Logger.Exception(e);
+            }
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private Dictionary<string, string> GetSettings()
+        {
+            Dictionary<string, string> settings = null;
+            try
+            {
+                if (!File.Exists(settingsFilePath))
+                {
+                    File.Create(settingsFilePath);
+                }
+                settings = JsonConvert
+                    .DeserializeObject<Dictionary<string, string>>(File.ReadAllText(settingsFilePath));
+                if (null == settings)
+                {
+                    settings = new Dictionary<string, string>();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log("GetSettings exception: " + e.Message);
+                Logger.Exception(e);
+            }
+            return settings;
         }
 
         /// <summary>
@@ -73,31 +125,6 @@ namespace NineSunScripture.trade.persistence
             }
             item.InitTotalAsset = account.InitTotalAsset;
             SaveAccounts(accounts);
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        private Dictionary<string, string> GetSettings()
-        {
-            Dictionary<string, string> settings = null;
-            try
-            {
-                if (!File.Exists(settingsFilePath))
-                {
-                    File.Create(settingsFilePath);
-                }
-                settings = JsonConvert
-                    .DeserializeObject<Dictionary<string, string>>(File.ReadAllText(settingsFilePath));
-                if (null == settings)
-                {
-                    settings = new Dictionary<string, string>();
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Log("GetSettings exception: " + e.Message);
-                Logger.Exception(e);
-            }
-            return settings;
         }
 
         /// <summary>
@@ -256,6 +283,34 @@ namespace NineSunScripture.trade.persistence
                     serializer.Serialize(file, settings);
                 }
                 Settings = settings;
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SaveOpenBoardCnt(Dictionary<string, short> cntDic)
+        {
+            if (null == cntDic || cntDic.Count == 0)
+            {
+                return;
+            }
+            Dictionary<DateTime, Dictionary<string, short>> data
+                = new Dictionary<DateTime, Dictionary<string, short>>();
+            data.Add(DateTime.Now.Date, cntDic);
+            try
+            {
+                if (!Directory.Exists(baseDir))
+                {
+                    Directory.CreateDirectory(baseDir);
+                }
+                using (StreamWriter file = File.CreateText(openBoardCntFilePath))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.Serialize(file, data);
+                }
             }
             catch (Exception e)
             {

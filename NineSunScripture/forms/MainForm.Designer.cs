@@ -515,7 +515,7 @@
             this.tspiPrivacyMode.AutoSize = false;
             this.tspiPrivacyMode.Name = "tspiPrivacyMode";
             this.tspiPrivacyMode.Size = new System.Drawing.Size(150, 30);
-            this.tspiPrivacyMode.Text = "隐私模式";
+            this.tspiPrivacyMode.Text = "隐私模式【关】";
             this.tspiPrivacyMode.Click += new System.EventHandler(this.TspiPrivacyMode_Click);
             // 
             // toolStripSeparator5
@@ -592,7 +592,7 @@
             this.btnPeriod.BackColor = System.Drawing.Color.Red;
             this.btnPeriod.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
             this.btnPeriod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnPeriod.Location = new System.Drawing.Point(553, 68);
             this.btnPeriod.Name = "btnPeriod";
             this.btnPeriod.Size = new System.Drawing.Size(126, 42);
@@ -623,7 +623,7 @@
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "九阳真经策略";
+            this.Text = "打板超市";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_Closing);
             this.flpStockPool.ResumeLayout(false);
             this.cmsStocks.ResumeLayout(false);

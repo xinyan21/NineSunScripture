@@ -266,7 +266,7 @@ namespace NineSunScripture.util
             }
         }
 
-        public static void PlaySoundHint()
+        public static void PlaySuccessSoundHint()
         {
             Task.Run(() =>
             {
@@ -274,12 +274,17 @@ namespace NineSunScripture.util
                 sp.SoundLocation = Environment.CurrentDirectory + @"\sound\ding.wav";
                 sp.Load();
                 sp.Play();
-                Thread.Sleep(2000);
+                Thread.Sleep(1000);
                 sp.Play();
-                Thread.Sleep(2000);
+                Thread.Sleep(1000);
                 sp.Play();
-                Thread.Sleep(2000);
+                Thread.Sleep(1000);
             });
+        }
+
+        public static void PlayFailSoundHint()
+        {
+
         }
 
         public static string FormatPositionForShow(float position)

@@ -1,5 +1,6 @@
 ﻿using NineSunScripture.model;
 using NineSunScripture.trade;
+using NineSunScripture.trade.persistence;
 using NineSunScripture.trade.structApi.api;
 using NineSunScripture.trade.structApi.helper;
 using NineSunScripture.util;
@@ -74,12 +75,7 @@ namespace NineSunScripture.strategy
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            if (null == quotes || null == accounts)
-            {
-                return;
-            }
-            //9:30之前不打板
-            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30 && !MainStrategy.IsTest)
+            if (!BasicCheck(quotes, accounts))
             {
                 return;
             }
@@ -101,11 +97,6 @@ namespace NineSunScripture.strategy
             historyTicks[code].Enqueue(quotes);
             rwLockSlimForHistory.ExitWriteLock();
 
-            if ((DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 || DateTime.Now.Hour > 14)
-                && !MainStrategy.IsTest)
-            {
-                return;
-            }
             //买一小于MinBuy1Ratio的直线拉板，过滤
             if (quotes.Buy1 < quotes.PreClose * MinBuy1Ratio ||
                 quotes.Buy2 < quotes.PreClose * MinBuy1Ratio)
@@ -133,6 +124,25 @@ namespace NineSunScripture.strategy
             TriggerBuy(accounts, quotes, highLimit, positionRatioCtrl, callback);
         }
 
+        private bool BasicCheck(Quotes quotes, List<Account> accounts)
+        {
+            if (null == quotes || null == accounts)
+            {
+                return false;
+            }
+            //9:30之前不打板
+            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30 && !MainStrategy.IsTest)
+            {
+                return false;
+            }
+            if ((DateTime.Now.Hour == 14 && DateTime.Now.Minute > 30 || DateTime.Now.Hour > 14)
+               && !MainStrategy.IsTest)
+            {
+                return false;
+            }
+            return true;
+        }
+
         private bool CheckOpenBoards(
             Quotes quotes, Quotes lastTickQuotes, float open, float highLimit)
         {
@@ -144,18 +154,7 @@ namespace NineSunScripture.strategy
             bool isNotBoardThisTick = quotes.Buy1 < highLimit && 0 != quotes.Buy1;
             if (isBoardLastTick && isNotBoardThisTick && !openBoardTime.ContainsKey(code))
             {
-                rwLockSlimForOpenBoard.EnterWriteLock();
-                openBoardTime.Add(code, DateTime.Now);
-                if (!openBoardCnt.ContainsKey(code))
-                {
-                    openBoardCnt.Add(code, 1);
-                }
-                else
-                {
-                    openBoardCnt[code] += 1;
-                }
-                rwLockSlimForOpenBoard.ExitWriteLock();
-                Logger.Log("【" + quotes.Name + "】开板");
+                SetOpenBoardState(quotes);
             }
             int minOpenBoardTime = MinOpenBoardTimeOfDown;
             if (Utils.IsUpPeriod())
@@ -174,7 +173,7 @@ namespace NineSunScripture.strategy
                 //重置后因为触发了买点需要判断下开板时间是否足够
                 if (openBoardInterval < minOpenBoardTime)
                 {
-                    Logger.Log( "【" + quotes.Name 
+                    Logger.Log("【" + quotes.Name
                         + "】开板时间（已回封），此次开板时间为" + openBoardInterval + "s");
                     return false;
                 }
@@ -200,11 +199,35 @@ namespace NineSunScripture.strategy
             }
             else if (open == highLimit)
             {
-                Logger.Log("【" + quotes.Name + "】未开板，过滤");
-                //涨停开盘，没开板，过滤
-                return false;
+                //特殊情况是开盘卖一是涨停，而上面是用的买一做判断，所以会漏掉，这里要加上
+                if (quotes.Buy1 != highLimit && !openBoardTime.ContainsKey(code))
+                {
+                    SetOpenBoardState(quotes);
+                }
+                else
+                {
+                    Logger.Log("【" + quotes.Name + "】未开板，过滤");
+                    //涨停开盘，没开板，过滤
+                    return false;
+                }
             }
             return true;
+        }
+
+        private void SetOpenBoardState(Quotes quotes)
+        {
+            rwLockSlimForOpenBoard.EnterWriteLock();
+            openBoardTime.Add(quotes.Code, DateTime.Now);
+            if (!openBoardCnt.ContainsKey(quotes.Code))
+            {
+                openBoardCnt.Add(quotes.Code, 1);
+            }
+            else
+            {
+                openBoardCnt[quotes.Code] += 1;
+            }
+            rwLockSlimForOpenBoard.ExitWriteLock();
+            Logger.Log("【" + quotes.Name + "】开板");
         }
 
         private static bool CheckMoney(List<Account> accounts,
@@ -393,8 +416,8 @@ namespace NineSunScripture.strategy
             }   //END  if (null != position)
             else    //新开仓买入
             {
-                Logger.Log("【" + quotes.Name + "】触发买点，账户["
-                    + account.FundAcct + "]将新开仓买入");
+                Logger.Log("【" + quotes.Name
+                    + "】触发买点，账户[" + account.FundAcct + "]将新开仓买入");
                 //positionRatioCtrl是基于个股仓位风险控制，profitPositionCtrl是基于账户仓位风险控制
                 //账户风险控制直接写死在程序里，没毛病，后面改的必要也不大
                 float acctPositionCtrl = GetNewPositionRatio(account);
@@ -538,6 +561,22 @@ namespace NineSunScripture.strategy
                 lastTickQuotes = ticks[ticks.Length - 1];
             }
             return lastTickQuotes;
+        }
+
+        public void RestoreOpenBoardCnt()
+        {
+            Dictionary<string, short> reservedCnt = JsonDataHelper.Instance.GetOpenBoardCnt();
+            if (null != reservedCnt)
+            {
+                openBoardCnt = reservedCnt;
+                Logger.Log("RestoreOpenBoardCnt=" + reservedCnt);
+            }
+        }
+
+        public void SaveOpenBoardCnt()
+        {
+            JsonDataHelper.Instance.SaveOpenBoardCnt(openBoardCnt);
+            Logger.Log("SaveOpenBoardCnt=" + openBoardCnt);
         }
     }
 }
