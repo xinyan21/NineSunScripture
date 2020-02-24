@@ -40,7 +40,7 @@ namespace NineSunScripture.forms
             {
                 if (tbPosition.Text.Length > 0)
                 {
-                    quotes.PositionCtrl = (float)Math.Round(float.Parse(tbPosition.Text) / 10, 1);
+                    quotes.PositionCtrl = float.Parse(tbPosition.Text) / 10;
                 }
                 if (tbMoney.Text.Length > 0)
                 {

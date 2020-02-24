@@ -57,7 +57,7 @@ namespace NineSunScripture.trade.structApi.helper
             account.FundPassword = "3594035x";
             account.PricePassword = "3594035x";
             //没指定初始资产，差点又被大坑
-            account.InitTotalAsset = 60000;
+            account.InitTotalAsset = 200000;
             return account;
         }
 
@@ -72,10 +72,13 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 localAccounts = new List<Account>();
             }
-            localAccounts.Insert(0, GetTestMainAccount());
             if (!MainStrategy.IsTest)
             {
                 localAccounts.Insert(0, GetPrdMainAccount());
+            }
+            else
+            {
+                localAccounts.Insert(0, GetTestMainAccount());
             }
             Account mainAcct = localAccounts[0];
             List<Account> loginAccts = new List<Account>();
@@ -935,25 +938,35 @@ namespace NineSunScripture.trade.structApi.helper
         }
 
         /// <summary>
-        /// 获取当天成交的code股票数量
+        /// 获取当天已买code股票数量，这里包括所有已经委托的仓位=成交+未成交可撤单
         /// </summary>
         /// <param name="sessionId">登录账号的ID</param>
         /// <param name="code">股票代码</param>
-        /// <param name="op">操作方向</param>
+        /// <param name="op">操作方向 Order.OperationXX</param>
         /// <returns></returns>
-        public static int GetTodayTransactionQuantityOf(int sessionId, string code, string op)
+        public static int GetTodayBoughtQuantityOf(int sessionId, string code, string op)
         {
             int quantity = 0;
             List<Order> todayTransactions = TradeAPI.QueryTodayTransaction(sessionId);
-            if (null == todayTransactions || todayTransactions.Count == 0)
+            if (!Utils.IsListEmpty(todayTransactions))
             {
-                return quantity;
-            }
-            foreach (Order order in todayTransactions)
-            {
-                if (order.Code == code && order.Operation.Contains(op))
+                foreach (Order order in todayTransactions)
                 {
-                    quantity += order.Quantity;
+                    if (order.Code == code && order.Operation.Contains(op))
+                    {
+                        quantity += order.Quantity;
+                    }
+                }
+            }
+            List<Order> ordersCanCancel = GetOrdersCanCancelOf(sessionId, code);
+            if (!Utils.IsListEmpty(ordersCanCancel))
+            {
+                foreach (var item in ordersCanCancel)
+                {
+                    if (item.Operation.Contains(op))
+                    {
+                        quantity += item.Quantity;
+                    }
                 }
             }
 

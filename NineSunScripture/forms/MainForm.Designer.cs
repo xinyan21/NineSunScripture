@@ -228,7 +228,7 @@
             this.panelFundInfo.Controls.Add(this.btnSwtichPositions);
             this.panelFundInfo.Controls.Add(this.lvCancelOrders);
             this.panelFundInfo.Controls.Add(this.lvPositions);
-            this.panelFundInfo.Location = new System.Drawing.Point(128, 831);
+            this.panelFundInfo.Location = new System.Drawing.Point(126, 808);
             this.panelFundInfo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panelFundInfo.Name = "panelFundInfo";
             this.panelFundInfo.Size = new System.Drawing.Size(986, 178);
@@ -480,7 +480,7 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(173, 6);
             // 
             // tsmiBuyStock
             // 
@@ -494,7 +494,7 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(173, 6);
             // 
             // tsmiClearPositions
             // 
@@ -508,7 +508,7 @@
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(173, 6);
             // 
             // tspiPrivacyMode
             // 
@@ -521,7 +521,7 @@
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(173, 6);
             // 
             // tsmiTest
             // 
@@ -534,7 +534,7 @@
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(173, 6);
             // 
             // tspExit
             // 
@@ -547,7 +547,7 @@
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(173, 6);
             // 
             // tbRuntimeInfo
             // 

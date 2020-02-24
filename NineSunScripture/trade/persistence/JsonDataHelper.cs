@@ -36,19 +36,19 @@ namespace NineSunScripture.trade.persistence
         [MethodImpl(MethodImplOptions.Synchronized)]
         public Dictionary<string, short> GetOpenBoardCnt()
         {
-            Dictionary<DateTime, Dictionary<string, short>> data
-            = new Dictionary<DateTime, Dictionary<string, short>>();
+            Dictionary<string, Dictionary<string, short>> data
+            = new Dictionary<string, Dictionary<string, short>>();
             try
             {
                 if (!File.Exists(openBoardCntFilePath))
                 {
                     File.Create(openBoardCntFilePath);
                 }
-                data = JsonConvert.DeserializeObject<
-                    Dictionary<DateTime, Dictionary<string, short>>>(File.ReadAllText(openBoardCntFilePath));
-                if (null != data && data.ContainsKey(DateTime.Now.Date))
+                data = JsonConvert.DeserializeObject< Dictionary
+                    <string, Dictionary<string, short>>>(File.ReadAllText(openBoardCntFilePath));
+                if (null != data && data.ContainsKey(DateTime.Now.Date.ToString("yyyyMMdd")))
                 {
-                    return data[DateTime.Now.Date];
+                    return data[DateTime.Now.Date.ToString("yyyyMMdd")];
                 }
             }
             catch (Exception e)
@@ -297,9 +297,9 @@ namespace NineSunScripture.trade.persistence
             {
                 return;
             }
-            Dictionary<DateTime, Dictionary<string, short>> data
-                = new Dictionary<DateTime, Dictionary<string, short>>();
-            data.Add(DateTime.Now.Date, cntDic);
+            Dictionary<string, Dictionary<string, short>> data
+                = new Dictionary<string, Dictionary<string, short>>();
+            data.Add(DateTime.Now.ToString("yyyyMMdd"), cntDic);
             try
             {
                 if (!Directory.Exists(baseDir))

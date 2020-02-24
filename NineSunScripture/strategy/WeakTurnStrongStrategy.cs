@@ -165,7 +165,7 @@ namespace NineSunScripture.strategy
                 Logger.Log("【" + quotes.Name + "】触发买点，账户["
                     + account.FundAcct + "]经过仓位控制后可买数量为" + order.Quantity + "股");
             }//END else 新开仓买入
-            int boughtQuantity = AccountHelper.GetTodayTransactionQuantityOf(
+            int boughtQuantity = AccountHelper.GetTodayBoughtQuantityOf(
                    account.TradeSessionId, quotes.Code, Order.OperationBuy);
             if (order.Quantity <= boughtQuantity)
             {

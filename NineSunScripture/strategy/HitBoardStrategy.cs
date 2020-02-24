@@ -392,7 +392,7 @@ namespace NineSunScripture.strategy
                 Logger.Log(
                     "【" + quotes.Name + "】触发买点，账户[" + account.FundAcct + "]已经持有");
                 //查询已卖数量得到买入数量（可用大于0说明今天之前买的，这种情况只回补仓位）
-                int sellQuantity = AccountHelper.GetTodayTransactionQuantityOf(
+                int sellQuantity = AccountHelper.GetTodayBoughtQuantityOf(
                     account.TradeSessionId, quotes.Code, Order.OperationSell);
                 //因为1/2板会在7%止盈，上板的时候全部打回，T字板也全部打回
                 if (open == highLimit || quotes.ContBoards < 3)
@@ -464,7 +464,7 @@ namespace NineSunScripture.strategy
             int boughtQuantity = 0;
             try
             {
-                boughtQuantity = AccountHelper.GetTodayTransactionQuantityOf(
+                boughtQuantity = AccountHelper.GetTodayBoughtQuantityOf(
                          account.TradeSessionId, quotes.Code, Order.OperationBuy);
             }
             catch (ApiTimeoutException e)
@@ -569,14 +569,14 @@ namespace NineSunScripture.strategy
             if (null != reservedCnt)
             {
                 openBoardCnt = reservedCnt;
-                Logger.Log("RestoreOpenBoardCnt=" + reservedCnt);
+                Logger.Log("RestoreOpenBoardCnt=" + reservedCnt.ToString());
             }
         }
 
         public void SaveOpenBoardCnt()
         {
             JsonDataHelper.Instance.SaveOpenBoardCnt(openBoardCnt);
-            Logger.Log("SaveOpenBoardCnt=" + openBoardCnt);
+            Logger.Log("SaveOpenBoardCnt=" + openBoardCnt.ToString());
         }
     }
 }
