@@ -52,7 +52,7 @@ namespace NineSunScripture.trade.structApi.helper
             account.CommPwd = "";
             account.SalesDepartId = "";
             account.IsRandomMac = false;
-            account.FundAcct = "24509958";
+            account.FundAcct = "59661045";
             account.PriceAcct = "13534068934";
             account.FundPassword = "3594035x";
             account.PricePassword = "3594035x";

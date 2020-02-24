@@ -289,7 +289,7 @@ namespace NineSunScripture.util
 
         public static string FormatPositionForShow(float position)
         {
-            return (position * 10) + "成";
+            return Math.Round(position * 10, 1) + "成";
         }
 
         public static string FormatMoneyForShow(int money)

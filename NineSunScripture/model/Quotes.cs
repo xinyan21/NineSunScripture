@@ -244,6 +244,7 @@ namespace NineSunScripture.model
             sb.Append("#Code=").Append(Code);
             sb.Append("#Name=").Append(Name);
             sb.Append("#Open=").Append(Open);
+            sb.Append("#PreClose=").Append(PreClose);
             sb.Append("#HighLimit=").Append(HighLimit);
             sb.Append("#LowLimit=").Append(LowLimit);
             sb.Append("#Money=").Append(Money);
@@ -270,6 +271,7 @@ namespace NineSunScripture.model
                 return;
             }
             Open = quotes.Open;
+            preClose = quotes.preClose;
             HighLimit = quotes.HighLimit;
             LowLimit = quotes.LowLimit;
             InPosition = quotes.InPosition;

@@ -159,6 +159,12 @@ namespace NineSunScripture
                     btnPeriod.BackColor = Color.Green;
                 }
             }
+            else
+            {
+                settings = new Dictionary<string, string>();
+                settings.Add("period", "up");
+                JsonDataHelper.Instance.SaveSettings(settings);
+            }
         }
 
         /// <summary>

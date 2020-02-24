@@ -135,7 +135,7 @@ namespace NineSunScripture.strategy
 
         private void CloseMarket()
         {
-            if (isMarketOpen && !IsTest)
+            if (isMarketOpen && !IsTradeTime() && !IsTest)
             {
                 UnsubscribeAll();
                 isMarketOpen = false;
@@ -199,8 +199,12 @@ namespace NineSunScripture.strategy
         public void OnPushResult(int type, IntPtr result)
         {
             string code = Marshal.PtrToStringAnsi(result + 16, 6);
-            Quotes stock = stocksForPrice.Find(item => item.Code.Equals(code));
-            if (0 == stock.HighLimit)
+            Quotes stock = stocksToBuy.Find(item => item.Code.Equals(code));
+            if (null == stock)
+            {
+                stock = stocksToSell.Find(item => item.Code.Equals(code));
+            }
+            if (null == stock || 0 == stock.HighLimit)
             {
                 InitLimitPrice();
                 return;
@@ -251,8 +255,10 @@ namespace NineSunScripture.strategy
                 return;
             }
             quotes.Name = stock.Name;
-            if (null != workListener)
+            if (null != workListener &&
+                DateTime.Now.Subtract(lastFundUpdateTime).TotalSeconds < UpdateFundCycle)
             {
+                quotes.CloneStrategyParamsFrom(stock);
                 workListener.OnPriceChange(quotes);
             }
 
@@ -572,7 +578,7 @@ namespace NineSunScripture.strategy
                     {
                         Quotes quotes
                         = PriceAPI.QueryTenthGearPrice(mainAcct.PriceSessionId, item.Code);
-                        if (null != quotes)
+                        if (null == quotes)
                         {
                             return;
                         }
@@ -584,6 +590,7 @@ namespace NineSunScripture.strategy
                                 buyItem.HighLimit = quotes.HighLimit;
                                 buyItem.LowLimit = quotes.LowLimit;
                                 buyItem.Open = quotes.Open;
+                                buyItem.PreClose = quotes.PreClose;
                             }
                         }
                         foreach (var sellItem in stocksToBuy)
@@ -593,6 +600,7 @@ namespace NineSunScripture.strategy
                                 sellItem.HighLimit = quotes.HighLimit;
                                 sellItem.LowLimit = quotes.LowLimit;
                                 sellItem.Open = quotes.Open;
+                                sellItem.PreClose = quotes.PreClose;
                             }
                         }
                         Logger.Log("InitLimitPric=》 " + item);
