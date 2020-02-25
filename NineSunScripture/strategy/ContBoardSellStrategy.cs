@@ -120,9 +120,9 @@ namespace NineSunScripture.strategy
             //龙头单独卖
             if (quotes.IsDragonLeader)
             {
-                Logger.Log("收盘不板卖" + quotes.Name);
                 if (now.Minute >= 55 && curPrice < highLimit)
                 {
+                    Logger.Log("【" + quotes.Name + "】收盘不板卖" );
                     AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                 }
                 return;
@@ -176,13 +176,13 @@ namespace NineSunScripture.strategy
                 {
                     if (curPrice > open * 1.04)
                     {
-                        Logger.Log("超低开拉升4%卖" + quotes.Name);
+                        Logger.Log("【" + quotes.Name + "】超低开拉升4%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                         return false;
                     }
                     if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * TooWeakRatio)
                     {
-                        Logger.Log("超低开10:10还小于-5%卖" + quotes.Name);
+                        Logger.Log("【" + quotes.Name + "】超低开10:10还小于-5%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                         return false;
                     }
@@ -191,7 +191,7 @@ namespace NineSunScripture.strategy
                 {
                     if (curPrice <= avgCost * StopLossRatio || curPrice <= preClose * StopLossRatio)
                     {
-                        Logger.Log("小于-8%卖" + quotes.Name);
+                        Logger.Log("【" + quotes.Name + "】小于-8%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                         return false;
                     }
@@ -214,7 +214,7 @@ namespace NineSunScripture.strategy
             if (null != ticks && ticks.Length >= 2 &&
                 ticks[ticks.Length - 2].Buy1 == highLimit && quotes.Buy1 < highLimit)
             {
-                Logger.Log("开板卖" + quotes.Name);
+                Logger.Log("【" + quotes.Name + "】开板卖");
                 AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                 return;
             }
@@ -227,19 +227,19 @@ namespace NineSunScripture.strategy
             {
                 if (curPrice <= preClose * NotGoodRatio)
                 {
-                    Logger.Log("2:00小于1%卖" + quotes.Name);
+                    Logger.Log("【" + quotes.Name + "】2:00小于1%卖");
                     AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                     return;
                 }
                 if (now.Minute >= 30 && curPrice <= preClose * GoodByeRatio)
                 {
-                    Logger.Log("2:30小于5%卖" + quotes.Name);
+                    Logger.Log("【" + quotes.Name + "】2:30小于5%卖");
                     AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                     return;
                 }
                 if (now.Minute >= 55 && curPrice < highLimit)
                 {
-                    Logger.Log("收盘不板卖" + quotes.Name);
+                    Logger.Log("【" + quotes.Name + "】收盘不板卖");
                     AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                     return;
                 }
@@ -337,7 +337,7 @@ namespace NineSunScripture.strategy
             if (ticks.First().Buy1Vol * quotes.HighLimit > SealMoneyBeginToDecrease * 10000
                && ticks.Last().Buy1Vol * quotes.HighLimit < MinSealMoneyToSell * 10000)
             {
-                string log = "封单减少到1000万以下清" + quotes.Name;
+                string log = "【" + quotes.Name + "】封单减少到1000万以下清 ";
                 Logger.Log(log);
                 Utils.ShowRuntimeInfo(callback, log);
                 AccountHelper.SellByRatio(quotes, accounts, callback, 1);
@@ -346,7 +346,7 @@ namespace NineSunScripture.strategy
             if (ticks.First().Buy1Vol * quotes.HighLimit > SealMoneyBeginToDecrease * 10000
                 && ticks.Last().Buy1Vol * quotes.HighLimit < MaxSealMoneyToSell * 10000)
             {
-                string log = "封单减少到1500万以下卖1/2" + quotes.Name;
+                string log = "【" + quotes.Name + "】封单减少到1500万以下卖1/2";
                 Logger.Log(log);
                 Utils.ShowRuntimeInfo(callback, log);
                 AccountHelper.SellByRatio(quotes, accounts, callback, 0.5f);
@@ -402,7 +402,7 @@ namespace NineSunScripture.strategy
 
             if (null != callback && (successCnt + failAccts.Count) > 0)
             {
-                string tradeResult = "3板以下止盈卖结果：成功账户"
+                string tradeResult = "【" + quotes.Name + "】3板以下止盈卖结果：成功账户"
                 + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
                 callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
                 Utils.LogTradeFailedAccts(tradeResult, failAccts);

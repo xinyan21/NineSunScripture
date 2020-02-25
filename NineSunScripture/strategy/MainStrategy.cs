@@ -458,10 +458,9 @@ namespace NineSunScripture.strategy
                     }
                 }
             }
-            //重启策略的时候要重新订阅行情，该清除的状态要清除
             Stop();
             Thread.Sleep(2000);
-
+            UnsubscribeAll();
             hitBoardStrategy.RestoreOpenBoardCnt();
             strategyThread = new Thread(InitStrategy);
             strategyThread.Start();

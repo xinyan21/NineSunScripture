@@ -41,7 +41,7 @@ namespace NineSunScripture.model
         public const short OperationBuy = 1;
         public const short OperationSell = 2;
 
-        private string code="";
+        private string code = "";
         private string name = "";
 
         //昨收
@@ -195,7 +195,18 @@ namespace NineSunScripture.model
         public int Buy5Vol { get => buy5Vol; set => buy5Vol = value; }
         public float PositionCtrl { get => positionCtrl; set => positionCtrl = value; }
         public int MoneyCtrl { get => moneyCtrl; set => moneyCtrl = value; }
-        public short StockCategory { get => stockCategory; set => stockCategory = value; }
+        public short StockCategory
+        {
+            get => stockCategory;
+            set
+            {
+                stockCategory = value;
+                if (stockCategory == CategoryDragonLeader)
+                {
+                    IsDragonLeader = true;
+                }
+            }
+        }
         public short Operation { get => operation; set => operation = value; }
         public short ContBoards { get => contBoards; set => contBoards = value; }
         public bool InPosition { get => inPosition; set => inPosition = value; }
