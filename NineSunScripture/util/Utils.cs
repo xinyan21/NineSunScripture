@@ -9,6 +9,7 @@ using System.IO;
 using System.Media;
 using System.Net;
 using System.Net.Mail;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -265,6 +266,7 @@ namespace NineSunScripture.util
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void PlaySuccessSoundHint()
         {
             Task.Run(() =>
@@ -273,14 +275,15 @@ namespace NineSunScripture.util
                 sp.SoundLocation = Environment.CurrentDirectory + @"\sound\ding.wav";
                 sp.Load();
                 sp.Play();
-                Thread.Sleep(1000);
+                Thread.Sleep(1300);
                 sp.Play();
-                Thread.Sleep(1000);
+                Thread.Sleep(1300);
                 sp.Play();
-                Thread.Sleep(1000);
+                Thread.Sleep(1300);
             });
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void PlayFailSoundHint()
         {
 

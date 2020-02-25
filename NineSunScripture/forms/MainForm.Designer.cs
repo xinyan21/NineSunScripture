@@ -281,7 +281,7 @@
             this.btnSwitchCancelOrders.FlatAppearance.BorderSize = 2;
             this.btnSwitchCancelOrders.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSwitchCancelOrders.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.btnSwitchCancelOrders.Location = new System.Drawing.Point(159, 106);
+            this.btnSwitchCancelOrders.Location = new System.Drawing.Point(157, 106);
             this.btnSwitchCancelOrders.Name = "btnSwitchCancelOrders";
             this.btnSwitchCancelOrders.Size = new System.Drawing.Size(126, 42);
             this.btnSwitchCancelOrders.TabIndex = 19;
@@ -296,7 +296,7 @@
             this.btnSwtichPositions.FlatAppearance.BorderSize = 2;
             this.btnSwtichPositions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSwtichPositions.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.btnSwtichPositions.Location = new System.Drawing.Point(159, 26);
+            this.btnSwtichPositions.Location = new System.Drawing.Point(157, 26);
             this.btnSwtichPositions.Name = "btnSwtichPositions";
             this.btnSwtichPositions.Size = new System.Drawing.Size(126, 42);
             this.btnSwtichPositions.TabIndex = 18;

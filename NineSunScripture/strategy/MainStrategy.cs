@@ -21,7 +21,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = false;
+        public static bool IsTest = true;
 
         public const int RspCodeOfUpdateAcctInfo = 8888;
 

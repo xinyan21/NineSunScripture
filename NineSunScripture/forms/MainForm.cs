@@ -670,6 +670,11 @@ namespace NineSunScripture
             }
         }
 
+        /// <summary>
+        /// 删除分组前要取消订阅对应分组的行情
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TsmiDelGroup_Click(object sender, EventArgs e)
         {
             if (lvStocks.SelectedItems.Count <= 0)
@@ -677,7 +682,14 @@ namespace NineSunScripture
                 return;
             }
             Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
-            JsonDataHelper.Instance.DelStocksByCategory(quotes.Operation, quotes.StockCategory);
+            List<Quotes> group = JsonDataHelper.Instance.GetStocksByCatgory(
+                quotes.Operation, quotes.StockCategory);
+            foreach (var item in group)
+            {
+                mainStrategy.DelStock(item);
+            }
+            JsonDataHelper.Instance.DelStocksByCategory(
+                quotes.Operation, quotes.StockCategory);
             RefreshStocksListView();
         }
 
