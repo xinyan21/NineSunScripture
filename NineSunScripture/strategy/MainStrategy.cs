@@ -60,6 +60,7 @@ namespace NineSunScripture.strategy
         private ITrade callback;
         private IWorkListener workListener;
         private DateTime lastFundUpdateTime;
+        private DateTime lastPriceUpdateTime;
         private Thread strategyThread;
 
         //逆回购记录，使用日期记录以支持不关策略长时间运行
@@ -81,6 +82,7 @@ namespace NineSunScripture.strategy
             isHoliday = Utils.IsHolidayByDate(DateTime.Now);
             reverseRepurchaseRecords = new Dictionary<DateTime, bool>();
             lastFundUpdateTime = DateTime.Now;
+            lastPriceUpdateTime = DateTime.Now;
             pushCallback = OnPushResult;
             buyProtection = new Dictionary<string, bool>();
         }
@@ -206,6 +208,7 @@ namespace NineSunScripture.strategy
             }
             if (null == stock || 0 == stock.HighLimit)
             {
+                Logger.Log("OnPushResult find a stock to InitLimitPrice=" + stock);
                 InitLimitPrice();
                 return;
             }
@@ -255,11 +258,16 @@ namespace NineSunScripture.strategy
                 return;
             }
             quotes.Name = stock.Name;
-            if (null != workListener &&
-                DateTime.Now.Subtract(lastFundUpdateTime).TotalSeconds < UpdateFundCycle)
+            double updatePriceInterval
+                = DateTime.Now.Subtract(lastPriceUpdateTime).TotalSeconds;
+            if (null != workListener && updatePriceInterval >= UpdateFundCycle/2)
             {
                 quotes.CloneStrategyParamsFrom(stock);
                 workListener.OnPriceChange(quotes);
+                if (updatePriceInterval > (UpdateFundCycle/2 + 2))
+                {
+                    lastPriceUpdateTime = DateTime.Now;
+                }
             }
 
             Utils.SamplingLogQuotes(quotes);
@@ -593,7 +601,7 @@ namespace NineSunScripture.strategy
                                 buyItem.PreClose = quotes.PreClose;
                             }
                         }
-                        foreach (var sellItem in stocksToBuy)
+                        foreach (var sellItem in stocksToSell)
                         {
                             if (sellItem.Equals(item))
                             {
