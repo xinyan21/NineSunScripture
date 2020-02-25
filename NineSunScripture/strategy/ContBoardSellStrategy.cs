@@ -111,6 +111,7 @@ namespace NineSunScripture.strategy
             Position position = AccountHelper.GetPositionOf(accounts, quotes.Code);
             if (!BasicCheck(quotes, position, curPrice, lowLimit))
             {
+                Logger.Log("【" + quotes.Name + "】BasicCheck return");
                 return;
             }
             if (quotes.AvgCost == 0)
@@ -122,7 +123,7 @@ namespace NineSunScripture.strategy
             {
                 if (now.Minute >= 55 && curPrice < highLimit)
                 {
-                    Logger.Log("【" + quotes.Name + "】收盘不板卖" );
+                    Logger.Log("【" + quotes.Name + "】收盘不板卖");
                     AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                 }
                 return;
@@ -158,7 +159,7 @@ namespace NineSunScripture.strategy
         /// <param name="accounts">账户列表</param>
         /// <param name="callback">回调</param>
         /// <param name="quotes">股票对象</param>
-        /// <returns></returns>
+        /// <returns>是否已经执行卖点</returns>
         private bool StopWinOrLoss(
             List<Account> accounts, ITrade callback, Quotes quotes)
         {
@@ -170,6 +171,7 @@ namespace NineSunScripture.strategy
             DateTime now = DateTime.Now;
             if (open != highLimit)
             {
+                Logger.Log("【" + quotes.Name + "】StopWinOrLoss");
                 StopWin(quotes, accounts, callback);
                 StopWinForLessThan3Boards(accounts, quotes, callback);
                 if (open < quotes.PreClose * StopLossRatio)
@@ -247,9 +249,7 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// TODO 【重点】止盈 这里有个卖出之后成本降低导致收益增高的问题，解决方法一个是在本地记录成本
-        /// 还有就是开板清掉买回，这个成本如何算
-        /// 好像就只有20%这档会触发，除非一直不开板到结尾
+        /// 如果不手动设置成本，每次卖出后成本会变
         /// </summary>
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
@@ -282,6 +282,7 @@ namespace NineSunScripture.strategy
                 stopWinPosition = FirstStopWinPosition;
                 log = "20%止盈3成卖" + quotes.Name;
             }
+            Logger.Log("【" + quotes.Name + "】StopWin " + log);
 
             short successCnt = 0;
             List<Task> tasks = new List<Task>();
@@ -291,9 +292,11 @@ namespace NineSunScripture.strategy
                 //每个账户开个线程去处理，账户间同时操作，效率提升大大的
                 tasks.Add(Task.Run(() =>
                 {
-                    if (stopWinPosition > 0 && !AccountHelper.IsSoldToday(account, quotes, callback))
+                    if (stopWinPosition > 0 
+                    && !AccountHelper.IsSoldToday(account, quotes, callback))
                     {
-                        int code = AccountHelper.SellWithAcct(quotes, account, callback, stopWinPosition);
+                        int code 
+                        = AccountHelper.SellWithAcct(quotes, account, callback, stopWinPosition);
                         lock (failAccts)
                         {
                             if (code <= 0)
@@ -314,7 +317,8 @@ namespace NineSunScripture.strategy
             {
                 string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
                     + successCnt + "个，失败账户" + failAccts.Count + "个";
-                callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
+                callback.OnTradeResult(
+                    MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
                 Utils.LogTradeFailedAccts(tradeResult, failAccts);
             }
         }
@@ -328,12 +332,14 @@ namespace NineSunScripture.strategy
         private void SellIfSealDecrease(List<Account> accounts, Quotes quotes, ITrade callback)
         {
             rwLockSlim.EnterReadLock();
-            Quotes[] ticks = historyTicks[quotes.Code].ToArray();
-            rwLockSlim.ExitReadLock();
-            if (ticks.Length < 2)
+            Queue<Quotes> ticks = historyTicks[quotes.Code];
+            if (ticks.Count < 2)
             {
                 return;
             }
+            rwLockSlim.ExitReadLock();
+            Logger.Log("【" + quotes.Name + "】StopWinForLessThan3Boards ");
+
             if (ticks.First().Buy1Vol * quotes.HighLimit > SealMoneyBeginToDecrease * 10000
                && ticks.Last().Buy1Vol * quotes.HighLimit < MinSealMoneyToSell * 10000)
             {
@@ -366,10 +372,12 @@ namespace NineSunScripture.strategy
                 && quotes.Sell1 / quotes.PreClose < Less3BoardsStopWinRatio;
             //下降期不检查连板数，到Less3BoardsStopWinRatio就止盈
             bool isContBoardsNotQualified = Utils.IsUpPeriod() ? quotes.ContBoards >= 3 : false;
-            if (null == accounts || null == quotes || isContBoardsNotQualified || isUpRatioNotEnough)
+            if (null == accounts
+                || null == quotes || isContBoardsNotQualified || isUpRatioNotEnough)
             {
                 return;
             }
+            Logger.Log("【" + quotes.Name + "】StopWinForLessThan3Boards ");
 
             short successCnt = 0;
             List<Task> tasks = new List<Task>();

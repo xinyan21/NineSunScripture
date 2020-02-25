@@ -721,16 +721,17 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 List<Order> todayTransactions
                         = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
-                if (todayTransactions.Count > 0)
+                if (Utils.IsListEmpty(todayTransactions))
                 {
-                    foreach (Order order in todayTransactions)
+                    return false;
+                }
+                foreach (Order order in todayTransactions)
+                {
+                    if (order.Code == quotes.Code
+                        && order.Operation.Contains(Order.OperationSell))
                     {
-                        if (order.Code == quotes.Code
-                            && order.Operation.Contains(Order.OperationSell))
-                        {
-                            isSoldToday = true;
-                            break;
-                        }
+                        isSoldToday = true;
+                        break;
                     }
                 }
             }

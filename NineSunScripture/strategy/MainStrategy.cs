@@ -209,7 +209,7 @@ namespace NineSunScripture.strategy
             if (null == stock || 0 == stock.HighLimit)
             {
                 Logger.Log("OnPushResult find a stock to InitLimitPrice=" + stock);
-                InitLimitPrice();
+                InitLimitPrice(code);
                 return;
             }
             lock (buyProtection)
@@ -260,11 +260,11 @@ namespace NineSunScripture.strategy
             quotes.Name = stock.Name;
             double updatePriceInterval
                 = DateTime.Now.Subtract(lastPriceUpdateTime).TotalSeconds;
-            if (null != workListener && updatePriceInterval >= UpdateFundCycle/2)
+            if (null != workListener && updatePriceInterval >= UpdateFundCycle / 2)
             {
                 quotes.CloneStrategyParamsFrom(stock);
                 workListener.OnPriceChange(quotes);
-                if (updatePriceInterval > (UpdateFundCycle/2 + 2))
+                if (updatePriceInterval > (UpdateFundCycle / 2 + 2))
                 {
                     lastPriceUpdateTime = DateTime.Now;
                 }
@@ -572,13 +572,17 @@ namespace NineSunScripture.strategy
         }
 
         /// <summary>
-        /// 初始化涨跌停数据
+        /// 初始化开盘、昨收、涨跌停数据，推送的并没有这些数据
         /// </summary>
-        private void InitLimitPrice()
+        private void InitLimitPrice(string code = null)
         {
             List<Task> tasks = new List<Task>();
             foreach (Quotes item in stocksForPrice)
             {
+                if (!string.IsNullOrEmpty(code) && !item.Code.Equals(code))
+                {
+                    continue;
+                }
                 tasks.Add(Task.Run(() =>
                 {
                     try
@@ -589,6 +593,10 @@ namespace NineSunScripture.strategy
                         {
                             return;
                         }
+                        item.HighLimit = quotes.HighLimit;
+                        item.LowLimit = quotes.LowLimit;
+                        item.Open = quotes.Open;
+                        item.PreClose = quotes.PreClose;
                         foreach (var buyItem in stocksToBuy)
                         {
                             //重写了equal方法，只要代码相等就相等
@@ -631,7 +639,7 @@ namespace NineSunScripture.strategy
             {
                 return false;
             }
-            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 24)
+            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 26)
             {
                 isMarketOpen = false;
                 return false;

@@ -395,7 +395,7 @@ namespace NineSunScripture
 
             ImageList imgList = new ImageList
             {
-                ImageSize = new Size(1, 28)//分别是宽和高
+                ImageSize = new Size(1, 24)//分别是宽和高
             };
             lvStocks.SmallImageList = imgList;
             lvPositions.SmallImageList = imgList;

@@ -315,7 +315,7 @@
             this.panelBandParam.Controls.Add(this.tbStopWinPrice);
             this.panelBandParam.Controls.Add(this.lblStopWinPrice);
             this.panelBandParam.Controls.Add(this.lblStopLossPrice);
-            this.panelBandParam.Location = new System.Drawing.Point(85, 350);
+            this.panelBandParam.Location = new System.Drawing.Point(85, 346);
             this.panelBandParam.Name = "panelBandParam";
             this.panelBandParam.Size = new System.Drawing.Size(627, 67);
             this.panelBandParam.TabIndex = 16;
@@ -357,7 +357,7 @@
             this.tbAvgCost.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tbAvgCost.Location = new System.Drawing.Point(480, 19);
             this.tbAvgCost.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tbAvgCost.MaxLength = 4;
+            this.tbAvgCost.MaxLength = 6;
             this.tbAvgCost.Name = "tbAvgCost";
             this.tbAvgCost.Size = new System.Drawing.Size(147, 29);
             this.tbAvgCost.TabIndex = 19;

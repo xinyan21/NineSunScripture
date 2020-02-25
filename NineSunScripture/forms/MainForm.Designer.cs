@@ -397,7 +397,7 @@
             this.pbWorkStatus.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.pbWorkStatus.Image = global::NineSunScripture.Properties.Resources.taiji;
             this.pbWorkStatus.InitialImage = null;
-            this.pbWorkStatus.Location = new System.Drawing.Point(360, 229);
+            this.pbWorkStatus.Location = new System.Drawing.Point(359, 229);
             this.pbWorkStatus.Name = "pbWorkStatus";
             this.pbWorkStatus.Size = new System.Drawing.Size(517, 510);
             this.pbWorkStatus.TabIndex = 3;
@@ -593,7 +593,7 @@
             this.btnPeriod.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
             this.btnPeriod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.btnPeriod.Location = new System.Drawing.Point(553, 68);
+            this.btnPeriod.Location = new System.Drawing.Point(543, 68);
             this.btnPeriod.Name = "btnPeriod";
             this.btnPeriod.Size = new System.Drawing.Size(126, 42);
             this.btnPeriod.TabIndex = 23;

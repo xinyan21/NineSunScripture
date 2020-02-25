@@ -280,10 +280,12 @@ namespace NineSunScripture.strategy
             }
             if (quotes.MoneyCtrl > 0 && quotes.Money > quotes.MoneyCtrl * 10000)
             {
+                Logger.Log("【" + quotes.Name + "】符合限制的成交额");
                 isMoneyQuolified = true;
             }
             else if (quotes.MoneyCtrl == 0 && quotes.Money > DefaultMoneyCtrl * 10000)
             {
+                Logger.Log("【" + quotes.Name + "】符合默认限制成交额");
                 isMoneyQuolified = true;
             }
             return isMoneyQuolified;
@@ -380,7 +382,7 @@ namespace NineSunScripture.strategy
             {
                 Logger.Log("【" + quotes.Name + "】触发买点，账户["
                     + account.FundAcct + "]结束于可用金额不够，余额为"
-                    + account.Funds.AvailableAmt);
+                    + account.Funds.AvailableAmt + "元");
                 return 888;
             }
             //################计算买入数量BEGIN#######################
