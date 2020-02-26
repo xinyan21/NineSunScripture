@@ -121,7 +121,7 @@ namespace NineSunScripture.strategy
             //龙头单独卖
             if (quotes.IsDragonLeader)
             {
-                if (now.Minute >= 55 && curPrice < highLimit)
+                if (now.Hour == 14 && now.Minute >= 55 && curPrice < highLimit)
                 {
                     Logger.Log("【" + quotes.Name + "】收盘不板卖");
                     AccountHelper.SellByRatio(quotes, accounts, callback, 1);
@@ -180,13 +180,13 @@ namespace NineSunScripture.strategy
                     {
                         Logger.Log("【" + quotes.Name + "】超低开拉升4%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
-                        return false;
+                        return true;
                     }
                     if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * TooWeakRatio)
                     {
                         Logger.Log("【" + quotes.Name + "】超低开10:10还小于-5%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
-                        return false;
+                        return true;
                     }
                 }
                 else
@@ -195,11 +195,11 @@ namespace NineSunScripture.strategy
                     {
                         Logger.Log("【" + quotes.Name + "】小于-8%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
-                        return false;
+                        return true;
                     }
                 }
             }
-            return true;
+            return false;
         }
 
         private void OtherSells(List<Account> accounts, ITrade callback, Quotes quotes)
@@ -210,6 +210,7 @@ namespace NineSunScripture.strategy
             string code = quotes.Code;
             DateTime now = DateTime.Now;
 
+            Logger.Log("【" + quotes.Name + "】OtherSells");
             rwLockSlim.EnterReadLock();
             Quotes[] ticks = historyTicks[code].ToArray();
             rwLockSlim.ExitReadLock();
@@ -292,10 +293,10 @@ namespace NineSunScripture.strategy
                 //每个账户开个线程去处理，账户间同时操作，效率提升大大的
                 tasks.Add(Task.Run(() =>
                 {
-                    if (stopWinPosition > 0 
+                    if (stopWinPosition > 0
                     && !AccountHelper.IsSoldToday(account, quotes, callback))
                     {
-                        int code 
+                        int code
                         = AccountHelper.SellWithAcct(quotes, account, callback, stopWinPosition);
                         lock (failAccts)
                         {

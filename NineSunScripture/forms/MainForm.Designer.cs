@@ -592,7 +592,7 @@
             this.btnPeriod.BackColor = System.Drawing.Color.Red;
             this.btnPeriod.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
             this.btnPeriod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnPeriod.Location = new System.Drawing.Point(543, 68);
             this.btnPeriod.Name = "btnPeriod";
             this.btnPeriod.Size = new System.Drawing.Size(126, 42);

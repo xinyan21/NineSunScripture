@@ -21,7 +21,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = true;
+        public static bool IsTest = false;
 
         public const int RspCodeOfUpdateAcctInfo = 8888;
 
@@ -219,7 +219,6 @@ namespace NineSunScripture.strategy
                 {
                     if (buyProtection[code])
                     {
-                        Logger.Log("【" + stock.Name + "】被买入保护过滤");
                         return;
                     }
                 }
@@ -245,7 +244,6 @@ namespace NineSunScripture.strategy
                 lock (buyProtection)
                 {
                     buyProtection[code] = false;
-                    Logger.Log("【" + stock.Name + "】取消买入保护");
                 }
             }
         }
@@ -287,7 +285,6 @@ namespace NineSunScripture.strategy
             lock (buyProtection)
             {
                 buyProtection[stock.Code] = true;
-                Logger.Log("【" + stock.Name + "】开启十档买入保护");
             }
             //由于一只股票可能要分多个策略买，所以单独用行情里的参数去执行是不行的
             foreach (var item in stocksToBuy)
@@ -317,7 +314,7 @@ namespace NineSunScripture.strategy
                 Logger.Log("OnTenthGearPricePush error " + queryPriceErrorCnt);
                 if (null != quotes)
                 {
-                    Logger.Log(quotes.ToString(), LogType.Quotes);
+                    Logger.Log(quotes.ToString());
                 }
                 else
                 {

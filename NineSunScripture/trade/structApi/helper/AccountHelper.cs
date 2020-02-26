@@ -705,7 +705,8 @@ namespace NineSunScripture.trade.structApi.helper
         }//END METHOD
 
         /// <summary>
-        ///account账户今天是否卖出过quotes股票
+        ///account账户今天是否卖出过quotes股票，由于下单后可能不会立即成交，或者被砸无法成交
+        ///所以还要查可撤单
         /// </summary>
         /// <param name="account">账户对象</param>
         /// <param name="quotes">股票对象</param>
@@ -721,17 +722,29 @@ namespace NineSunScripture.trade.structApi.helper
             {
                 List<Order> todayTransactions
                         = TradeAPI.QueryTodayTransaction(account.TradeSessionId);
-                if (Utils.IsListEmpty(todayTransactions))
+                if (!Utils.IsListEmpty(todayTransactions))
                 {
-                    return false;
-                }
-                foreach (Order order in todayTransactions)
-                {
-                    if (order.Code == quotes.Code
-                        && order.Operation.Contains(Order.OperationSell))
+                    foreach (Order order in todayTransactions)
                     {
-                        isSoldToday = true;
-                        break;
+                        if (order.Code == quotes.Code
+                            && order.Operation.Contains(Order.OperationSell))
+                        {
+                            isSoldToday = true;
+                            break;
+                        }
+                    }
+                }
+                List<Order> ordersCanCancel
+                    = GetOrdersCanCancelOf(account.TradeSessionId, quotes.Code);
+                if (!Utils.IsListEmpty(ordersCanCancel))
+                {
+                    foreach (var item in ordersCanCancel)
+                    {
+                        if (item.Operation.Contains(Order.OperationSell))
+                        {
+                            isSoldToday = true;
+                            break;
+                        }
                     }
                 }
             }

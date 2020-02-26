@@ -372,15 +372,15 @@ namespace NineSunScripture
             {
                 settings.Add("period", "up");
             }
-            if (btnPeriod.Text.Equals("上升期"))
+            if (btnPeriod.Text.Equals("涨潮期"))
             {
-                btnPeriod.Text = "下降期";
+                btnPeriod.Text = "退潮期";
                 btnPeriod.BackColor = Color.Green;
                 settings["period"] = "down";
             }
             else
             {
-                btnPeriod.Text = "上升期";
+                btnPeriod.Text = "涨潮期";
                 btnPeriod.BackColor = Color.Red;
                 settings["period"] = "up";
             }
