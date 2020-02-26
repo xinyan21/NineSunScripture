@@ -61,13 +61,15 @@ namespace NineSunScripture.strategy
         private IWorkListener workListener;
         private DateTime lastFundUpdateTime;
         private DateTime lastPriceUpdateTime;
+        private DateTime lastPricePushTime;
         private Thread strategyThread;
+        private ReaderWriterLockSlim pricePushLockSlim;
 
         //逆回购记录，使用日期记录以支持不关策略长时间运行
         private Dictionary<DateTime, bool> reverseRepurchaseRecords;
 
-        //买入状态保护，由于逐笔委托的毫秒级高速并发，为防止误买入一只股票同时只能执行一次策略
-        private Dictionary<string, bool> buyProtection;
+        //策略执行状态保护，由于逐笔委托的毫秒级高速并发，为防止误操作一只股票同时只能执行一次策略
+        private Dictionary<string, bool> operationProtection;
 
         public MainStrategy()
         {
@@ -79,12 +81,13 @@ namespace NineSunScripture.strategy
             contBoardSellStrategy = new ContBoardSellStrategy();
             weakTurnStrongStrategy = new WeakTurnStrongStrategy();
             bandStrategy = new BandStrategy();
-            isHoliday = Utils.IsHolidayByDate(DateTime.Now);
             reverseRepurchaseRecords = new Dictionary<DateTime, bool>();
+            operationProtection = new Dictionary<string, bool>();
+            isHoliday = Utils.IsHolidayByDate(DateTime.Now);
             lastFundUpdateTime = DateTime.Now;
             lastPriceUpdateTime = DateTime.Now;
             pushCallback = OnPushResult;
-            buyProtection = new Dictionary<string, bool>();
+            pricePushLockSlim = new ReaderWriterLockSlim();
         }
 
         private void InitStrategy()
@@ -118,6 +121,7 @@ namespace NineSunScripture.strategy
                     }
                     OpenMarket();
                     CloseMarket();
+                    CheckPricePush();
                     UpdateTotalAccountInfo(true);
                     if (null != workListener)
                     {
@@ -133,6 +137,21 @@ namespace NineSunScripture.strategy
                     callback.OnTradeResult(0, "辅助策略线程", e.Message, false);
                 }
             }
+        }
+
+        private void CheckPricePush()
+        {
+            pricePushLockSlim.EnterReadLock();
+            if (DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 10)
+            {
+                string log = "10秒未收到行情推送，重启策略";
+                Logger.Log(log);
+                if (null != callback)
+                {
+                    callback.OnTradeResult(0, log, "", true);
+                }
+            }
+            pricePushLockSlim.ExitReadLock();
         }
 
         private void CloseMarket()
@@ -212,19 +231,19 @@ namespace NineSunScripture.strategy
                 InitLimitPrice(code);
                 return;
             }
-            lock (buyProtection)
+            lock (operationProtection)
             {
                 //买入保护
-                if (buyProtection.ContainsKey(code))
+                if (operationProtection.ContainsKey(code))
                 {
-                    if (buyProtection[code])
+                    if (operationProtection[code])
                     {
                         return;
                     }
                 }
                 else
                 {
-                    buyProtection.Add(code, false);
+                    operationProtection.Add(code, false);
                 }
             }
             try
@@ -241,9 +260,9 @@ namespace NineSunScripture.strategy
             }
             finally
             {
-                lock (buyProtection)
+                lock (operationProtection)
                 {
-                    buyProtection[code] = false;
+                    operationProtection[code] = false;
                 }
             }
         }
@@ -255,6 +274,10 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
+            pricePushLockSlim.EnterWriteLock();
+            lastPricePushTime = DateTime.Now;
+            pricePushLockSlim.ExitWriteLock();
+
             quotes.Name = stock.Name;
             double updatePriceInterval
                 = DateTime.Now.Subtract(lastPriceUpdateTime).TotalSeconds;
@@ -282,9 +305,9 @@ namespace NineSunScripture.strategy
             {
                 EditStockSub(stock, false, PriceAPI.PushTypeOByOCommision);
             }
-            lock (buyProtection)
+            lock (operationProtection)
             {
-                buyProtection[stock.Code] = true;
+                operationProtection[stock.Code] = true;
             }
             //由于一只股票可能要分多个策略买，所以单独用行情里的参数去执行是不行的
             foreach (var item in stocksToBuy)
@@ -307,14 +330,15 @@ namespace NineSunScripture.strategy
 
         private bool CheckQuotes(Quotes quotes)
         {
-            if (null == quotes || quotes.Buy1 == 0)
+            //这里要考虑涨跌停的情况，涨停sell1=0，跌停buy1=0
+            if (null == quotes || (quotes.Buy1 == 0 && quotes.Sell1 == 0))
             {
                 //这个变量不需要lock，因为大于2后必定会触发
                 queryPriceErrorCnt++;
                 Logger.Log("OnTenthGearPricePush error " + queryPriceErrorCnt);
                 if (null != quotes)
                 {
-                    Logger.Log(quotes.ToString());
+                    Logger.Log("OnTenthGearPricePush error " + quotes.ToString());
                 }
                 else
                 {
@@ -330,7 +354,7 @@ namespace NineSunScripture.strategy
                 Logger.Log("OnTenthGearPricePush error has been occured 3 times, need to reboot");
                 if (null != quotes)
                 {
-                    Logger.Log(quotes.ToString(), LogType.Quotes);
+                    Logger.Log("queryPriceErrorCnt > 2=" + quotes.ToString());
                 }
                 if (null != callback)
                 {
@@ -360,9 +384,9 @@ namespace NineSunScripture.strategy
                 {
                     return;
                 }
-                lock (buyProtection)
+                lock (operationProtection)
                 {
-                    buyProtection[stock.Code] = true;
+                    operationProtection[stock.Code] = true;
                     Logger.Log("【" + stock.Name + "】开启逐笔买入保护");
                 }
                 //执行买入，同时设置买入保护状态，防止多次买入，把打板的买入逻辑拆出来
@@ -632,17 +656,21 @@ namespace NineSunScripture.strategy
 
         public bool IsTradeTime()
         {
-            if (DateTime.Now.Hour < 9 || DateTime.Now.Hour > 14)
+            DateTime now = DateTime.Now;
+            if (now.Hour < 9 || now.Hour > 14)
             {
                 return false;
             }
-            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 26)
+            if (now.Hour == 9 && now.Minute < 26)
             {
                 isMarketOpen = false;
                 return false;
             }
-
-            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute >= 56)
+            if (now.Hour == 11 && now.Minute >= 30)
+            {
+                return false;
+            }
+            if (now.Hour == 12 && now.Minute < 59)
             {
                 return false;
             }
@@ -711,7 +739,10 @@ namespace NineSunScripture.strategy
             if (!stocksForPrice.Contains(quotes))
             {
                 stocksForPrice.Add(quotes);
-                EditStockSub(quotes, true);
+                if (IsTradeTime())
+                {
+                    EditStockSub(quotes, true);
+                }
             }
             if (quotes.Operation == Quotes.OperationBuy)
             {
@@ -760,6 +791,7 @@ namespace NineSunScripture.strategy
 
         public void ClearStocks()
         {
+            UnsubscribeAll();
             stocksForPrice.Clear();
             stocksToBuy.Clear();
             stocksToSell.Clear();

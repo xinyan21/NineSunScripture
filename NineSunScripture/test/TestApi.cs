@@ -38,7 +38,7 @@ namespace C_sharp演示
             try
             {
                 int code = QueryData(sessionId, 0, funds.PtrResult, funds.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(funds.PtrErrorInfo);
+                ApiHelper.HandleApiException(funds.PtrErrorInfo);
                 if (code > 0)
                 {
                     资产结构体 fund
@@ -70,7 +70,7 @@ namespace C_sharp演示
             try
             {
                 int code = QueryData(sessionId, 1, positionResult.PtrResult, positionResult.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(positionResult.PtrErrorInfo);
+                ApiHelper.HandleApiException(positionResult.PtrErrorInfo);
                 if (code > 0)
                 {
                     int positionLength = Marshal.ReadInt32(positionResult.PtrResult + 4);
@@ -112,7 +112,7 @@ namespace C_sharp演示
             try
             {
                 int code = QueryData(sessionId, 5, account.PtrResult, account.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(account.PtrErrorInfo);
+                ApiHelper.HandleApiException(account.PtrErrorInfo);
                 if (code > 0)
                 {
                     int listLength = Marshal.ReadInt32(account.PtrResult + 4);
@@ -152,7 +152,7 @@ namespace C_sharp演示
             try
             {
                 int code = QueryData(sessionId, 4, orderResult.PtrResult, orderResult.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(orderResult.PtrErrorInfo);
+                ApiHelper.HandleApiException(orderResult.PtrErrorInfo);
                 if (code > 0)
                 {
                     int listLength = Marshal.ReadInt32(orderResult.PtrResult + 4);

@@ -211,6 +211,13 @@ namespace NineSunScripture.strategy
             DateTime now = DateTime.Now;
 
             Logger.Log("【" + quotes.Name + "】OtherSells");
+
+            if (curPrice == highLimit)
+            {
+                SellIfSealDecrease(accounts, quotes, callback);
+                return;
+            }
+
             rwLockSlim.EnterReadLock();
             Quotes[] ticks = historyTicks[code].ToArray();
             rwLockSlim.ExitReadLock();
@@ -219,11 +226,6 @@ namespace NineSunScripture.strategy
             {
                 Logger.Log("【" + quotes.Name + "】开板卖");
                 AccountHelper.SellByRatio(quotes, accounts, callback, 1);
-                return;
-            }
-            if (curPrice == highLimit)
-            {
-                SellIfSealDecrease(accounts, quotes, callback);
                 return;
             }
             if (now.Hour == 14)

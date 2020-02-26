@@ -102,7 +102,7 @@
             // label2
             // 
             this.label2.Font = new System.Drawing.Font("微软雅黑", 18.33962F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.ForeColor = System.Drawing.Color.Yellow;
+            this.label2.ForeColor = System.Drawing.Color.Gold;
             this.label2.Location = new System.Drawing.Point(4, 0);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
@@ -277,8 +277,7 @@
             // btnSwitchCancelOrders
             // 
             this.btnSwitchCancelOrders.BackColor = System.Drawing.Color.Green;
-            this.btnSwitchCancelOrders.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
-            this.btnSwitchCancelOrders.FlatAppearance.BorderSize = 2;
+            this.btnSwitchCancelOrders.FlatAppearance.BorderColor = System.Drawing.Color.Gold;
             this.btnSwitchCancelOrders.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSwitchCancelOrders.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnSwitchCancelOrders.Location = new System.Drawing.Point(157, 106);
@@ -292,8 +291,7 @@
             // btnSwtichPositions
             // 
             this.btnSwtichPositions.BackColor = System.Drawing.Color.Red;
-            this.btnSwtichPositions.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
-            this.btnSwtichPositions.FlatAppearance.BorderSize = 2;
+            this.btnSwtichPositions.FlatAppearance.BorderColor = System.Drawing.Color.Gold;
             this.btnSwtichPositions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSwtichPositions.Font = new System.Drawing.Font("微软雅黑", 10.18868F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnSwtichPositions.Location = new System.Drawing.Point(157, 26);
@@ -568,7 +566,7 @@
             // 
             this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("微软雅黑", 18.33962F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label3.ForeColor = System.Drawing.Color.Yellow;
+            this.label3.ForeColor = System.Drawing.Color.Gold;
             this.label3.Location = new System.Drawing.Point(-2, 0);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
@@ -590,7 +588,7 @@
             // btnPeriod
             // 
             this.btnPeriod.BackColor = System.Drawing.Color.Red;
-            this.btnPeriod.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
+            this.btnPeriod.FlatAppearance.BorderColor = System.Drawing.Color.Gold;
             this.btnPeriod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnPeriod.Font = new System.Drawing.Font("微软雅黑", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btnPeriod.Location = new System.Drawing.Point(543, 68);

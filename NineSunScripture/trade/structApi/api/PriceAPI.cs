@@ -78,7 +78,7 @@ namespace NineSunScripture.trade.structApi.api
             {
                 int rspCode
                    = HQ_QueryData(priceSessionId, 0, code, "", result, errorInfo);
-                ApiHelper.HandleTimeOut(errorInfo);
+                ApiHelper.HandleApiException(errorInfo);
                 quotes.StrErrorInfo = ApiHelper.ParseErrInfo(errorInfo);
                 if (rspCode > 0)
                 {

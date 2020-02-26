@@ -91,7 +91,7 @@ namespace NineSunScripture.trade.structApi.api
             try
             {
                 int code = QueryData(sessionId, 0, funds.PtrResult, funds.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(funds.PtrErrorInfo);
+                ApiHelper.HandleApiException(funds.PtrErrorInfo);
                 if (code > 0)
                 {
                     资产结构体 fund
@@ -103,7 +103,7 @@ namespace NineSunScripture.trade.structApi.api
                 }
                 else
                 {
-                    Logger.Log("QueryFunds：" + ApiHelper.ParseErrInfo(funds.PtrErrorInfo));
+                    Logger.Log(sessionId + "->QueryFunds：" + ApiHelper.ParseErrInfo(funds.PtrErrorInfo));
                 }
             }
             finally
@@ -129,7 +129,7 @@ namespace NineSunScripture.trade.structApi.api
             try
             {
                 int code = QueryData(sessionId, 1, result, errorInfo);
-                ApiHelper.HandleTimeOut(errorInfo);
+                ApiHelper.HandleApiException(errorInfo);
                 if (code > 0)
                 {
                     int listLength = Marshal.ReadInt32(result + 4);
@@ -159,7 +159,7 @@ namespace NineSunScripture.trade.structApi.api
                 }
                 else
                 {
-                    Logger.Log("QueryPositions：" + ApiHelper.ParseErrInfo(errorInfo));
+                    Logger.Log(sessionId + "->QueryPositions：" + ApiHelper.ParseErrInfo(errorInfo));
                 }
             }
             finally
@@ -188,7 +188,7 @@ namespace NineSunScripture.trade.structApi.api
             try
             {
                 int code = QueryData(sessionId, 3, result, errorInfo);
-                ApiHelper.HandleTimeOut(errorInfo);
+                ApiHelper.HandleApiException(errorInfo);
                 if (code > 0)
                 {
                     int listLength = Marshal.ReadInt32(result + 4);
@@ -239,7 +239,7 @@ namespace NineSunScripture.trade.structApi.api
             try
             {
                 int code = QueryData(sessionId, 4, result, errorInfo);
-                ApiHelper.HandleTimeOut(errorInfo);
+                ApiHelper.HandleApiException(errorInfo);
                 if (code > 0)
                 {
                     int listLength = Marshal.ReadInt32(result + 4);
@@ -291,7 +291,7 @@ namespace NineSunScripture.trade.structApi.api
             try
             {
                 int code = QueryData(sessionId, 5, account.PtrResult, account.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(account.PtrErrorInfo);
+                ApiHelper.HandleApiException(account.PtrErrorInfo);
                 if (code > 0)
                 {
                     int listLength = Marshal.ReadInt32(account.PtrResult + 4);
@@ -336,7 +336,7 @@ namespace NineSunScripture.trade.structApi.api
             try
             {
                 int rspCode = QueryHQ(tradeSessionId, code, quotes.PtrResult, quotes.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(quotes.PtrErrorInfo);
+                ApiHelper.HandleApiException(quotes.PtrErrorInfo);
                 if (rspCode > 0)
                 {
                     证券行情结构体 price =
@@ -403,7 +403,7 @@ namespace NineSunScripture.trade.structApi.api
             {
                 rspId = SendOrder(order.TradeSessionId, Order.CategoryBuy, order.ShareholderAcct,
                    order.Code, order.Price, order.Quantity, order.PtrResult, order.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(order.PtrErrorInfo);
+                ApiHelper.HandleApiException(order.PtrErrorInfo);
                 order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
             }
             finally
@@ -431,7 +431,7 @@ namespace NineSunScripture.trade.structApi.api
             {
                 rspId = SendOrder(order.TradeSessionId, Order.CategorySell, order.ShareholderAcct,
                   order.Code, order.Price, order.Quantity, order.PtrResult, order.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(order.PtrErrorInfo);
+                ApiHelper.HandleApiException(order.PtrErrorInfo);
                 order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
             }
             finally
@@ -458,7 +458,7 @@ namespace NineSunScripture.trade.structApi.api
             {
                 rspId = CancelOrder(order.TradeSessionId, order.ShareholderAcct,
                   order.OrderId, order.PtrResult, order.PtrErrorInfo);
-                ApiHelper.HandleTimeOut(order.PtrErrorInfo);
+                ApiHelper.HandleApiException(order.PtrErrorInfo);
                 order.StrErrorInfo = ApiHelper.ParseErrInfo(order.PtrErrorInfo);
             }
             finally

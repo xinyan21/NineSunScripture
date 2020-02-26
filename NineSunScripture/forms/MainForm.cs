@@ -616,7 +616,6 @@ namespace NineSunScripture
 
             lvStocks.Items.Remove(lvStocks.SelectedItems[0]);
             AddRuntimeInfo("删除股票【" + quotes.Name + "】");
-            mainStrategy.EditStockSub(quotes, false);
         }
 
         /// <summary>

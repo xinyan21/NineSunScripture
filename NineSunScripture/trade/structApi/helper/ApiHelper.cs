@@ -57,18 +57,19 @@ namespace NineSunScripture.trade.structApi.helper
         /// </summary>
         /// <param name="errInfo">错误源数据</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void HandleTimeOut(IntPtr errInfo)
+        public static void HandleApiException(IntPtr errInfo)
         {
             if (null == errInfo)
             {
                 return;
             }
             string strErr = ParseErrInfo(errInfo);
-            if (!string.IsNullOrEmpty(strErr) && strErr.Contains("超时"))
+            if (!string.IsNullOrEmpty(strErr)
+                && (strErr.Contains("超时") || strErr.Equals("ClientID_错误")))
             {
                 if (callApiTimeOutCnt > 3)
                 {
-                    Logger.Log("接口超时>" + strErr);
+                    Logger.Log("HandleApiException->" + strErr);
                     throw new ApiTimeoutException(strErr);
                 }
                 callApiTimeOutCnt += 1;
