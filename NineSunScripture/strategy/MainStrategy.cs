@@ -107,6 +107,7 @@ namespace NineSunScripture.strategy
                     callback.OnTradeResult(0, "策略启动", "现在是假期", false);
                     return;
                 }
+                lastPricePushTime = DateTime.Now;
                 while (true)
                 {
                     Thread.Sleep(cycleTime);
@@ -120,7 +121,7 @@ namespace NineSunScripture.strategy
                         continue;
                     }
                     OpenMarket();
-                    CloseMarket();
+                    CloseMarket(false);
                     CheckPricePush();
                     UpdateTotalAccountInfo(true);
                     if (null != workListener)
@@ -142,7 +143,8 @@ namespace NineSunScripture.strategy
         private void CheckPricePush()
         {
             pricePushLockSlim.EnterReadLock();
-            if (DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 10)
+            if (null != lastPricePushTime
+                && DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 10)
             {
                 string log = "10秒未收到行情推送，重启策略";
                 Logger.Log(log);
@@ -154,9 +156,9 @@ namespace NineSunScripture.strategy
             pricePushLockSlim.ExitReadLock();
         }
 
-        private void CloseMarket()
+        private void CloseMarket(bool isStop)
         {
-            if (isMarketOpen && !IsTradeTime() && !IsTest)
+            if (isStop || (isMarketOpen && !IsTradeTime() && !IsTest))
             {
                 UnsubscribeAll();
                 isMarketOpen = false;
@@ -481,7 +483,6 @@ namespace NineSunScripture.strategy
             }
             Stop();
             Thread.Sleep(2000);
-            UnsubscribeAll();
             hitBoardStrategy.RestoreOpenBoardCnt();
             strategyThread = new Thread(InitStrategy);
             strategyThread.Start();
@@ -499,7 +500,7 @@ namespace NineSunScripture.strategy
             {
                 strategyThread.Abort();
             }
-            CloseMarket();
+            CloseMarket(true);
             hitBoardStrategy.SaveOpenBoardCnt();
         }
 

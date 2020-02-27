@@ -108,6 +108,9 @@ namespace NineSunScripture.trade.structApi.helper
                 }
 
                 LoginTrade(localAccounts, loginAccts, mainAcct, callback);
+                //并发导致主账户不是在第一个
+                loginAccts.Remove(mainAcct);
+                loginAccts.Insert(0, mainAcct);
             }
             finally
             {
@@ -168,7 +171,10 @@ namespace NineSunScripture.trade.structApi.helper
                             {
                                 account.PriceSessionId = mainAcct.PriceSessionId;
                             }
-                            loginAccts.Add(account);
+                            lock (loginAccts)
+                            {
+                                loginAccts.Add(account);
+                            }
                             opLog
                             = "资金账号【" + account.FundAcct + "】登录成功，会话ID为" + tradeSessionId;
                             Logger.Log(opLog);

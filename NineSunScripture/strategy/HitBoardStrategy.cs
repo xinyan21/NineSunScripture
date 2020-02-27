@@ -147,6 +147,12 @@ namespace NineSunScripture.strategy
             Quotes quotes, Quotes lastTickQuotes, float open, float highLimit)
         {
             string code = quotes.Code;
+            //特殊情况开盘价是涨停价，但是并没有封死的处理。特殊情况特殊处理
+            if (quotes.Open == highLimit
+                && quotes.Buy1 != highLimit && !openBoardTime.ContainsKey(code))
+            {
+                SetOpenBoardState(quotes);
+            }
             //记录开板时间，这里得用买1来判断封板和开板，即使涨停，但是买1不是涨停价也不算板
             //注意买一和最新价的区别，最新价即使涨停，但是买一不是涨停就没有封住，板就是封住
             bool isBoardLastTick
@@ -199,17 +205,9 @@ namespace NineSunScripture.strategy
             }
             else if (open == highLimit)
             {
-                //特殊情况是开盘卖一是涨停，而上面是用的买一做判断，所以会漏掉，这里要加上
-                if (quotes.Buy1 != highLimit && !openBoardTime.ContainsKey(code))
-                {
-                    SetOpenBoardState(quotes);
-                }
-                else
-                {
-                    Logger.Log("【" + quotes.Name + "】未开板，过滤");
-                    //涨停开盘，没开板，过滤
-                    return false;
-                }
+                Logger.Log("【" + quotes.Name + "】未开板，过滤");
+                //涨停开盘，没开板，过滤
+                return false;
             }
             return true;
         }
