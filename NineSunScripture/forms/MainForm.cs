@@ -20,7 +20,7 @@ namespace NineSunScripture
     {
         void OnAcctInfoUpdate(Account account);
 
-        void OnPriceChange(Quotes quotes);
+        void OnPriceChange(List<Quotes> quotes);
 
         void OnImgRotate(int degree);
     }
@@ -44,6 +44,7 @@ namespace NineSunScripture
         private List<Quotes> positionStocks;
         private List<Quotes> stocks;
         private List<Quotes> weakTurnStrongStocks;
+        private List<Quotes> windVanes; //风向标
 
         public MainForm()
         {
@@ -57,6 +58,7 @@ namespace NineSunScripture
             mainStrategy.SetTradeCallback(this);
             imgTaiJi = Properties.Resources.taiji;
             updatePrice = new UpdatePrice(UpdateStocksPrice);
+            lblDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
 
             //Start strategy
             Task.Run(() =>
@@ -68,7 +70,7 @@ namespace NineSunScripture
 
         private delegate void SetTextCallback(string text);
 
-        private delegate void UpdatePrice(Quotes quotes);
+        private delegate void UpdatePrice(List<Quotes> quotes);
 
         /// <summary>
         /// 添加股票
@@ -255,6 +257,7 @@ namespace NineSunScripture
         /// </summary>
         private void BindStocksData()
         {
+            ListViewGroup lvgWindVane = new ListViewGroup("风向标");
             ListViewGroup lvgDragonLeader = new ListViewGroup("龙头");
             ListViewGroup lvgLongTerm = new ListViewGroup("常驻打板");
             ListViewGroup lvgTomorrow = new ListViewGroup("打板");
@@ -262,6 +265,7 @@ namespace NineSunScripture
             ListViewGroup lvgBand = new ListViewGroup("波段");
             ListViewGroup lvgPositions = new ListViewGroup("持仓");
 
+            lvStocks.Groups.Add(lvgWindVane);
             lvStocks.Groups.Add(lvgDragonLeader);
             lvStocks.Groups.Add(lvgLongTerm);
             lvStocks.Groups.Add(lvgTomorrow);
@@ -271,8 +275,26 @@ namespace NineSunScripture
 
             ListViewItem lvi;
             List<Quotes> quotes = JsonDataHelper.Instance.GetStocksByCatgory(
+               Quotes.OperationSell, Quotes.CategoryWindVane);
+            windVanes = quotes;
+            if (!Utils.IsListEmpty(quotes))
+            {
+                foreach (Quotes item in quotes)
+                {
+                    lvi = new ListViewItem(item.Name, lvgWindVane);
+                    string text = "";
+                    if (item.ContBoards > 0)
+                    {
+                        text = item.ContBoards + "板";
+                    }
+                    lvi.SubItems.Add(text);
+                    lvi.SubItems.Add("");
+                    lvi.Tag = item;
+                    lvStocks.Items.Add(lvi);
+                }
+            }
+            dragonLeaders = quotes = JsonDataHelper.Instance.GetStocksByCatgory(
                 Quotes.OperationBuy, Quotes.CategoryDragonLeader);
-            dragonLeaders = quotes;
             if (!Utils.IsListEmpty(quotes))
             {
                 foreach (Quotes item in quotes)
@@ -500,29 +522,33 @@ namespace NineSunScripture
 
         private void PutStocksTogether()
         {
-            if (null != dragonLeaders && dragonLeaders.Count > 0)
+            if (!Utils.IsListEmpty(dragonLeaders))
             {
                 stocks.AddRange(dragonLeaders);
             }
-            if (null != latestStocks && latestStocks.Count > 0)
+            if (!Utils.IsListEmpty(latestStocks))
             {
                 stocks.AddRange(latestStocks);
             }
-            if (null != weakTurnStrongStocks && weakTurnStrongStocks.Count > 0)
+            if (!Utils.IsListEmpty(weakTurnStrongStocks))
             {
                 stocks.AddRange(weakTurnStrongStocks);
             }
-            if (null != bandStocks && bandStocks.Count > 0)
+            if (!Utils.IsListEmpty(bandStocks))
             {
                 stocks.AddRange(bandStocks);
             }
-            if (null != longTermStocks && longTermStocks.Count > 0)
+            if (!Utils.IsListEmpty(longTermStocks))
             {
                 stocks.AddRange(longTermStocks);
             }
-            if (null != positionStocks && positionStocks.Count > 0)
+            if (!Utils.IsListEmpty(positionStocks))
             {
                 stocks.AddRange(positionStocks);
+            }
+            if (!Utils.IsListEmpty(windVanes))
+            {
+                stocks.AddRange(windVanes);
             }
         }
         /// <summary>
@@ -852,24 +878,27 @@ namespace NineSunScripture
             }
         }
 
-        private void UpdateStocksPrice(Quotes quotes)
+        private void UpdateStocksPrice(List<Quotes> quotesList)
         {
-            if (null == quotes)
+            if (null == quotesList)
             {
                 return;
             }
+            lvStocks.BeginUpdate();
             foreach (ListViewItem item in lvStocks.Items)
             {
-                if (item.Text.Contains(quotes.Name))
+                Quotes stock = quotesList.Find(t => item.Text.Contains(t.Name));
+                if (null != stock)
                 {
-                    double changeRatio = Math.Round((quotes.Buy1 / quotes.PreClose - 1) * 100, 1);
-                    item.Text = quotes.Name + "[" + changeRatio + "%]";
+                    double changeRatio = Math.Round((stock.Buy1 / stock.PreClose - 1) * 100, 1);
+                    item.Text = stock.Name + "[" + changeRatio + "%]";
                 }
             }
+            lvStocks.EndUpdate();
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void OnPriceChange(Quotes quotes)
+        public void OnPriceChange(List<Quotes> quotes)
         {
             lvStocks.Invoke(updatePrice, quotes);
         }

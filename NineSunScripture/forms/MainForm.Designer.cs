@@ -76,6 +76,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.btnPeriod = new System.Windows.Forms.Button();
+            this.lblDate = new System.Windows.Forms.Label();
             this.flpStockPool.SuspendLayout();
             this.cmsStocks.SuspendLayout();
             this.panelFundInfo.SuspendLayout();
@@ -395,7 +396,7 @@
             this.pbWorkStatus.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.pbWorkStatus.Image = global::NineSunScripture.Properties.Resources.taiji;
             this.pbWorkStatus.InitialImage = null;
-            this.pbWorkStatus.Location = new System.Drawing.Point(359, 229);
+            this.pbWorkStatus.Location = new System.Drawing.Point(358, 229);
             this.pbWorkStatus.Name = "pbWorkStatus";
             this.pbWorkStatus.Size = new System.Drawing.Size(517, 510);
             this.pbWorkStatus.TabIndex = 3;
@@ -599,6 +600,18 @@
             this.btnPeriod.UseVisualStyleBackColor = false;
             this.btnPeriod.Click += new System.EventHandler(this.BtnUpPeriod_Click);
             // 
+            // lblDate
+            // 
+            this.lblDate.BackColor = System.Drawing.Color.Crimson;
+            this.lblDate.Font = new System.Drawing.Font("微软雅黑", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblDate.ForeColor = System.Drawing.Color.Gold;
+            this.lblDate.Location = new System.Drawing.Point(1082, 6);
+            this.lblDate.Name = "lblDate";
+            this.lblDate.Size = new System.Drawing.Size(120, 30);
+            this.lblDate.TabIndex = 24;
+            this.lblDate.Text = "xxxx-xx-xx";
+            this.lblDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -607,6 +620,7 @@
             this.BackgroundImage = global::NineSunScripture.Properties.Resources._3_1_;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1211, 1014);
+            this.Controls.Add(this.lblDate);
             this.Controls.Add(this.btnPeriod);
             this.Controls.Add(this.pbWorkStatus);
             this.Controls.Add(this.panel2);
@@ -686,6 +700,7 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Button btnPeriod;
         private System.Windows.Forms.ToolStripMenuItem tsmiDelGroup;
+        private System.Windows.Forms.Label lblDate;
     }
 }
 

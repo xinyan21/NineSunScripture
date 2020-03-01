@@ -519,6 +519,7 @@ namespace NineSunScripture.strategy
 
         /// <summary>
         /// 获取新开仓单股仓位>>新账户按盈利计算单股仓位，10%内1/3，10%-20%间1/2，30%以上满仓
+        /// 需要加上周期的仓位控制
         /// </summary>
         /// <param name="fundAcct">资金账号</param>
         /// <returns>仓位比例</returns>
@@ -526,7 +527,7 @@ namespace NineSunScripture.strategy
         {
             if (null == account || 0 == account.InitTotalAsset)
             {
-                return 1 / 3f;
+                return 1 / 5f;
             }
             double totalProfitPct = account.Funds.TotalAsset / account.InitTotalAsset;
             if (totalProfitPct < 1.1)

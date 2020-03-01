@@ -29,7 +29,8 @@ namespace NineSunScripture.trade.structApi.api
         //comm_password,//通讯密码	可空
         //dommac 是否随机MAC 假=取本机MAC  真=每次登录都随机MAC   正常情况下写假 	变态测试时最好写真
         //errInfo//此 API 执行返回后，如果出错，保存了错误信息说明。一般要分配 256 字节的空间。没出错时为空字符串
-        [DllImport(@dllPath, EntryPoint = "Logon", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath,
+            EntryPoint = "Logon", CallingConvention = CallingConvention.Winapi)]
         public extern static int Logon(int Qsid, string Host, short Port, string Version, string YybId,
             short AccountType, string Account, string Password, string comm_password,
             bool dommac, IntPtr ErrInfo);
@@ -47,7 +48,8 @@ namespace NineSunScripture.trade.structApi.api
         //zqdm,//股票代码
         //result,//内保存了返回的查询数据
         //errInfo//执行返回后，如果出错，保存了错误信息说明
-        [DllImport(@dllPath, EntryPoint = "QueryHQ", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath,
+            EntryPoint = "QueryHQ", CallingConvention = CallingConvention.Winapi)]
         public extern static int QueryHQ(int ClientID, string Gddm, IntPtr Result, IntPtr ErrInfo);
 
         //功能：委托下单
@@ -59,7 +61,8 @@ namespace NineSunScripture.trade.structApi.api
         //quantity,//委托数量
         //result,//内保存了返回的查询数据, 含有委托编号数据 出错时为空字符串。
         //errInfo//如果出错，保存了错误信息说明。一般要分配 256 字节的空间
-        [DllImport(@dllPath, EntryPoint = "SendOrder", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath,
+            EntryPoint = "SendOrder", CallingConvention = CallingConvention.Winapi)]
         public extern static int SendOrder(int sessionId, int category, string gddm, string zqdm,
             float price, int quantity, IntPtr result, IntPtr errInfo);
 
@@ -69,12 +72,15 @@ namespace NineSunScripture.trade.structApi.api
         //OrderID,//表示要撤的目标委托的编号
         //result,//内保存了返回的查询数据
         //errInfo//执行返回后，如果出错，保存了错误信息说明
-        [DllImport(@dllPath, EntryPoint = "CancelOrder", CallingConvention = CallingConvention.Winapi)]
-        public extern static int CancelOrder(int sessionId, string gddm, string orderID, IntPtr result, IntPtr errInfo);
+        [DllImport(@dllPath,
+            EntryPoint = "CancelOrder", CallingConvention = CallingConvention.Winapi)]
+        public extern static int CancelOrder(
+            int sessionId, string gddm, string orderID, IntPtr result, IntPtr errInfo);
 
         //功能：退出登录	无返回值
         //sessionId,//客户端ID
-        [DllImport(@dllPath, EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
+        [DllImport(@dllPath,
+            EntryPoint = "Logoff", CallingConvention = CallingConvention.Winapi)]
         public extern static void Logoff(int sessionId);
 
         private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim();
@@ -103,7 +109,11 @@ namespace NineSunScripture.trade.structApi.api
                 }
                 else
                 {
-                    Logger.Log(sessionId + "->QueryFunds：" + ApiHelper.ParseErrInfo(funds.PtrErrorInfo));
+                    string info = ApiHelper.ParseErrInfo(funds.PtrErrorInfo);
+                    if (!"无数据".Equals(info))
+                    {
+                        Logger.Log(sessionId + "->QueryFunds：" + info);
+                    }
                 }
             }
             finally
@@ -159,7 +169,11 @@ namespace NineSunScripture.trade.structApi.api
                 }
                 else
                 {
-                    Logger.Log(sessionId + "->QueryPositions：" + ApiHelper.ParseErrInfo(errorInfo));
+                    string info = ApiHelper.ParseErrInfo(errorInfo);
+                    if (!"无数据".Equals(info))
+                    {
+                        Logger.Log(sessionId + "->QueryPositions：" + info);
+                    }
                 }
             }
             finally

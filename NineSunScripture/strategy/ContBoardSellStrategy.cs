@@ -16,12 +16,18 @@ namespace NineSunScripture.strategy
     public class ContBoardSellStrategy : Strategy
     {
         /// <summary>
-        /// 三档止盈比例为20%、30%、40%
+        ///普通股三档止盈比例为20%、30%、40%
         /// </summary>
         private const float FirstClassStopWin = 20;
-
         private const float SecondClassStopWin = 30;
         private const float ThirdClassStopWin = 40;
+
+        /// <summary>
+        ///龙头三档止盈比例为30%、50%、70%
+        /// </summary>
+        private const float DragonLeaderFirstClassStopWin = 30;
+        private const float DragonLeaderSecondClassStopWin = 50;
+        private const float DragonLeaderThirdClassStopWin = 70;
 
         /// <summary>
         /// 1/2板的止盈比例
@@ -32,12 +38,11 @@ namespace NineSunScripture.strategy
         /// 三档止盈仓位为30%、50%、50%
         /// </summary>
         private const float FirstStopWinPosition = 0.3f;
-
         private const float SecondStopWinPosition = 0.5f;
         private const float ThirdStopWinPosition = 0.5f;
 
         /// <summary>
-        /// 1/2板的止盈仓位
+        /// 1、2板的止盈仓位
         /// </summary>
         private const float Less3BoardsStopWinPosition = 0.5f;
 
@@ -121,6 +126,13 @@ namespace NineSunScripture.strategy
             //龙头单独卖
             if (quotes.IsDragonLeader)
             {
+                /* if (quotes.Buy1 <= quotes.PreClose)
+                 {
+                     Logger.Log("【" + quotes.Name + "】龙头绿盘卖");
+                     AccountHelper.SellByRatio(quotes, accounts, callback, 1);
+                     return;
+                 }*/
+                StopWin(quotes, accounts, callback, true);
                 if (now.Hour == 14 && now.Minute >= 55 && curPrice < highLimit)
                 {
                     Logger.Log("【" + quotes.Name + "】收盘不板卖");
@@ -172,7 +184,7 @@ namespace NineSunScripture.strategy
             if (open != highLimit)
             {
                 Logger.Log("【" + quotes.Name + "】StopWinOrLoss");
-                StopWin(quotes, accounts, callback);
+                StopWin(quotes, accounts, callback, false);
                 StopWinForLessThan3Boards(accounts, quotes, callback);
                 if (open < quotes.PreClose * StopLossRatio)
                 {
@@ -257,7 +269,8 @@ namespace NineSunScripture.strategy
         /// <param name="quotes">行情对象</param>
         /// <param name="accounts">账户数组</param>
         /// <param name="callback">交易结果回调</param>
-        private void StopWin(Quotes quotes, List<Account> accounts, ITrade callback)
+        private void StopWin(
+            Quotes quotes, List<Account> accounts, ITrade callback, bool isDragonLeader)
         {
             if (null == accounts || null == quotes)
             {
@@ -270,22 +283,31 @@ namespace NineSunScripture.strategy
             }
             string log = "";
             float stopWinPosition = 0;  //止盈仓位
-            if (profitPct > ThirdClassStopWin)
+            float firstClass = FirstClassStopWin;
+            float secondClass = SecondClassStopWin;
+            float thirdClass = ThirdClassStopWin;
+            if (isDragonLeader)
+            {
+                firstClass = DragonLeaderFirstClassStopWin;
+                secondClass = DragonLeaderSecondClassStopWin;
+                thirdClass = DragonLeaderThirdClassStopWin;
+            }
+            if (profitPct > thirdClass)
             {
                 stopWinPosition = ThirdStopWinPosition;
-                log = "40%止盈1/2卖" + quotes.Name;
+                log = thirdClass + "%止盈1/2卖【" + quotes.Name + "】";
             }
-            else if (profitPct > SecondClassStopWin)
+            else if (profitPct > secondClass)
             {
                 stopWinPosition = SecondStopWinPosition;
-                log = "30%止盈1/2卖" + quotes.Name;
+                log = secondClass + "%止盈1/2卖【" + quotes.Name + "】";
             }
-            else if (profitPct > FirstClassStopWin)
+            else if (profitPct > firstClass)
             {
                 stopWinPosition = FirstStopWinPosition;
-                log = "20%止盈3成卖" + quotes.Name;
+                log = firstClass + "%止盈3成卖【" + quotes.Name + "】";
             }
-            Logger.Log("【" + quotes.Name + "】StopWin " + log);
+            Logger.Log(log);
 
             short successCnt = 0;
             List<Task> tasks = new List<Task>();
@@ -318,7 +340,7 @@ namespace NineSunScripture.strategy
             Task.WaitAll(tasks.ToArray());
             if (null != callback && stopWinPosition > 0 && (successCnt + failAccts.Count) > 0)
             {
-                string tradeResult = "【" + quotes.Name + "】止盈结果：成功账户"
+                string tradeResult = log + "止盈结果：成功账户"
                     + successCnt + "个，失败账户" + failAccts.Count + "个";
                 callback.OnTradeResult(
                     MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);

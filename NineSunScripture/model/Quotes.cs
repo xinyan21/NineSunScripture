@@ -38,6 +38,11 @@ namespace NineSunScripture.model
         /// </summary>
         public const short CategoryPosition = 5;
 
+        /// <summary>
+        /// 【卖出策略】风向标：用来当做情绪指标股，和竞价清仓卖点判断依据
+        /// </summary>
+        public const short CategoryWindVane = 5;
+
         public const short OperationBuy = 1;
         public const short OperationSell = 2;
 

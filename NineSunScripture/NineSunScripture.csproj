@@ -196,6 +196,7 @@
     <Compile Include="strategy\Strategy.cs" />
     <Compile Include="strategy\StrategySetting.cs" />
     <Compile Include="strategy\WeakTurnStrongStrategy.cs" />
+    <Compile Include="strategy\WindVaneStrategy.cs" />
     <Compile Include="test\TestApi.cs" />
     <Compile Include="trade\ApiTimeoutException.cs" />
     <Compile Include="trade\persistence\JsonDataHelper.cs" />
