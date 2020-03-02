@@ -64,12 +64,12 @@ namespace NineSunScripture.util.test
                 quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "300160");
                 quotes.Name = "秀强股份";
                 Invoke(new MethodInvoker(UpdatePrice));
-                mainForm.OnPriceChange(quotes);
+                //mainForm.OnPriceChange(quotes);
 
                 quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002239");
                 quotes.Name = "奥特佳";
                 Invoke(new MethodInvoker(UpdatePrice));
-                mainForm.OnPriceChange(quotes);
+                //mainForm.OnPriceChange(quotes);
             }
             catch (Exception e)
             {

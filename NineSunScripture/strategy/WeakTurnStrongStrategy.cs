@@ -33,7 +33,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 开盘最大涨幅
         /// </summary>
-        private const float MaxUpRatio = 1.055f;
+        private const float MaxUpRatio = 1.06f;
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
