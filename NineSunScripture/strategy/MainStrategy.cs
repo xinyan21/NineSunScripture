@@ -412,7 +412,7 @@ namespace NineSunScripture.strategy
         private void CheckPricePush()
         {
             //IsTradeTime包括集合竞价，但是这时每分钟才推一次，所以这段时间不检查
-            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute > 30)
+           /* if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30)
             {
                 return;
             }
@@ -423,9 +423,9 @@ namespace NineSunScripture.strategy
             if (!IsTradeTime())
             {
                 return;
-            }
+            }*/
             if (null != lastPricePushTime
-                && DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 20)
+                && DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 60)
             {
                 string log = "20秒未收到行情推送，重启策略";
                 Logger.Log(log);

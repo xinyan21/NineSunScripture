@@ -394,7 +394,7 @@ namespace NineSunScripture.strategy
                 //查询已卖数量得到买入数量（可用大于0说明今天之前买的，这种情况只回补仓位）
                 int sellQuantity = AccountHelper.GetTodayBoughtQuantityOf(
                     account.TradeSessionId, quotes.Code, Order.OperationSell);
-                //因为1/2板会在7%止盈，上板的时候全部打回，T字板也全部打回
+                //因为1/2板会在7%止盈，上板的时候全部打回，T字板也全部打回，开板后回封再全部打回
                 if (open == highLimit || quotes.ContBoards < 3)
                 {
                     order.Quantity = sellQuantity;
