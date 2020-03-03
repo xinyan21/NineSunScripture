@@ -251,7 +251,7 @@ namespace NineSunScripture.strategy
                 return false;
             }
             if (quotes.Sell2 == highLimit
-                && quotes.Sell2Vol * highLimit > MaxSellMoneyCtrl * 10000)
+                && (quotes.Sell2Vol + quotes.Sell1Vol) * highLimit > MaxSellMoneyCtrl * 10000)
             {
                 Logger.Log("【" + quotes.Name + "】板上货太多，过滤");
                 return false;

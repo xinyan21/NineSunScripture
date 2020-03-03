@@ -57,7 +57,6 @@ namespace NineSunScripture.strategy
         //策略执行状态保护，由于逐笔委托的毫秒级高速并发，为防止误操作一只股票同时只能执行一次策略
         private Dictionary<string, bool> operationProtection;
 
-        private ReaderWriterLockSlim pricePushLockSlim;
         private short queryPriceErrorCnt = 0;
         //逆回购记录，使用日期记录以支持不关策略长时间运行
         private Dictionary<DateTime, bool> reverseRepurchaseRecords;
@@ -86,7 +85,6 @@ namespace NineSunScripture.strategy
             lastFundUpdateTime = DateTime.Now;
             lastPriceUpdateTime = DateTime.Now;
             pushCallback = OnPushResult;
-            pricePushLockSlim = new ReaderWriterLockSlim();
         }
 
         public void AddStock(Quotes quotes)
@@ -139,7 +137,7 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            if (!stocksForPrice.Contains(quotes))
+            if (stocksForPrice.Contains(quotes))
             {
                 stocksForPrice.Remove(quotes);
                 EditStockSub(quotes, false);
@@ -413,8 +411,12 @@ namespace NineSunScripture.strategy
 
         private void CheckPricePush()
         {
-            //IsTradeTime包括早盘集合竞价，但是这时每分钟才推一次，所以这段时间不检查
+            //IsTradeTime包括集合竞价，但是这时每分钟才推一次，所以这段时间不检查
             if (DateTime.Now.Hour == 9 && DateTime.Now.Minute > 30)
+            {
+                return;
+            }
+            if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 55)
             {
                 return;
             }
@@ -422,7 +424,6 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            pricePushLockSlim.EnterReadLock();
             if (null != lastPricePushTime
                 && DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 20)
             {
@@ -433,7 +434,6 @@ namespace NineSunScripture.strategy
                     callback.OnTradeResult(0, log, "", true);
                 }
             }
-            pricePushLockSlim.ExitReadLock();
         }
 
         private bool CheckQuotes(Quotes quotes)
@@ -626,7 +626,6 @@ namespace NineSunScripture.strategy
                     callback.OnTradeResult(0, "策略启动", "现在是假期", false);
                     return;
                 }
-                lastPricePushTime = DateTime.Now;
                 while (true)
                 {
                     Thread.Sleep(cycleTime);
@@ -701,9 +700,6 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            pricePushLockSlim.EnterWriteLock();
-            lastPricePushTime = DateTime.Now;
-            pricePushLockSlim.ExitWriteLock();
             Quotes priceStock = stocksForPrice.Find(item => item.Code.Equals(stock.Code));
             if (null != priceStock)
             {
@@ -727,6 +723,7 @@ namespace NineSunScripture.strategy
             }
             lock (operationProtection)
             {
+                lastPricePushTime = DateTime.Now;
                 operationProtection[stock.Code] = true;
             }
             //由于一只股票可能要分多个策略买，所以单独用行情里的参数去执行是不行的
