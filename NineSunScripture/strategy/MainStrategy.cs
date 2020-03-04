@@ -23,7 +23,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = false;
+        public static bool IsTest = true;
         //非交易时间策略执行频率，单位ms
         //    private const short CycleTimeOfNonTrade = 2500;
 
@@ -646,7 +646,7 @@ namespace NineSunScripture.strategy
                     {
                         workListener.OnImgRotate(1);
                         if (DateTime.Now.Subtract(lastPriceUpdateTime).TotalSeconds
-                            >= UpdateFundCycle)
+                            >= UpdateFundCycle && IsTradeTime())
                         {
                             workListener.OnPriceChange(stocksForPrice);
                             lastPriceUpdateTime = DateTime.Now;
@@ -674,7 +674,7 @@ namespace NineSunScripture.strategy
                     return;
                 }
                 //低于1000手或者低于300万的单子过滤
-                if (commision.Quantity < 100000 || commision.Quantity * commision.Price < 3000000)
+                if (commision.Quantity < 100000 && commision.Quantity * commision.Price < 2000000)
                 {
                     return;
                 }
