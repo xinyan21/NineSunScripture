@@ -248,7 +248,7 @@ namespace NineSunScripture.model
             return Code == other.Code;
         }
 
-        //重写Equals和GetHashCode方法可以在List里面使用Contains方法
+        //重写Equals和GetHashCode方法可以在List里面使用Contains方法，只要代码相等就是包含
         public override int GetHashCode()
         {
             return Code.GetHashCode();

@@ -418,14 +418,6 @@ namespace NineSunScripture.strategy
         private void CheckPricePush()
         {
             //IsTradeTime包括集合竞价，但是这时每分钟才推一次，所以这段时间不检查
-            /* if (DateTime.Now.Hour == 9 && DateTime.Now.Minute < 30)
-             {
-                 return;
-             }
-             if (DateTime.Now.Hour == 14 && DateTime.Now.Minute > 55)
-             {
-                 return;
-             }*/
             if (!IsTradeTime())
             {
                 return;
@@ -739,20 +731,26 @@ namespace NineSunScripture.strategy
                 operationProtection[stock.Code] = true;
             }
             //由于一只股票可能要分多个策略买，所以单独用行情里的参数去执行是不行的
-            foreach (var item in stocksToBuy)
+            if (stocksToBuy.Contains(quotes))
             {
-                if (item.Code.Equals(quotes.Code))
+                foreach (var item in stocksToBuy)
                 {
-                    quotes.CloneStrategyParamsFrom(item);
-                    ExeContBoardStrategyByStock(quotes);
+                    if (item.Code.Equals(quotes.Code))
+                    {
+                        quotes.CloneStrategyParamsFrom(item);
+                        ExeContBoardStrategyByStock(quotes);
+                    }
                 }
             }
-            foreach (var item in stocksToSell)
+            if (stocksToSell.Contains(quotes))
             {
-                if (item.Code.Equals(quotes.Code))
+                foreach (var item in stocksToSell)
                 {
-                    quotes.CloneStrategyParamsFrom(item);
-                    ExeContBoardStrategyByStock(quotes);
+                    if (item.Code.Equals(quotes.Code))
+                    {
+                        quotes.CloneStrategyParamsFrom(item);
+                        ExeContBoardStrategyByStock(quotes);
+                    }
                 }
             }
         }

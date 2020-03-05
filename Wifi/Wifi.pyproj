@@ -25,6 +25,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GeneratePwd.py" />
+    <Compile Include="test.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Wifi.py" />
     <Compile Include="WifiCraker.py" />
   </ItemGroup>
