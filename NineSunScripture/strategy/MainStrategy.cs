@@ -84,6 +84,7 @@ namespace NineSunScripture.strategy
             isHoliday = Utils.IsHolidayByDate(DateTime.Now);
             lastFundUpdateTime = DateTime.Now;
             lastPriceUpdateTime = DateTime.Now;
+            lastPricePushTime = DateTime.MaxValue;
             pushCallback = OnPushResult;
         }
 
@@ -424,10 +425,10 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            if (null != lastPricePushTime
-                && DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 60)
+            double seconds = DateTime.Now.Subtract(lastPricePushTime).TotalSeconds;
+            if (seconds > 60)
             {
-                string log = "20秒未收到行情推送，重启策略";
+                string log = "60秒未收到行情推送，重启策略";
                 Logger.Log(log);
                 if (null != callback)
                 {
