@@ -23,7 +23,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = false;
+        public static bool IsTest = true;
         //非交易时间策略执行频率，单位ms
         //    private const short CycleTimeOfNonTrade = 2500;
 
@@ -232,9 +232,9 @@ namespace NineSunScripture.strategy
             {
                 return false;
             }
-            if (CycleTimeOfTrade != cycleTime)
+            if (now.Hour == 14 && now.Minute >= 57)
             {
-                cycleTime = CycleTimeOfTrade;
+                return false;
             }
             return true;
         }
@@ -246,6 +246,11 @@ namespace NineSunScripture.strategy
         /// <param name="result">数据指针</param>
         public void OnPushResult(int type, IntPtr result)
         {
+            if (!IsTradeTime())
+            {
+                Logger.Log("非交易时间推送");
+                return;
+            }
             string code = Marshal.PtrToStringAnsi(result + 16, 6);
             Quotes stock = stocksToBuy.Find(item => item.Code.Equals(code));
             if (null == stock)
@@ -427,7 +432,7 @@ namespace NineSunScripture.strategy
             if (null != lastPricePushTime
                 && DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 60)
             {
-                string log = "20秒未收到行情推送，重启策略";
+                string log = "60秒未收到行情推送，重启策略";
                 Logger.Log(log);
                 if (null != callback)
                 {
@@ -466,7 +471,7 @@ namespace NineSunScripture.strategy
                 }
                 if (null != callback)
                 {
-                    callback.OnTradeResult(0, "调用行情接口", "行情数据异常", true);
+                    callback.OnTradeResult(0, "检查行情推送", "行情数据异常", true);
                 }
                 return false;
             }
@@ -477,11 +482,17 @@ namespace NineSunScripture.strategy
             return true;
         }
 
+        /// <summary>
+        /// 是否是关闭策略
+        /// </summary>
+        /// <param name="isStop"></param>
         private void CloseMarket(bool isStop)
         {
             if (isStop || (isMarketOpen && !IsTradeTime() && !IsTest))
             {
                 UnsubscribeAll();
+                //要清空状态，否则关闭重启策略会有问题
+                lastPricePushTime = DateTime.MaxValue;
                 isMarketOpen = false;
             }
         }
@@ -805,6 +816,7 @@ namespace NineSunScripture.strategy
                 reverseRepurchaseRecords.Add(DateTime.Now.Date, true);
             }
         }
+
         private void UnsubscribeAll()
         {
             foreach (var stock in stocksForPrice)
