@@ -84,6 +84,7 @@ namespace NineSunScripture.strategy
             isHoliday = Utils.IsHolidayByDate(DateTime.Now);
             lastFundUpdateTime = DateTime.Now;
             lastPriceUpdateTime = DateTime.Now;
+            lastPricePushTime = DateTime.MaxValue;
             pushCallback = OnPushResult;
         }
 
@@ -429,8 +430,8 @@ namespace NineSunScripture.strategy
             {
                 return;
             }
-            if (null != lastPricePushTime
-                && DateTime.Now.Subtract(lastPricePushTime).TotalSeconds > 60)
+            double seconds = DateTime.Now.Subtract(lastPricePushTime).TotalSeconds;
+            if (seconds > 60)
             {
                 string log = "60秒未收到行情推送，重启策略";
                 Logger.Log(log);
@@ -657,7 +658,7 @@ namespace NineSunScripture.strategy
                     {
                         workListener.OnImgRotate(1);
                         if (DateTime.Now.Subtract(lastPriceUpdateTime).TotalSeconds
-                            >= UpdateFundCycle)
+                            >= UpdateFundCycle && IsTradeTime())
                         {
                             workListener.OnPriceChange(stocksForPrice);
                             lastPriceUpdateTime = DateTime.Now;
@@ -685,7 +686,7 @@ namespace NineSunScripture.strategy
                     return;
                 }
                 //低于1000手或者低于300万的单子过滤
-                if (commision.Quantity < 100000 || commision.Quantity * commision.Price < 3000000)
+                if (commision.Quantity < 100000 && commision.Quantity * commision.Price < 2000000)
                 {
                     return;
                 }
