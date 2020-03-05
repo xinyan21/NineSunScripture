@@ -72,13 +72,16 @@ namespace NineSunScripture.util
 
         public static void SamplingLogQuotes(Quotes quotes)
         {
-            if (null == quotes)
+            if (null == quotes || quotes.PreClose == 0)
             {
                 return;
             }
-            if (DateTime.Now.Hour == 9 && DateTime.Now.Minute <= 30)
+            bool isOpenBid = DateTime.Now.Hour == 9 && DateTime.Now.Minute <= 30;
+            bool isCloseHighLimit = quotes.Buy1 / quotes.PreClose >= 1.095;
+            if (isCloseHighLimit || isOpenBid)
             {
                 Logger.Log(quotes.ToString(), LogType.Quotes);
+                return;
             }
             if (DateTime.Now.Second != 0)
             {

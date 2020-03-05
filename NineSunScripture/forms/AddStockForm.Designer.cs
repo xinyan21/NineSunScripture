@@ -325,7 +325,7 @@
             this.tbStopLossPrice.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tbStopLossPrice.Location = new System.Drawing.Point(480, 22);
             this.tbStopLossPrice.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tbStopLossPrice.MaxLength = 4;
+            this.tbStopLossPrice.MaxLength = 8;
             this.tbStopLossPrice.Name = "tbStopLossPrice";
             this.tbStopLossPrice.Size = new System.Drawing.Size(147, 29);
             this.tbStopLossPrice.TabIndex = 18;
@@ -335,7 +335,7 @@
             this.tbStopWinPrice.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tbStopWinPrice.Location = new System.Drawing.Point(87, 20);
             this.tbStopWinPrice.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tbStopWinPrice.MaxLength = 4;
+            this.tbStopWinPrice.MaxLength = 8;
             this.tbStopWinPrice.Name = "tbStopWinPrice";
             this.tbStopWinPrice.Size = new System.Drawing.Size(147, 29);
             this.tbStopWinPrice.TabIndex = 17;
@@ -357,7 +357,7 @@
             this.tbAvgCost.Font = new System.Drawing.Font("微软雅黑", 12.22642F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tbAvgCost.Location = new System.Drawing.Point(480, 19);
             this.tbAvgCost.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tbAvgCost.MaxLength = 6;
+            this.tbAvgCost.MaxLength = 8;
             this.tbAvgCost.Name = "tbAvgCost";
             this.tbAvgCost.Size = new System.Drawing.Size(147, 29);
             this.tbAvgCost.TabIndex = 19;
