@@ -23,7 +23,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = false;
+        public static bool IsTest = true;
         //非交易时间策略执行频率，单位ms
         //    private const short CycleTimeOfNonTrade = 2500;
 
@@ -358,7 +358,7 @@ namespace NineSunScripture.strategy
             Stop();
             Thread.Sleep(2000);
             hitBoardStrategy.RestoreOpenBoardCnt();
-            strategyThread = new Thread(InitStrategy);
+            strategyThread = new Thread(DoStrategy);
             strategyThread.Start();
 
             return true;
@@ -613,7 +613,7 @@ namespace NineSunScripture.strategy
             Task.WaitAll(tasks.ToArray());
         }
 
-        private void InitStrategy()
+        private void DoStrategy()
         {
             try
             {
@@ -642,6 +642,7 @@ namespace NineSunScripture.strategy
                         ReverseRepurchaseBonds();
                         continue;
                     }
+                    RebootBeforeOpenMarket();
                     OpenMarket();
                     CloseMarket(false);
                     CheckPricePush();
@@ -765,6 +766,19 @@ namespace NineSunScripture.strategy
                     InitLimitPrice();
                     PrepareStocksAndSubPrice();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 开盘前重启策略，防止长时间挂机登录状态失效，DoStrategy的交易时机是9:26开始算起
+        /// 而且跟睡眠频率相关
+        /// </summary>
+        private void RebootBeforeOpenMarket()
+        {
+            DateTime now = DateTime.Now;
+            if (now.Hour == 9 && now.Minute == 27 && now.Second == 0 && null != callback)
+            {
+                callback.OnTradeResult(0, "开盘前重启策略，防止长时间挂机登录状态失效", "", true);
             }
         }
 
