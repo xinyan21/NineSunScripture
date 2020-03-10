@@ -397,6 +397,8 @@ namespace NineSunScripture.strategy
                 && quotes.Sell1 / quotes.PreClose < Less3BoardsStopWinRatio;
             //下降期不检查连板数，到Less3BoardsStopWinRatio就止盈
             bool isContBoardsNotQualified = Utils.IsUpPeriod() ? quotes.ContBoards >= 3 : false;
+            //TODO 除龙头外，涨7%必卖一半，稳健复利，上板打回
+            isContBoardsNotQualified = false;
             if (null == accounts
                 || null == quotes || isContBoardsNotQualified || isUpRatioNotEnough)
             {

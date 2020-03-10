@@ -988,6 +988,7 @@ namespace NineSunScripture.trade.structApi.helper
                     if (item.Operation.Contains(op))
                     {
                         quantity += item.Quantity;
+                        quantity -= item.CanceledQuantity;
                     }
                 }
             }

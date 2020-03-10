@@ -1,4 +1,6 @@
-﻿namespace NineSunScripture
+﻿using NineSunScripture.util;
+
+namespace NineSunScripture
 {
     partial class MainForm
     {
@@ -32,7 +34,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.flpStockPool = new System.Windows.Forms.FlowLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
-            this.lvStocks = new System.Windows.Forms.ListView();
+            this.lvStocks = new NineSunScripture.util.DoubleBufferListView();
             this.cmsStocks = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmiAddStock = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiBuy = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,7 +52,7 @@
             this.lvCancelOrders = new System.Windows.Forms.ListView();
             this.cmsCancelOrders = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmiCancel = new System.Windows.Forms.ToolStripMenuItem();
-            this.lvPositions = new System.Windows.Forms.ListView();
+            this.lvPositions = new NineSunScripture.util.DoubleBufferListView();
             this.cmsPositions = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmiSell = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiSellInForm = new System.Windows.Forms.ToolStripMenuItem();
@@ -479,7 +481,7 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(173, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiBuyStock
             // 
@@ -493,7 +495,7 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(173, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiClearPositions
             // 
@@ -507,20 +509,20 @@
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(173, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
             // 
             // tspiPrivacyMode
             // 
             this.tspiPrivacyMode.AutoSize = false;
             this.tspiPrivacyMode.Name = "tspiPrivacyMode";
             this.tspiPrivacyMode.Size = new System.Drawing.Size(150, 30);
-            this.tspiPrivacyMode.Text = "隐私模式【关】";
+            this.tspiPrivacyMode.Text = "隐私模式【开】";
             this.tspiPrivacyMode.Click += new System.EventHandler(this.TspiPrivacyMode_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(173, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiTest
             // 
@@ -533,7 +535,7 @@
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(173, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(177, 6);
             // 
             // tspExit
             // 
@@ -546,7 +548,7 @@
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(173, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(177, 6);
             // 
             // tbRuntimeInfo
             // 
@@ -668,7 +670,6 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiDelStock;
         private System.Windows.Forms.ToolStripMenuItem tsmiClearStocks;
         private System.Windows.Forms.TextBox tbRuntimeInfo;
-        private System.Windows.Forms.ListView lvPositions;
         private System.Windows.Forms.ToolStripMenuItem 管理菜单ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tspExit;
         private System.Windows.Forms.Label label3;
@@ -676,7 +677,6 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiSwitch;
         private System.Windows.Forms.ToolStripMenuItem tsmiClearPositions;
         private System.Windows.Forms.ToolStripMenuItem tsmiBuy;
-        private System.Windows.Forms.ListView lvStocks;
         private System.Windows.Forms.ToolStripMenuItem tsmiBuyStock;
         private System.Windows.Forms.ContextMenuStrip cmsPositions;
         private System.Windows.Forms.ToolStripMenuItem tsmiSell;
@@ -701,6 +701,8 @@
         private System.Windows.Forms.Button btnPeriod;
         private System.Windows.Forms.ToolStripMenuItem tsmiDelGroup;
         private System.Windows.Forms.Label lblDate;
+        private DoubleBufferListView lvPositions;
+        private DoubleBufferListView lvStocks;
     }
 }
 

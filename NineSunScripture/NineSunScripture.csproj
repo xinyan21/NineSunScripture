@@ -205,6 +205,9 @@
     <Compile Include="trade\structApi\api\TradeAPI.cs" />
     <Compile Include="trade\structApi\helper\AccountHelper.cs" />
     <Compile Include="trade\structApi\helper\ApiHelper.cs" />
+    <Compile Include="util\DoubleBufferListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="util\log\Logger.cs" />
     <Compile Include="test\TestForm.cs">
       <SubType>Form</SubType>

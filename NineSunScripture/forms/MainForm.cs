@@ -814,9 +814,9 @@ namespace NineSunScripture
 
         private void TspiPrivacyMode_Click(object sender, EventArgs e)
         {
-            if (tspiPrivacyMode.Text.Equals("隐私模式【关】"))
+            if (tspiPrivacyMode.Text.Equals("隐私模式【开】"))
             {
-                tspiPrivacyMode.Text = "隐私模式【开】";
+                tspiPrivacyMode.Text = "隐私模式【关】";
                 lblMoneyAvailable.Text = "可用：***";
                 lblTotalAsset.Text = "总资产：***";
                 lblTotalProfit.Text = "总盈亏：***";
@@ -839,7 +839,9 @@ namespace NineSunScripture
             }
             else
             {
-                tspiPrivacyMode.Text = "隐私模式【关】";
+                tspiPrivacyMode.Text = "隐私模式【开】";
+                lblTotalAsset.Text = "总资产：";
+                lblTotalProfit.Text = "总盈亏：";
                 mainStrategy.UpdateTotalAccountInfo(false);
             }
         }
@@ -849,7 +851,7 @@ namespace NineSunScripture
         /// </summary>
         private void UpdateAcctInfo()
         {
-            if (tspiPrivacyMode.Text.Equals("隐私模式【开】"))
+            if (tspiPrivacyMode.Text.Equals("隐私模式【关】"))
             {
                 return;
             }

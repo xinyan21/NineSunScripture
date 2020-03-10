@@ -440,7 +440,7 @@ namespace NineSunScripture.strategy
                 Logger.Log("【" + quotes.Name + "】触发买点，账户["
                     + account.FundAcct + "]经过仓位控制后可买数量为" + order.Quantity + "股");
             }//END else 新开仓买入
-            if (!CheckQuantity(account, quotes, order, callback))
+            if (!CheckBoughtQuantity(account, quotes, order, callback))
             {
                 return 888;
             }
@@ -459,7 +459,7 @@ namespace NineSunScripture.strategy
             return rspCode;
         }
 
-        private bool CheckQuantity(Account account, Quotes quotes, Order order, ITrade callback)
+        private bool CheckBoughtQuantity(Account account, Quotes quotes, Order order, ITrade callback)
         {
             int boughtQuantity = 0;
             try
@@ -484,29 +484,6 @@ namespace NineSunScripture.strategy
             else
             {
                 order.Quantity -= boughtQuantity;
-            }
-            //检查委托，如果已经委托，但是没成交，要减去已经委托数量
-            List<Order> orders =
-                AccountHelper.GetOrdersCanCancelOf(account.TradeSessionId, quotes.Code);
-            int orderedQauntity = 0;
-            if (orders.Count > 0)
-            {
-                foreach (Order item in orders)
-                {
-                    if (item.Operation.Contains("买入"))
-                    {
-                        //委托数量要扣掉已经撤单的数量
-                        orderedQauntity += item.Quantity;
-                        orderedQauntity -= item.CanceledQuantity;
-                    }
-                }
-            }
-            if (orderedQauntity > 0)
-            {
-                //买入数量要减去已经委托数量
-                order.Quantity -= orderedQauntity;
-                Logger.Log("【" + quotes.Name + "】触发买点，账户[" + account.FundAcct
-                    + "]已下单数量为" + orderedQauntity + "，减去后为" + order.Quantity);
             }
             if (order.Quantity <= 0)
             {
