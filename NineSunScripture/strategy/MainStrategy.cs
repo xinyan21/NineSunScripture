@@ -264,6 +264,7 @@ namespace NineSunScripture.strategy
                 InitLimitPrice(code);
                 return;
             }
+            Logger.Log("OnPushResult new push =" + stock);
             lock (operationProtection)
             {
                 //买入保护
@@ -279,6 +280,7 @@ namespace NineSunScripture.strategy
                     operationProtection.Add(code, false);
                 }
             }
+            Logger.Log("OnPushResult new push and pass protection=" + stock);
             try
             {
                 //推送过来是数据是十档行情 推送中的十档无换手、总市值、流通值、涨停、跌停
