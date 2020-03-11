@@ -23,7 +23,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = true;
+        public static bool IsTest = false;
         //非交易时间策略执行频率，单位ms
         //    private const short CycleTimeOfNonTrade = 2500;
 
@@ -455,6 +455,7 @@ namespace NineSunScripture.strategy
                     return false;
                 }
             }
+            Utils.SamplingLogQuotes(quotes);
             if (queryPriceErrorCnt > 2)
             {
                 Logger.Log("OnTenthGearPricePush error has been occured 3 times, need to reboot");
@@ -703,6 +704,7 @@ namespace NineSunScripture.strategy
             Quotes quotes = ApiHelper.ParseStructToQuotes(result);
             if (!CheckQuotes(quotes))
             {
+                Logger.Log("CheckQuotes failed: " + quotes);
                 return;
             }
             Quotes priceStock = stocksForPrice.Find(item => item.Code.Equals(stock.Code));
@@ -712,7 +714,7 @@ namespace NineSunScripture.strategy
             }
 
             quotes.Name = stock.Name;
-            Utils.SamplingLogQuotes(quotes);
+            //Utils.SamplingLogQuotes(quotes);
             //打板的深圳股票需要在8.5%之上订阅逐笔委托，可以和十档争夺策略执行，买入之后取消订阅
             //由于是3s一推，所以这里不需要担心并发问题
             if (Utils.IfNeedToSubOByOPrice(quotes))

@@ -83,10 +83,11 @@ namespace NineSunScripture.util
                 Logger.Log(quotes.ToString(), LogType.Quotes);
                 return;
             }
-            if (DateTime.Now.Second != 0)
+            //TODO 为了找出推送问题，先记录全部推送
+            /*if (DateTime.Now.Second != 0)
             {
                 return;
-            }
+            }*/
             Logger.Log("Sampling->" + quotes.ToString(), LogType.Quotes);
         }
 
