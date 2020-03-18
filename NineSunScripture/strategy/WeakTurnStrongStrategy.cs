@@ -37,9 +37,7 @@ namespace NineSunScripture.strategy
 
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            //行情在26-29会每分钟开始的时候推一次，因为9:26才有开盘、涨跌停价，策略才开市
-            //所以这里买入时机要在9:26之后，少吃一个涨停的代价
-            bool isTradeTime = DateTime.Now.Hour == 9 && DateTime.Now.Minute == 29;
+            bool isTradeTime = DateTime.Now.Hour == 9 && DateTime.Now.Minute == 30;
             if (!isTradeTime)
             {
                 return;
