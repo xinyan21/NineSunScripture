@@ -29,9 +29,9 @@ namespace NineSunScripture.strategy
         private const float MinBuy1Ratio = 1.085f;
 
         /// <summary>
-        /// 回封买回比例
+        /// 默认回封买回比例
         /// </summary>
-        private const float BuyBackRatio = 2 / 3;
+        private const float BuyBackRatio = 1 / 2;
 
         /// <summary>
         /// 单账户最小可用金额默认为5000
@@ -52,7 +52,6 @@ namespace NineSunScripture.strategy
         /// 最大买一额限制默认是1888万
         /// </summary>
         private const int MaxBuy1MoneyCtrl = 1888;
-
 
         /// <summary>
         /// 最大卖一额限制默认是1888万
@@ -387,15 +386,14 @@ namespace NineSunScripture.strategy
             //新增账户后之前账户已经持仓的股，新增账户不买（交了很多学费解决的bug）
             //持仓股都合并在一起，有的买了有的没买，没买的卖出数量是0，也没必要买入了
             //增加买回限制条件上升期和设置是否买回设置
-            if (quotes.InPosition && quotes.IsBuyBackWhenReboard && Utils.IsUpPeriod())
+            if (quotes.InPosition && quotes.IsBuyBackWhenReboard)
             {
                 Logger.Log(
                     "【" + quotes.Name + "】触发买点，账户[" + account.FundAcct + "]已经持有");
                 //查询已卖数量得到买入数量（可用大于0说明今天之前买的，这种情况只回补仓位）
                 int sellQuantity = AccountHelper.GetTodayBoughtQuantityOf(
                     account.TradeSessionId, quotes.Code, Order.OperationSell);
-                //因为1/2板会在7%止盈，上板的时候全部打回，T字板也全部打回，开板后回封再全部打回
-                if (open == highLimit || quotes.ContBoards < 3)
+                if (open == highLimit || Utils.IsUpPeriod())
                 {
                     order.Quantity = sellQuantity;
                     Logger.Log("【" + quotes.Name + "】触发买点，账户["

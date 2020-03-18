@@ -286,6 +286,7 @@ namespace NineSunScripture.model
             {
                 return;
             }
+            Name = quotes.Name;
             Open = quotes.Open;
             preClose = quotes.preClose;
             HighLimit = quotes.HighLimit;

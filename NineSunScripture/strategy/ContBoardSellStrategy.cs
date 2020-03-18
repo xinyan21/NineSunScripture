@@ -187,7 +187,7 @@ namespace NineSunScripture.strategy
                 StopWin(quotes, accounts, callback, false);
                 if (open < quotes.PreClose * StopLossRatio)
                 {
-                    if (curPrice > open * 1.04)
+                    if (curPrice > preClose * 0.96)
                     {
                         Logger.Log("【" + quotes.Name + "】超低开拉升4%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);

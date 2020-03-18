@@ -157,9 +157,10 @@ namespace NineSunScripture.util
             {
                 return false;
             }
-            if (quotes.PreClose > 0 && quotes.Buy1 / quotes.PreClose > 1.085
+            if (quotes.PreClose > 0 && quotes.Buy1 / quotes.PreClose >= 1.085
                 && quotes.Buy1 != quotes.HighLimit)
             {
+                Logger.Log("检测到需要订阅逐笔行情的个股：" + quotes.Code);
                 return true;
             }
 
