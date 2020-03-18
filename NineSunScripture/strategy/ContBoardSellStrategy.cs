@@ -32,7 +32,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 1/2板的止盈比例
         /// </summary>
-        private const float Less3BoardsStopWinRatio = 1.07f;
+        private const float Less3BoardsStopWinRatio = 7;
 
         /// <summary>
         /// 三档止盈仓位为30%、50%、50%
@@ -185,7 +185,6 @@ namespace NineSunScripture.strategy
             {
                 Logger.Log("【" + quotes.Name + "】StopWinOrLoss");
                 StopWin(quotes, accounts, callback, false);
-                StopWinForLessThan3Boards(accounts, quotes, callback);
                 if (open < quotes.PreClose * StopLossRatio)
                 {
                     if (curPrice > open * 1.04)
@@ -307,6 +306,11 @@ namespace NineSunScripture.strategy
                 stopWinPosition = FirstStopWinPosition;
                 log = firstClass + "%止盈3成卖【" + quotes.Name + "】";
             }
+            else if (profitPct > Less3BoardsStopWinRatio)
+            {
+                stopWinPosition = Less3BoardsStopWinPosition;
+                log = Less3BoardsStopWinRatio + "%止盈5成卖【" + quotes.Name + "】";
+            }
             Logger.Log(log);
 
             short successCnt = 0;
@@ -381,66 +385,6 @@ namespace NineSunScripture.strategy
                 Logger.Log(log);
                 Utils.ShowRuntimeInfo(callback, log);
                 AccountHelper.SellByRatio(quotes, accounts, callback, 0.5f);
-            }
-        }
-
-        /// <summary>
-        /// 3板以下止盈卖点
-        /// </summary>
-        /// <param name="accounts">账户列表</param>
-        /// <param name="quotes">股票对象</param>
-        /// <param name="callback">日志回显接口</param>
-        private void StopWinForLessThan3Boards(
-            List<Account> accounts, Quotes quotes, ITrade callback)
-        {
-            bool isUpRatioNotEnough = quotes.AvgCost > 0
-                && quotes.Sell1 / quotes.PreClose < Less3BoardsStopWinRatio;
-            //下降期不检查连板数，到Less3BoardsStopWinRatio就止盈
-            bool isContBoardsNotQualified = Utils.IsUpPeriod() ? quotes.ContBoards >= 3 : false;
-            //TODO 除龙头外，涨7%必卖一半，稳健复利，上板打回
-            isContBoardsNotQualified = false;
-            if (null == accounts
-                || null == quotes || isContBoardsNotQualified || isUpRatioNotEnough)
-            {
-                return;
-            }
-            Logger.Log("【" + quotes.Name + "】StopWinForLessThan3Boards ");
-
-            short successCnt = 0;
-            List<Task> tasks = new List<Task>();
-            List<Account> failAccts = new List<Account>();
-            foreach (Account account in accounts)
-            {
-                tasks.Add(Task.Run(() =>
-                {
-                    if (AccountHelper.IsSoldToday(account, quotes, callback))
-                    {
-                        return;
-                    }
-                    int code = AccountHelper.SellWithAcct(
-                        quotes, account, callback, Less3BoardsStopWinPosition);
-                    lock (failAccts)
-                    {
-                        if (code <= 0)
-                        {
-                            failAccts.Add(account);
-                        }
-                        else if (code != 888)
-                        {
-                            successCnt++;
-                        }
-                    }
-                }));
-                Thread.Sleep(1);
-            }
-            Task.WaitAll(tasks.ToArray());
-
-            if (null != callback && (successCnt + failAccts.Count) > 0)
-            {
-                string tradeResult = "【" + quotes.Name + "】3板以下止盈卖结果：成功账户"
-                + (accounts.Count - failAccts.Count) + "个，失败账户" + failAccts.Count + "个";
-                callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
-                Utils.LogTradeFailedAccts(tradeResult, failAccts);
             }
         }
     }
