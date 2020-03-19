@@ -277,7 +277,7 @@ namespace NineSunScripture.strategy
                     operationProtection.Add(code, false);
                 }
             }
-            Logger.Log("OnPushResult new push and pass protection=" + stock.Code);
+            Logger.Log("OnPushResult new push and pass protection=" + stock.Name);
             try
             {
                 //推送过来是数据是十档行情 推送中的十档无换手、总市值、流通值、涨停、跌停
