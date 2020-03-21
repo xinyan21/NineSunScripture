@@ -187,13 +187,13 @@ namespace NineSunScripture.strategy
                 StopWin(quotes, accounts, callback, false);
                 if (open < quotes.PreClose * StopLossRatio)
                 {
-                    if (curPrice > preClose * 0.96)
+                    if (curPrice > preClose * 0.95)
                     {
                         Logger.Log("【" + quotes.Name + "】超低开拉升4%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                         return true;
                     }
-                    if (now.Hour >= 10 && now.Minute >= 10 && curPrice <= avgCost * TooWeakRatio)
+                    if (now.Hour >= 11)
                     {
                         Logger.Log("【" + quotes.Name + "】超低开10:10还小于-5%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
