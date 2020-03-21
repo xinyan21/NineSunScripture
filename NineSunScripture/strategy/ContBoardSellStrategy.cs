@@ -308,7 +308,12 @@ namespace NineSunScripture.strategy
             }
             else if (profitPct > Less3BoardsStopWinRatio)
             {
-                stopWinPosition = Less3BoardsStopWinPosition;
+                //退潮期止盈7成，上板再打回
+                stopWinPosition = 0.7f;
+                if (Utils.IsUpPeriod())
+                {
+                    stopWinPosition = Less3BoardsStopWinPosition;
+                }
                 log = Less3BoardsStopWinRatio + "%止盈5成卖【" + quotes.Name + "】";
             }
             Logger.Log(log);
