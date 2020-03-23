@@ -35,20 +35,23 @@ namespace NineSunScripture.strategy
         /// </summary>
         private const float MaxUpRatio = 1.06f;
 
+        private Dictionary<string, int> boughtStocks = new Dictionary<string, int>();
+
         public void Buy(Quotes quotes, List<Account> accounts, ITrade callback)
         {
-            bool isTradeTime = DateTime.Now.Hour == 9 && DateTime.Now.Minute == 30;
+            bool isTradeTime = DateTime.Now.Hour == 9 &&
+                (DateTime.Now.Minute == 30 || DateTime.Now.Minute == 29);
             if (!isTradeTime)
             {
                 return;
             }
-            if (null == accounts || null == quotes)
+            if (null == accounts || null == quotes || CheckIfBought(quotes.Code))
             {
                 return;
             }
             float changeRatio = quotes.Buy1 / quotes.PreClose;
             bool canBuy = changeRatio > MinUpRatio && changeRatio < MaxUpRatio
-                && quotes.Buy1 * quotes.Buy1Vol > MinBuy1MoneyCtrl;
+                && quotes.Open / quotes.PreClose < MaxUpRatio;
             if (!canBuy)
             {
                 return;
@@ -101,12 +104,23 @@ namespace NineSunScripture.strategy
             Task.WaitAll(tasks.ToArray());
             if (null != callback && (successCnt + failAccts.Count) > 0)
             {
+                boughtStocks.Add(quotes.Code, DateTime.Now.Day);
                 string tradeResult = "【" + quotes.Name + "】弱转强买入结果：成功账户"
                     + successCnt + "个，失败账户" + failAccts.Count + "个";
                 callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, tradeResult, "", false);
                 Utils.LogTradeFailedAccts(tradeResult, failAccts);
             }
         }//END BUY
+
+        private bool CheckIfBought(string code)
+        {
+            if (boughtStocks.ContainsKey(code) && boughtStocks[code] == DateTime.Now.Day)
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         private int BuyWithAcct(
             Account account, Quotes quotes, Funds funds, float positionRatioCtrl)

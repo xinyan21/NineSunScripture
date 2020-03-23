@@ -79,7 +79,7 @@ namespace NineSunScripture.trade.structApi.helper
             else
             {
                 //测试用一个账户就行了
-               localAccounts.Clear();
+                localAccounts.Clear();
                 localAccounts.Insert(0, GetTestMainAccount());
             }
             Account mainAcct = localAccounts[0];
@@ -992,6 +992,8 @@ namespace NineSunScripture.trade.structApi.helper
                     }
                 }
             }
+            Logger.Log("sessionId=" + sessionId
+                + "code=" + code + ">GetTodayBoughtQuantityOf=" + quantity);
 
             return quantity;
         }

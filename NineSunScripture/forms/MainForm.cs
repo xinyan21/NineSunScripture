@@ -58,7 +58,6 @@ namespace NineSunScripture
             mainStrategy.SetTradeCallback(this);
             imgTaiJi = Properties.Resources.taiji;
             updatePrice = new UpdatePrice(UpdateStocksPrice);
-            lblDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
 
             //Start strategy
             Task.Run(() =>
@@ -851,6 +850,7 @@ namespace NineSunScripture
         /// </summary>
         private void UpdateAcctInfo()
         {
+            lblDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
             if (tspiPrivacyMode.Text.Equals("隐私模式【关】"))
             {
                 return;
