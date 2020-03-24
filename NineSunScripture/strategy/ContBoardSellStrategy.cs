@@ -205,6 +205,11 @@ namespace NineSunScripture.strategy
                 {
                     if (curPrice <= avgCost * StopLossRatio || curPrice <= preClose * StopLossRatio)
                     {
+                        if (curPrice <= preClose * StopLossRatio 
+                            && now.Hour < 10 || (now.Hour == 10 && now.Minute < 30))
+                        {
+                            return false;
+                        }
                         Logger.Log("【" + quotes.Name + "】小于-8%卖");
                         AccountHelper.SellByRatio(quotes, accounts, callback, 1);
                         return true;
@@ -309,8 +314,8 @@ namespace NineSunScripture.strategy
             }
             else if (profitPct > Less3BoardsStopWinRatio)
             {
-                //退潮期止盈7成，上板再打回
-                stopWinPosition = 0.7f;
+                //退潮期全部止盈，上板再打回
+                stopWinPosition = 1;
                 if (Utils.IsUpPeriod())
                 {
                     stopWinPosition = Less3BoardsStopWinPosition;
