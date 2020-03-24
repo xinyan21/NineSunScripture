@@ -82,6 +82,7 @@ namespace NineSunScripture.strategy
         private const int SealMoneyBeginToDecrease = 3000;
 
         private static ReaderWriterLockSlim rwLockSlim = new ReaderWriterLockSlim();
+        private Dictionary<string, int> stopWinStocks = new Dictionary<string, int>();
 
         public void Sell(Quotes quotes, List<Account> accounts, ITrade callback)
         {
@@ -271,7 +272,7 @@ namespace NineSunScripture.strategy
         private void StopWin(
             Quotes quotes, List<Account> accounts, ITrade callback, bool isDragonLeader)
         {
-            if (null == accounts || null == quotes)
+            if (null == accounts || null == quotes || CheckIfStopWin(quotes.Code))
             {
                 return;
             }
@@ -349,6 +350,7 @@ namespace NineSunScripture.strategy
             Task.WaitAll(tasks.ToArray());
             if (null != callback && stopWinPosition > 0 && (successCnt + failAccts.Count) > 0)
             {
+                stopWinStocks.Add(quotes.Code, DateTime.Now.Day);
                 string tradeResult = log + "止盈结果：成功账户"
                     + successCnt + "个，失败账户" + failAccts.Count + "个";
                 callback.OnTradeResult(
@@ -391,6 +393,16 @@ namespace NineSunScripture.strategy
                 Utils.ShowRuntimeInfo(callback, log);
                 AccountHelper.SellByRatio(quotes, accounts, callback, 0.5f);
             }
+        }
+
+        private bool CheckIfStopWin(string code)
+        {
+            if (stopWinStocks.ContainsKey(code) && stopWinStocks[code] == DateTime.Now.Day)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
