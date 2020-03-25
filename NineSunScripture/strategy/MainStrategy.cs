@@ -23,7 +23,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = true;
+        public static bool IsTest = false;
         //非交易时间策略执行频率，单位ms
         //    private const short CycleTimeOfNonTrade = 2500;
 
