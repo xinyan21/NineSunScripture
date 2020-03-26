@@ -36,7 +36,7 @@ namespace NineSunScripture
         private MainStrategy mainStrategy;
         private UpdatePrice updatePrice;
 
-        private List<Quotes> latestStocks;
+        private List<Quotes> hitBoardStocks;
         private List<Quotes> longTermStocks;
         private List<Quotes> bandStocks;
         private List<Quotes> dragonLeaders;
@@ -344,7 +344,7 @@ namespace NineSunScripture
                     lvStocks.Items.Add(lvi);
                 }
             }
-            latestStocks = quotes = JsonDataHelper.Instance.GetStocksByCatgory(
+            hitBoardStocks = quotes = JsonDataHelper.Instance.GetStocksByCatgory(
                 Quotes.OperationBuy, Quotes.CategoryHitBoard);
             if (!Utils.IsListEmpty(quotes))
             {
@@ -525,9 +525,9 @@ namespace NineSunScripture
             {
                 stocks.AddRange(dragonLeaders);
             }
-            if (!Utils.IsListEmpty(latestStocks))
+            if (!Utils.IsListEmpty(hitBoardStocks))
             {
-                stocks.AddRange(latestStocks);
+                stocks.AddRange(hitBoardStocks);
             }
             if (!Utils.IsListEmpty(weakTurnStrongStocks))
             {
@@ -606,7 +606,7 @@ namespace NineSunScripture
 
                 stocks.Clear();
                 lvStocks.Clear();
-                latestStocks.Clear();
+                hitBoardStocks.Clear();
                 longTermStocks.Clear();
                 dragonLeaders.Clear();
                 bandStocks.Clear();
@@ -630,7 +630,7 @@ namespace NineSunScripture
                 return;
             }
             Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
-            latestStocks.Remove(quotes);
+            hitBoardStocks.Remove(quotes);
             weakTurnStrongStocks.Remove(quotes);
             bandStocks.Remove(quotes);
             dragonLeaders.Remove(quotes);
@@ -706,6 +706,32 @@ namespace NineSunScripture
                 return;
             }
             Quotes quotes = (Quotes)lvStocks.SelectedItems[0].Tag;
+            switch (quotes.StockCategory)
+            {
+                case Quotes.CategoryBand:
+                    bandStocks.Clear();
+                    break;
+                case Quotes.CategoryDragonLeader:
+                    dragonLeaders.Clear();
+                    break;
+                case Quotes.CategoryHitBoard:
+                    hitBoardStocks.Clear();
+                    break;
+                case Quotes.CategoryLongTerm:
+                    longTermStocks.Clear();
+                    break;
+                case Quotes.CategoryPosition:
+                    positionStocks.Clear();
+                    break;
+                case Quotes.CategoryWeakTurnStrong:
+                    weakTurnStrongStocks.Clear();
+                    break;
+                case Quotes.CategoryWindVane:
+                    windVanes.Clear();
+                    break;
+                default:
+                    break;
+            }
             List<Quotes> group = JsonDataHelper.Instance.GetStocksByCatgory(
                 quotes.Operation, quotes.StockCategory);
             foreach (var item in group)
