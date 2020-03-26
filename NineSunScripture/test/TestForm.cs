@@ -61,14 +61,12 @@ namespace NineSunScripture.util.test
                      Invoke(new MethodInvoker(UpdatePrice));
                      Thread.Sleep(200);
                  }*/
-                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "300160");
-                quotes.Name = "秀强股份";
+                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "123033");
                 Invoke(new MethodInvoker(UpdatePrice));
                 //mainForm.OnPriceChange(quotes);
 
-                quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002239");
-                quotes.Name = "奥特佳";
-                Invoke(new MethodInvoker(UpdatePrice));
+                //quotes = PriceAPI.QueryTenthGearPrice(accounts[0].PriceSessionId, "002239");
+                //Invoke(new MethodInvoker(UpdatePrice));
                 //mainForm.OnPriceChange(quotes);
             }
             catch (Exception e)
@@ -79,6 +77,11 @@ namespace NineSunScripture.util.test
 
         private void UpdatePrice()
         {
+            if (null==quotes)
+            {
+                lblTenthGearPrice.Text = "quotes is null";
+                return;
+            }
             StringBuilder sb = new StringBuilder();
             sb.Append("卖三 ").Append(quotes.Sell3).Append(" ").Append(quotes.Sell3Vol).Append("\n");
             sb.Append("卖二 ").Append(quotes.Sell2).Append(" ").Append(quotes.Sell2Vol).Append("\n");

@@ -50,14 +50,16 @@ namespace NineSunScripture.strategy
         private HitBoardStrategy hitBoardStrategy;
         private bool isHoliday;
         private bool isMarketOpen = false;
+        private short queryPriceErrorCnt = 0;
+        //统计被操作保护过滤的行情次数
+        private short pricePushPassCnt = 0;
+
         private DateTime lastFundUpdateTime;
         private DateTime lastPricePushTime;
         private DateTime lastPriceUpdateTime;
         private Account mainAcct;
         //策略执行状态保护，由于逐笔委托的毫秒级高速并发，为防止误操作一只股票同时只能执行一次策略
         private Dictionary<string, bool> operationProtection;
-
-        private short queryPriceErrorCnt = 0;
         //逆回购记录，使用日期记录以支持不关策略长时间运行
         private Dictionary<DateTime, bool> reverseRepurchaseRecords;
 
@@ -268,6 +270,13 @@ namespace NineSunScripture.strategy
                 {
                     if (operationProtection[code])
                     {
+                        pricePushPassCnt++;
+                        if (pricePushPassCnt > 10 && null != callback)
+                        {
+                            pricePushPassCnt = 0;
+                            callback.OnTradeResult(
+                                0, "被操作保护过滤的行情推送次数超过10次，重启策略", "", true);
+                        }
                         Logger.Log("【" + stock.Name + "】被操作保护，推送被过滤");
                         return;
                     }
@@ -773,6 +782,7 @@ namespace NineSunScripture.strategy
         {
             if (!isMarketOpen && IsTradeTime())
             {
+                pricePushPassCnt = 0;
                 isMarketOpen = true;
                 InitLimitPrice();
                 PrepareStocksAndSubPrice();
