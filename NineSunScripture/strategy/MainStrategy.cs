@@ -23,7 +23,7 @@ namespace NineSunScripture.strategy
         /// <summary>
         /// 是否是测试状态，实盘的时候改为false
         /// </summary>
-        public static bool IsTest = false;
+        public static bool IsTest = true;
         //非交易时间策略执行频率，单位ms
         //    private const short CycleTimeOfNonTrade = 2500;
 
@@ -39,10 +39,10 @@ namespace NineSunScripture.strategy
         private List<Account> accounts;
 
         private BandStrategy bandStrategy;
+        private ContBoardSellStrategy contBoardSellStrategy;
+        private ConvertibleBondStrategy convertibleBondStrategy;
 
         private ITrade callback;
-
-        private ContBoardSellStrategy contBoardSellStrategy;
 
         //主策略周期时间
         private short cycleTime = CycleTimeOfTrade;
@@ -79,6 +79,7 @@ namespace NineSunScripture.strategy
             stocksToSell = new List<Quotes>();
             hitBoardStrategy = new HitBoardStrategy();
             contBoardSellStrategy = new ContBoardSellStrategy();
+            convertibleBondStrategy = new ConvertibleBondStrategy();
             weakTurnStrongStrategy = new WeakTurnStrongStrategy();
             bandStrategy = new BandStrategy();
             reverseRepurchaseRecords = new Dictionary<DateTime, bool>();
@@ -88,6 +89,288 @@ namespace NineSunScripture.strategy
             lastPriceUpdateTime = DateTime.Now;
             lastPricePushTime = DateTime.MaxValue;
             pushCallback = OnPushResult;
+        }
+
+        private void DoStrategy()
+        {
+            try
+            {
+                accounts = AccountHelper.Login(callback);
+                if (null == accounts || accounts.Count == 0)
+                {
+                    callback.OnTradeResult(0, "策略启动", "登录账户失败", false);
+                    return;
+                }
+                mainAcct = accounts[0];
+                UpdateTotalAccountInfo(false);
+                if (isHoliday && !IsTest)
+                {
+                    callback.OnTradeResult(0, "策略启动", "现在是假期", false);
+                    return;
+                }
+                while (true)
+                {
+                    Thread.Sleep(cycleTime);
+                    if (!IsTest && !IsTradeTime())
+                    {
+                        if (null != workListener)
+                        {
+                            workListener.OnImgRotate(-1);
+                        }
+                        ReverseRepurchaseBonds();
+                        continue;
+                    }
+                    DoConvertibleBondStrategy();
+
+                    RebootBeforeOpenMarket();
+                    OpenMarket();
+                    CloseMarket(false);
+                    CheckPricePush();
+                    UpdateTotalAccountInfo(true);
+                    if (null != workListener)
+                    {
+                        workListener.OnImgRotate(1);
+                        if (DateTime.Now.Subtract(lastPriceUpdateTime).TotalSeconds
+                            >= UpdateFundCycle && IsTradeTime())
+                        {
+                            workListener.OnPriceChange(stocksForPrice);
+                            lastPriceUpdateTime = DateTime.Now;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e);
+                if (null != callback)
+                {
+                    callback.OnTradeResult(0, "辅助策略线程", e.Message, true);
+                }
+            }
+        }
+
+        public bool Start(List<Quotes> stocks)
+        {
+            if (!Utils.IsListEmpty(stocks))
+            {
+                stocksForPrice.Clear();
+                //这里需要对股票对象进行分类
+                foreach (Quotes item in stocks)
+                {
+                    if (!stocksForPrice.Contains(item))
+                    {
+                        stocksForPrice.Add(item);
+                    }
+                    if (item.Operation == Quotes.OperationBuy
+                        && !stocksToBuy.Exists(t => t.Code == item.Code
+                        && t.StockCategory == item.StockCategory))
+                    {
+                        stocksToBuy.Add(item);
+                    }
+                    if (item.Operation == Quotes.OperationSell
+                        && !stocksToSell.Exists(t => t.Code == item.Code))
+                    {
+                        stocksToSell.Add(item);
+                    }
+                }
+            }
+            Stop();
+            Thread.Sleep(2000);
+            hitBoardStrategy.RestoreOpenBoardCnt();
+            strategyThread = new Thread(DoStrategy);
+            strategyThread.Start();
+
+            return true;
+        }
+
+        /// <summary>
+        /// 策略停止后不注销，依然可以人工操作
+        /// 注销后停止更新资金信息，不能逆回购，太极图停止转动
+        /// </summary>
+        public void Stop()
+        {
+            if (null != strategyThread)
+            {
+                strategyThread.Abort();
+            }
+            CloseMarket(true);
+            hitBoardStrategy.SaveOpenBoardCnt();
+        }
+
+        /// <summary>
+        /// 此回调在C++线程里面执行
+        /// </summary>
+        /// <param name="type">功能号</param>
+        /// <param name="result">数据指针</param>
+        public void OnPushResult(int type, IntPtr result)
+        {
+            if (!IsTradeTime())
+            {
+                Logger.Log("非交易时间推送");
+                return;
+            }
+            string code = Marshal.PtrToStringAnsi(result + 16, 6);
+            Quotes stock = stocksForPrice.Find(item => item.Code.Equals(code));
+            if (null == stock || 0 == stock.HighLimit)
+            {
+                Logger.Log("OnPushResult find a stock to InitLimitPrice=" + stock);
+                InitLimitPrice(code);
+                return;
+            }
+            Logger.Log("OnPushResult new push =" + stock.Name);
+            lock (operationProtection)
+            {
+                //买入保护
+                if (operationProtection.ContainsKey(code))
+                {
+                    if (operationProtection[code])
+                    {
+                        pricePushPassCnt++;
+                        if (pricePushPassCnt > 10 && null != callback)
+                        {
+                            pricePushPassCnt = 0;
+                            callback.OnTradeResult(
+                                0, "被操作保护过滤的行情推送次数超过10次，重启策略", "", true);
+                        }
+                        Logger.Log("【" + stock.Name + "】被操作保护，推送被过滤");
+                        return;
+                    }
+                }
+                else
+                {
+                    operationProtection.Add(code, false);
+                }
+            }
+            Logger.Log("OnPushResult new push and pass protection=" + stock.Name);
+            try
+            {
+                //推送过来是数据是十档行情 推送中的十档无换手、总市值、流通值、涨停、跌停
+                if (type == 10001)
+                {
+                    OnTenthGearPricePush(result, stock);
+                }
+                else if (type == 10206)
+                {
+                    OnOByOCommisionPush(result, stock);
+                }
+            }
+            finally
+            {
+                lock (operationProtection)
+                {
+                    operationProtection[code] = false;
+                    Logger.Log("【" + stock.Name + "】取消操作保护");
+                }
+            }
+        }
+
+        private void OnTenthGearPricePush(IntPtr result, Quotes stock)
+        {
+            Quotes quotes = ApiHelper.ParseStructToQuotes(result);
+            if (!CheckQuotes(quotes))
+            {
+                Logger.Log("CheckQuotes failed: " + quotes);
+                return;
+            }
+            //修改行情价格以更新主界面的涨跌幅
+            Quotes priceStock = stocksForPrice.Find(item => item.Code.Equals(stock.Code));
+            if (null != priceStock)
+            {
+                if (quotes.Buy1 > 0)
+                {
+                    priceStock.Buy1 = quotes.Buy1;
+                }
+                else
+                {
+                    priceStock.Buy1 = quotes.Sell1;
+                }
+                quotes.Name = priceStock.Name;
+            }
+
+            lock (operationProtection)
+            {
+                lastPricePushTime = DateTime.Now;
+                operationProtection[stock.Code] = true;
+                Logger.Log("【" + stock.Name + "】开启操作保护");
+            }
+            Logger.Log("执行策略");
+            //由于一只股票可能要分多个策略买，所以单独用行情里的参数去执行是不行的
+            if (stocksToBuy.Contains(quotes))
+            {
+                foreach (var item in stocksToBuy)
+                {
+                    if (item.Code.Equals(quotes.Code))
+                    {
+                        quotes.CloneStrategyParamsFrom(item);
+                        //打板的深圳股票需要在8.5%之上订阅逐笔委托，可以和十档争夺策略执行，买入之后取消订阅
+                        //由于是3s一推，所以这里不需要担心并发问题
+                        if (Utils.IfNeedToSubOByOPrice(quotes))
+                        {
+                            if (!stock.IsOByOComissionSubscribed)
+                            {
+                                EditStockSub(stock, true, PriceAPI.PushTypeOByOCommision);
+                            }
+                        }
+                        else
+                        {
+                            EditStockSub(stock, false, PriceAPI.PushTypeOByOCommision);
+                        }
+                        ExeContBoardStrategyByStock(quotes);
+                    }
+                }
+            }
+            if (stocksToSell.Contains(quotes))
+            {
+                foreach (var item in stocksToSell)
+                {
+                    if (item.Code.Equals(quotes.Code))
+                    {
+                        quotes.CloneStrategyParamsFrom(item);
+                        ExeContBoardStrategyByStock(quotes);
+                    }
+                }
+            }
+        }
+
+        private void OnOByOCommisionPush(IntPtr Result, Quotes stock)
+        {
+            List<OByOCommision> commisions = ApiHelper.ParseStructToCommision(Result);
+            foreach (var commision in commisions)
+            {
+                //逐笔委托只处理特大单，这里还要拿到涨停价
+                if (commision.Price != stock.HighLimit)
+                {
+                    return;
+                }
+                //低于1000手或者低于300万的单子过滤
+                if (commision.Quantity < 100000 && commision.Quantity * commision.Price < 2000000)
+                {
+                    return;
+                }
+                lock (operationProtection)
+                {
+                    operationProtection[stock.Code] = true;
+                    Logger.Log("【" + stock.Name + "】开启逐笔买入保护");
+                }
+                //执行买入，同时设置买入保护状态，防止多次买入，把打板的买入逻辑拆出来
+                //还有个问题就是这里没有行情对象，要查个行情出来，或者把打板保存的最新对象拿出来
+                //修改买一卖一，然后直接调用打板的方法
+                Quotes quotes = hitBoardStrategy.GetLastHistoryQuotesBy(stock.Code);
+                quotes.Buy1 = stock.HighLimit;
+                Logger.Log("【" + quotes.Name + "】触发逐笔委托买点：" + commision);
+                ExeContBoardStrategyByStock(quotes);
+            }
+        }
+
+        /// <summary>
+        /// 执行可转债策略
+        /// </summary>
+        private void DoConvertibleBondStrategy()
+        {
+            if (DateTime.Now.Second%3==0)
+            {
+                convertibleBondStrategy.DoStrategy();
+            }
         }
 
         public void AddStock(Quotes quotes)
@@ -241,74 +524,6 @@ namespace NineSunScripture.strategy
             }
             return true;
         }
-
-        /// <summary>
-        /// 此回调在C++线程里面执行
-        /// </summary>
-        /// <param name="type">功能号</param>
-        /// <param name="result">数据指针</param>
-        public void OnPushResult(int type, IntPtr result)
-        {
-            if (!IsTradeTime())
-            {
-                Logger.Log("非交易时间推送");
-                return;
-            }
-            string code = Marshal.PtrToStringAnsi(result + 16, 6);
-            Quotes stock = stocksForPrice.Find(item => item.Code.Equals(code));
-            if (null == stock || 0 == stock.HighLimit)
-            {
-                Logger.Log("OnPushResult find a stock to InitLimitPrice=" + stock);
-                InitLimitPrice(code);
-                return;
-            }
-            Logger.Log("OnPushResult new push =" + stock.Name);
-            lock (operationProtection)
-            {
-                //买入保护
-                if (operationProtection.ContainsKey(code))
-                {
-                    if (operationProtection[code])
-                    {
-                        pricePushPassCnt++;
-                        if (pricePushPassCnt > 10 && null != callback)
-                        {
-                            pricePushPassCnt = 0;
-                            callback.OnTradeResult(
-                                0, "被操作保护过滤的行情推送次数超过10次，重启策略", "", true);
-                        }
-                        Logger.Log("【" + stock.Name + "】被操作保护，推送被过滤");
-                        return;
-                    }
-                }
-                else
-                {
-                    operationProtection.Add(code, false);
-                }
-            }
-            Logger.Log("OnPushResult new push and pass protection=" + stock.Name);
-            try
-            {
-                //推送过来是数据是十档行情 推送中的十档无换手、总市值、流通值、涨停、跌停
-                if (type == 10001)
-                {
-                    OnTenthGearPricePush(result, stock);
-                }
-                else if (type == 10206)
-                {
-                    OnOByOCommisionPush(result, stock);
-                }
-            }
-            finally
-            {
-                lock (operationProtection)
-                {
-                    operationProtection[code] = false;
-                    Logger.Log("【" + stock.Name + "】取消操作保护");
-                }
-            }
-        }
-
         public void SellAll(ITrade callBack)
         {
             if (Utils.IsListEmpty(accounts))
@@ -338,55 +553,6 @@ namespace NineSunScripture.strategy
         {
             this.workListener = workListener;
         }
-
-        public bool Start(List<Quotes> stocks)
-        {
-            if (!Utils.IsListEmpty(stocks))
-            {
-                stocksForPrice.Clear();
-                //这里需要对股票对象进行分类
-                foreach (Quotes item in stocks)
-                {
-                    if (!stocksForPrice.Contains(item))
-                    {
-                        stocksForPrice.Add(item);
-                    }
-                    if (item.Operation == Quotes.OperationBuy
-                        && !stocksToBuy.Exists(t => t.Code == item.Code
-                        && t.StockCategory == item.StockCategory))
-                    {
-                        stocksToBuy.Add(item);
-                    }
-                    if (item.Operation == Quotes.OperationSell
-                        && !stocksToSell.Exists(t => t.Code == item.Code))
-                    {
-                        stocksToSell.Add(item);
-                    }
-                }
-            }
-            Stop();
-            Thread.Sleep(2000);
-            hitBoardStrategy.RestoreOpenBoardCnt();
-            strategyThread = new Thread(DoStrategy);
-            strategyThread.Start();
-
-            return true;
-        }
-
-        /// <summary>
-        /// 策略停止后不注销，依然可以人工操作
-        /// 注销后停止更新资金信息，不能逆回购，太极图停止转动
-        /// </summary>
-        public void Stop()
-        {
-            if (null != strategyThread)
-            {
-                strategyThread.Abort();
-            }
-            CloseMarket(true);
-            hitBoardStrategy.SaveOpenBoardCnt();
-        }
-
         /// <summary>
         /// 每隔UpdateFundInterval更新一下总账户信息
         /// </summary>
@@ -624,160 +790,6 @@ namespace NineSunScripture.strategy
             }
             Task.WaitAll(tasks.ToArray());
         }
-
-        private void DoStrategy()
-        {
-            try
-            {
-                accounts = AccountHelper.Login(callback);
-                if (null == accounts || accounts.Count == 0)
-                {
-                    callback.OnTradeResult(0, "策略启动", "登录账户失败", false);
-                    return;
-                }
-                mainAcct = accounts[0];
-                UpdateTotalAccountInfo(false);
-                if (isHoliday && !IsTest)
-                {
-                    callback.OnTradeResult(0, "策略启动", "现在是假期", false);
-                    return;
-                }
-                while (true)
-                {
-                    Thread.Sleep(cycleTime);
-                    if (!IsTest && !IsTradeTime())
-                    {
-                        if (null != workListener)
-                        {
-                            workListener.OnImgRotate(-1);
-                        }
-                        ReverseRepurchaseBonds();
-                        continue;
-                    }
-                    RebootBeforeOpenMarket();
-                    OpenMarket();
-                    CloseMarket(false);
-                    CheckPricePush();
-                    UpdateTotalAccountInfo(true);
-                    if (null != workListener)
-                    {
-                        workListener.OnImgRotate(1);
-                        if (DateTime.Now.Subtract(lastPriceUpdateTime).TotalSeconds
-                            >= UpdateFundCycle && IsTradeTime())
-                        {
-                            workListener.OnPriceChange(stocksForPrice);
-                            lastPriceUpdateTime = DateTime.Now;
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Exception(e);
-                if (null != callback)
-                {
-                    callback.OnTradeResult(0, "辅助策略线程", e.Message, false);
-                }
-            }
-        }
-        private void OnOByOCommisionPush(IntPtr Result, Quotes stock)
-        {
-            List<OByOCommision> commisions = ApiHelper.ParseStructToCommision(Result);
-            foreach (var commision in commisions)
-            {
-                //逐笔委托只处理特大单，这里还要拿到涨停价
-                if (commision.Price != stock.HighLimit)
-                {
-                    return;
-                }
-                //低于1000手或者低于300万的单子过滤
-                if (commision.Quantity < 100000 && commision.Quantity * commision.Price < 2000000)
-                {
-                    return;
-                }
-                lock (operationProtection)
-                {
-                    operationProtection[stock.Code] = true;
-                    Logger.Log("【" + stock.Name + "】开启逐笔买入保护");
-                }
-                //执行买入，同时设置买入保护状态，防止多次买入，把打板的买入逻辑拆出来
-                //还有个问题就是这里没有行情对象，要查个行情出来，或者把打板保存的最新对象拿出来
-                //修改买一卖一，然后直接调用打板的方法
-                Quotes quotes = hitBoardStrategy.GetLastHistoryQuotesBy(stock.Code);
-                quotes.Buy1 = stock.HighLimit;
-                Logger.Log("【" + quotes.Name + "】触发逐笔委托买点：" + commision);
-                ExeContBoardStrategyByStock(quotes);
-            }
-        }
-
-        private void OnTenthGearPricePush(IntPtr result, Quotes stock)
-        {
-            Quotes quotes = ApiHelper.ParseStructToQuotes(result);
-            if (!CheckQuotes(quotes))
-            {
-                Logger.Log("CheckQuotes failed: " + quotes);
-                return;
-            }
-            //修改行情价格以更新主界面的涨跌幅
-            Quotes priceStock = stocksForPrice.Find(item => item.Code.Equals(stock.Code));
-            if (null != priceStock)
-            {
-                if (quotes.Buy1 > 0)
-                {
-                    priceStock.Buy1 = quotes.Buy1;
-                }
-                else
-                {
-                    priceStock.Buy1 = quotes.Sell1;
-                }
-                quotes.Name = priceStock.Name;
-            }
-
-            lock (operationProtection)
-            {
-                lastPricePushTime = DateTime.Now;
-                operationProtection[stock.Code] = true;
-                Logger.Log("【" + stock.Name + "】开启操作保护");
-            }
-            Logger.Log("执行策略");
-            //由于一只股票可能要分多个策略买，所以单独用行情里的参数去执行是不行的
-            if (stocksToBuy.Contains(quotes))
-            {
-                foreach (var item in stocksToBuy)
-                {
-                    if (item.Code.Equals(quotes.Code))
-                    {
-                        quotes.CloneStrategyParamsFrom(item);
-                        //打板的深圳股票需要在8.5%之上订阅逐笔委托，可以和十档争夺策略执行，买入之后取消订阅
-                        //由于是3s一推，所以这里不需要担心并发问题
-                        if (Utils.IfNeedToSubOByOPrice(quotes))
-                        {
-                            if (!stock.IsOByOComissionSubscribed)
-                            {
-                                EditStockSub(stock, true, PriceAPI.PushTypeOByOCommision);
-                            }
-                        }
-                        else
-                        {
-                            EditStockSub(stock, false, PriceAPI.PushTypeOByOCommision);
-                        }
-                        ExeContBoardStrategyByStock(quotes);
-                    }
-                }
-            }
-            if (stocksToSell.Contains(quotes))
-            {
-                foreach (var item in stocksToSell)
-                {
-                    if (item.Code.Equals(quotes.Code))
-                    {
-                        quotes.CloneStrategyParamsFrom(item);
-                        ExeContBoardStrategyByStock(quotes);
-                    }
-                }
-            }
-        }
-
         private void OpenMarket()
         {
             if (!isMarketOpen && IsTradeTime())

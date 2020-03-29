@@ -189,6 +189,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="strategy\BandStrategy.cs" />
+    <Compile Include="strategy\ConvertibleBondStrategy.cs" />
     <Compile Include="strategy\ITrade.cs" />
     <Compile Include="strategy\ContBoardSellStrategy.cs" />
     <Compile Include="strategy\HitBoardStrategy.cs" />
@@ -208,6 +209,7 @@
     <Compile Include="util\DoubleBufferListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="util\Http.cs" />
     <Compile Include="util\log\Logger.cs" />
     <Compile Include="test\TestForm.cs">
       <SubType>Form</SubType>

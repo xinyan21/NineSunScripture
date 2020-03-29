@@ -167,6 +167,8 @@ namespace NineSunScripture.model
         /// </summary>
         private bool isBuyBackWhenReboard = true;
 
+        private DateTime time;
+
         public string Code { get => code; set => code = value; }
         public string Name { get => name; set => name = value; }
         public float PreClose { get => preClose; set => preClose = value; }
@@ -233,6 +235,7 @@ namespace NineSunScripture.model
         {
             get => isBuyBackWhenReboard; set => isBuyBackWhenReboard = value;
         }
+        public DateTime Time { get => time; set => time = value; }
 
         /// <summary>
         /// 重写后就不用专门拿出代码来比较，直接比较对象即可

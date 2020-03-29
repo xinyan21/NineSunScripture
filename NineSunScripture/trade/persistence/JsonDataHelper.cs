@@ -19,6 +19,7 @@ namespace NineSunScripture.trade.persistence
         private static string stocksFilePath = baseDir + "stocks.json";
         private static string settingsFilePath = baseDir + "settings.json";
         private static string openBoardCntFilePath = baseDir + "openBoardCnt.json";
+        private static string bondsFilePath = baseDir + "bonds.json";
 
         private Dictionary<string, string> settings;
         private static readonly Lazy<JsonDataHelper> lazy
@@ -44,7 +45,7 @@ namespace NineSunScripture.trade.persistence
                 {
                     File.Create(openBoardCntFilePath);
                 }
-                data = JsonConvert.DeserializeObject< Dictionary
+                data = JsonConvert.DeserializeObject<Dictionary
                     <string, Dictionary<string, short>>>(File.ReadAllText(openBoardCntFilePath));
                 if (null != data && data.ContainsKey(DateTime.Now.Date.ToString("yyyyMMdd")))
                 {
@@ -107,6 +108,31 @@ namespace NineSunScripture.trade.persistence
                 Logger.Exception(e);
             }
             return accounts;
+        }
+
+        /// <summary>
+        /// 获取可以交易的可转债代码
+        /// </summary>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public List<string> GetConvertibleBonds()
+        {
+            List<string> bonds = null;
+            try
+            {
+                if (!File.Exists(bondsFilePath))
+                {
+                    File.Create(bondsFilePath);
+                }
+                bonds
+                    = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(bondsFilePath));
+            }
+            catch (Exception e)
+            {
+                Logger.Log("GetConvertibleBonds exception: " + e.Message);
+                Logger.Exception(e);
+            }
+            return bonds;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
