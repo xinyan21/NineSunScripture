@@ -22,8 +22,8 @@ namespace NineSunScripture.strategy
         private Dictionary<string, Quotes> highPiceDic;
         private Dictionary<string, Quotes> buyRecordDic;
         private Dictionary<string, Quotes> sellRecordDic;
-        private Dictionary<string, double> boughtValue;     //已买市值
         private Dictionary<string, Quotes> lastTickDic;
+        private Dictionary<string, double> boughtValue;     //已买市值
 
         public ConvertibleBondStrategy()
         {
@@ -55,6 +55,11 @@ namespace NineSunScripture.strategy
                 Sell(quotes);
                 UpdateHighPrice(quotes);
                 UpdateLastTick(quotes);
+                DateTime now = DateTime.Now;
+                if (now.Hour > 10 && now.Minute == 0 && now.Second == 0)
+                {
+                    Logger.Log("可转债当日盈亏比例为" + (asset / 50000 - 1) * 100 + "%");
+                }
             }
             catch (Exception e)
             {
@@ -74,7 +79,8 @@ namespace NineSunScripture.strategy
                 BidTimeBuy(quotes);
                 return;
             }
-            foreach (var item in quotes)
+            //除了竞价，其它的玩不了，要被止损玩死，除非是热点的几个
+           /* foreach (var item in quotes)
             {
                 if (item.Buy1 / item.PreClose < 1.06)
                 {
@@ -93,7 +99,7 @@ namespace NineSunScripture.strategy
                 {
                     SimulateBuy(item);
                 }
-            }
+            }*/
         }
 
         private void Sell(List<Quotes> quotes)
@@ -189,12 +195,12 @@ namespace NineSunScripture.strategy
                     continue;
                 }
                 DateTime buyTime = buyQuote.Time;
-                if (9 == buyTime.Hour && buyTime.Minute <= 35 && quote.Buy1 < buyQuote.Buy1)
+                if (9 == buyTime.Hour && buyTime.Minute <= 31 && quote.Buy1 < buyQuote.Buy1)
                 {
                     double secsAfterHighUpdated = DateTime.Now.Subtract(buyTime).TotalSeconds;
                     if (secsAfterHighUpdated >= 60)
                     {
-                        Logger.Log("可转债卖出9：35前买入的>" + quote.Name);
+                        Logger.Log("可转债卖出9：30及之前买入的>" + quote.Name);
                         SimulateSell(quote);
                     }
                 }
@@ -230,11 +236,13 @@ namespace NineSunScripture.strategy
             }
             sellRecordDic.Add(quote.Name, quote);
             Quotes buyQuote = buyRecordDic[quote.Name];
-            boughtValue[quote.Name] *= (quote.Buy1 - buyQuote.Buy1) / buyQuote.Buy1;
+            float profitPct = (quote.Buy1 - buyQuote.Buy1) / buyQuote.Buy1;
+            boughtValue[quote.Name] *= profitPct;
             asset += boughtValue[quote.Name];
 
             boughtValue.Remove(quote.Name);
-            Logger.Log("可转债模拟卖出>" + quote.Name);
+            Logger.Log(
+                "可转债模拟卖出>" + quote.Name + " 盈利=" + Math.Round(profitPct * 100) + "%");
         }
 
         private void Init()
@@ -380,7 +388,8 @@ namespace NineSunScripture.strategy
         private bool IsOpenMarketBidTime()
         {
             DateTime now = DateTime.Now;
-            if (now.Hour == 9 && now.Minute == 24 && now.Second == 57)
+            //可转债策略只有在3的倍数秒才会执行
+            if (now.Hour == 9 && now.Minute == 24 && now.Second == 56)
             {
                 return true;
             }

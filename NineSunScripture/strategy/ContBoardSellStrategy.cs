@@ -186,6 +186,10 @@ namespace NineSunScripture.strategy
             {
                 Logger.Log("【" + quotes.Name + "】StopWinOrLoss");
                 StopWin(quotes, accounts, callback, false);
+                if (now.Hour < 10)
+                {
+                    return false;
+                }
                 if (open < quotes.PreClose * StopLossRatio)
                 {
                     if (curPrice > preClose * 0.95)
@@ -205,7 +209,7 @@ namespace NineSunScripture.strategy
                 {
                     if (curPrice <= avgCost * StopLossRatio || curPrice <= preClose * StopLossRatio)
                     {
-                        if (curPrice <= preClose * StopLossRatio 
+                        if (curPrice <= preClose * StopLossRatio
                             && now.Hour < 10 || (now.Hour == 10 && now.Minute < 30))
                         {
                             return false;
