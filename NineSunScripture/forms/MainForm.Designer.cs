@@ -481,7 +481,7 @@ namespace NineSunScripture
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(173, 6);
             // 
             // tsmiBuyStock
             // 
@@ -495,7 +495,7 @@ namespace NineSunScripture
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(173, 6);
             // 
             // tsmiClearPositions
             // 
@@ -509,7 +509,7 @@ namespace NineSunScripture
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(173, 6);
             // 
             // tspiPrivacyMode
             // 
@@ -522,7 +522,7 @@ namespace NineSunScripture
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(173, 6);
             // 
             // tsmiTest
             // 
@@ -535,7 +535,7 @@ namespace NineSunScripture
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(173, 6);
             // 
             // tspExit
             // 
@@ -548,7 +548,7 @@ namespace NineSunScripture
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(173, 6);
             // 
             // tbRuntimeInfo
             // 
@@ -611,7 +611,6 @@ namespace NineSunScripture
             this.lblDate.Name = "lblDate";
             this.lblDate.Size = new System.Drawing.Size(120, 30);
             this.lblDate.TabIndex = 24;
-            this.lblDate.Text = "xxxx-xx-xx";
             this.lblDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // MainForm

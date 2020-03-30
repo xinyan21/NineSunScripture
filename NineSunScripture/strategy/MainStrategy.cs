@@ -18,6 +18,9 @@ namespace NineSunScripture.strategy
     /// </summary>
     public class MainStrategy
     {
+        /// <summary>
+        /// 此代码用于播放交易成功提示音和更新账户信息
+        /// </summary>
         public const int RspCodeOfUpdateAcctInfo = 8888;
 
         /// <summary>
@@ -71,15 +74,17 @@ namespace NineSunScripture.strategy
         private WeakTurnStrongStrategy weakTurnStrongStrategy;
         private IWorkListener workListener;
 
-        public MainStrategy()
+        public MainStrategy(MainForm mainForm)
         {
+            callback = mainForm;
+            workListener = mainForm;
             ThreadPool.SetMinThreads(100, 40);
             stocksToBuy = new List<Quotes>();
             stocksForPrice = new List<Quotes>();
             stocksToSell = new List<Quotes>();
             hitBoardStrategy = new HitBoardStrategy();
             contBoardSellStrategy = new ContBoardSellStrategy();
-            convertibleBondStrategy = new ConvertibleBondStrategy();
+            convertibleBondStrategy = new ConvertibleBondStrategy(mainForm);
             weakTurnStrongStrategy = new WeakTurnStrongStrategy();
             bandStrategy = new BandStrategy();
             reverseRepurchaseRecords = new Dictionary<DateTime, bool>();
@@ -544,15 +549,6 @@ namespace NineSunScripture.strategy
             AccountHelper.SellByRatio(quotes, accounts, callBack, 1);
         }
 
-        public void SetTradeCallback(ITrade callback)
-        {
-            this.callback = callback;
-        }
-
-        public void SetWorkListener(IWorkListener workListener)
-        {
-            this.workListener = workListener;
-        }
         /// <summary>
         /// 每隔UpdateFundInterval更新一下总账户信息
         /// </summary>

@@ -16,6 +16,7 @@ namespace NineSunScripture.strategy
         private double asset = 50000;
         private string priceUrl = "http://hq.sinajs.cn/list=";
         private bool isBidBought = false;
+        private ITrade callback;
 
         private Http http;
         //标的最高价字典；key=Name，value=行情对象，里面的time保留了时间
@@ -25,8 +26,9 @@ namespace NineSunScripture.strategy
         private Dictionary<string, Quotes> lastTickDic;
         private Dictionary<string, double> boughtValue;     //已买市值
 
-        public ConvertibleBondStrategy()
+        public ConvertibleBondStrategy(ITrade callback)
         {
+            this.callback = callback;
             http = new Http();
             highPiceDic = new Dictionary<string, Quotes>();
             buyRecordDic = new Dictionary<string, Quotes>();
@@ -39,7 +41,7 @@ namespace NineSunScripture.strategy
 
         public void DoStrategy()
         {
-            if (!MainStrategy.IsTest && !IsTradeTime())
+            if (!IsTradeTime())
             {
                 return;
             }
@@ -51,9 +53,9 @@ namespace NineSunScripture.strategy
             }
             try
             {
-                Buy(quotes);
-                Sell(quotes);
                 UpdateHighPrice(quotes);
+                Sell(quotes);
+                Buy(quotes);
                 UpdateLastTick(quotes);
                 DateTime now = DateTime.Now;
                 if (now.Hour > 10 && now.Minute == 0 && now.Second == 0)
@@ -77,6 +79,11 @@ namespace NineSunScripture.strategy
             if (IsOpenMarketBidTime())
             {
                 BidTimeBuy(quotes);
+                return;
+            }
+            //暂时只买10点前的，后面再加火箭发射的买点
+            if (DateTime.Now.Hour >= 10)
+            {
                 return;
             }
             //除了竞价，其它的玩不了，要被止损玩死，除非是热点的几个
@@ -117,27 +124,33 @@ namespace NineSunScripture.strategy
                 {
                     continue;
                 }
-                if ((quote.Buy1 - buyQuote.Buy1) / quote.PreClose > 1.1)
+                if ((quote.Buy1 - buyQuote.Buy1) / quote.PreClose > 0.1)
                 {
                     Logger.Log("可转债止盈卖出1/3>" + quote.Name);
                     SimulateSell(quote);
                     continue;
                 }
-                if ((quote.Buy1 - buyQuote.Buy1) / quote.PreClose > 1.2)
+                if ((quote.Buy1 - buyQuote.Buy1) / quote.PreClose > 0.2)
                 {
                     Logger.Log("可转债止盈卖出1/2>" + quote.Name);
                     SimulateSell(quote);
                     continue;
                 }
-                if ((quote.Buy1 - buyQuote.Buy1) / quote.PreClose > 1.3)
+                if ((quote.Buy1 - buyQuote.Buy1) / quote.PreClose > 0.3)
                 {
                     Logger.Log("可转债止盈清仓>" + quote.Name);
                     SimulateSell(quote);
                     continue;
                 }
-                if ((quote.Buy1 - buyQuote.Buy1) / quote.PreClose < 0.985)
+                if ((quote.Buy1 - buyQuote.Buy1) / quote.PreClose < -0.015)
                 {
                     Logger.Log("可转债止损卖出>" + quote.Name);
+                    SimulateSell(quote);
+                    continue;
+                }
+                if ((quote.Buy1 - buyQuote.Buy1) <= (highPiceDic[key].Buy1 - buyQuote.Buy1) / 2)
+                {
+                    Logger.Log("可转债回落超过一半最高涨幅卖出>" + quote.Name);
                     SimulateSell(quote);
                     continue;
                 }
@@ -225,7 +238,12 @@ namespace NineSunScripture.strategy
             buyRecordDic.Add(quote.Name, quote);
             boughtValue.Add(quote.Name, asset / 4);
             asset -= asset / 4;
-            Logger.Log("可转债模拟买入>" + quote.Name);
+            string log = "可转债模拟买入>" + quote.Name;
+            Logger.Log(log);
+            if (null != callback)
+            {
+                callback.OnTradeResult(MainStrategy.RspCodeOfUpdateAcctInfo, log, "", false);
+            }
         }
 
         private void SimulateSell(Quotes quote)
@@ -241,8 +259,7 @@ namespace NineSunScripture.strategy
             asset += boughtValue[quote.Name];
 
             boughtValue.Remove(quote.Name);
-            Logger.Log(
-                "可转债模拟卖出>" + quote.Name + " 盈利=" + Math.Round(profitPct * 100) + "%");
+            Logger.Log("可转债模拟卖出>" + quote.Name);
         }
 
         private void Init()
