@@ -49,13 +49,11 @@ namespace NineSunScripture
         public MainForm()
         {
             stocks = new List<Quotes>();
-            mainStrategy = new MainStrategy();
+            mainStrategy = new MainStrategy(this);
             InitializeComponent();
             InitPeriod();
             InitializeListViews();
             BindStocksData();
-            mainStrategy.SetWorkListener(this);
-            mainStrategy.SetTradeCallback(this);
             imgTaiJi = Properties.Resources.taiji;
             updatePrice = new UpdatePrice(UpdateStocksPrice);
 
